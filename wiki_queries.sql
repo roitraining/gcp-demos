@@ -1,7 +1,9 @@
-# wiki 1M
+#StandardSQL
+#wiki 1M
 SELECT
   title,
-  SUM(views) AS views
+  SUM(views) AS views,
+  COUNT(views) AS rows_summed
 FROM
   `bigquery-samples.wikipedia_benchmark.Wiki1M`
 WHERE
