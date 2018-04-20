@@ -1,3 +1,5 @@
+# bunch of demo queries from DE class
+
 # uses standard sql
 # medicare claims in 2014
 SELECT
