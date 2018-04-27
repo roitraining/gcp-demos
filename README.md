@@ -7,7 +7,7 @@
 * Highlight time and data processed
 * Show denorm.png and talk through schema
 * Show schema in https://bigquery.cloud.google.com/dataset/jwd-gcp-demos:cpb200_liquor_sales?pli=1
-* Copy/[aste liquor_denrom.sql in BQ UI and run query
+* Copy/paste liquor_denrom.sql in BQ UI and run query
 * Highlight time and data processed
 
 ## Dataproc scaling and preµemtable instances
