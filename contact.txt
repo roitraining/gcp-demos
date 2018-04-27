@@ -1,2 +1,4 @@
 email:		jeff@roitraining.com
 linkedin:	https://www.linkedin.com/in/jwdavis/
+twitter:    @jwd_success
+github:     https://github.com/jwdavis
