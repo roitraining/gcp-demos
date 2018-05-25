@@ -9,17 +9,17 @@ WITH
         total,
         0)) AS cstore_total
   FROM
-    `cpb200_liquor_sales.sales` AS s
+    `jwd-gcp-demos.cpb200_liquor_sales.sales` AS s
   JOIN
-    `cpb200_liquor_sales.store` AS st
+    `jwd-gcp-demos.cpb200_liquor_sales.store` AS st
   ON
     s.store = st.store
   JOIN
-    `cpb200_liquor_sales.county` AS cy
+    `jwd-gcp-demos.cpb200_liquor_sales.county` AS cy
   ON
     st.county_number = cy.county_number
   LEFT OUTER JOIN
-    `cpb200_liquor_sales.convenience_store` AS c
+    `jwd-gcp-demos.cpb200_liquor_sales.convenience_store` AS c
   ON
     s.store = c.store
   GROUP BY

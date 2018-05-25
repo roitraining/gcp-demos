@@ -14,7 +14,7 @@ FROM (
         total,
         0)) AS cstore_total
   FROM
-    `cpb200_liquor_sales.iowa_sales_denorm`
+    `jwd-gcp-demos.cpb200_liquor_sales.iowa_sales_denorm`
   GROUP BY
     county
   ORDER BY
