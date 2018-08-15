@@ -35,6 +35,10 @@ The purpose of this demo is to provide step-by-step breakdown of searching by ar
 * Copy/paste queries one at a time and show results
 * For each result, show the JSON code to clarify
 
+## Cloud Functions Demo
+
+* Visit https://github.com/GoogleCloudPlatform/nodejs-docs-samples/tree/master/functions/imagemagick
+
 ## Misc
 * startup script that registers dns record
 * queries from Data Engineering course slides
