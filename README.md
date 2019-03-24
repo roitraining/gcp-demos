@@ -9,17 +9,6 @@ git clone https://github.com/roitraining/gcp-demos.git
 cd gcp-demos
 ```
 
-
-## Normalized vs. denormalized queries for demoing perf difference
-* Show norm.png and talk through schema
-* Show schema in https://bigquery.cloud.google.com/dataset/jwd-gcp-demos:cpb200_liquor_sales?pli=1
-* Copy/paste ```liquor_rel.sql``` into BQ UI and run query
-* Highlight time and data processed
-* Show denorm.png and talk through schema
-* Show schema in https://bigquery.cloud.google.com/dataset/jwd-gcp-demos:cpb200_liquor_sales?pli=1
-* Copy/paste ```liquor_denrom.sql``` in BQ UI and run query
-* Highlight time and data processed
-
 ## Dataproc scaling and preµemtable instances
 * Create a dataproc cluster with 2 nodes in a region where you have a lot of CPU/Disk quota
 * SSH into master and run the command from ```dataproc_scale_demo.sh```
@@ -53,6 +42,67 @@ The purpose of this demo is to provide step-by-step breakdown of searching by ar
 * Upload zombie photo
 * Show students logs with GCF info
 * Show students blurred image
+
+## BQ Demo
+The goal of this demo is to show the price/performance impact of different data structures and BQ features. You will run a query that generates identical results against multiple copies of data that's organized in different ways, and highlight how price/performance differs.
+
+The data is sample order data with:
+* Customers
+* Orders
+* Line items
+* Products
+
+There are several versions of the data store:
+* Normalized, relational
+* Fully denormalized
+* Single level nesting
+    * Order as parent row
+    * Customer data denormalized into order rows
+    * Line items aggregated into an array
+    * Product data denormalized into line item structs
+* Double level nesting
+    * Customer as parent row
+    * Orders aggregated into an array
+    * Line items aggregated into an array for each order
+    * Product data denormalized into line item structs
+* Single level nested, partitioned by order date
+* Single level nested, partitioned by order date, clustered by zip code
+
+The query you'll benchmark is looking to return:
+* Total sizes
+* In March 2018
+* Summed by zip code
+
+### To demo
+* Run the query saved in ```norm-query.sql```
+    * Highlight the time taken
+    * Highlight the data processed
+* Run the query saved in ```denorm-query.sql```
+    * Highlight the time taken and speak about importance of diff
+    * Highlight the data processed and speak about importance of diff
+* Run the query saved in ```nested-once.sql```
+    * Highlight the time taken and speak about importance of diff
+    * Highlight the data processed and speak about importance of diff
+    * Talk about complexity of query
+* Run the query saved in ```nested-twice.sql```
+    * Highlight the time taken and speak about importance of diff
+    * Highlight the data processed and speak about importance of diff
+    * Talk about complexity of query
+* Run the query saved in ```nested-partitioned.sql```
+    * Highlight the time taken and speak about importance of diff
+    * Highlight the data processed and speak about importance of diff
+* Run the query saved in ```nested-clustered.sql```
+    * Highlight the time taken and speak about importance of diff
+    * Highlight the data processed and speak about importance of diff
+
+### Other interesting stuff
+* We created the normalized dataset first, then generated then derived the other tables using queries and saving results to permanent tables
+    * ```load_denorm.sql ``` generates the fully denormalized table
+    * ```load_nested_once.sql``` generates the table with line items nested in orders
+    ```load_nested_twice.sql``` generates the table with orders nested in customer and line items nested in orders
+
+* To generate the partitioned and clustered tables, we used the ```bq``` command line. You can see the specific commands in the ```misc.txt``` file.
+
 
 ## Misc
 * startup script that registers dns record
