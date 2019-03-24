@@ -4,7 +4,7 @@ WITH
     cust_zip,
     prod_price * oline_qty AS line_item_subtotal
   FROM
-    `roi-bq-demo.bq_benchmark_tables_denorm.table_denorm_2`
+    `roi-bq-demo.bq_benchmark_tables_denorm.table_denorm`
   WHERE
     o_date >= "2018-03-01"
     AND o_date <= "2018-03-31")
