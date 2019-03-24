@@ -1,0 +1,2 @@
+bq query --destination_table roi-bq-demo:bq_benchmark_tables_one_level_nest.table_nested_partitioned --time_partitioning_field o_date --use_legacy_sql=false 'SELECT * FROM `roi-bq-demo.bq_benchmark_tables_one_level_nest.table_nested`'
+bq query --use_legacy_sql=false 'CREATE TABLE `roi-bq-demo.bq_benchmark_tables_one_level_nest.table_nested_partitioned_clustered` PARTITION BY o_date CLUSTER BY cust_zip AS SELECT * FROM `roi-bq-demo.bq_benchmark_tables_one_level_nest.table_nested_partitioned`'
