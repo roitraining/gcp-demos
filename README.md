@@ -9,14 +9,12 @@ git clone https://github.com/roitraining/gcp-demos.git
 cd gcp-demos
 ```
 
-## Dataproc scaling and preµemtable instances
+## Dataproc scaling and pre-emptable instances
 * Create a dataproc cluster with 2 nodes in a region where you have a lot of CPU/Disk quota
 * SSH into master and run the command from ```dataproc_scale_demo.sh```
 * Note progress (or lack thereof)
 * Add hundreds of CPUs of preemptable instances
 * Go back to master SSH window and show uptick in performance
-
-Credit to Nigel for this demo
 
 ## Hackernews BQ demo
 
@@ -39,9 +37,9 @@ The purpose of this demo is to provide step-by-step breakdown of searching by ar
 * ```. ./gcf-demo-setup.sh``` to deploy the cloud function
 * Discuss purpose (function finds offensive images and replaces with blurred images)
 * Show the students the zombie picture (either whole picture or thumbnail)
-* Upload zombie photo
+* Upload zombie photo into the "originals" bucket in your project
 * Show students logs with GCF info
-* Show students blurred image
+* Show students blurred image in the "blurred" bucket
 
 ## BQ Demo
 The goal of this demo is to show the price/performance impact of different data structures and BQ features. You will run a query that generates identical results against multiple copies of data that's organized in different ways, and highlight how price/performance differs.

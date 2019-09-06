@@ -230,7 +230,7 @@ ORDER BY
 
 # join condition
 # Top name frequency in Shakespeare
-  # Top name frequency in Shakespeare
+# Top name frequency in Shakespeare
 WITH
   TopNames AS (
   SELECT
