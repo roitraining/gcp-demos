@@ -7,10 +7,7 @@ SELECT
 FROM
   `bigquery-public-data.github_repos.commits`
 WHERE
-  EXTRACT(YEAR
-  FROM
-    author.date)=2016
-  AND array_length(difference) = 5
+  array_length(difference) = 5
 LIMIT 10
 
 #standardSQL
@@ -23,10 +20,7 @@ SELECT
 FROM
   `bigquery-public-data.github_repos.commits`
 WHERE
-  EXTRACT(YEAR
-  FROM
-    author.date)=2016
-  AND array_length(difference) = 5
+  array_length(difference) = 5
 LIMIT 10
 
 #standardSQL
@@ -40,10 +34,7 @@ WITH
   FROM
     `bigquery-public-data.github_repos.commits`
   WHERE
-    EXTRACT(YEAR
-    FROM
-      author.date)=2016
-    AND ARRAY_LENGTH(difference) = 5
+    ARRAY_LENGTH(difference) = 5
   LIMIT
     1)
 SELECT
@@ -54,3 +45,25 @@ from
   sample,
   unnest(difference) as diff
 
+#standardSQL
+#find commits where a particular file was touched
+#this shows searching on values within an array
+SELECT
+  author,
+  difference
+FROM
+  `bigquery-public-data.github_repos.commits`,
+  unnest(difference) as files
+WHERE
+  files.new_path = "courses/data_analysis/lab2/python/is_popular.py"
+
+
+#standardSQL
+#alternative approach to above query
+SELECT
+  author,
+  difference
+FROM
+  `bigquery-public-data.github_repos.commits`
+WHERE
+  exists (select * from unnest(difference) as f where f.name="courses/data_analysis/lab2/python/is_popular.py")

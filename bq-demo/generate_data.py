@@ -3,9 +3,11 @@ import apache_beam as beam
 import random
 import datetime
 
+from apache_beam.io import ReadFromText
+
 NUM_PRODUCTS = 10000
-NUM_CUSTOMERS = 1000000
-NUM_ORDERS = 100
+NUM_CUSTOMERS = 10000000
+NUM_ORDERS = 200
 
 states = ("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL",\
 "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME",\
@@ -20,49 +22,49 @@ BUCKET = "{}-df".format(PROJECT)
 
 argv = [
     '--project={0}'.format(PROJECT),
-    '--job_name=shq-demo-data-{}'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S')),
+    '--job_name=bq-demo-data-{}'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S')),
     '--save_main_session',
     '--staging_location=gs://{0}/staging/'.format(BUCKET),
     '--temp_location=gs://{0}/temp/'.format(BUCKET),
-    # '--requirements_file=dflow-req.txt',
     '--runner=DataflowRunner',
-    '--num_workers=10',
-    '--machine_type=n1-standard-4'
+    '--worker_machine_type=n1-standard-16',
+    '--region=us-central1',
 ]
 
-def make_orders(cid):
+# def make_orders(cust_id):
+def make_orders(customer):
+    cust_id = customer.split(",")[0]
     for order_num in range(1, NUM_ORDERS+1):
-        orderDate = str(datetime.date(2018,random.randint(1,12),random.randint(1,28)))
-        o_num = "{}-{}".format(cid, order_num)
-        row = [o_num, str(cid), orderDate]
+        order_date = str(datetime.date(2018,random.randint(1,12),random.randint(1,28)))
+        order_num = "{}-{}".format(cust_id, order_num)
+        row = [order_num, str(cust_id), order_date]
         yield ",".join(row)
 
 def make_lines(order_string):
     order = order_string.split(",")
-    for line_number in range(1,11):
-        oline_order_num = order[0]
-        oline_line_item_num = str(line_number)
-        oline_prod_code = str(random.randint(0,NUM_PRODUCTS))
-        oline_qty = str(random.randint(0,10))
-        row = [oline_order_num, oline_line_item_num, oline_prod_code, oline_qty]
-        # yield ""
+    for line_item_num in range(1,11):
+        order_num = order[0]
+        line_item_num = str(line_item_num)
+        prod_code = str(random.randint(0,NUM_PRODUCTS))
+        qty = str(random.randint(0,10))
+        row = [order_num, line_item_num, prod_code, qty]
         yield ",".join(row)
 
-def create_cids(num_cids):
-    for cid in range(0,num_cids):
-        yield cid
+def create_cust_ids(num_cust_ids):
+    for cust_id in range(0,num_cust_ids):
+        yield cust_id
 
-def make_customer(cid):
-    custNum = str(cid)
-    custName = "Customer_" + custNum + "_Name"
+def make_customer(cust_id):
+    cust_num = str(cust_id)
+    cust_name = "Customer_" + cust_num + "_Name"
     phone = str(random.randint(100,999))\
         + "-" + str(random.randint(100,999))\
         + "-" + str(random.randint(0,9999))
-    email = "Customer_" + custNum + "_Email@{}.com".format(custName)
-    address = custNum + " Main St."
-    state = states[random.randint(0,50)]
-    zipCode = str(random.randint(0,99999))
-    row = [custNum, custName, address, state, zipCode, email, phone]   
+    cust_email = "Customer_" + cust_num + "_Email@{}.com".format(cust_name)
+    cust_address = cust_num + " Main St."
+    cust_state = states[random.randint(0,50)]
+    cust_zip = str(random.randint(0,99999))
+    row = [cust_num, cust_name, cust_address, cust_state, cust_zip, cust_email, phone]   
     return ",".join(row)
 
 def create_pids(num_pids):
@@ -79,33 +81,42 @@ def make_product(pid):
 
 def run():
 
-    p = beam.Pipeline(argv = argv)
+    p1 = beam.Pipeline(argv = argv)
 
     # create the customer ids
-    num_customers = p | "num_customers" >> beam.Create([NUM_CUSTOMERS])
-    cids = num_customers | beam.FlatMap(create_cids)
+    num_customers = p1 | "num_customers" >> beam.Create([NUM_CUSTOMERS])
+    cust_ids = num_customers | beam.FlatMap(create_cust_ids)
 
     # create the product ids
-    num_products = p | "num_product" >> beam.Create([NUM_PRODUCTS])
+    num_products = p1 | "num_product" >> beam.Create([NUM_PRODUCTS])
     pids = num_products | beam.FlatMap(create_pids)
-    customers = cids | "generate customer row" >> beam.Map(make_customer)
+
+    # create customers and products
+    customers = cust_ids | "generate customer row" >> beam.Map(make_customer)
     products = pids | "generate product row" >> beam.Map(make_product)
-    orders = cids | beam.FlatMap(make_orders)
-    line_items = orders | beam.FlatMap(make_lines)
 
     # output customer
-    output = customers | "write customers to gcs" >> beam.io.WriteToText("gs://jwd-gcp-demos-df/customers")
-
-    # output orders
-    output = orders | "write orders to gcs" >> beam.io.WriteToText("gs://jwd-gcp-demos-df/orders")
-
-    # output line items
-    output = line_items | "write line_items to gcs" >> beam.io.WriteToText("gs://jwd-gcp-demos-df/line_items")
+    output = customers | "write customers to gcs" >> beam.io.WriteToText("gs://{}/customer".format(BUCKET))
 
     # output products
-    output = products | "write products to gcs" >> beam.io.WriteToText("gs://jwd-gcp-demos-df/products")
+    output = products | "write products to gcs" >> beam.io.WriteToText("gs://{}/product".format(BUCKET))
 
-    p.run()
+    p1.run().wait_until_finish()
+
+    # p1.run().wait_until_finish()
+    p2 = beam.Pipeline(argv = argv)    
+
+    customers = p2 | 'read c' >> ReadFromText('gs://{}/customer*'.format(BUCKET))
+    orders = customers | beam.FlatMap(make_orders)
+    line_items = orders | beam.FlatMap(make_lines)
+ 
+    # output orders
+    output = orders | "write orders to gcs" >> beam.io.WriteToText("gs://{}/order".format(BUCKET))
+
+    # output line items
+    output = line_items | "write line_items to gcs" >> beam.io.WriteToText("gs://roi-bq-demo-df/line_items")
+
+    p2.run() 
 
 if __name__ == '__main__':
    run()

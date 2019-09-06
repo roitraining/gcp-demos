@@ -1,0 +1,30 @@
+[
+  {
+    "name": "cust_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "cust_name",
+    "type": "STRING"
+  },
+  {
+    "name": "cust_address",
+    "type": "STRING"
+  },
+  {
+    "name": "cust_state",
+    "type": "STRING"
+  },
+  {
+    "name": "cust_zip",
+    "type": "INTEGER"
+  },
+  {
+    "name": "cust_email",
+    "type": "STRING"
+  },
+  {
+    "name": "cust_phone",
+    "type": "STRING"
+  }
+]

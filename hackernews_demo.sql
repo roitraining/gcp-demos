@@ -21,7 +21,7 @@ WHERE
 order by
   day desc, score desc
 
-# show struct
+# create struct
 SELECT
   DATE(time_ts) AS day,
   STRUCT (title,
@@ -36,7 +36,7 @@ order by
 Limit
   100
 
-# show window functions
+# leverage window functions to get ranking
 SELECT
   DATE(time_ts) AS day,
   ROW_NUMBER() OVER (PARTITION BY DATE(time_ts)

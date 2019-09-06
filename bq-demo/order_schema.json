@@ -1,0 +1,14 @@
+[
+  {
+    "name": "order_num",
+    "type": "STRING"
+  },
+  {
+    "name": "cust_id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "order_date",
+    "type": "DATE"
+  }
+]
