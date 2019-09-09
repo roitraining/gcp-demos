@@ -89,11 +89,13 @@ Load the BQ user interface in the project where you have the dataset. The querie
     * Note you get the same results as with 1
     * This should be 60+% faster than 2&3
 
+5. Run queries 3-4-5 from *nested_queries.sql*
+    * Note the amount of data processed for each
+    * Note the query time for each
+    * You should seeing decreases for each one
+
 There are some additional demos you can do.
 
-
-* You can run the 3rd and 4th queries within the __nested_queries.sql__ file. The goal of these queries to show performance deltas between partitioned and partitioned/clustered tables. The problem is, I'm not seeing the kind of differences you would expect, so this demo may not be interesting.
-
-* You can run the 5th query in the __nested_queries.sql__ file to show performance, cost, and query mechanics when querying a table with multiple levels of nesting.
+* You can run the 6th query in the __nested_queries.sql__ file to show performance, cost, and query mechanics when querying a table with multiple levels of nesting.
 
 * If you don't want to have to build the big dataset for these demos, you can run the same queries against a small dataset that already exists. Open BigQuery pointing to the __roi-bq-demo__ project in the __roicgp__ organization and run the queries there.
