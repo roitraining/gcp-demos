@@ -20,16 +20,7 @@ states = ("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL",\
 PROJECT = os.environ['DEVSHELL_PROJECT_ID']
 BUCKET = "{}-bq-demo".format(PROJECT)
 
-argv = [
-    '--project={0}'.format(PROJECT),
-    '--job_name=bq-demo-data-{}'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S')),
-    '--save_main_session',
-    '--staging_location=gs://{0}/staging/'.format(BUCKET),
-    '--temp_location=gs://{0}/temp/'.format(BUCKET),
-    '--runner=DataflowRunner',
-    '--worker_machine_type=n1-standard-8',
-    '--region=us-central1',
-]
+argv = []
 
 # def make_orders(cust_id):
 def make_orders(customer):
@@ -104,6 +95,17 @@ def run():
     p1.run().wait_until_finish()
 
     # p1.run().wait_until_finish()
+    argv = [
+        '--project={0}'.format(PROJECT),
+        '--job_name=bq-demo-data-{}'.format(
+            datetime.datetime.now().strftime('%Y%m%d%H%M%S')),
+        '--save_main_session',
+        '--staging_location=gs://{0}/staging/'.format(BUCKET),
+        '--temp_location=gs://{0}/temp/'.format(BUCKET),
+        '--runner=DataflowRunner',
+        '--worker_machine_type=n1-standard-8',
+        '--region=us-central1',
+    ]
     p2 = beam.Pipeline(argv = argv)    
 
     customers = p2 | 'read c' >> ReadFromText('gs://{}/customer*'.format(BUCKET))
