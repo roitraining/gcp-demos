@@ -18,7 +18,7 @@ states = ("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL",\
 
 # basic config stuff
 PROJECT = os.environ['DEVSHELL_PROJECT_ID']
-BUCKET = "{}-df".format(PROJECT)
+BUCKET = "{}-bq-demo".format(PROJECT)
 
 argv = [
     '--project={0}'.format(PROJECT),
@@ -27,7 +27,7 @@ argv = [
     '--staging_location=gs://{0}/staging/'.format(BUCKET),
     '--temp_location=gs://{0}/temp/'.format(BUCKET),
     '--runner=DataflowRunner',
-    '--worker_machine_type=n1-standard-16',
+    '--worker_machine_type=n1-standard-8',
     '--region=us-central1',
 ]
 
@@ -114,7 +114,7 @@ def run():
     output = orders | "write orders to gcs" >> beam.io.WriteToText("gs://{}/order".format(BUCKET))
 
     # output line items
-    output = line_items | "write line_items to gcs" >> beam.io.WriteToText("gs://roi-bq-demo-df/line_items")
+    output = line_items | "write line_items to gcs" >> beam.io.WriteToText("gs://{}/line_items".format(BUCKET))
 
     p2.run() 
 

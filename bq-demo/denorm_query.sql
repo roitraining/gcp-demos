@@ -6,7 +6,7 @@ WITH
     cust_zip,
     prod_price * qty AS line_item_subtotal
   FROM
-    `roi-bq-demo.bq_demo.denorm`
+    `bq_demo.denorm`
   WHERE
     order_date >= "2018-03-01"
     AND order_date <= "2018-03-31")
