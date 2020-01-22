@@ -6,7 +6,7 @@ import datetime
 from apache_beam.io import ReadFromText
 
 NUM_PRODUCTS = 10000
-NUM_CUSTOMERS = 10000000
+NUM_CUSTOMERS = 100000000
 NUM_ORDERS = 200
 
 states = ("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL",\
@@ -20,7 +20,6 @@ states = ("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL",\
 PROJECT = os.environ['DEVSHELL_PROJECT_ID']
 BUCKET = "{}-bq-demo".format(PROJECT)
 
-argv = []
 
 # def make_orders(cust_id):
 def make_orders(customer):
@@ -72,6 +71,7 @@ def make_product(pid):
 
 def run():
 
+    argv = []
     p1 = beam.Pipeline(argv = argv)
 
     # create the customer ids
@@ -94,7 +94,6 @@ def run():
 
     p1.run().wait_until_finish()
 
-    # p1.run().wait_until_finish()
     argv = [
         '--project={0}'.format(PROJECT),
         '--job_name=bq-demo-data-{}'.format(
@@ -106,6 +105,7 @@ def run():
         '--worker_machine_type=n1-standard-8',
         '--region=us-central1',
     ]
+
     p2 = beam.Pipeline(argv = argv)    
 
     customers = p2 | 'read c' >> ReadFromText('gs://{}/customer*'.format(BUCKET))
