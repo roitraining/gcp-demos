@@ -2,12 +2,12 @@ import os
 import apache_beam as beam
 import random
 import datetime
+import argparse
 
 from apache_beam.io import ReadFromText
+from apache_beam.options.pipeline_options import PipelineOptions
+from apache_beam.options.pipeline_options import SetupOptions
 
-NUM_PRODUCTS = 10000
-NUM_CUSTOMERS = 100000000
-NUM_ORDERS = 200
 
 states = ("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL",\
 "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME",\
@@ -17,9 +17,22 @@ states = ("AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL",\
 "WY", "DC")
 
 # basic config stuff
-PROJECT = os.environ['DEVSHELL_PROJECT_ID']
-BUCKET = "{}-bq-demo".format(PROJECT)
+# PROJECT = os.environ['DEVSHELL_PROJECT_ID']
+# BUCKET = "{}-bq-demo".format(PROJECT)
 
+# handle arguments
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "--bucket", help="Name of the bucket where output files are written", required=True)
+parser.add_argument(
+    "--products", help="Number of products to generate", default=10000)
+parser.add_argument(
+    "--customers",  help="Number of customer to generate", default=10000000)
+parser.add_argument(
+    "--orders", help="Number of orders per customer", default=10000000)
+
+known_args, pipeline_args = parser.parse_known_args()
 
 # def make_orders(cust_id):
 def make_orders(customer):
@@ -70,16 +83,16 @@ def make_product(pid):
     return ",".join(row)
 
 def run():
-
-    argv = []
-    p1 = beam.Pipeline(argv = argv)
+    p1 = beam.Pipeline(argv = [])
 
     # create the customer ids
-    num_customers = p1 | "num_customers" >> beam.Create([NUM_CUSTOMERS])
+    num_customers = p1 | "num_customers" >> beam.Create(
+        [int(known_args.customers)])
     cust_ids = num_customers | beam.FlatMap(create_cust_ids)
 
     # create the product ids
-    num_products = p1 | "num_product" >> beam.Create([NUM_PRODUCTS])
+    num_products = p1 | "num_product" >> beam.Create(
+        [int(known_args.products)])
     pids = num_products | beam.FlatMap(create_pids)
 
     # create customers and products
@@ -87,24 +100,22 @@ def run():
     products = pids | "generate product row" >> beam.Map(make_product)
 
     # output customer
-    output = customers | "write customers to gcs" >> beam.io.WriteToText("gs://{}/customer".format(BUCKET))
+    output = customers | "write customers to gcs" >> beam.io.WriteToText(
+        "gs://{}/bq-demo/customer".format(known_args.bucket))
 
     # output products
-    output = products | "write products to gcs" >> beam.io.WriteToText("gs://{}/product".format(BUCKET))
+    output = products | "write products to gcs" >> beam.io.WriteToText(
+        "gs://{}/bq-demo/product".format(known_args.bucket))
 
     p1.run().wait_until_finish()
+    return
 
-    argv = [
-        '--project={0}'.format(PROJECT),
-        '--job_name=bq-demo-data-{}'.format(
-            datetime.datetime.now().strftime('%Y%m%d%H%M%S')),
-        '--save_main_session',
-        '--staging_location=gs://{0}/staging/'.format(BUCKET),
-        '--temp_location=gs://{0}/temp/'.format(BUCKET),
-        '--runner=DataflowRunner',
-        '--worker_machine_type=n1-standard-8',
-        '--region=us-central1',
-    ]
+    pipeline_args.append(
+        '--job_name=bq-demo-data-{}'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S')))
+    pipeline_args.append(
+        '--staging_location=gs://{0}/bq-demo/staging/'.format(''.format(known_args.bucket)))
+    pipeline_args.append(
+        '--temp_location=gs://{0}/bq-demo/temp/'.format(''.format(known_args.bucket)))
 
     p2 = beam.Pipeline(argv = argv)    
 
