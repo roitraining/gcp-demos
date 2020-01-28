@@ -1,11 +1,16 @@
  #!/bin/bash
 
-bq load --source_format=CSV $DEVSHELL_PROJECT_ID:bq_demo.customer gs://$DEVSHELL_PROJECT_ID-bq-demo/customer* ./customer_schema.json
-bq load --source_format=CSV $DEVSHELL_PROJECT_ID:bq_demo.order gs://$DEVSHELL_PROJECT_ID-bq-demo/order* ./order_schema.json
-bq load --source_format=CSV $DEVSHELL_PROJECT_ID:bq_demo.product gs://$DEVSHELL_PROJECT_ID-bq-demo/product* ./product_schema.json
-bq load --source_format=CSV $DEVSHELL_PROJECT_ID:bq_demo.line_item gs://$DEVSHELL_PROJECT_ID-bq-demo/line_item* ./line_item_schema.json
+ read -p "project for normalized data: " norm_project 
+ read -p "project for dervied tables: " derived_project
+ read -p "source bucket: " bucket
 
-bq query --use_legacy_sql=false --destination_table=$DEVSHELL_PROJECT_ID:bq_demo.denorm 'SELECT
+bq load --source_format=CSV $norm_project:bq_demo.customer gs://$bucket/bq-demo/customer* ./customer_schema.json
+bq load --source_format=CSV $norm_project:bq_demo.order gs://$bucket/bq-demo/order* ./order_schema.json
+bq load --source_format=CSV $norm_project:bq_demo.product gs://$bucket/bq-demo/product* ./product_schema.json
+bq load --source_format=CSV $norm_project:bq_demo.line_item gs://$bucket/bq-demo/line_item* ./line_item_schema.json
+
+bq query --use_legacy_sql=false --destination_table=$derived_project:bq_demo.denorm '
+SELECT
   c.*,
   o.order_num as order_num, 
   order_date,
@@ -16,27 +21,27 @@ bq query --use_legacy_sql=false --destination_table=$DEVSHELL_PROJECT_ID:bq_demo
   prod_desc, 
   prod_price
 FROM
-  '"\`$DEVSHELL_PROJECT_ID.bq_demo.customer\`"' c
+  '"\`$norm_project.bq_demo.customer\`"' c
 LEFT JOIN
-  '"\`$DEVSHELL_PROJECT_ID.bq_demo.order\`"' o
+  '"\`$norm_project.bq_demo.order\`"' o
 ON
   c.cust_id = o.cust_id
 LEFT JOIN
-  '"\`$DEVSHELL_PROJECT_ID.bq_demo.line_item\`"' AS li
+  '"\`$norm_project.bq_demo.line_item\`"' AS li
 ON
   o.order_num = li.order_num
 LEFT JOIN
-  '"\`$DEVSHELL_PROJECT_ID.bq_demo.product\`"' AS p
+  '"\`$norm_project.bq_demo.product\`"' AS p
 ON
   li.prod_code = p.prod_code'
 
-bq query --use_legacy_sql=false --destination_table=$DEVSHELL_PROJECT_ID:bq_demo.nested_once '
+bq query --use_legacy_sql=false --destination_table=$derived_project:bq_demo.nested_once '
 WITH
   dlow AS (
   SELECT
     *
   FROM
-    '"\`$DEVSHELL_PROJECT_ID.bq_demo.denorm\`"'
+    '"\`$derived_project.bq_demo.denorm\`"'
 )
 SELECT
   cust_id,
@@ -68,24 +73,24 @@ GROUP BY
   cust_id'
 
 bq query --use_legacy_sql=false \
---destination_table $DEVSHELL_PROJECT_ID:bq_demo.table_nested_partitioned \
+--destination_table $derived_project:bq_demo.table_nested_partitioned \
 --time_partitioning_field order_date \
-'SELECT * FROM '"\`$DEVSHELL_PROJECT_ID.bq_demo.nested_once\`"
+'SELECT * FROM '"\`$derived_project.bq_demo.nested_once\`"
 
 bq query --use_legacy_sql=false 'CREATE TABLE 
-'"\`$DEVSHELL_PROJECT_ID.bq_demo.table_nested_partitioned_clustered\`"' 
+'"\`$derived_project.bq_demo.table_nested_partitioned_clustered\`"' 
 PARTITION BY order_date 
-CLUSTER BY order_date, cust_zip AS 
-SELECT * FROM '"\`$DEVSHELL_PROJECT_ID.bq_demo.nested_once\`"
+CLUSTER BY cust_zip AS 
+SELECT * FROM '"\`$derived_project.bq_demo.nested_once\`"
 
 bq query --use_legacy_sql=false \
---destination_table=$DEVSHELL_PROJECT_ID:bq_demo.nested_twice '
+--destination_table=$derived_project:bq_demo.nested_twice '
 WITH
   dlow AS (
   SELECT
     *
   FROM
-    '"\`$DEVSHELL_PROJECT_ID.bq_demo.denorm\`"' ),
+    '"\`$derived_project.bq_demo.denorm\`"' ),
   orders AS (
   SELECT
     cust_id,
