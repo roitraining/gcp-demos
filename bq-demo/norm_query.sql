@@ -5,17 +5,17 @@ WITH
     o.order_num,
     li.qty * p.prod_price AS line_item_subtotal
   FROM
-    `bq_demo.customer` c
+    `<project-id>.bq_demo.customer` c
   LEFT JOIN
-    `bq_demo.order` o
+    `<project-id>.bq_demo.order` o
   ON
     o.cust_id = c.cust_id
   LEFT JOIN
-    `bq_demo.line_item` li
+    `<project-id>.bq_demo.line_item` li
   ON
     o.order_num = li.order_num
   LEFT JOIN
-    `bq_demo.product` p
+    `<project-id>.bq_demo.product` p
   ON
     p.prod_code = li.prod_code
   WHERE

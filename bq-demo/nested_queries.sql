@@ -116,24 +116,3 @@ WITH
     cust_zip
   ORDER BY
     zip_sales DESC
-
-#standardSQL
-#find sales/zip for march from nested_twice table
-SELECT
-  cust_name,
-  order_num,
-  li
-FROM (
-  SELECT
-    cust_name,
-    order_num,
-    orderinfo
-  FROM
-    `bq_demo.nested_twice`,
-    UNNEST(orders) AS orderinfo
-  WHERE
-    order_date >= "2018-03-01"
-    AND order_date <= "2018-03-31"
-  LIMIT
-    100),
-  UNNEST(orderinfo.line_items) AS li
