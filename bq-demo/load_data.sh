@@ -4,12 +4,12 @@
  read -p "project for dervied tables: " derived_project
  read -p "source bucket: " bucket
 
-bq load --source_format=CSV $norm_project:bq_demo.customer gs://$bucket/bq-demo/customer* ./customer_schema.json
-bq load --source_format=CSV $norm_project:bq_demo.order gs://$bucket/bq-demo/order* ./order_schema.json
-bq load --source_format=CSV $norm_project:bq_demo.product gs://$bucket/bq-demo/product* ./product_schema.json
-bq load --source_format=CSV $norm_project:bq_demo.line_item gs://$bucket/bq-demo/line_item* ./line_item_schema.json
+bq load --source_format=CSV $norm_project:bq_demo.customer gs://$bucket/bq-demo/customer* ./customer_schema.json --replace
+bq load --source_format=CSV $norm_project:bq_demo.order gs://$bucket/bq-demo/order* ./order_schema.json --replace
+bq load --source_format=CSV $norm_project:bq_demo.product gs://$bucket/bq-demo/product* ./product_schema.json --replace
+bq load --source_format=CSV $norm_project:bq_demo.line_item gs://$bucket/bq-demo/line_item* ./line_item_schema.json --replace
 
-bq query --use_legacy_sql=false --destination_table=$derived_project:bq_demo.denorm '
+bq query --use_legacy_sql=false --replace --destination_table=$derived_project:bq_demo.denorm '
 SELECT
   c.*,
   o.order_num as order_num, 
@@ -35,7 +35,7 @@ LEFT JOIN
 ON
   li.prod_code = p.prod_code'
 
-bq query --use_legacy_sql=false --destination_table=$derived_project:bq_demo.nested_once '
+bq query --use_legacy_sql=false --replace --destination_table=$derived_project:bq_demo.nested_once '
 WITH
   dlow AS (
   SELECT
@@ -73,17 +73,19 @@ GROUP BY
   cust_id'
 
 bq query --use_legacy_sql=false \
+--replace \
 --destination_table $derived_project:bq_demo.table_nested_partitioned \
 --time_partitioning_field order_date \
 'SELECT * FROM '"\`$derived_project.bq_demo.nested_once\`"
 
-bq query --use_legacy_sql=false 'CREATE TABLE 
+bq query --use_legacy_sql=false 'CREATE OR REPLACE TABLE 
 '"\`$derived_project.bq_demo.table_nested_partitioned_clustered\`"' 
 PARTITION BY order_date 
 CLUSTER BY cust_zip AS 
 SELECT * FROM '"\`$derived_project.bq_demo.nested_once\`"
 
 bq query --use_legacy_sql=false \
+--replace \
 --destination_table=$derived_project:bq_demo.nested_twice '
 WITH
   dlow AS (
