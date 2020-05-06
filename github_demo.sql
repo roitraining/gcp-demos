@@ -58,6 +58,15 @@ WHERE
   files.new_path = "courses/data_analysis/lab2/python/is_popular.py"
 
 
+SELECT
+  author,
+  difference
+FROM
+  `bigquery-public-data.github_repos.commits`
+WHERE
+  "courses/data_analysis/lab2/python/is_popular.py" in (select f.new_path from unnest(difference) as f)
+
+
 #standardSQL
 #alternative approach to above query
 SELECT

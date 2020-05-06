@@ -1,3 +1,6 @@
 contact.txt
 .DS_Store
 .vscode*
+*snippets*
+*secrets*
+*.pyc

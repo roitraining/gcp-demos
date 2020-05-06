@@ -1,0 +1,3 @@
+google-cloud-dlp
+oauth2client
+Flask
