@@ -1,20 +1,9 @@
 runtime: python37
-api_version: 1
-threadsafe: yes
 
 handlers:
-- url: /js
-  static_dir: static/js
-  mime_type: application/javascript
-  expiration: "5s"
 
-- url: /images
-  static_dir: static/images
+- url: /static
+  static_dir: static
 
-- url: /css
-  static_dir: static/css
-  mime_type: text/css
-
-- url: .*
-  script: main.app
-  secure: always
+- url: /.*
+  script: auto

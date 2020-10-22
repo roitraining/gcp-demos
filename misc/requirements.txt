@@ -1,3 +1,4 @@
 google-cloud-dlp
 oauth2client
 Flask
+flask_cors

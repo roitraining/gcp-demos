@@ -1,0 +1,57 @@
+{% extends 'master.html' %}
+{% block head %}
+    <title>{{ title }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<main role="main" id="app">
+  <section class="jumbotron text-center">
+    <h1>DLP Demo</h1>
+  </section>
+  <div role="main" class="container">
+    <div class="card-deck">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          Source text
+        </div>
+        <div class="card-body">
+          <textarea v-model="text_for_dlp" v-on:input="typing = true" style="height:400px; width:400px"></textarea>
+          <div class="row justify-content-center">
+            <div class="btn-group btn-group-toggle mt-2">
+              <label class="btn btn-primary" :class="{active: activeButton === 'inspect'}">
+                <input type="radio" id="inspect" value="inspect" @click="activeButton='inspect'" > Inspect
+              </label>
+              <label class="btn btn-primary" :class="{active: activeButton === 'redact'}">
+                <input type="radio" id="redact" value="redact" @click="activeButton='redact'" > Redact
+              </label>
+              <label class="btn btn-primary" :class="{active: activeButton === 'replace'}">
+                <input type="radio" id="replace" value="replace" @click="activeButton= 'replace'"> Replace
+              </label>
+              <label class="btn btn-primary" :class="{active: activeButton === 'mask'}">
+                <input type="radio" id="mask" value="mask" @click="activeButton= 'mask'"> Mask
+              </label>
+            </div>
+          </div>  
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          DLP results
+        </div>
+        <div class="card-body">
+          <p v-html="result"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+  
+<script src="/static/js/dlp-demo.js"></script>
+
+{% endblock %}
+{% block footer %}
+{% endblock %}

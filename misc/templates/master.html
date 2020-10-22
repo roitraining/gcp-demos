@@ -6,9 +6,7 @@
     <meta name="description" content="ROI Labs">
     <meta name="author" content="Jeff Davis">
     <script src="/static/js/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="/static/js/roi-admin.js"></script>
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-    <link href="https://fonts.googleapis.com/static/css?family=Roboto" rel="stylesheet">
     {% block head %}
     {% endblock %}
   </head>
@@ -20,14 +18,13 @@
           <div class="row">
             <div class="col-sm-8 col-md-7 py-4">
               <h4 class="text-white">About</h4>
-              <p class="text-muted">ROI Training App for managing GCP course rosters in Qwiklabs</p>
+              <p class="text-muted">ROI Training Google Cloud Demos</p>
             </div>
             <div class="col-sm-4 offset-md-1 py-4">
               <h4 class="text-white">Misc.</h4>
               <ul class="list-unstyled">
                 <li class='text-secondary'>Logged in as {{ user_email }}</li>
                 <li><a href="{{ logout_url }}" class="text-white">Logout</a></li>
-                <li><a href="mailto:jeff@roitraining.com" class="text-white"><a href="https://join.skype.com/Jxah9MWbTBT8" target="_blank" class="text-white">Get Help</a></li>
               </ul>
             </div>
           </div>
@@ -36,7 +33,7 @@
       <div class="navbar navbar-dark bg-dark box-shadow">
         <div class="container d-flex justify-content-between">
           <a href="/" class="navbar-brand d-flex align-items-center">
-            <strong>ROI Training</strong>
+            <img src="/static/images/logo.png" height="32" style="margin-right:9px"><strong>ROI Training</strong>
           </a>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -57,7 +54,8 @@
         <p class="float-right">
           <a href="#">Back to top</a>
         </p>
-        <p>&copy; ROI Training, Inc. All rights reserved.</p>
+        <p>
+          &copy; ROI Training, Inc. All rights reserved.</p>
       </div>
     </footer>
 
