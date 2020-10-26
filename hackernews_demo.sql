@@ -34,7 +34,7 @@ WHERE
 order by
   day desc, score desc
 Limit
-  100
+  300
 
 # leverage window functions to get ranking
 SELECT

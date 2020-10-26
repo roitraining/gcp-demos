@@ -15,7 +15,6 @@ LIMIT 10
 #create separate columns from struct properties
 SELECT
   author.email,
-  author.date,
   difference
 FROM
   `bigquery-public-data.github_repos.commits`
@@ -25,11 +24,12 @@ LIMIT 10
 
 #standardSQL
 #show correlated cross join and unnest
+#this one row per email/file combo
+#but also include the entire array for each output row
 WITH
   sample AS (
   SELECT
     author.email,
-    author.date,
     difference
   FROM
     `bigquery-public-data.github_repos.commits`
@@ -39,7 +39,28 @@ WITH
     1)
 SELECT
   email,
-  date,
+  difference,
+  diff.new_path as path
+from
+  sample,
+  unnest(difference) as diff
+
+#standardSQL
+#show correlated cross join and unnest
+#this drop the difference column with the array
+WITH
+  sample AS (
+  SELECT
+    author.email,
+    difference
+  FROM
+    `bigquery-public-data.github_repos.commits`
+  WHERE
+    ARRAY_LENGTH(difference) = 5
+  LIMIT
+    1)
+SELECT
+  email,
   diff.new_path as path
 from
   sample,

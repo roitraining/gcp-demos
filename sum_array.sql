@@ -22,7 +22,7 @@ SELECT
   [5,
   10] AS some_numbers
 
-  # show original row plus new column with sum of array
+# show original row plus new column with sum of array
 SELECT
   row_id,
   some_numbers,
@@ -34,7 +34,7 @@ SELECT
 FROM
   `gcp_demos.arrays`
 
-  # show original row plus new column with sum of array - 2nd approach
+# show original row plus new column with sum of array - 2nd approach
 SELECT
   row_id,
   ARRAY_AGG(n) AS some_numbers,
