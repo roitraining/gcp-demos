@@ -44,7 +44,9 @@ The purpose of this demo is to provide step-by-step breakdown of searching by ar
 
 ## Arch Demos
 ### Cloud Functions Demo
-
+This demonstrates creation of a Cloud Function that monitors additions to a
+bucket, and will check the picture for offensive content, and blur the picture
+if needed.
 * ```. ./gcf-demo-setup.sh``` to deploy the cloud function
 * Discuss purpose (function finds offensive images and replaces with blurred images)
 * Show the students the zombie picture (either whole picture or thumbnail)

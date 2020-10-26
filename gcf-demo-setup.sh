@@ -14,7 +14,11 @@ rm -rf ~/nodejs-docs-samples
 git clone https://github.com/GoogleCloudPlatform/nodejs-docs-samples.git
 
 # deploy the function
-cd functions/imagemagick/
-gcloud functions deploy blurOffensiveImages --trigger-bucket=$DEVSHELL_PROJECT_ID-cf-originals --set-env-vars BLURRED_BUCKET_NAME=gs://$DEVSHELL_PROJECT_ID-cf-blurred
+cd nodejs-docs-samplesfunctions/imagemagick/
+gcloud functions deploy blurOffensiveImages /
+--trigger-bucket=$DEVSHELL_PROJECT_ID-cf-originals /
+--set-env-vars BLURRED_BUCKET_NAME=gs://$DEVSHELL_PROJECT_ID-cf-blurred /
+--runtime=nodejs10
+
 # change back to demos directory
 cd ~/gcp-demos
