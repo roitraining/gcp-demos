@@ -17,13 +17,8 @@ You can demo the changes in query performance and cost with these different sche
 Incidentally, this also provides the potential to demo Dataflow, BigQuery load techniques, doing intra-BigQuery ETL, etc.
 
 ## Setup
-### Notes
 
-There are two ways to do setup.
-- Start with a pre-created normalized data set
-- Start by creating your own normalized data set
-
-The former approach uses this normalized data set:
+This demo uses this normalized data set:
 
 ```
 roi-bq-demo.bq_demo
@@ -35,67 +30,19 @@ which has the following tables:
 - order: 7.5B rows
 - line_item: 75B rows
 
-This is the largest dataset we can reasonably store for instructor use. If you want a larger dataset, you can follow the instructions for creating your own normalized tables.
-
-### Setup - general
+This is the largest dataset we can reasonably store for instructor use.
+If you want a larger dataset, you can create your own - the pieces you need
+are found in this directory.
 
 1. Log into the cloud console, and select an appropriate project. Queries used to derive the not-normalized tables and do the demos are expensive, so choose your project wisely (i.e. do not use a project billable to ROI Training even if you can). For recommended strategy, visit the demos Slack channel.
 
 2. In your target project, make sure that there is a dataset named `bq_demo` (create it if necessary).
 
-### Setup - standard normalized tables
-
-1. Run the query in __load_data.sql__. This will take about 70 minutes, cost $150, and create four new tables in your target project/dataset:
+3. Run the query in __load_data.sql__. This will take about 70 minutes, cost $150, and create four new tables in your target project/dataset:
 - denorm
 - nested_once
 - table_nested_partitioned
 - table_nested_partitioned_clustered
-
-### Setup - create your own normalized tables
-
-1. Open Cloud Shell
-
-2. In your project of choice, create a bucket to hold the data files
-
-```
-gsutil mb -c regional -l us-central1 gs://$DEVSHELL_PROJECT_ID
-```
-
-3. Create and activate a virtual environment
-
-```
-virtualenv ~/venvs/bq-demo
-source ~/venvs/bq-demo/bin/activate
-```
-
-4. Install the required Python packages
-
-```
-pip install -r requirements.txt
-```
-
-5. Generate the data files for the normalized BQ tables. The amount of time this takes will depend on your quotas in the project where it's running - with 100 16cpu nodes, it takes about 70 minutes total and costs $xx. You will definitely need to run the Dataflow job in an environment where you have plenty of quota. Make sure to replace the placeholders in the command-line below:
-
-```
-python generate_data.py \
-    --project=<project-id> \
-    --bucket=<bucket-name> \
-    --save_main_session \
-    --runner=DataflowRunner \
-    --worker_machine_type=<machine-type> \
-    --region=<region> \
-    --customers=<# customers> \
-    --products=10000 \
-    --orders=<#orders> \
-```
-
-6. Load the data from the generated files in GCS into BigQuery, and then run queries to create the derived tables. This will take on the order of 75 minutes to complete, and cost about $150.
-
-```
-. ./load_data.sh
-```
-
-When prompted, enter the project name where the data will reside, and the bucket where Dataflow stored the import files.
 
 ## Demo
 

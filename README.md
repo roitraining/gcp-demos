@@ -55,6 +55,7 @@ function vs accurate function.
 * Open ```approx.sql``` 
 * Copy/paste queries one at a time, executing in Qwiklabs project
 * Show difference between answers and query times
+* In a test run, I approx taking 11% as long and being within 0.32%
 
 ## Arch Demos
 ### Cloud Functions Demo
