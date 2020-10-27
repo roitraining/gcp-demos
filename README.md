@@ -9,7 +9,12 @@ git clone https://github.com/roitraining/gcp-demos.git
 cd gcp-demos
 ```
 
-## Data Demos
+## BQ Demo
+The goal of this demo is to show the price/performance impact of different data structures and BQ features. You will run a query that generates identical results against multiple copies of data that's organized in different ways, and highlight how price/performance differs.
+
+See separate [README.md](https://github.com/roitraining/gcp-demos/blob/master/bq-demo/README.md)
+
+## Misc Data Demos
 ### Sum Array
 This demo was created in response to a student asking about how to sum array columns. It shows:
 * Shows how to show rows with array and sum of array using subquery
@@ -34,13 +39,22 @@ The purpose of this demo is to provide step-by-step breakdown of searching by ar
 * Copy/paste queries one at a time and show results
 * For each result, show the JSON code to clarify
 
-
 ### Dataproc scaling and pre-emptable instances
-* Create a dataproc cluster with 2 nodes in a region where you have a lot of CPU/Disk quota
-* SSH into master and run the command from ```dataproc_scale_demo.sh```
-* Note progress (or lack thereof)
-* Add hundreds of CPUs of preemptable instances
-* Go back to master SSH window and show uptick in performance
+* Open ```dataproc_scale_demo.sh```
+* Use first command in Cloud Shell to create the cluster
+* Use second set of commands in cloud Shell to submit the job
+* Show the slow progress of the job
+* Open a 2nd Cloud Shell session, and use the third command to add nodes to
+  the cluster, changing the number of nodes to fit within your quotas.
+* Show the new nodes. Show the improved rate of progress
+* Run the last command to tear down the cluster
+
+### Approximation functions
+This demo shows the performance/accuracy tradeoff of using approxmiation
+function vs accurate function.
+* Open ```approx.sql``` 
+* Copy/paste queries one at a time, executing in Qwiklabs project
+* Show difference between answers and query times
 
 ## Arch Demos
 ### Cloud Functions Demo
@@ -53,11 +67,3 @@ if needed.
 * Upload zombie photo into the "originals" bucket in your project
 * Show students logs with GCF info
 * Show students blurred image in the "blurred" bucket
-
-## BQ Demo
-The goal of this demo is to show the price/performance impact of different data structures and BQ features. You will run a query that generates identical results against multiple copies of data that's organized in different ways, and highlight how price/performance differs. See the readme inside the bq-demo folder.
-
-## Misc
-* startup script that registers dns record
-* queries from Data Engineering course slides
-* wikimedia demo query

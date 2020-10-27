@@ -17,7 +17,6 @@ You can demo the changes in query performance and cost with these different sche
 Incidentally, this also provides the potential to demo Dataflow, BigQuery load techniques, doing intra-BigQuery ETL, etc.
 
 ## Setup
-
 ### Notes
 
 There are two ways to do setup.
@@ -40,7 +39,7 @@ This is the largest dataset we can reasonably store for instructor use. If you w
 
 ### Setup - general
 
-1. Log into the cloud console, and select an appropriate project. Queries used to derive the not-normalized tables and do the demos are expensive, so choose your project wisely (i.e. do not use a project billable to ROI Training even if you can).
+1. Log into the cloud console, and select an appropriate project. Queries used to derive the not-normalized tables and do the demos are expensive, so choose your project wisely (i.e. do not use a project billable to ROI Training even if you can). For recommended strategy, visit the demos Slack channel.
 
 2. In your target project, make sure that there is a dataset named `bq_demo` (create it if necessary).
 
@@ -61,7 +60,6 @@ This is the largest dataset we can reasonably store for instructor use. If you w
 ```
 gsutil mb -c regional -l us-central1 gs://$DEVSHELL_PROJECT_ID
 ```
-
 
 3. Create and activate a virtual environment
 
@@ -91,7 +89,7 @@ python generate_data.py \
     --orders=<#orders> \
 ```
 
-6. Load the data from the generated files in GCS into BigQuery. This will take on the order of 75 minutes to complete, and cost about $150.
+6. Load the data from the generated files in GCS into BigQuery, and then run queries to create the derived tables. This will take on the order of 75 minutes to complete, and cost about $150.
 
 ```
 . ./load_data.sh
@@ -138,5 +136,3 @@ Load the BQ user interface in the project where you have the dataset. The querie
         * 1.2TB, 6.3 seconds, $7
         * 614G, 3.8 seconds, $3
         * 11GB, 3.2 seconds, $.06
-
-

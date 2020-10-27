@@ -1,6 +1,6 @@
-#Run these within a QLabs projects
-#Run the approx first
-#When it's done, run the exact
+# Run these within a QLabs projects
+# Run the approx first
+# When it's done, run the exact
 #Compare times and % difference
 
 #First query - approx
