@@ -69,6 +69,7 @@ from
 #standardSQL
 #find commits where a particular file was touched
 #this shows searching on values within an array
+#by using correlated cross join and filter
 SELECT
   author,
   difference
@@ -78,7 +79,9 @@ FROM
 WHERE
   files.new_path = "courses/data_analysis/lab2/python/is_popular.py"
 
-
+#standardSQL
+#this also shows searching on values within an array
+#this time using subquery in where clause
 SELECT
   author,
   difference
@@ -87,13 +90,19 @@ FROM
 WHERE
   "courses/data_analysis/lab2/python/is_popular.py" in (select f.new_path from unnest(difference) as f)
 
-
 #standardSQL
-#alternative approach to above query
+#this is by far the fastest way of the three to search on values in array
+#this avoids the cross join of #1. EXISTS is faster than IN
 SELECT
   author,
   difference
 FROM
   `bigquery-public-data.github_repos.commits`
 WHERE
-  exists (select * from unnest(difference) as f where f.name="courses/data_analysis/lab2/python/is_popular.py")
+  EXISTS (
+  SELECT
+    *
+  FROM
+    UNNEST(difference) AS f
+  WHERE
+    f.new_path="courses/data_analysis/lab2/python/is_popular.py")

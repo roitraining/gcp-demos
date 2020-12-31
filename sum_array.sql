@@ -55,7 +55,7 @@ FROM
   gcp_demos.arrays,
   UNNEST(some_numbers) AS n
 
-  # query the denormalized view
+# query the denormalized view
 SELECT
   row_id,
   SUM(n),
