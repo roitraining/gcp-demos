@@ -4,3 +4,5 @@ contact.txt
 *snippets*
 *secrets*
 *.pyc
+dflow-bq-stream-python/env/
+dflow-bq-stream-python/*.json
