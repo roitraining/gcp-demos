@@ -1,0 +1,21 @@
+ #!/bin/bash
+
+export PROJECT_ID=$(gcloud config get-value project)
+
+python3 -m venv env
+source env/bin/activate; 
+pip install -r req1.txt
+pip install -r req2.txt
+
+gcloud iam service-accounts create $1  \
+    --display-name="$1"
+export sa_email=$(gcloud iam service-accounts list --filter="displayName:$1" --format="value(email)")
+gcloud projects add-iam-policy-binding $PROJECT_ID\
+    --member="serviceAccount:$sa_email" \
+    --role="roles/editor"
+gcloud iam service-accounts keys create demo_sa.json --iam-account=$sa_email
+export GOOGLE_APPLICATION_CREDENTIALS="${1-demo_.json}"
+
+gsutil mb -l us-central1 "gs://$PROJECT_ID-dflow-demo"
+
+gcloud services enable pubsub, bigquery

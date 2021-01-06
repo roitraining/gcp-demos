@@ -1,0 +1,6 @@
+google-cloud-core
+google-cloud-pubsub
+google-api-python-client
+google-auth
+google-auth-httplib2
+google-cloud-bigquery
