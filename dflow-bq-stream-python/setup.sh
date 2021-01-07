@@ -11,6 +11,7 @@ pip install -r req2.txt
 
 gcloud iam service-accounts create $1  \
     --display-name="$1"
+sleep 2
 export sa_email=$(gcloud iam service-accounts list --filter="displayName:$1" --format="value(email)")
 gcloud projects add-iam-policy-binding $PROJECT_ID\
     --member="serviceAccount:$sa_email" \

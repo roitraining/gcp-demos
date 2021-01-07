@@ -29,7 +29,7 @@ Setup will do the following:
 
     ```bash
     git clone https://github.com/roitraining/gcp-demos.git
-    cd gcp-demos/dflow-gq-stream-python
+    cd gcp-demos/dflow-bq-stream-python
     ```
 
 2. Make sure that **gcloud** is configured to point to the project you want to work in.
@@ -55,8 +55,8 @@ messages and writes nested/repeated rows for each window into a
    --runner DataflowRunner \
    --region us-central1 \
    --project $PROJECT_ID \
-   --staging-location gs://<$PROJECT_ID-dflow-demo> \
-   --temp-location gs://<$PROJECT_ID-dflow-demo>
+   --staging_location gs://$PROJECT_ID-dflow-demo \
+   --temp_location gs://$PROJECT_ID-dflow-demo
    ```
 
 3. If you want to adjust the fixed window size from 10 seconds, you can provide
@@ -78,7 +78,7 @@ one per second.
 
     ```bash
     python3 send_events.py \
-        --project_id=$PORJECT_ID
+        --project_id=$PROJECT_ID
     ```
 
     You may optionally change the topic and sucscription names if you like by
