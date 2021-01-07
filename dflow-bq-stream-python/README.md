@@ -55,8 +55,8 @@ messages and writes nested/repeated rows for each window into a
    --runner DataflowRunner \
    --region us-central1 \
    --project $PROJECT_ID \
-   --staging_location gs://$PROJECT_ID-dflow-demo \
-   --temp_location gs://$PROJECT_ID-dflow-demo
+   --staging_location gs://$PROJECT_ID-dflow-demo/ \
+   --temp_location gs://$PROJECT_ID-dflow-demo/
    ```
 
 3. If you want to adjust the fixed window size from 10 seconds, you can provide
@@ -85,16 +85,16 @@ one per second.
     specifying additional arguments: `topic_id` and `sub_id`.
 
 2. If you are running the pipeline locally, you will need to open a 2nd
-   terminal window and start the sending utility:
+   terminal window and start the sending utility.
 
    Assuming you cloned the repo into your home directory, enter the following
-   into the 2nd terminal window
+   into the 2nd terminal window:
 
    ```bash
     cd gcp-demos/dflow-demo
     source env/bin/activate
     python3 send_events.py \
-        --project_id=$PORJECT_ID
+        --project_id=$PROJECT_ID
    ```
 
 ## Checking out results
