@@ -21,7 +21,7 @@ Incidentally, this also provides the potential to demo Dataflow, BigQuery load t
 This demo uses this normalized data set:
 
 ```
-roi-bq-demo.bq_demo
+roi-bq-demos.bq_demo
 ```
 
 which has the following tables:
