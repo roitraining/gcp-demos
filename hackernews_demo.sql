@@ -1,4 +1,4 @@
-# get simple results
+-- get simple results
 SELECT
   DATE(time_ts) AS day,
   title,
@@ -8,7 +8,7 @@ FROM
 order by
   day desc, score desc
 
-# filter nulls
+-- filter nulls
 SELECT
   DATE(time_ts) AS day,
   title,
@@ -21,7 +21,7 @@ WHERE
 order by
   day desc, score desc
 
-# create struct
+-- create struct
 SELECT
   DATE(time_ts) AS day,
   STRUCT (title,
@@ -36,7 +36,7 @@ order by
 Limit
   300
 
-# leverage window functions to get ranking
+-- leverage window functions to get ranking
 SELECT
   DATE(time_ts) AS day,
   ROW_NUMBER() OVER (PARTITION BY DATE(time_ts)
@@ -55,7 +55,7 @@ order by
 limit 
   100
 
-# simple array agg
+-- simple array agg
 SELECT
   day,
   ARRAY_AGG(top_articles) AS top_articles
@@ -76,7 +76,7 @@ GROUP BY
 ORDER BY
   day DESC
 
-# the whole shebang
+-- the whole shebang
 SELECT
   day,
   ARRAY_AGG(top_articles) AS top_articles

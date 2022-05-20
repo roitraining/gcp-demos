@@ -1,5 +1,5 @@
-#standardSQL
-#find sales/zip for august
+-- standardSQL
+-- find sales/zip for august
 WITH
   orders AS (
   SELECT

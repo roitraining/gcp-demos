@@ -1,5 +1,5 @@
-# make sure you have a dataset in current project name gcp_demos
-# this creates the table used for demo
+-- make sure you have a dataset in current project name gcp_demos
+-- this creates the table used for demo
 CREATE OR REPLACE TABLE
   gcp_demos.arrays AS
 SELECT
@@ -22,7 +22,7 @@ SELECT
   [5,
   10] AS some_numbers
 
-# show original row plus new column with sum of array
+-- show original row plus new column with sum of array
 SELECT
   row_id,
   some_numbers,
@@ -34,7 +34,7 @@ SELECT
 FROM
   `gcp_demos.arrays`
 
-# show original row plus new column with sum of array - 2nd approach
+-- show original row plus new column with sum of array - 2nd approach
 SELECT
   row_id,
   ARRAY_AGG(n) AS some_numbers,
@@ -45,7 +45,7 @@ FROM
 GROUP BY
   row_id
 
-# create a denormalized view
+-- create a denormalized view
 CREATE OR REPLACE VIEW
   gcp_demos.arrays_denorm_view AS
 SELECT
@@ -55,7 +55,7 @@ FROM
   gcp_demos.arrays,
   UNNEST(some_numbers) AS n
 
-# query the denormalized view
+-- query the denormalized view
 SELECT
   row_id,
   SUM(n),
