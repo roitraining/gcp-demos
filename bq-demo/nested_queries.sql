@@ -1,5 +1,5 @@
-#standardSQL
-#find sales/zip for march from nested_once table
+-- standardSQL
+-- find sales/zip for march from nested_once table
 WITH
   orders AS (
   SELECT
@@ -22,8 +22,8 @@ order by
   zip_sales desc
 
 
-#standardSQL
-#find sales/zip for march from nested/partitioned
+-- standardSQL
+-- find sales/zip for march from nested/partitioned
 WITH
   orders AS (
   SELECT
@@ -45,8 +45,8 @@ GROUP BY
 order by 
   zip_sales desc
 
-#standardSQL
-#find sales for 6 months in 8754 from nested
+-- standardSQL
+-- find sales for 6 months in 8754 from nested
 WITH
   orders AS (
   SELECT
@@ -69,8 +69,8 @@ WITH
   ORDER BY
     zip_sales DESC
 
-#standardSQL
-#find for 6 months in 8754 from nested/partitioned
+-- standardSQL
+-- find for 6 months in 8754 from nested/partitioned
 WITH
   orders AS (
   SELECT
@@ -93,8 +93,8 @@ WITH
   ORDER BY
     zip_sales DESC
 
-#standardSQL
-#find for 6 months in 8754 from nested/partitioned/clustered
+-- standardSQL
+-- find for 6 months in 8754 from nested/partitioned/clustered
 WITH
   orders AS (
   SELECT

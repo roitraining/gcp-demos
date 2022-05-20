@@ -1,5 +1,5 @@
-#StandardSQL
-#wiki 1M
+-- StandardSQL
+-- wiki 1M
 SELECT
   title,
   SUM(views) AS views,
