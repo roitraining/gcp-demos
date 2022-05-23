@@ -34,8 +34,9 @@ WHERE
   cust_id<100000
 
 -- create view
+-- assumes dataset in current project named class
 CREATE OR REPLACE VIEW
-  `roi-bq-demos.bq_demo.nj_view` AS
+  `class.nj_view` AS
 SELECT
   cust_id,
   cust_name,
@@ -50,6 +51,6 @@ WHERE
 SELECT
   *
 FROM
-  roi-bq-demos.bq_demo.nj_view
+  `class.nj_view`
 WHERE
   cust_id < 100000
