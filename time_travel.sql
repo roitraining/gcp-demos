@@ -9,7 +9,7 @@ FROM `roi-bq-demos.bq_demo.time_travel`
 
 -- create restoration table
 CREATE OR REPLACE TABLE
-  roi-bq-demos.bq_demo.time_travel_restore AS (
+  class.time_travel_restore AS (
   SELECT
     *
   FROM

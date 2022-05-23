@@ -1,0 +1,59 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Time Travel with Bigquery</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="roi-bq-tt"
+                  title="Time Travel with Bigquery"
+                  environment="web"
+                  feedback-link="-">
+    
+      <google-codelab-step label="Time Travel" duration="5">
+        <h2 is-upgraded><strong>Step 1</strong></h2>
+<p>Make sure you have the BigQuery console open.</p>
+<h2 is-upgraded><strong>Step 2</strong><br></h2>
+<p>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/time_travel.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/time_travel.sql</a> .</p>
+<h2 is-upgraded><strong>Step 3</strong></h2>
+<p>Run the first query from time_travel to see the total number of rows returned in BigQuery.</p>
+<h2 is-upgraded><strong>Step 4</strong></h2>
+<p>Run the second query from time_travel to see the table as it was at an earlier time.</p>
+<h2 is-upgraded>Step 5</h2>
+<p>Run the third query from time_travel to restore a copy of the table from that point in time into a dataset in your project</p>
+<aside class="special"><ul>
+<li>Time travel window is configurable 2-7 days</li>
+<li>Table snapshots are a new feature on top of time travel (see <a href="https://cloud.google.com/bigquery/docs/table-snapshots-intro" target="_blank">https://cloud.google.com/bigquery/docs/table-snapshots-intro</a><strong>)</strong></li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
