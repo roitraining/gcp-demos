@@ -1,0 +1,84 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>GCP Demos Codelabs</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="gcp-demos"
+                  title="GCP Demos Codelabs"
+                  environment="web"
+                  feedback-link="-">
+    
+      <google-codelab-step label="Wikipedia queries" duration="0">
+        <h2 is-upgraded><strong>Step 1</strong></h2>
+<p>Log into Qwiklabs and start the Data to Insights Lab.</p>
+<h2 is-upgraded><strong>Step 2</strong></h2>
+<p>Open the Google Cloud Console, and navigate to the BigQuery UI.</p>
+<h2 is-upgraded><strong>Step 3</strong></h2>
+<p>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/wiki_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/wiki_queries.sql</a>. </p>
+<h2 is-upgraded><strong>Step 4</strong></h2>
+<p>Enter the query from the github file into the BigQuery code editor, and change the term you are searching for to whatever word you like.</p>
+<h2 is-upgraded><strong>Step 5</strong></h2>
+<p>Run the query. Check the Job Information pane and note the query execution time and the bytes processed.</p>
+<h2 is-upgraded><strong>Step 6</strong></h2>
+<p>Modify your query, changing the table name from 1M to 10M. Rerun the query and note the job info.</p>
+<h2 is-upgraded><strong>Step 7</strong></h2>
+<p>Repeat the process with the 100M, 1B, 10B and 100B tables. For the 100B table query, enter the query time into the chat window.<br></p>
+<aside class="special"><ul>
+<li>You provisioned no servers</li>
+<li>You wrote no Java or Python code</li>
+<li>You processed 106B rows with regex comparisons and hundreds of thousands of aggregations in under a minute!</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Time Travel" duration="0">
+        <h2 is-upgraded><strong>Step 1</strong></h2>
+<p>Make sure you have the BigQuery console open.</p>
+<h2 is-upgraded><strong>Step 2</strong><br></h2>
+<p>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/time_travel.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/time_travel.sql</a> .</p>
+<h2 is-upgraded><strong>Step 3</strong></h2>
+<p>Run the first query from time_travel to see the total number of rows returned in BigQuery.</p>
+<h2 is-upgraded><strong>Step 4</strong></h2>
+<p>Run the second query from time_travel to see the table as it was at an earlier time.</p>
+<h2 is-upgraded>Step 5</h2>
+<p>Run the third query from time_travel to restore a copy of the table from that point in time into a dataset in your project<br></p>
+<aside class="special"><ul>
+<li>Time travel window is configurable 2-7 days</li>
+<li>Table snapshots are a new feature on top of time travel (see <a href="https://cloud.google.com/bigquery/docs/table-snapshots-intro" target="_blank">https://cloud.google.com/bigquery/docs/table-snapshots-intro</a><strong>)</strong></li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
