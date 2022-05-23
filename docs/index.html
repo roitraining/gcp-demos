@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <meta name="theme-color" content="#4F7DC9">
   <meta charset="UTF-8">
-  <title>gcp-demos Codelabs</title>
+  <title>gcp-demos do-it-nows</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
   <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
@@ -23,7 +23,7 @@
   <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
   <google-codelab codelab-gaid=""
                   id="docs"
-                  title="gcp-demos Codelabs"
+                  title="gcp-demos do-it-nows"
                   environment="web"
                   feedback-link="-">
     
@@ -459,6 +459,77 @@
 <ul>
 <li>What is the average? </li>
 <li>How is this query working?</li>
+</ul>
+</aside>
+<ol type="1" start="4">
+<li>Run the <code>basic correlated cross join</code> query. </li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How does it work?</li>
+<li>Why might you do this?</li>
+</ul>
+</aside>
+<h2 is-upgraded><strong>Querying on array contents</strong></h2>
+<ol type="1" start="5">
+<li>Run the <code>find elements where num=2</code> query. </li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Do you see how it finds the row/element combos with desired value?</li>
+<li>What might be a problem with this?</li>
+</ul>
+</aside>
+<ol type="1" start="6">
+<li>Run the <code>find rows where num=2</code> query.  What does this query do?</li>
+<li>Run each of the find commits queries</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Which one is fastest?</li>
+<li>Why?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Exploring nested data" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>View the <strong>nested_once</strong> table in your instructor&#39;s project</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Which col is repeated?</li>
+<li>How many line items are there per order?</li>
+<li>How much data does the table store?</li>
+<li>How does this compare to the denorm table?</li>
+</ul>
+</aside>
+<ol type="1" start="3">
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/nested_queries.sql</a></li>
+</ol>
+<h2 is-upgraded><strong>Querying the nested table</strong></h2>
+<ol type="1" start="4">
+<li>Read and run the <code>find sales/zip for march from nested_once table</code> query</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How fast was it?</li>
+<li>How does this compare to normalized and denorm queries?</li>
+<li>How much data was processed?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>How much faster was this query than the normalized query?</li>
 </ul>
 </aside>
 
