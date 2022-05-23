@@ -44,7 +44,10 @@
 <li>Modify your query, changing the table name from <code>1M</code> to <code>10M</code>. Rerun the query and note the job info.</li>
 <li>Repeat the process with the <code>100M</code>, <code>1B</code>, <code>10B</code> and <code>100B</code> tables.</li>
 </ol>
-<aside class="warning"><p>For the <code>100B</code> table query, enter the query time into the chat window.</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>For the <code>100B</code> table query, enter the query time into the chat window.</li>
+</ul>
 </aside>
 <aside class="special"><p>Some things to think about:</p>
 <ul>
@@ -69,30 +72,33 @@
 <li>Pin <code>bigquery-samples</code></li>
 <li>Pin <code>bigquery-public-data</code></li>
 <li>Pin <code>roi-bq-demos</code></li>
-<li>Pin <code>qwiklabs-gcp-02-4251632938ed</code></li>
 </ol>
 <h2 is-upgraded><strong>Exploring datasets</strong></h2>
-<ol type="1" start="8">
+<ol type="1" start="7">
 <li>Expand <code>bigquery-samples</code></li>
 <li>Note the datasets; expand one or two of the datasets. A dataset is a collection of assets (can be secured as a unit; lives in a location)</li>
 <li>Click on a data set name in the Explorer pane; look at wiki dataset metadata</li>
 <li>Click on the three dot menu to the right of a dataset and note the available actions</li>
 </ol>
 <h2 is-upgraded><strong>Creating a dataset</strong></h2>
-<ol type="1" start="12">
+<ol type="1" start="11">
 <li>In your Qwiklabs project, create a new dataset called <code>class</code></li>
 </ol>
 <h2 is-upgraded><strong>Exploring tables</strong></h2>
-<ol type="1" start="13">
+<ol type="1" start="12">
 <li>Review tables in the <code>bigquery-samples.wikipedia_benchmark</code> dataset</li>
 <li>Click on <code>100B</code> table</li>
 <li>Review schema</li>
-<li>What do the modes mean?</li>
 <li>Look at metadata</li>
 <li>Look at preview data</li>
 <li>Check out three dot menu</li>
 <li>Check out jobs in personal history</li>
 </ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
 
 
       </google-codelab-step>
@@ -125,7 +131,7 @@
 <li>Check out the view in the UI</li>
 <li>Now try running the last query, which queries the view</li>
 </ol>
-<aside class="warning"><p>Enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
 <ul>
 <li>How much data is getting processed?</li>
 <li>Do you save time/money?</li>
@@ -166,6 +172,11 @@
 <li>Run the <strong>query with javascript udf</strong> query</li>
 <li>Look at documentation for stored procedures: <a href="https://cloud.google.com/bigquery/docs/procedures" target="_blank">https://cloud.google.com/bigquery/docs/procedures</a> </li>
 </ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
 
 
       </google-codelab-step>
@@ -185,7 +196,13 @@
 <li>Press <code>CTRL/CMD-D</code> several times to multi select</li>
 <li>Hit backspace or delete to change all the lines</li>
 <li>Click the shortcut button to get a list of shortcuts</li>
+<li>Press F1 (or right-click in editor tab and choose show command palette) to see more options (including making the font bigger!)</li>
 </ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
 
 
       </google-codelab-step>
@@ -205,6 +222,11 @@
 <li>Note duration and bytes processed</li>
 <li>Disable cache and re-run query</li>
 </ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
 
 
       </google-codelab-step>
@@ -222,7 +244,7 @@
 <li>Click on your saved query in the Explorer panel</li>
 <li>Run the query again</li>
 </ol>
-<aside class="warning"><p>Share the query publicly; post the link in the chat</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, share the query publicly and the link into the chat window</p>
 </aside>
 
 
@@ -241,8 +263,13 @@
 <h2 is-upgraded><strong>Running queries against historical table</strong><br></h2>
 <ol type="1" start="4">
 <li>Run the second query from time_travel to see the table as it was at an earlier time.</li>
-<li>Run the third query from time_travel to restore a copy of the table from that point in time into a dataset in your project<br></li>
+<li>Run the third query from time_travel to restore a copy of the table from that point in time into a dataset in your project</li>
 </ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>How many rows are in the time travel table?</li>
+</ul>
+</aside>
 <aside class="special"><p>Some things to think about:</p>
 <ul>
 <li>Time travel window is configurable 2-7 days</li>
@@ -270,6 +297,8 @@
 <li>Write a query query that finds all the <code>038110</code> entries for <code>1929, 1930, 1931</code> using a wildcard table</li>
 <li>If you wanted to write a query to find <code>038110</code> entries in ALL the tables in the dataset?</li>
 </ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, pate your query into the chat window</p>
+</aside>
 
 
       </google-codelab-step>
@@ -290,8 +319,148 @@
 <p>What you are seeing is a Hive-partitioned dataset living in your Data Lake (within GCS)</p>
 <h2 is-upgraded><strong>Create an external table</strong></h2>
 <ol type="1" start="7">
-<li>In BigQuery </li>
+<li>In the BigQuery UI&#39;s Explorer pane, select your dataset </li>
+<li>From three-dot menu, select <strong>create table</strong></li>
+<li>In <strong>Create table from</strong>, select <strong>Google Cloud Storage</strong></li>
+<li>In <strong>Select file...</strong> enter <code>jwd-gcp-demos/orders_partitioned/*</code></li>
+<li>In <strong>File format</strong> select <strong>parquet</strong></li>
+<li>Check <strong>Source data partitioning</strong></li>
+<li>In <strong>Select Source...</strong> enter <code>gs://jwd-gcp-demos/orders_partitioned/</code></li>
+<li>In <strong>Table</strong>, enter <code>ext_part</code> </li>
+<li>In <strong>Table type</strong> select <strong>External table</strong></li>
+<li>In <strong>Schema</strong>, select <strong>Auto detect</strong></li>
+<li><strong>Click CREATE TABLE</strong></li>
+<li>Check your table details</li>
 </ol>
+<h2 is-upgraded><strong>Query the external table</strong></h2>
+<ol type="1" start="1">
+<li>Run the first query; how many rows are returned?</li>
+<li>Run the second query; review the execution details; how many slot seconds were consumed?</li>
+<li>Run the third query; review the execution details; how many slot seconds were consumed; why the difference?</li>
+</ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Exploring normalized data and joins" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/norm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/norm_query.sql</a></li>
+<li>Copy the query into the BQ query editor</li>
+<li>Replace all instances of <strong>&lt;project-id&gt;</strong> with <code>roi-bq-demos</code></li>
+</ol>
+<h2 is-upgraded><strong>Try out query with joins</strong></h2>
+<ol type="1" start="1">
+<li>Run the query and review the Job Information and Execution Details</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How much data was processed?</li>
+<li>How long did it take</li>
+<li>How many slot seconds were consumed?</li>
+<li>How much data was shuffled?</li>
+<li>Did it work?</li>
+<li>Why are we using the with clause here?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>How long did your query take to run?</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Exploring denormalized data" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>View the denorm in the project shared with you by your instructor</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How much more data is in this table vs. the normalized tables?</li>
+<li>What much more does it cost to store this data?</li>
+</ul>
+</aside>
+<ol type="1" start="3">
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/denorm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/denorm_query.sql</a> </li>
+<li>Copy the query into the BQ query editor</li>
+<li>Replace <code><project></code> with the instructor&#39;s project name</li>
+</ol>
+<h2 is-upgraded><strong>Try out query with joins</strong></h2>
+<ol type="1" start="6">
+<li>Run the query and review the Job Information and Execution Details</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How much data was processed?</li>
+<li>How long did it take?</li>
+<li>How many slot seconds were consumed?</li>
+<li>How much data was shuffled?</li>
+<li>Did it work?</li>
+<li>Why was it faster?</li>
+<li>Is the price/performance tradeoff worthwhile?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>How much faster was this query than the last?</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Exploring arrays" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/arrays.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/arrays.sql</a></li>
+</ol>
+<h2 is-upgraded><strong>Populating Arrays</strong></h2>
+<ol type="1" start="3">
+<li>Read and the <code>populate arrays explicitly</code> query, and review the results</li>
+<li>Read and the <code>populate arrays using array_agg</code> query, and review the results. </li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How is the array column being generated?</li>
+</ul>
+</aside>
+<h2 is-upgraded><strong>Array lengths</strong></h2>
+<ol type="1" start="5">
+<li>In the Explorer pane, drill down to<strong> bigquery-public-data.github_repos.commits</strong>. </li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How many rows are there? </li>
+<li>What is the <strong>difference</strong> column?</li>
+</ul>
+</aside>
+<ol type="1" start="6">
+<li>Read and the <code>report array length</code> query, and review the results. </li>
+<li>Write a query to find all the rows where the length of the <strong>difference</strong> array is equal to <strong>five</strong> (hint, you can use the <code>find by array length</code> query from the git file).</li>
+</ol>
+<h2 is-upgraded><strong>UNNEST</strong></h2>
+<ol type="1" start="1">
+<li>Run the <code>select basic array from array</code> query. Note that there is one row, with one column that is an array, which has four elements</li>
+<li>Run the <code>select table from array</code> query. Note that there are four rows, each with one column which is a scalar value. Unnest flattens the array into a table.</li>
+<li>Run the <code>calculate average of array</code> query. </li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>What is the average? </li>
+<li>How is this query working?</li>
+</ul>
+</aside>
 
 
       </google-codelab-step>
