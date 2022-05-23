@@ -32,19 +32,19 @@ FROM
 
 -- create udf
 CREATE OR REPLACE FUNCTION
-  `roi-bq-demos.bq_demo.tidy_string` (text STRING)
+  `class.tidy_string` (text STRING)
   RETURNS STRING AS (REGEXP_REPLACE(LOWER(TRIM(text)), '[^a-zA-Z0-9 ]+', ''));
 
 -- query with SQL UDF
 SELECT
   text AS messy,
-  `roi-bq-demos.bq_demo.tidy_string`(text) AS tidy
+  `class.tidy_string`(text) AS tidy
 FROM
   `roi-bq-demos.bq_demo.messy_text`
 
 -- create javascript udf
 CREATE OR REPLACE FUNCTION
-  `roi-bq-demos.bq_demo.get_numbers`(str STRING)
+  `class.get_numbers`(str STRING)
   RETURNS NUMERIC
   LANGUAGE js AS '''
    return nlp(str).values(0).toNumber().out()
@@ -53,6 +53,6 @@ CREATE OR REPLACE FUNCTION
 -- query with javascript udf
 SELECT
   text,
-  `roi-bq-demos.bq_demo.get_numbers`(text) AS number
+  `class.get_numbers`(text) AS number
 FROM
   `roi-bq-demos.bq_demo.number_strings`
