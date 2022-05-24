@@ -544,6 +544,105 @@
 
       </google-codelab-step>
     
+      <google-codelab-step label="Exploring partitioned tables" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>Review the <strong>table_nested_partitioned</strong> table in your instructor&#39;s project</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>What column is it partitioned on?</li>
+</ul>
+</aside>
+<ol type="1" start="3">
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/nested_queries.sql</a></li>
+</ol>
+<h2 is-upgraded><strong>Querying the partitioned table</strong></h2>
+<ol type="1" start="4">
+<li>Read and run the <code>find sales/zip for march from nested/partitioned table</code> query</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How fast was it?</li>
+<li>How much data was processed?</li>
+<li>Why?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Exploring clustered tables" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>Review the <strong>table_nested_partitioned_clustered</strong> table in your instructor&#39;s project</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>What column is it clustered on?</li>
+</ul>
+</aside>
+<ol type="1" start="3">
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/bq-demo/nested_queries.sql</a></li>
+</ol>
+<h2 is-upgraded><strong>Querying the partitioned table</strong></h2>
+<ol type="1" start="4">
+<li>Find the total sales for the 8754 zip code by running the <code>find sales for 6 months in 8754 from nested</code> query. Note the duration and data processed.</li>
+<li>Run the <code>find for 6 months in 8754 from nested/partitioned query</code> and note the duration and data processed.</li>
+<li>Run the <code>find for 6 months in 8754 from nested/partitioned/clustered</code> query and note the duration and data processed.</li>
+</ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>How much faster was the clustered/partitioned table compared to the table with no partitioning or clustering?</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Exploring derived tables" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+</ol>
+<h2 is-upgraded><strong>Querying the partitioned table</strong></h2>
+<ol type="1" start="2">
+<li>Write and run a query to find all the March 2018 orders from the instructor&#39;s nested/repeated table, projecting all the columns except the customer email and phone number, and storing the results in a derived table in your <code>class</code> dataset.</li>
+<li>Write and run a query to sum sales for AK customers orders in March 2018, using the full nested/repeated table. Note the query duration and bytes processed.</li>
+<li>Write and run a query to sum sales for AK customers orders in March 2018, using the derived table. Note the query duration and bytes processed.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How much faster was querying the derived table?</li>
+<li>How much cheaper was querying the derive table?</li>
+<li>Consider the impact if AK analysts queried AK orders 100s of times per day</li>
+</ul>
+</aside>
+<ol type="1" start="5">
+<li>Schedule the query to run daily at 12.01am, overwriting the previous contents of the derived table.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>What are some downsides of derived tables?</li>
+<li>How else might you achieve similar performance using the full table?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
   </google-codelab>
 
   <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
