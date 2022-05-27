@@ -1,28 +1,3 @@
--- create the tables with sample data
-CREATE OR REPLACE TABLE
-  `roi-bq-demos.bq_demo.messy_text` AS
-SELECT
-  "one" AS text
-UNION ALL
-SELECT
-  "one word" AS text
-UNION ALL
-SELECT
-  "one word and )(*&^" AS text;
-CREATE OR REPLACE TABLE
-  `roi-bq-demos.bq_demo.number_strings` AS
-SELECT
-  "two hundred fifty one" AS text
-UNION ALL
-SELECT
-  "1 point 6" AS text
-UNION ALL
-SELECT
-  "minus 33" AS text
-UNION ALL
-SELECT
-  "30 million two hundred twenty point zero two" AS text
-
 -- trim strings
 SELECT
   text AS messy,

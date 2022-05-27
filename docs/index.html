@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <meta name="theme-color" content="#4F7DC9">
   <meta charset="UTF-8">
-  <title>gcp-demos do-it-nows</title>
+  <title>gcp-demos Do-It-Now activities</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
   <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
@@ -23,23 +23,25 @@
   <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
   <google-codelab codelab-gaid=""
                   id="docs"
-                  title="gcp-demos do-it-nows"
+                  title="gcp-demos Do-It-Now activities"
                   environment="web"
                   feedback-link="-">
     
       <google-codelab-step label="Overview" duration="0">
-        <p><strong>tl;dr</strong> hands-on &gt; demos &gt; slides</p>
-<p>The best way to learn something is try it yourself. So we&#39;ve turned a bunch of the demos out instructors do in BigQuery classes into Do-It-Now activities, where students can try each concept out in quick, bite-size activities.</p>
-<p>If you are using these as part of an Instructor Led Training (ILT), make sure to listen to your instructor and coordinate your efforts with their direction.</p>
+        <p><strong>tl;dr hands-on &gt; demos &gt; slides</strong></p>
+<p>The best way to learn something is try it yourself. So we&#39;ve turned a bunch of the demos out instructors do into Do-It-Now activities, where students can try each concept out in quick, bite-size activities.</p>
+<p>If you are using these as part of an Instructor Led Training (ILT), make sure to listen to your instructor and coordinate your efforts with their direction. </p>
+<aside class="special"><p><strong>Note</strong>: Do-It-Nows tagged as $ assume that you are working in Qwiklabs-generated projects with Qwiklabs-provided accounts; this is important because these activities may generate significant charges if run in your personal account.</p>
+</aside>
 
 
       </google-codelab-step>
     
-      <google-codelab-step label="Wikipedia queries" duration="0">
+      <google-codelab-step label="BigQuery - Wikipedia queries [$$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Log into <strong>Qwiklabs</strong> and start the <strong>Data to Insights Lab</strong>.</li>
-<li>Open the <strong>Google Cloud Console</strong>, and navigate to the <strong>BigQuery UI</strong>.</li>
+<li>Using the provided credentials, open the <strong>Google Cloud Console</strong>, and navigate to the <strong>BigQuery UI</strong>.</li>
 <li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/wiki_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/wiki_queries.sql</a>. </li>
 </ol>
 <h2 is-upgraded><strong>Running a query</strong></h2>
@@ -52,10 +54,7 @@
 <li>Modify your query, changing the table name from <code>1M</code> to <code>10M</code>. Rerun the query and note the job info.</li>
 <li>Repeat the process with the <code>100M</code>, <code>1B</code>, <code>10B</code> and <code>100B</code> tables.</li>
 </ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
-<ul>
-<li>For the <code>100B</code> table query, enter the query time into the chat window.</li>
-</ul>
+<aside class="warning"><p>For the <code>100B</code> table query, enter the query time into the chat window.</p>
 </aside>
 <aside class="special"><p>Some things to think about:</p>
 <ul>
@@ -68,39 +67,39 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="Exploring projects, datasets, and tables" duration="0">
+      <google-codelab-step label="BigQuery - Exploring projects, datasets, and tables" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Open the console</li>
 <li>Go to <strong>BigQuery</strong> page</li>
-<li>Expand your project; not that there are no resources as yet</li>
+<li>Expand your project. If working in Qwiklabs, note that there are no resources as yet</li>
 </ol>
 <h2 is-upgraded><strong>Pinning projects</strong></h2>
 <ol type="1" start="4">
 <li>Pin <code>bigquery-samples</code></li>
 <li>Pin <code>bigquery-public-data</code></li>
 <li>Pin <code>roi-bq-demos</code></li>
+<li>Pin any additional projects suggested by your instructor</li>
 </ol>
 <h2 is-upgraded><strong>Exploring datasets</strong></h2>
-<ol type="1" start="7">
-<li>Expand <code>bigquery-samples</code></li>
-<li>Note the datasets; expand one or two of the datasets. A dataset is a collection of assets (can be secured as a unit; lives in a location)</li>
-<li>Click on a data set name in the Explorer pane; look at wiki dataset metadata</li>
-<li>Click on the three dot menu to the right of a dataset and note the available actions</li>
+<ol type="1" start="8">
+<li>Expand <strong>bigquery-samples </strong>in the Explorer pane.</li>
+<li>Note the datasets; expand one or two of the datasets. A dataset is a collection of assets (can be secured as a unit; lives in a specific location)</li>
+<li>Click on <strong>wikipedia_benchmark</strong> in the <strong>Explorer</strong> pane; look at the metadata displayed in right pane.</li>
+<li>Click on the three dot menu to the right of a dataset in <strong>Explorer</strong> and note the available actions</li>
 </ol>
 <h2 is-upgraded><strong>Creating a dataset</strong></h2>
-<ol type="1" start="11">
-<li>In your Qwiklabs project, create a new dataset called <code>class</code></li>
+<ol type="1" start="12">
+<li>In your project, create a new dataset called <code>class</code></li>
 </ol>
 <h2 is-upgraded><strong>Exploring tables</strong></h2>
-<ol type="1" start="12">
-<li>Review tables in the <code>bigquery-samples.wikipedia_benchmark</code> dataset</li>
-<li>Click on <code>100B</code> table</li>
-<li>Review schema</li>
-<li>Look at metadata</li>
+<ol type="1" start="13">
+<li>Review tables in the <strong>bigquery-samples.wikipedia_benchmark</strong> dataset</li>
+<li>Click on <strong>100B</strong> table</li>
+<li>Review the table schema shown on the right</li>
+<li>Look at table details</li>
 <li>Look at preview data</li>
-<li>Check out three dot menu</li>
-<li>Check out jobs in personal history</li>
+<li>Check out three dot menu next to the table name on the left</li>
 </ol>
 <aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
 <ul>
@@ -111,7 +110,7 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="Exploring views and jobs" duration="0">
+      <google-codelab-step label="BigQuery - Exploring views and jobs [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -119,37 +118,32 @@
 </ol>
 <h2 is-upgraded><strong>Making the case for views</strong></h2>
 <ol type="1" start="3">
-<li>Enter the first query into the <strong>BigQuery</strong> editor</li>
+<li>Enter the <code>query with subquery</code> query into the <strong>BigQuery</strong> editor</li>
 <li>Review the query - what does it do?</li>
 <li>Examine just the subquery</li>
-<li>Run just the subquery and note results</li>
-<li>Next, run the whole query</li>
+<li>Run just the subquery and note results (CMD-e)</li>
+<li>Next, run the whole query<br>a. It runs the subquery first, and generates an in-memory table<br>b. It then runs the outer query against the in-memory table<br>c. Run the query and check the results</li>
+<li>Rather than using subqueries, you can use with clauses. This behaves effectively the same. Try running the <code>with clause</code> query in <strong>BigQuery</strong></li>
 </ol>
-<ol type="1" start="1">
-<li>It runs the subquery first, and generates an in-memory table</li>
-<li>It then runs the outer query against the in-memory table</li>
-<li>Run the query and check the results</li>
-</ol>
-<ol type="1" start="8">
-<li>Rather than using subqueries, you can use with clauses. This behaves effectively the same. Try running query #2 in <strong>BigQuery</strong></li>
-</ol>
-<p>What if you like that subquery a lot, and would like to use it in many other queries? Rather than copy/paste, you can create a view. A view is just a saved, shared subquery.</p>
+<p>What if you like that subquery a lot, and would like to use it in many other queries? Rather than copy/paste over and over, you can create a view. A view is just a saved, shared subquery.</p>
 <ol type="1" start="9">
-<li>Run the <strong>create view</strong> query in <strong>BigQuery</strong></li>
+<li>Run the <code>create view</code> query in <strong>BigQuery</strong></li>
 <li>Check out the view in the UI</li>
-<li>Now try running the last query, which queries the view</li>
+<li>Now try running the <code>query view</code> query, which queries the view</li>
 </ol>
 <aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
 <ul>
-<li>How much data is getting processed?</li>
+<li>How much data is getting processed when you query the view?</li>
 <li>Do you save time/money?</li>
 </ul>
 </aside>
-<h2 is-upgraded><strong>Why would you use views?</strong></h2>
+<aside class="special"><p><strong>Why would you use views?</strong></p>
 <ol type="1" start="1">
-<li>Again, shared subqueries</li>
-<li>Limits data shown to audience (though not securely)</li>
+<li>To make sharing subqueries easier</li>
+<li>To make your code more readable</li>
+<li>To limit data shown to audience (though not securely)</li>
 </ol>
+</aside>
 <h2 is-upgraded><strong>See the jobs you&#39;ve run</strong><br></h2>
 <ol type="1" start="12">
 <li>Click on the history links at the bottom of the page and review the queries that you&#39;ve run</li>
@@ -158,7 +152,7 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="Exploring routines" duration="0">
+      <google-codelab-step label="BigQuery - Exploring routines [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -167,17 +161,17 @@
 <h2 is-upgraded><strong>Messy numbers</strong></h2>
 <ol type="1" start="3">
 <li>Look at the <strong>messy_text</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
-<li>Run the <strong>trim strings</strong> query. What does it do? How does it do it?</li>
-<li>Review and run the <strong>create udf</strong> query</li>
+<li>Run the <code>trim strings</code> query. What does it do? How does it do it?</li>
+<li>Review and run the <code>create udf</code> query</li>
 <li>Select the <strong>tidy_string</strong> function in the routines section of the <strong>Explorer</strong> pane; review the details.</li>
-<li>Run the query with <strong>SQL UDF</strong> query</li>
+<li>Run the query with <code>query with SQL UDF</code> query</li>
 </ol>
 <h2 is-upgraded><strong>Getting numbers from text</strong></h2>
 <ol type="1" start="8">
 <li>Review the <strong>number_string</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
-<li>Review and run the <strong>create javascript udf</strong> query</li>
+<li>Review and run the <code>create javascript udf</code> query</li>
 <li>Review the <strong>get_numbers</strong> UDF in the routines section</li>
-<li>Run the <strong>query with javascript udf</strong> query</li>
+<li>Run the <code>query with javascript udf</code> query</li>
 <li>Look at documentation for stored procedures: <a href="https://cloud.google.com/bigquery/docs/procedures" target="_blank">https://cloud.google.com/bigquery/docs/procedures</a> </li>
 </ol>
 <aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
@@ -189,7 +183,7 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="Exploring the editor" duration="0">
+      <google-codelab-step label="BigQuery - Exploring the editor" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -204,7 +198,7 @@
 <li>Press <code>CTRL/CMD-D</code> several times to multi select</li>
 <li>Hit backspace or delete to change all the lines</li>
 <li>Click the shortcut button to get a list of shortcuts</li>
-<li>Press F1 (or right-click in editor tab and choose show command palette) to see more options (including making the font bigger!)</li>
+<li>Press <code>F1</code> (or right-click in editor tab and choose show command palette) to see more options (including making the font bigger!)</li>
 </ol>
 <aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
 <ul>
@@ -215,17 +209,20 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="Exploring caching" duration="0">
+      <google-codelab-step label="BigQuery - Exploring caching [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
 </ol>
 <h2 is-upgraded><strong>Working with cache</strong></h2>
 <ol type="1" start="2">
-<li>Run this query <code>select * from `roi-bq-demos.bq_demo.customer` where cust_state = "AK"</code></li>
+<li>Run this query:</li>
+</ol>
+<pre><code>select * from `roi-bq-demos.bq_demo.customer` where cust_state = &#34;AK&#34;</code></pre>
+<ol type="1" start="3">
 <li>Look at <strong>JOB INFORMATION</strong></li>
 <li>Note the query  duration and bytes processed</li>
-<li>Click on link for <strong>Destination table. </strong>This temp table has the results of your query and lasts for about 24 hours</li>
+<li>Click on link for <strong>Destination table. </strong>This temp table has the results of your query and lasts for 24 hours</li>
 <li>Re-run the query</li>
 <li>Note duration and bytes processed</li>
 <li>Disable cache and re-run query</li>
