@@ -1,4 +1,4 @@
--- subquery
+-- query with subquery
 SELECT
   *
 FROM (

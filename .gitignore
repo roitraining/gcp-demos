@@ -6,3 +6,4 @@ contact.txt
 *.pyc
 dflow-bq-stream-python/env/
 dflow-bq-stream-python/*.json
+setup.sql
