@@ -6,7 +6,7 @@ WITH
     cust_zip,
     prod_price * qty AS line_item_subtotal
   FROM
-    `bq_demo.nested_once`,
+    `<project-id>.bq_demo.nested_once`,
     unnest(line_items)
   WHERE
     order_date >= "2018-03-01"
@@ -30,7 +30,7 @@ WITH
     cust_zip,
     prod_price * qty AS line_item_subtotal
   FROM
-    `bq_demo.table_nested_partitioned`,
+    `<project-id>.bq_demo.table_nested_partitioned`,
     unnest(line_items)
   WHERE
     order_date >= "2018-03-01"
@@ -53,7 +53,7 @@ WITH
     cust_zip,
     prod_price * qty AS line_item_subtotal
   FROM
-    `bq_demo.nested_once`,
+    `<project-id>.bq_demo.nested_once`,
     UNNEST(line_items)
   WHERE
     order_date >= "2018-01-01"
@@ -77,7 +77,7 @@ WITH
     cust_zip,
     prod_price * qty AS line_item_subtotal
   FROM
-    `bq_demo.table_nested_partitioned`,
+    `<project-id>.bq_demo.table_nested_partitioned`,
     UNNEST(line_items)
   WHERE
     order_date >= "2018-01-01"
@@ -101,7 +101,7 @@ WITH
     cust_zip,
     prod_price * qty AS line_item_subtotal
   FROM
-    `bq_demo.table_nested_partitioned_clustered`,
+    `<project-id>.bq_demo.table_nested_partitioned_clustered`,
     UNNEST(line_items)
   WHERE
     order_date >= "2018-01-01"

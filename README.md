@@ -9,35 +9,11 @@ git clone https://github.com/roitraining/gcp-demos.git
 cd gcp-demos
 ```
 
-## BQ Demo
-The goal of this demo is to show the price/performance impact of different data structures and BQ features. You will run a query that generates identical results against multiple copies of data that's organized in different ways, and highlight how price/performance differs.
-
-See separate [README.md](https://github.com/roitraining/gcp-demos/blob/master/bq-demo/README.md)
-
 ## Misc Data Demos
-### Sum Array
-This demo was created in response to a student asking about how to sum array columns. It shows:
-* Shows how to show rows with array and sum of array using subquery
-* Shows how to show rows with array and sum of array using cross join and agg
-* Shows how to generate a denormalized view of a table with an array column
-* Shows how to query denormalized view and show array col and sum
 
-To use:
-* Open ```sum_array.sql```
-* Copy/paste queries one at a time and show results
-* For each result, show the JSON code to clarify
-
-### Hackernews BQ demo
-The purpose of this demo is to provide step-by-step breakdown of structs, windowing functions, and arrays. It's intended as an alternative to the code in the class.
-* Open ```hackernews_demo.sql```
-* Copy/paste queries one at a time and show results
-* For each result, show the JSON code to clarify
-
-### Github BQ demo
-The purpose of this demo is to provide step-by-step breakdown of searching by array length, more struct creation, correlated cross-joins with UNNEST statement, and querying on values within a repeated struct.
-* Open ```github_demo.sql```
-* Copy/paste queries one at a time and show results
-* For each result, show the JSON code to clarify
+### BigQuery Demos
+* Check out <https://roitraining.github.io/gcp-demos/#1> for details on 
+  demoing or using **Do-It-Now** activities
 
 ### Dataproc scaling and pre-emptable instances
 * Open ```dataproc_scale_demo.sh```
@@ -49,13 +25,17 @@ The purpose of this demo is to provide step-by-step breakdown of searching by ar
 * Show the new nodes. Show the improved rate of progress
 * Run the last command to tear down the cluster
 
-### Approximation functions
-This demo shows the performance/accuracy tradeoff of using approxmiation
-function vs accurate function.
-* Open ```approx.sql``` 
-* Copy/paste queries one at a time, executing in Qwiklabs project
-* Show difference between answers and query times
-* In a test run, I approx taking 11% as long and being within 0.32%
+### DLP
+* Open application at <https://roi-gcp-demos.appspot.com/dlp_demo>
+* Enter text with no sensitive data into left pane; see results on right
+* Enter sensitive data in left pane; see results on right
+* Fiddle around with contextual info on left, see ratings change on right
+* Demonstrate different remediation tactics with blue buttons
+* Optional - show source code to class
+
+
+### Dataflow streaming in Python
+* See <https://github.com/roitraining/gcp-demos/tree/master/dflow-bq-stream-python>
 
 ## Arch Demos
 ### Cloud Functions Demo
