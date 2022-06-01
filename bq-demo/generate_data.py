@@ -1,10 +1,10 @@
 import os
 import apache_beam as beam
 import random
+from apache_beam.io import ReadFromText
 import datetime
 import argparse
 
-from apache_beam.io import ReadFromText
 # from apache_beam.options.pipeline_options import PipelineOptions
 # from apache_beam.options.pipeline_options import SetupOptions
 
