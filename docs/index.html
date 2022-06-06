@@ -276,17 +276,41 @@
       <google-codelab-step label="BigQuery - Time Travel [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/time_travel.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/time_travel.sql</a>.</li>
+<li>Make sure you have the <strong>BigQuery</strong> console open</li>
+<li>Open the Cloud Shell</li>
 </ol>
-<h2 is-upgraded><strong>Running query against current table</strong></h2>
+<h2 is-upgraded><strong>Creating the time travel table</strong></h2>
 <ol type="1" start="3">
-<li>Run the first query from time_travel to see the total number of rows returned in BigQuery.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/time_travel.sh" target="_blank">https://github.com/roitraining/gcp-demos/blob/may22/time_travel.sh</a></li>
+<li>Review the contents of the file</li>
 </ol>
-<h2 is-upgraded><strong>Running queries against historical table</strong><br></h2>
-<ol type="1" start="4">
-<li>Run the second query from time_travel to see the table as it was at an earlier time.</li>
-<li>Run the third query from time_travel to restore a copy of the table from that point in time into a dataset in your project</li>
+<aside class="special"><p>Here&#39;s what&#39;s happening:</p>
+<ul>
+<li>The <strong>first</strong> command uses the bq CLI tool to find all the January orders for CA customers, and writes order information into a new table</li>
+<li>The <strong>second</strong> command notes the time at which the table was updated</li>
+<li>The <strong>third</strong> command uses the bq CLI tool to find all the February orders for CA customers and appends those to the table</li>
+<li>The <strong>last</strong> commands tell you when the table updates are done, and give you the target value for your timestamp search</li>
+</ul>
+</aside>
+<ol type="1" start="5">
+<li>Copy the contents of the file and paste them into your Cloud Shell terminal window.</li>
+</ol>
+<h2 is-upgraded><strong>Running queries against the current, fully populated table</strong></h2>
+<ol type="1" start="6">
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/time_travel.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/time_travel.sql</a>.</li>
+<li>Run the <code>-- view up-to-date table</code> query. This should show you the total number of orders per month, with values for Jan. and Feb.</li>
+</ol>
+<h2 is-upgraded><strong>Running a time travel query, finding results from specific time</strong></h2>
+<ol type="1" start="8">
+<li>Copy the  <code>-- view table with only initial load</code>  query from the SQL file in Github and paste it into your BigQuery editor.</li>
+<li>Replace <code>target</code> with the time travel target value that was output in your Cloud Shell window. It should look like this: <strong>1654541783</strong></li>
+<li>Run the query. This should show you the total number of orders per month, but from the table as it looked after it&#39;s initial load when only January data was stored.</li>
+</ol>
+<h2 is-upgraded><strong>Restore a previous version of the table to a new table</strong></h2>
+<ol type="1" start="11">
+<li>Copy the  <code>-- create restoration table</code>  query from the SQL file in Github and paste it into your BigQuery editor.</li>
+<li>Replace <code>target</code> with the time travel target value that was output in your Cloud Shell window. It should look like this: <strong>1654541783</strong></li>
+<li>Run the query. One the table has been created, check out the Details and Preview data. Verify that only January orders exist.<br></li>
 </ol>
 <aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
 <ul>
@@ -716,6 +740,32 @@
 <aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
 <ul>
 <li>FINISHED!</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="BigQuery - Approximate aggregation functions [$$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/may22/mv.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/approx.sql</a></li>
+</ol>
+<h2 is-upgraded><strong>Run exact and approx queries side-by-side</strong></h2>
+<ol type="1" start="3">
+<li>Run the <code>-- First query - exact query</code> in one editor tab. This query will find the number of unique article titles in the 106B row wikipedia table</li>
+<li>Open a 2nd editor tab, and run the <code>-- Second query - approx</code> query. This will approximate the number of unique article titles in the 106B row wikipedia table.</li>
+</ol>
+<h2 is-upgraded><strong>Compare results</strong></h2>
+<ol type="1" start="5">
+<li>Calculate the % difference in query execution time between the two queries</li>
+<li>Calculate the % difference in reported number of unique titles </li>
+</ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<ul>
+<li>Query time difference</li>
+<li>% error in approximation</li>
 </ul>
 </aside>
 
