@@ -21,4 +21,5 @@ export GOOGLE_APPLICATION_CREDENTIALS=$1.json
 
 gsutil mb -l us-central1 "gs://$PROJECT_ID-dflow-demo"
 
+gcloud services disable pubsub bigquery dataflow
 gcloud services enable pubsub bigquery dataflow

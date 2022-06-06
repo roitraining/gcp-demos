@@ -29,21 +29,25 @@ known_args, extra_args = parser.parse_known_args()
 
 # create the topic in the specified project
 publisher = pubsub.PublisherClient()
-topic_path = publisher.topic_path(known_args.project_id, known_args.topic_id)
+topic_name = 'projects/{project_id}/topics/{topic}'.format(
+    project_id=known_args.project_id,
+    topic=known_args.topic_id,  # Set this to something appropriate.
+)
 topic_list = publisher.list_topics(project=f"projects/{known_args.project_id}")
-if (next((True for x in topic_list if topic_path == x.name), False)):
-    topic = publisher.get_topic(topic_path)
+if (next((True for x in topic_list if topic_name == x.name), False)):
+    pass
 else:
-    topic = publisher.create_topic(topic_path)
+    topic = publisher.create_topic(name=topic_name)
 
 # create the sub in the specified project
 subscriber = pubsub.SubscriberClient()
+topic_path = publisher.topic_path(known_args.project_id, known_args.topic_id)
 sub_path = subscriber.subscription_path(known_args.project_id, known_args.sub_id)
 sub_list = subscriber.list_subscriptions(project=f"projects/{known_args.project_id}")
 if (next((True for x in sub_list if sub_path == x.name), False)):
-    sub = subscriber.get_subscription(sub_path)
+    pass
 else:
-    subscriber.create_subscription(name=sub_path, topic=topic_path)
+    subscriber.create_subscription(request={"name": sub_path, "topic": topic_path})
 
 # send a message every second
 while True:
