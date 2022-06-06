@@ -1,11 +1,20 @@
 -- view up-to-date table
-SELECT *
-FROM `roi-bq-demos.bq_demo.time_travel`
+SELECT
+  month,
+  COUNT(*)
+FROM
+  `class.time_travel`
+GROUP BY
+  month;
 
 -- view table with only initial load
-SELECT *
-FROM `roi-bq-demos.bq_demo.time_travel`
-  FOR SYSTEM_TIME AS OF timestamp("2022-05-20 18:25:23+00");
+SELECT
+  month,
+  COUNT(*)
+FROM
+  `class.time_travel` FOR SYSTEM_TIME AS OF TIMESTAMP_SECONDS(target)
+GROUP BY
+  month;
 
 -- create restoration table
 CREATE OR REPLACE TABLE
@@ -13,4 +22,4 @@ CREATE OR REPLACE TABLE
   SELECT
     *
   FROM
-    `roi-bq-demos.bq_demo.time_travel` FOR SYSTEM_TIME AS OF TIMESTAMP("2022-05-20 18:25:23+00"));
+    `class.time_travel` FOR SYSTEM_TIME AS OF TIMESTAMP_SECONDS(target))
