@@ -872,11 +872,13 @@ cd gcp-demos/dflow-bq-stream-python</pre>
 </aside>
 <h2 is-upgraded><strong>Check out the results</strong></h2>
 <ol type="1" start="11">
-<li>In the console, go to Dataflow and check out the streaming job.</li>
-<li>In the console, got to BigQuery and explore your new <strong>dflow_demo</strong> dataset. Check out the <strong>DETAILS</strong> and <strong>PREVIEW</strong> section for both of the tables in that dataset.</li>
+<li>In the console, go to <strong>Dataflow</strong> and click on the running job.</li>
+<li>Click on the top node of the pipeline diagram. Wait until you see metrics showing the number of received messages on the right-hand side (it takes a while for the cluster to spin up and start processing messages).</li>
+<li>Explore the pipeline and the execution metrics in Dataflow.</li>
+<li>In the console, got to <strong>BigQuery</strong> and explore your new <strong>dflow_demo</strong> dataset. Check out the <strong>DETAILS</strong> and <strong>PREVIEW</strong> section for both of the tables in that dataset. Note that the nested table has one row per window, with an array of structs, each struct representing one message for that window.</li>
 </ol>
 <h2 is-upgraded><strong>Clean up</strong></h2>
-<ol type="1" start="1">
+<ol type="1" start="15">
 <li>Stop the Dataflow job via the console</li>
 <li>Stop the sending of messages by closing the Cloud Shell window</li>
 <li>Delete the PubSub topic and subscription</li>
