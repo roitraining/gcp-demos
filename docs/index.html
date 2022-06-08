@@ -14,8 +14,19 @@
     .success {
       color: #1e8e3e;
     }
+  
     .error {
       color: red;
+    }
+  
+    img {
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+    }
+  
+    pre {
+      margin-left: 1.5em;
     }
   </style>
 </head>
@@ -780,9 +791,9 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="DE - Dataflow Streaming [$]" duration="0">
-        <h2 is-upgraded><strong>Overview</strong></h2>
-<p>This activity is intended to illustrate a variety of techniques...</p>
+      <google-codelab-step label="DE - Dataflow Streaming with Python [$]" duration="0">
+        <h2 is-upgraded><strong>1. Overview</strong></h2>
+<p>This activity is intended to illustrate a variety of techniques, including:</p>
 <p><strong>Managing and using PubSub with Python</strong></p>
 <ul>
 <li>Creating topics and subscriptions</li>
@@ -792,38 +803,32 @@
 <p><strong>Various BEAM tricks when processing streams of data</strong></p>
 <ul>
 <li>Decoding bytestring message bodies</li>
-<li>One branch for writing each event into a BigQuery table</li>
-<li>One branch for aggregating rows into windows and writing windows to BigQuery</li>
-<li>Writing repeated tables from BEAM to BigQuery</li>
+<li>Using one branch for writing each event into a BigQuery table</li>
+<li>Using a second branch for aggregating rows into windows and writing windows to BigQuery</li>
+<li>Writing nested/repeated data from BEAM to BigQuery</li>
 <li>Reading the end of window time</li>
 </ul>
-<h2 is-upgraded><strong>Setting up</strong></h2>
+<h2 is-upgraded>2. <strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Open the Google Cloud console</li>
 <li>Activate Cloud Shell</li>
 <li>Click the button to open Cloud Shell in a new browser window</li>
-<li>Clone the <strong>gcp-demos</strong> repository into Cloud Shell</li>
+<li>Clone the <strong>gcp-demos</strong> repository into Cloud Shell with the following command:</li>
 </ol>
 <pre>git clone https://github.com/roitraining/gcp-demos.git
 cd gcp-demos/dflow-bq-stream-python</pre>
 <ol type="1" start="5">
-<li>Run the setup.sh script, providing the name of the service account you want the demo code to use. For example:</li>
+<li>Run the <code>setup.sh</code> script, providing the name of the service account you want the demo code to use. For example (with <code>demo-sa</code> as the service account name):</li>
 </ol>
 <pre>. ./setup.sh demo-sa</pre>
-<aside class="special"><p><strong>What&#39;s happening here?</strong> Feel free to explore the <code>setup.sh</code> script. It does the following:</p>
-<ul>
-<li>Create a Python virtual environment, and installs necessary libraries (including BEAM, and the PubSub client library)</li>
-<li>Creates a service account that will be used to connect to Cloud APIs</li>
-<li>Assigns the new service account the permissions it needs to talk to the APIs</li>
-<li>Creates and downloads a service account key file which is used to authenticate</li>
-<li>Create a GCS bucket to use as a staging area for the Dataflow job</li>
-<li>Makes sure that the services required are enabled (the disabling is done in case you are using a Qwiklabs project, as those projects require a disable/enable cycle</li>
-</ul>
-</aside>
-<h2 is-upgraded><br><strong>Starting the pipeline</strong></h2>
 <ol type="1" start="6">
+<li>Take a few minutes to review and understand the setup script. The diagram below indicates what&#39;s happening in the script.</li>
+</ol>
+<h2 is-upgraded><img style="width: 624.00px" src="img/e4b52eedaff69ff5.png"></h2>
+<h2 is-upgraded>3. <strong>Starting the pipeline</strong></h2>
+<ol type="1" start="7">
 <li>Make sure that you are in the <strong>dflow-bq-stream-python </strong>directory in your Cloud Shell window.</li>
-<li>Deploy the Dataflow job like this (you&#39;ll review the code in a minute):</li>
+<li>Deploy the Dataflow job with the follow command (you&#39;ll review the code in a minute):</li>
 </ol>
 <pre>python3 process_events.py \
 --runner DataflowRunner \
@@ -831,54 +836,33 @@ cd gcp-demos/dflow-bq-stream-python</pre>
 --project $PROJECT_ID \
 --staging_location gs://$PROJECT_ID-dflow-demo/ \
 --temp_location gs://$PROJECT_ID-dflow-demo/</pre>
-<h2 is-upgraded><strong>Starting the event stream</strong></h2>
-<ol type="1" start="8">
+<h2 is-upgraded><strong>4. Starting the event stream</strong></h2>
+<ol type="1" start="9">
 <li>Run the following command to start sending messages:</li>
 </ol>
 <pre>python3 send_events.py \
     --project_id=$PROJECT_ID</pre>
-<h2 is-upgraded><strong>Understanding the code</strong></h2>
-<ol type="1" start="9">
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/send_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/send_events.py</a> </li>
-</ol>
-<aside class="special"><p><strong>Note the following:</strong></p>
-<ul>
-<li>The code checks for an existing topic, and creates a new one if necessary</li>
-<li>The code checks for an existing subscription, and creates a new one if necessary</li>
-<li>The code sends a new message roughly once per second</li>
-<li>The message is an object that has four properties (pos_id, ts, zip, sale_amount)</li>
-<li>The object is converted into a JSON string, which is then encoded as a byte array</li>
-<li>A message is then published to the topic</li>
-</ul>
-</aside>
+<h2 is-upgraded><strong>5. Understanding the code</strong></h2>
 <ol type="1" start="10">
-<li>Open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/process_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/process_events.py</a> </li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/send_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/send_events.py</a> </li>
+<li>Take a few minutes to review and understand the code. The diagram below highlights some key features:</li>
 </ol>
-<aside class="special"><p><strong>Note the following:</strong></p>
-<ul>
-<li>The code checks for existing BigQuery resources, and creates if necessary</li>
-<li>This is a streaming pipeline developed in Python</li>
-<li>The pipeline is reading from a designated, existing subscription</li>
-<li>The first transform decodes the message body into a string</li>
-<li>The second transform converts the string into a dict</li>
-<li>The pipeline branches sending dicts along two parallel paths</li>
-<li>The first path simply writes each dict into a BigQuery row</li>
-<li>The second path converts messages into a key-value pairs of <strong>(pos_id, {ts, zip, sale_amount})</strong></li>
-<li>The KV pairs are windowed by PubSub receipt time (10 second fixed windows)</li>
-<li>The messages within each window are grouped by  <strong>pos_id</strong>. An output element of the windowed aggregation might look like<strong> (pos_id, [ts, zip, sale_amount}, ts, zip, sale_amount}]]</strong></li>
-<li>Each grouped element is then converted into a Bigquery row with an array of structs.</li>
-<li>The rows are then written into the nested/repeated output table</li>
-</ul>
-</aside>
-<h2 is-upgraded><strong>Check out the results</strong></h2>
-<ol type="1" start="11">
+<p class="image-container"><img style="width: 624.00px" src="img/c2f8eeefc77bc843.png"></p>
+<ol type="1" start="12">
+<li>Open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/process_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/process_events.py</a> </li>
+<li>Take a few minutes to review and understand the code. The diagrams below highlight some key features</li>
+</ol>
+<h2 is-upgraded><img style="width: 624.00px" src="img/2072fd183685cee3.png"></h2>
+<h2 is-upgraded><img style="width: 624.00px" src="img/f4db34e38b750e09.png"></h2>
+<h2 is-upgraded><strong>7. Check out the results</strong></h2>
+<ol type="1" start="14">
 <li>In the console, go to <strong>Dataflow</strong> and click on the running job.</li>
 <li>Click on the top node of the pipeline diagram. Wait until you see metrics showing the number of received messages on the right-hand side (it takes a while for the cluster to spin up and start processing messages).</li>
 <li>Explore the pipeline and the execution metrics in Dataflow.</li>
-<li>In the console, got to <strong>BigQuery</strong> and explore your new <strong>dflow_demo</strong> dataset. Check out the <strong>DETAILS</strong> and <strong>PREVIEW</strong> section for both of the tables in that dataset. Note that the nested table has one row per window, with an array of structs, each struct representing one message for that window.</li>
+<li>In the console, go to <strong>BigQuery</strong> and explore your new <strong>dflow_demo</strong> dataset. Check out the <strong>DETAILS</strong> and <strong>PREVIEW</strong> section for both of the tables in that dataset. Note that the nested table has one row per window, with an array of structs, each struct representing one message for that window. Note also that the <strong>DETAILS</strong> section shows the rows in in the streaming buffer and not the BigQuery storage service.</li>
 </ol>
-<h2 is-upgraded><strong>Clean up</strong></h2>
-<ol type="1" start="15">
+<h2 is-upgraded>8. <strong>Clean up</strong></h2>
+<ol type="1" start="18">
 <li>Stop the Dataflow job via the console</li>
 <li>Stop the sending of messages by closing the Cloud Shell window</li>
 <li>Delete the PubSub topic and subscription</li>
