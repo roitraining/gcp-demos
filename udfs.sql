@@ -1,14 +1,14 @@
 -- trim strings
 SELECT
   text AS messy,
-  (REGEXP_REPLACE(LOWER(TRIM(text)), '[^a-zA-Z0-9 ]+', '')) AS tidy
+  TRIM(REGEXP_REPLACE(LOWER(text), '[^a-zA-Z0-9 ]+', '')) AS tidy
 FROM
   `roi-bq-demos.bq_demo.messy_text`
-
+  
 -- create udf
 CREATE OR REPLACE FUNCTION
   `class.tidy_string` (text STRING)
-  RETURNS STRING AS (REGEXP_REPLACE(LOWER(TRIM(text)), '[^a-zA-Z0-9 ]+', ''));
+  RETURNS STRING AS TRIM(REGEXP_REPLACE(LOWER(text), '[^a-zA-Z0-9 ]+', ''));
 
 -- query with SQL UDF
 SELECT
