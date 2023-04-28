@@ -297,6 +297,7 @@
 </ol>
 <h2 is-upgraded><strong>Running queries against the current, fully populated table</strong></h2>
 <ol type="1" start="6">
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/time_travel.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/time_travel.sql</a>.</li>
 <li>Run the <code>-- view up-to-date table</code> query. This should show you the total number of orders per month, with values for Jan. and Feb.</li>
 </ol>
 <h2 is-upgraded><strong>Running a time travel query, finding results from specific time</strong></h2>
@@ -512,9 +513,11 @@
 </ol>
 <h2 is-upgraded><strong>UNNEST</strong></h2>
 <ol type="1" start="8">
-<li>Run the <code>select basic array from array</code> query. Note that there is one row, with one column that is an array, which has four elements</li>
-<li>Run the <code>select table from array</code> query. Note that there are four rows, each with one column which is a scalar value. Unnest flattens the array into a table.</li>
-<li>Run the <code>calculate average of array</code> query. </li>
+<li>Review and run the <code>select basic array from array</code> query. Review the results.</li>
+<li>Click on the <strong>JSON</strong> tab in the <strong>Query results</strong> area, and note the structure of the results. There&#39;s an array with a single row object. That object has a single column, which is a four-element array.</li>
+<li>Review and run the <code>select table from array</code> query. Review the results.</li>
+<li>Click on the <strong>JSON</strong> tab in the <strong>Query results</strong> area, and note the structure of the results. There are four rows, each with one column which is a scalar value. <code>Unnest</code> flattens the array into a table.</li>
+<li>Review and run the <code>calculate average of array</code> query. </li>
 </ol>
 <aside class="special"><p>Some things to think about:</p>
 <ul>
@@ -522,28 +525,76 @@
 <li>How is this query working?</li>
 </ul>
 </aside>
-<ol type="1" start="11">
-<li>Run the <code>basic correlated cross join</code> query. </li>
+<ol type="1" start="13">
+<li>Review and run the <code>basic correlated cross join</code> query. The CTE at the top is just creating an initial <code>arrays</code> table with two rows and two columns. Review the standard results output and the JSON output.</li>
 </ol>
 <aside class="special"><p>Some things to think about:</p>
 <ul>
-<li>How does it work?</li>
+<li>What is this query doing?</li>
 <li>Why might you do this?</li>
 </ul>
 </aside>
-<h2 is-upgraded><strong>Querying on array contents</strong></h2>
-<ol type="1" start="12">
-<li>Run the <code>find elements where num=2</code> query. </li>
+<ol type="1" start="14">
+<li>Review and run the <code>comma correlated cross join</code> query.</li>
 </ol>
 <aside class="special"><p>Some things to think about:</p>
 <ul>
-<li>Do you see how it finds the row/element combos with desired value?</li>
+<li>How does this differ from the previous query?</li>
+<li>Are the results the same?</li>
+</ul>
+</aside>
+<ol type="1" start="15">
+<li>It turns out, that if you&#39;re doing a correlated cross join, you don&#39;t even need to explicitly do the <code>UNNEST</code>, it&#39;s done for you implicitly. Review and run the <code>comma implicit unnest</code> query.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How does this differ from the previous query?</li>
+<li>Are the results the same?</li>
+</ul>
+</aside>
+<h2 is-upgraded><strong>Querying on array contents</strong></h2>
+<ol type="1" start="16">
+<li>Review and run the <code>-- find row where num_array contains 2 - take 1</code> query. Review the results.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How does this query find the rows with desired value?</li>
 <li>What might be a problem with this?</li>
 </ul>
 </aside>
-<ol type="1" start="13">
-<li>Run the <code>find rows where num=2</code> query.  What does this query do?</li>
-<li>Run each of the find commits queries</li>
+<ol type="1" start="17">
+<li>Edit the query, modifying the CTE so that the first row in the arrays table is [2, 2, 3, 4]. Re-run the query and note the results.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Did it do what you expected?</li>
+<li>How could you ensure it only returns one copy of any given row, no matter how many times the target element value occurs in the array? <em>Don&#39;t hurt yourself, we&#39;ll come back to this in a minute</em>.</li>
+</ul>
+</aside>
+<ol type="1" start="18">
+<li>Edit the query to search for rows that have an 8 in the array. Run the query and review the results? Are they correct?</li>
+<li>Run the <code>-- find row where num_array contains 2 - take 2</code> query. </li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Do you understand how the query works?</li>
+<li>Is row 1 returned more than once?</li>
+<li>Why?</li>
+</ul>
+</aside>
+<ol type="1" start="20">
+<li>Run the <code>-- find row where num_array contains 2 - take 3</code> query. </li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Do you understand how the query works?</li>
+<li>Is row 1 returned more than once?</li>
+<li>Why?</li>
+</ul>
+</aside>
+<p>All three of these queries return the same results, but there are differences in performance on large datasets. Let&#39;s explore that.</p>
+<ol type="1" start="21">
+<li>Run each of the <code>find commits that...</code> queries, noting the time taken for each to run.</li>
 </ol>
 <aside class="special"><p>Some things to think about:</p>
 <ul>

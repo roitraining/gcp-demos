@@ -104,11 +104,62 @@ WITH
     32] AS num_array)
 SELECT
   row_id,
+  num_array,
   num
 FROM
   arrays
 CROSS JOIN
   UNNEST(num_array) AS num
+
+-- comma correlated cross join
+WITH
+  arrays AS (
+  SELECT
+    "row1" AS row_id,
+    [1,
+    2,
+    3,
+    4] AS num_array
+  UNION ALL
+  SELECT
+    "row2" AS row_id,
+    [2,
+    4,
+    8,
+    16,
+    32] AS num_array)
+SELECT
+  row_id,
+  num_array,
+  num
+FROM
+  arrays,
+  UNNEST(num_array) AS num
+
+-- implicit unnest
+WITH
+  arrays AS (
+  SELECT
+    "row1" AS row_id,
+    [1,
+    2,
+    3,
+    4] AS num_array
+  UNION ALL
+  SELECT
+    "row2" AS row_id,
+    [2,
+    4,
+    8,
+    16,
+    32] AS num_array)
+SELECT
+  row_id,
+  num_array,
+  num
+FROM
+  arrays,
+  arrays.num_array AS num
 
 -- find elements where num=2
 WITH
