@@ -161,34 +161,7 @@ FROM
   arrays,
   arrays.num_array AS num
 
--- find elements where num=2
-WITH
-  arrays AS (
-  SELECT
-    "row1" AS row_id,
-    [1,
-    2,
-    3,
-    4] AS num_array
-  UNION ALL
-  SELECT
-    "row2" AS row_id,
-    [2,
-    4,
-    8,
-    16,
-    32] AS num_array)
-SELECT
-  row_id,
-  num
-FROM
-  arrays
-CROSS JOIN
-  UNNEST(num_array) AS num
-WHERE
-  num=2
-
--- find rows where num=2
+-- find row where num_array contains 2 - take 1
 WITH
   arrays AS (
   SELECT
@@ -214,6 +187,62 @@ CROSS JOIN
   UNNEST(num_array) AS num
 WHERE
   num=2
+
+-- find row where num_array contains 2 - take 2
+WITH
+  arrays AS (
+  SELECT
+    "row1" AS row_id,
+    [2,
+    2,
+    3,
+    4] AS num_array
+  UNION ALL
+  SELECT
+    "row2" AS row_id,
+    [2,
+    4,
+    8,
+    16,
+    32] AS num_array)
+SELECT
+  row_id,
+  num_array
+FROM
+  arrays
+WHERE
+  2 in (select num from unnest(arrays.num_array))
+
+-- find row where num_array contains 2 - take 3
+WITH
+  arrays AS (
+  SELECT
+    "row1" AS row_id,
+    [2,
+    2,
+    3,
+    4] AS num_array
+  UNION ALL
+  SELECT
+    "row2" AS row_id,
+    [2,
+    4,
+    8,
+    16,
+    32] AS num_array)
+SELECT
+  row_id,
+  num_array
+FROM
+  arrays
+WHERE
+  EXISTS (
+  SELECT
+    *
+  FROM
+    UNNEST(num_array) AS num
+  WHERE
+    num=2)
 
 -- find commits that touched a specific file - take 1
 SELECT
