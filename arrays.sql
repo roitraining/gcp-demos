@@ -211,7 +211,7 @@ SELECT
 FROM
   arrays
 WHERE
-  2 in (select num from unnest(arrays.num_array))
+  2 in (select num from unnest(arrays.num_array) as num)
 
 -- find row where num_array contains 2 - take 3
 WITH
