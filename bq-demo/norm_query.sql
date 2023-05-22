@@ -14,15 +14,15 @@ WITH
     o.order_num,
     li.qty * p.prod_price AS line_item_subtotal
   FROM
+    `<project-id>.bq_demo.line_item` li
+  JOIN
     march_orders o
+  ON
+    o.order_num = li.order_num
   JOIN
     `<project-id>.bq_demo.customer` c
   ON
     o.cust_id = c.cust_id
-  JOIN
-    `<project-id>.bq_demo.line_item` li
-  ON
-    o.order_num = li.order_num
   JOIN
     `<project-id>.bq_demo.product` p
   ON
