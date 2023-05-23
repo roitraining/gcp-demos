@@ -8,7 +8,7 @@ FROM
 -- create udf
 CREATE OR REPLACE FUNCTION
   `class.tidy_string` (text STRING)
-  RETURNS STRING AS TRIM(REGEXP_REPLACE(LOWER(text), '[^a-zA-Z0-9 ]+', ''));
+  RETURNS STRING AS (TRIM(REGEXP_REPLACE(LOWER(text), '[^a-zA-Z0-9 ]+', '')));
 
 -- query with SQL UDF
 SELECT
