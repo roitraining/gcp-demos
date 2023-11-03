@@ -1,4 +1,19 @@
 steps:
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: CreateRepo
+    entrypoint: gcloud
+    args:
+      - artifacts
+      - repositories
+      - create
+      - chat
+      - --repository-format=docker
+      - --location=us-central1
+      - --description="Chat artifact repository"
+      - --quiet
+    env:
+      - 'PROJECT=$PROJECT_ID'
+      - 'LOCATION=us-central1'
   - name: gcr.io/cloud-builders/docker
     args:
       - build
@@ -18,12 +33,12 @@ steps:
     id: Deploy
     args:
       - run
-      - services
-      - update
+      - deploy
       - chat
       - --image=us-central1-docker.pkg.dev/$PROJECT_ID/chat/chat:latest
       - --platform=managed
       - --region=us-central1
+      - --allow-unauthenticated
       - --quiet
     entrypoint: gcloud
     env:
