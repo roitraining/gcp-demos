@@ -293,6 +293,7 @@ SET
   line_items = u.line_items;
 END
 
+-- To dos
 -- # dml for type 1 dimension
 -- # dml for type 2 dimension
 -- # dml to update array, match col
