@@ -1,0 +1,3 @@
+streamlit
+watchdog
+google-cloud-aiplatform

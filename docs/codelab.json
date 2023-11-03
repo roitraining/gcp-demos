@@ -3,7 +3,7 @@
   "format": "html",
   "prefix": "https://storage.googleapis.com",
   "mainga": "UA-49880327-14",
-  "updated": "2023-04-28T03:01:34Z",
+  "updated": "2023-10-02T18:20:28Z",
   "id": "docs",
   "duration": 0,
   "title": "Do-It-Now activities (gcp-demos)",
@@ -17,7 +17,8 @@
     "-"
   ],
   "tags": [
-    "-"
+    "detailed",
+    "web"
   ],
   "feedback": "-",
   "url": "docs"
