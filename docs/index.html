@@ -9,7 +9,7 @@
   <title>Do-It-Now activities (gcp-demos)</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
   <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements-tmp.css">
   <style>
     .success {
       color: #1e8e3e;
@@ -61,7 +61,7 @@
 <ol type="1" start="1">
 <li>Log into <strong>Qwiklabs</strong> and start the <strong>Data to Insights Lab</strong>.</li>
 <li>Using the provided credentials, open the <strong>Google Cloud Console</strong>, and navigate to the <strong>BigQuery UI</strong>.</li>
-<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/wiki_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/wiki_queries.sql</a>. </li>
+<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-demos/wiki_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-demos/wiki_queries.sql</a>. </li>
 </ol>
 <h2 is-upgraded><strong>Running a query</strong></h2>
 <ol type="1" start="4">
@@ -133,7 +133,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/views.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/views.sql</a> </li>
+<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/views.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/views.sql</a> </li>
 </ol>
 <h2 is-upgraded><strong>Making the case for views</strong></h2>
 <ol type="1" start="3">
@@ -175,7 +175,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/udfs.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/udfs.sql</a> </li>
+<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/udfs.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/udfs.sql</a> </li>
 </ol>
 <h2 is-upgraded><strong>Messy numbers</strong></h2>
 <ol type="1" start="3">
@@ -212,7 +212,7 @@
 <li>Notice that you can have multiple tabs open</li>
 <li>Write a query to find all CA customers from <strong>roi-bq-demos.bq_demo. </strong>Use tab to autocomplete things like SQL keywords and table references.</li>
 <li>Add a comment at the top of the query using either # or – and the beginning of comment. Try toggling the comment using <code>CMD-/</code></li>
-<li>Copy/paste the contents of <a href="https://github.com/roitraining/gcp-demos/blob/master/udfs.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/udfs.sql</a>  into an editor tab</li>
+<li>Copy/paste the contents of <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/udfs.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/udfs.sql</a>  into an editor tab</li>
 <li>Select <code>OR REPLACE</code></li>
 <li>Press <code>CTRL/CMD-D</code> several times to multi select</li>
 <li>Hit backspace or delete to change all the lines</li>
@@ -282,7 +282,7 @@
 </ol>
 <h2 is-upgraded><strong>Creating the time travel table</strong></h2>
 <ol type="1" start="3">
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/time_travel.sh" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/time_travel.sh</a></li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/time_travel.sh" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/time_travel.sh</a></li>
 <li>Review the contents of the file</li>
 </ol>
 <aside class="special"><p>Here&#39;s what&#39;s happening:</p>
@@ -298,7 +298,7 @@
 </ol>
 <h2 is-upgraded><strong>Running queries against the current, fully populated table</strong></h2>
 <ol type="1" start="6">
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/time_travel.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/time_travel.sql</a>.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/time_travel.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/time_travel.sql</a>.</li>
 <li>Run the <code>-- view up-to-date table</code> query. This should show you the total number of orders per month, with values for Jan. and Feb.</li>
 </ol>
 <h2 is-upgraded><strong>Running a time travel query, finding results from specific time</strong></h2>
@@ -358,7 +358,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq_hive.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq_hive.sql</a> </li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/bq_hive.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/bq_hive.sql</a> </li>
 <li>In another new browser tab, open <a href="https://console.cloud.google.com/storage/browser/jwd-gcp-demos/orders_partitioned" target="_blank">https://console.cloud.google.com/storage/browser/jwd-gcp-demos/orders_partitioned</a></li>
 </ol>
 <aside class="special"><p><strong>Questions</strong>: </p>
@@ -413,7 +413,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-demo/norm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-demo/norm_query.sql</a></li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/norm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/norm_query.sql</a></li>
 <li>Copy the query into the BQ query editor</li>
 <li>Replace all instances of <strong>&lt;project-id&gt;</strong> with <code>roi-bq-demos</code> (or whatever project your instructor directs you to use)</li>
 </ol>
@@ -454,7 +454,7 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-demo/denorm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-demo/denorm_query.sql</a> </li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/denorm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/denorm_query.sql</a> </li>
 <li>Copy the query into the BQ query editor</li>
 <li>Replace <strong>&lt;project-id&gt;</strong> with the instructor&#39;s project name</li>
 </ol>
@@ -486,7 +486,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/arrays.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/arrays.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/arrays.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/arrays.sql</a></li>
 </ol>
 <h2 is-upgraded><strong>Populating Arrays</strong></h2>
 <ol type="1" start="3">
@@ -627,7 +627,7 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-demo/nested_queries.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql</a></li>
 </ol>
 <h2 is-upgraded><strong>Querying the nested table</strong></h2>
 <ol type="1" start="4">
@@ -661,7 +661,7 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-demo/nested_queries.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql</a></li>
 </ol>
 <h2 is-upgraded><strong>Querying the partitioned table</strong></h2>
 <ol type="1" start="4">
@@ -695,7 +695,7 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-demo/nested_queries.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql</a></li>
 </ol>
 <h2 is-upgraded><strong>Querying the partitioned table</strong></h2>
 <ol type="1" start="4">
@@ -764,7 +764,7 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/mv.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/mv.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/mv.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/mv.sql</a></li>
 </ol>
 <h2 is-upgraded><strong>Querying the materialized view</strong></h2>
 <ol type="1" start="4">
@@ -801,7 +801,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/approx.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/approx.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/approx.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/approx.sql</a></li>
 </ol>
 <h2 is-upgraded><strong>Run exact and approx queries side-by-side</strong></h2>
 <ol type="1" start="3">
@@ -884,12 +884,12 @@ cd gcp-demos/dflow-bq-stream-python</pre>
     --project_id=$PROJECT_ID</pre>
 <h2 is-upgraded><strong>5. Understanding the code</strong></h2>
 <ol type="1" start="10">
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/send_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/send_events.py</a> </li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/send_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/dflow-bq-stream-python/send_events.py</a> </li>
 <li>Take a few minutes to review and understand the code. The diagram below highlights some key features:</li>
 </ol>
 <p class="image-container"><img style="width: 624.00px" src="img/c2f8eeefc77bc843.png"></p>
 <ol type="1" start="12">
-<li>Open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/process_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/process_events.py</a> </li>
+<li>Open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/process_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/dflow-bq-stream-python/process_events.py</a> </li>
 <li>Take a few minutes to review and understand the code. The diagrams below highlight some key features</li>
 </ol>
 <h2 is-upgraded><img style="width: 624.00px" src="img/2072fd183685cee3.png"></h2>
@@ -922,7 +922,7 @@ cd gcp-demos/dflow-bq-stream-python</pre>
   <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
   <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
   <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
-  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements-tmp.js"></script>
   <script src="//support.google.com/inapp/api.js"></script>
 
 </body>

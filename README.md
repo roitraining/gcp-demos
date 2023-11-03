@@ -13,8 +13,6 @@
 
 Simple demos used to illustrate various BigQuery techniques
 
-* **bq_hive** allows you to show BigQuery doing optimized queries against
-   Hive-paritioned data in GCS
 * **github_demo** is useful for walking people through array functions and
    searching for rows that have a given value in an array column
 * **hackernews_demo** is useful for walking people through array work and 
