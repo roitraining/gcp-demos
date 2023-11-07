@@ -23,7 +23,10 @@ deploy to **Cloud Run**.
 2. Add permissions to cloud build service
     ```bash
     PROJECT_ID=$(gcloud config get-value project)
-    SERVICE_ACCOUNT="$PROJECT_ID@cloudbuild.gserviceaccount.com"
+    PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID \
+        --format='value(projectNumber)')
+    SERVICE_ACCOUNT="$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
+
     gcloud projects add-iam-policy-binding \
         $PROJECT_ID \
         --member=serviceAccount:$SERVICE_ACCOUNT \
