@@ -36,10 +36,10 @@ deploy to **Cloud Run**.
         $PROJECT_ID \
         --member=serviceAccount:$SERVICE_ACCOUNT \
         --role=roles/artifactregistry.admin
-    gcloud services add-iam-policy-binding \
-        $SERVICE_ACCOUNT \
-        --member=serviceAccount:$PROJECT_NUMER-compute@developer.gserviceaccount.com \
-        --role=roles/iam.serviceaccounts.actAs
+    gcloud projects add-iam-policy-binding \
+        $PROJECT_ID \
+        --member=serviceAccount:$SERVICE_ACCOUNT \
+        --role=roles/iam.serviceAccountUser
     ```
 
 3. Create a repository for application container
