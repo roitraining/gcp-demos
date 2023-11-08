@@ -12,6 +12,8 @@ deploy to **Cloud Run**.
 
 ## Setup
 
+1. Clone the repo into cloud shell
+
 1. Enable required services
    ```bash
     gcloud services enable cloudbuild.googleapis.com
@@ -54,6 +56,14 @@ deploy to **Cloud Run**.
    ```bash
     gcloud builds submit . --config=cloudbuild.yaml
    ```
+
+## Demo
+
+1. Go to Cloud Run in console to get URL of service
+2. Load the chatbot
+3. Demo the chatbot
+4. Open code in Cloud Shell editor
+5. Explicate on code
 
 ## Cleanup
 
