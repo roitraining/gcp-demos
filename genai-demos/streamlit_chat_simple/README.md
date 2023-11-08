@@ -18,6 +18,7 @@ deploy to **Cloud Run**.
     gcloud services enable run.googleapis.com
     gcloud services enable artifactregistry.googleapis.com
     gcloud services enable aiplatform.googleapis.com
+    gcloud services enable compute.googleapis.com
    ```
 
 2. Add permissions to cloud build service
@@ -35,6 +36,10 @@ deploy to **Cloud Run**.
         $PROJECT_ID \
         --member=serviceAccount:$SERVICE_ACCOUNT \
         --role=roles/artifactregistry.admin
+    gcloud services add-iam-policy-binding \
+        $SERVICE_ACCOUNT \
+        --member=serviceAccount:$PROJECT_NUMER-compute@developer.gserviceaccount.com \
+        --role=roles/iam.serviceaccounts.actAs
     ```
 
 3. Create a repository for application container
