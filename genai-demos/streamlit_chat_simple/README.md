@@ -55,7 +55,7 @@ deploy to **Cloud Run**.
     gcloud builds submit . --config=cloudbuild.yaml
    ```
 
-##Cleanup
+## Cleanup
 
 1. Delete the Cloud Run service
    ```bash
