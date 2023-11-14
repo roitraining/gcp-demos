@@ -24,8 +24,6 @@ steps:
       - --platform=managed
       - --region=us-central1
       - --allow-unauthenticated
+      - --set-env-vars=PROJECT=$PROJECT_ID,LOCATION=us-central1
       - --quiet
     entrypoint: gcloud
-    env:
-      - 'PROJECT=$PROJECT_ID'
-      - 'LOCATION=us-central1'
