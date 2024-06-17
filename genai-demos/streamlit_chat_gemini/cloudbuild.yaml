@@ -1,0 +1,29 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '--no-cache'
+      - -t
+      - us-central1-docker.pkg.dev/$PROJECT_ID/chat/chat
+      - .
+      - -f
+      - Dockerfile
+    id: Build
+  - name: gcr.io/cloud-builders/docker
+    id: Push
+    args:
+      - push
+      - us-central1-docker.pkg.dev/$PROJECT_ID/chat/chat:latest
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: Deploy
+    args:
+      - run
+      - deploy
+      - chat
+      - --image=us-central1-docker.pkg.dev/$PROJECT_ID/chat/chat:latest
+      - --platform=managed
+      - --region=us-central1
+      - --allow-unauthenticated
+      - --set-env-vars=PROJECT=$PROJECT_ID,LOCATION=us-central1
+      - --quiet
+    entrypoint: gcloud
