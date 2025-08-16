@@ -1,0 +1,11 @@
+basicAlgorithm:
+  yarnConfig:
+    gracefulDecommissionTimeout: 30s
+    scaleDownFactor: 0.5
+    scaleUpFactor: 0.5
+workerConfig:
+  minInstances: 2
+  maxInstances: 10
+secondaryWorkerConfig:
+  minInstances: 0
+  maxInstances: 150

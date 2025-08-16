@@ -1,0 +1,12 @@
+# replace ORG_ID
+
+name: organizations/ORG_ID/customConstraints/custom.gcsBucketLocationConstraint
+displayName: Restrict GCS Bucket Location
+description: Restricts Cloud Storage buckets to be created only in the 'us-central1' region.
+actionType: DENY
+condition: |
+  resource.location.startsWith('us-central1') == false
+methodTypes:
+  - CREATE
+resourceTypes:
+  - storage.googleapis.com/Bucket

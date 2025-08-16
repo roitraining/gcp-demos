@@ -1,0 +1,6 @@
+customer_id,customer_name,email,registration_date,country
+C001,John Smith,john.smith@email.com,2023-12-01,USA
+C002,Sarah Johnson,sarah.j@email.com,2023-11-15,Canada
+C003,Mike Wilson,mike.w@email.com,2024-01-10,USA
+C004,Emma Brown,emma.b@email.com,2023-10-20,UK
+C005,David Lee,david.lee@email.com,2024-01-05,Australia

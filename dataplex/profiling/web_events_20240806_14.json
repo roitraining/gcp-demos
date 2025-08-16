@@ -1,0 +1,60 @@
+{
+  "events": [
+    {
+      "event_id": "evt_1722963600001",
+      "timestamp": "2024-08-06T14:00:00.123Z",
+      "session_id": "sess_abc123def456",
+      "user_id": "user_789012345",
+      "event_type": "page_view",
+      "page_url": "https://shop.example.com/products/wireless-headphones",
+      "page_title": "Premium Wireless Headphones - Electronics Store",
+      "referrer": "https://google.com/search",
+      "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15",
+      "ip_address": "192.168.1.100",
+      "country": "US",
+      "state": "CA",
+      "city": "San Francisco",
+      "device_type": "mobile",
+      "browser": "Safari",
+      "utm_source": "google",
+      "utm_medium": "cpc",
+      "utm_campaign": "summer_electronics"
+    },
+    {
+      "event_id": "evt_1722963660002",
+      "timestamp": "2024-08-06T14:01:00.456Z",
+      "session_id": "sess_abc123def456",
+      "user_id": "user_789012345",
+      "event_type": "add_to_cart",
+      "product_id": "prod_headphones_001",
+      "product_name": "Premium Wireless Headphones",
+      "product_category": "Electronics > Audio",
+      "price": 199.99,
+      "quantity": 1,
+      "currency": "USD",
+      "cart_total": 199.99,
+      "ip_address": "192.168.1.100",
+      "device_type": "mobile"
+    },
+    {
+      "event_id": "evt_1722963720003",
+      "timestamp": "2024-08-06T14:02:00.789Z",
+      "session_id": "sess_xyz789ghi012",
+      "user_id": null,
+      "event_type": "page_view",
+      "page_url": "https://shop.example.com/",
+      "page_title": "Home - Electronics Store",
+      "referrer": "https://facebook.com/",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "ip_address": "203.0.113.42",
+      "country": "US",
+      "state": "NY",
+      "city": "New York",
+      "device_type": "desktop",
+      "browser": "Chrome",
+      "utm_source": "facebook",
+      "utm_medium": "social",
+      "utm_campaign": null
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# replace PROJECT_ID
+
+name: projects/PROJECT_ID/policies/custom.gcsBucketLocationConstraint
+spec:
+  rules:
+  - enforce: true

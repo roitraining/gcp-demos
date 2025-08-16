@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0"/>
+    <meta name="description" content="DLP Demo 2.0">
+    <meta name="author" content="ROI Training">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% block head %}
+    {% endblock %}
+  </head>
+
+  <body>
+    <header class="bg-light border-bottom py-3">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="d-flex align-items-center">
+              <img src="{{ url_for('static', filename='images/symbol-full-color.svg') }}" height="40" class="me-3" alt="ROI Training">
+              <div>
+                <h4 class="mb-0 text-primary">Google Cloud DLP Demo</h4>
+                <small class="text-muted">ROI Training - Data Loss Prevention API</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container-fluid py-4">
+      {% block content %}
+      {% endblock %}
+    </main>
+
+    <footer class="mt-5 py-3">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-lg-6">
+            <p class="text-muted mb-0">&copy; 2025 ROI Training, Inc. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}
+    {% endblock %}
+  </body>
+</html>
