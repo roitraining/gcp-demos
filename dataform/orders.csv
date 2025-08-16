@@ -1,0 +1,9 @@
+order_id,customer_id,product_id,order_date,quantity,unit_price,status
+1001,C001,P101,2024-01-15,2,29.99,completed
+1002,C002,P102,2024-01-15,1,49.99,completed
+1003,C001,P103,2024-01-16,3,19.99,completed
+1004,C003,P101,2024-01-16,1,29.99,pending
+1005,C002,P104,2024-01-17,2,89.99,completed
+1006,C004,P102,2024-01-17,1,49.99,cancelled
+1007,C003,P105,2024-01-18,4,15.99,completed
+1008,C005,P101,2024-01-18,2,29.99,completed

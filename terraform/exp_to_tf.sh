@@ -1,0 +1,1 @@
+gcloud beta resource-config bulk-export --path=./proj_spec --resource-format=terraform

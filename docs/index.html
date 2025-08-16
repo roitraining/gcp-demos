@@ -9,13 +9,16 @@
   <title>Do-It-Now activities (gcp-demos)</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
   <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements-tmp/codelab-elements.css">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
   <style>
     .success {
       color: #1e8e3e;
     }
     .error {
       color: red;
+    }
+    google-codelab:not([theme="minimal"]) google-codelab-step .instructions {
+      font-size: 16px;
     }
   </style>
 </head>
@@ -31,7 +34,7 @@
       <google-codelab-step label="Overview" duration="0">
         <aside class="special"><p><strong>tl;dr</strong> hands-on &gt; demos &gt; slides</p>
 </aside>
-<p>The best way to learn something is try it yourself. So we&#39;ve turned a bunch of the demos our instructors do into <strong>Do-It-Now</strong> activities, where students can try each concept out in quick, bite-size activities.</p>
+<p>The best way to learn something is to try it yourself. So, we&#39;ve turned a bunch of the demos our instructors do into <strong>Do-It-Now</strong> activities, where students can try each concept out in quick, bite-size activities.</p>
 <p>If you are using these as part of an Instructor Led Training (ILT), make sure to listen to your instructor and coordinate your efforts with their direction. </p>
 
 
@@ -40,14 +43,12 @@
       <google-codelab-step label="BigQuery Do-It-Nows" duration="0">
         <h2 is-upgraded><strong>Overview</strong><br></h2>
 <ol type="1" start="1">
-<li>We have 18 Do-It-Now activities for BigQuery concepts. </li>
-<li>These activities are all prefixed with <strong>BigQuery</strong>.</li>
 <li>Many of these activities will cost money</li>
 </ol>
-<aside class="warning"><p><strong>Warning</strong>: Do-It-Nows tagged with $ generate significant charges if run in your personal account. We assume that you are working in Qwiklabs-generated projects with Qwiklabs-provided accounts. You&#39;ve been warned</p>
+<aside class="warning"><p><strong>Warning</strong>: Do-It-Nows tagged with <strong>$</strong> generate significant charges if run in your personal account. We assume that you are working in lab projects with lab-provided accounts. You&#39;ve been warned.</p>
 </aside>
 <h2 is-upgraded><strong>Sample data</strong><br></h2>
-<ol type="1" start="4">
+<ol type="1" start="2">
 <li>Many of the activities use data in the <strong>roi-bq-demos.bq_demo</strong> dataset</li>
 <li>Other activities rely on additional sample tables that need to be derived from the tables in the <strong>bq_demo</strong> dataset. You can use the directions found <a href="https://github.com/roitraining/gcp-demos/tree/master/bq-schema-demo" target="_blank">here</a> to generate the required tables.</li>
 <li>There is a much smaller dataset which will work with the demos: <strong>roi-bq-demos.bq_demo_small</strong>. Queries will be much faster with this dataset, so aren&#39;t as effective at illustrating query speed benefits.</li>
@@ -59,9 +60,9 @@
       <google-codelab-step label="BigQuery - Wikipedia queries [$$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
-<li>Log into <strong>Qwiklabs</strong> and start the <strong>Data to Insights Lab</strong>.</li>
-<li>Using the provided credentials, open the <strong>Google Cloud Console</strong>, and navigate to the <strong>BigQuery UI</strong>.</li>
-<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-demos/wiki_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-demos/wiki_queries.sql</a>. </li>
+<li>Log into your lab-provided project with your lab user account.</li>
+<li>Navigate to the <strong>BigQuery UI</strong>.</li>
+<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/wiki_query_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/wiki_query_example.sql</a>. </li>
 </ol>
 <h2 is-upgraded><strong>Running a query</strong></h2>
 <ol type="1" start="4">
@@ -73,7 +74,7 @@
 <li>Modify your query, changing the table name from <code>1M</code> to <code>10M</code>. Rerun the query and note the job info.</li>
 <li>Repeat the process with the <code>100M</code>, <code>1B</code>, <code>10B</code> and <code>100B</code> tables.</li>
 </ol>
-<aside class="warning"><p>For the <code>100B</code> table query, enter the query time into the chat window.</p>
+<aside class="warning"><p>For the <code>100B</code> table query, enter the query time into the chat window or share with the instructor.</p>
 </aside>
 <aside class="special"><p>Some things to think about:</p>
 <ul>
@@ -91,9 +92,9 @@
 <ol type="1" start="1">
 <li>Open the console</li>
 <li>Go to <strong>BigQuery</strong> page</li>
-<li>Expand your project. If working in Qwiklabs, note that there are no resources as yet</li>
+<li>In the Explorer pane, expand your project; note that there are no resources as yet</li>
 </ol>
-<h2 is-upgraded><strong>Starring projects</strong></h2>
+<h2 is-upgraded>Starring projects (<a href="https://cloud.google.com/bigquery/docs/bigquery-web-ui#starring_adding_a_project" target="_blank">docs</a><strong>)</strong></h2>
 <ol type="1" start="4">
 <li>Star the <code>bigquery-samples</code> project by name</li>
 <li>Star the  <code>bigquery-public-data</code> project by name</li>
@@ -102,10 +103,10 @@
 </ol>
 <h2 is-upgraded><strong>Exploring datasets</strong></h2>
 <ol type="1" start="8">
-<li>Expand <strong>bigquery-samples </strong>in the Explorer pane.</li>
+<li>Expand <strong>bigquery-samples </strong>project in the Explorer pane.</li>
 <li>Note the datasets; expand one or two of the datasets. A dataset is a collection of assets (can be secured as a unit; lives in a specific location)</li>
-<li>Click on <strong>wikipedia_benchmark</strong> in the <strong>Explorer</strong> pane; look at the metadata displayed in right pane.</li>
-<li>Click on the three dot menu to the right of a dataset in <strong>Explorer</strong> and note the available actions</li>
+<li>Click on <strong>wikipedia_benchmark</strong> in the Explorer pane; look at the metadata displayed in the right pane.</li>
+<li>Click on the three dot menu to the right of a dataset in Explorer and note the available actions</li>
 </ol>
 <h2 is-upgraded><strong>Creating a dataset</strong></h2>
 <ol type="1" start="12">
@@ -120,7 +121,7 @@
 <li>Look at preview data</li>
 <li>Check out three dot menu next to the table name on the left</li>
 </ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>FINISHED!</li>
 </ul>
@@ -133,7 +134,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/views.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/views.sql</a> </li>
+<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/views_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/views_example.sql </a></li>
 </ol>
 <h2 is-upgraded><strong>Making the case for views</strong></h2>
 <ol type="1" start="3">
@@ -142,7 +143,7 @@
 <li>Examine just the subquery</li>
 <li>Run just the subquery and note results (CMD-e)</li>
 <li>Next, run the whole query<br>a. It runs the subquery first, and generates an in-memory table<br>b. It then runs the outer query against the in-memory table<br>c. Run the query and check the results</li>
-<li>Rather than using subqueries, you can use with clauses. This behaves effectively the same. Try running the <code>with clause</code> query in <strong>BigQuery</strong></li>
+<li>Rather than using subqueries, you can use WITH clauses. This behaves effectively the same. Try running the <code>with clause</code> query in <strong>BigQuery</strong></li>
 </ol>
 <p>What if you like that subquery a lot, and would like to use it in many other queries? Rather than copy/paste over and over, you can create a view. A view is just a saved, shared subquery.</p>
 <ol type="1" start="9">
@@ -150,7 +151,7 @@
 <li>Check out the view in the UI</li>
 <li>Now try running the <code>query view</code> query, which queries the view</li>
 </ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>How much data is getting processed when you query the view?</li>
 <li>Do you save time/money?</li>
@@ -171,63 +172,6 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="BigQuery - Exploring routines [$]" duration="0">
-        <h2 is-upgraded><strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/udfs.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/udfs.sql</a> </li>
-</ol>
-<h2 is-upgraded><strong>Messy numbers</strong></h2>
-<ol type="1" start="3">
-<li>Look at the <strong>messy_text</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
-<li>Run the <code>trim strings</code> query. What does it do? How does it do it?</li>
-<li>Review and run the <code>create udf</code> query</li>
-<li>Select the <strong>tidy_string</strong> function in the routines section of the <strong>Explorer</strong> pane; review the details.</li>
-<li>Run the query with <code>query with SQL UDF</code> query</li>
-</ol>
-<h2 is-upgraded><strong>Getting numbers from text</strong></h2>
-<ol type="1" start="8">
-<li>Review the <strong>number_string</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
-<li>Review and run the <code>create javascript udf</code> query</li>
-<li>Review the <strong>get_numbers</strong> UDF in the routines section</li>
-<li>Run the <code>query with javascript udf</code> query</li>
-<li>Look at documentation for stored procedures: <a href="https://cloud.google.com/bigquery/docs/procedures" target="_blank">https://cloud.google.com/bigquery/docs/procedures</a> </li>
-</ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
-<ul>
-<li>FINISHED!</li>
-</ul>
-</aside>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring the editor []" duration="0">
-        <h2 is-upgraded><strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-</ol>
-<h2 is-upgraded><strong>Taking the tour</strong></h2>
-<ol type="1" start="2">
-<li>Notice that you can have multiple tabs open</li>
-<li>Write a query to find all CA customers from <strong>roi-bq-demos.bq_demo. </strong>Use tab to autocomplete things like SQL keywords and table references.</li>
-<li>Add a comment at the top of the query using either # or – and the beginning of comment. Try toggling the comment using <code>CMD-/</code></li>
-<li>Copy/paste the contents of <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/udfs.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/udfs.sql</a>  into an editor tab</li>
-<li>Select <code>OR REPLACE</code></li>
-<li>Press <code>CTRL/CMD-D</code> several times to multi select</li>
-<li>Hit backspace or delete to change all the lines</li>
-<li>Click the shortcut button to get a list of shortcuts</li>
-<li>Press <code>F1</code> (or right-click in editor tab and choose show command palette) to see more options (including making the font bigger!)</li>
-</ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
-<ul>
-<li>FINISHED!</li>
-</ul>
-</aside>
-
-
-      </google-codelab-step>
-    
       <google-codelab-step label="BigQuery - Exploring caching [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
@@ -241,12 +185,12 @@
 <ol type="1" start="3">
 <li>Look at <strong>JOB INFORMATION</strong></li>
 <li>Note the query  duration and bytes processed</li>
-<li>Click on link for <strong>Destination table. </strong>This temp table has the results of your query and lasts for 24 hours</li>
+<li>Click on the link for the <strong>Destination table. </strong>This temp table has the results of your query and lasts for 24 hours</li>
 <li>Re-run the query</li>
 <li>Note duration and bytes processed</li>
 <li>Disable cache and re-run query</li>
 </ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>FINISHED!</li>
 </ul>
@@ -268,7 +212,7 @@
 <li>Click on your saved query in the Explorer panel</li>
 <li>Run the query again</li>
 </ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, share the query publicly and the link into the chat window</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, share the query publicly and the link into the chat window</p>
 </aside>
 
 
@@ -282,8 +226,8 @@
 </ol>
 <h2 is-upgraded><strong>Creating the time travel table</strong></h2>
 <ol type="1" start="3">
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/time_travel.sh" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/time_travel.sh</a></li>
-<li>Review the contents of the file</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/time_travel.sh" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/time_travel.sh</a> </li>
+<li>Review the contents of the file<br></li>
 </ol>
 <aside class="special"><p>Here&#39;s what&#39;s happening:</p>
 <ul>
@@ -298,22 +242,22 @@
 </ol>
 <h2 is-upgraded><strong>Running queries against the current, fully populated table</strong></h2>
 <ol type="1" start="6">
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/time_travel.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/time_travel.sql</a>.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/time_travel_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/time_travel_example.sql</a> </li>
 <li>Run the <code>-- view up-to-date table</code> query. This should show you the total number of orders per month, with values for Jan. and Feb.</li>
 </ol>
 <h2 is-upgraded><strong>Running a time travel query, finding results from specific time</strong></h2>
 <ol type="1" start="8">
 <li>Copy the  <code>-- view table with only initial load</code>  query from the SQL file in Github and paste it into your BigQuery editor.</li>
 <li>Replace <code>target</code> with the time travel target value that was output in your Cloud Shell window. It should look like this: <strong>1654541783</strong></li>
-<li>Run the query. This should show you the total number of orders per month, but from the table as it looked after it&#39;s initial load when only January data was stored.</li>
+<li>Run the query. This should show you the total number of orders per month, but from the table as it looked after its initial load when only January data was stored.</li>
 </ol>
 <h2 is-upgraded><strong>Restore a previous version of the table to a new table</strong></h2>
 <ol type="1" start="11">
 <li>Copy the  <code>-- create restoration table</code>  query from the SQL file in Github and paste it into your BigQuery editor.</li>
 <li>Replace <code>target</code> with the time travel target value that was output in your Cloud Shell window. It should look like this: <strong>1654541783</strong></li>
-<li>Run the query. One the table has been created, check out the Details and Preview data. Verify that only January orders exist.<br></li>
+<li>Run the query. Once the table has been created, check out the Details and Preview data. Verify that only January orders exist.<br></li>
 </ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>How many rows are in the time travel table?</li>
 </ul>
@@ -348,7 +292,7 @@
 <li>Write a query that finds all the <code>038110</code> entries for <code>1929-1939</code> using a wildcard table</li>
 <li>If you wanted to write a query to find <code>038110</code> entries in ALL the tables in the dataset?</li>
 </ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, paste your query into the chat window</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, paste your query into the chat window</p>
 </aside>
 
 
@@ -358,7 +302,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/bq_hive.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/bq_hive.sql</a> </li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/external_hive_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/external_hive_example.sql</a> </li>
 <li>In another new browser tab, open <a href="https://console.cloud.google.com/storage/browser/jwd-gcp-demos/orders_partitioned" target="_blank">https://console.cloud.google.com/storage/browser/jwd-gcp-demos/orders_partitioned</a></li>
 </ol>
 <aside class="special"><p><strong>Questions</strong>: </p>
@@ -400,7 +344,38 @@
 </ol>
 <aside class="special"><p> Review the execution details; how much data was processed? Why was it lower?</p>
 </aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="BigQuery - Exploring routines [$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/udf_examples.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/udf_examples.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>Messy numbers</strong></h2>
+<ol type="1" start="3">
+<li>Look at the <strong>messy_text</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
+<li>Run the <code>trim strings</code> query. What does it do? How does it do it?</li>
+<li>Review and run the <code>create udf</code> query</li>
+<li>Select the <strong>tidy_string</strong> function in the routines section of the <strong>Explorer</strong> pane; review the details.</li>
+<li>Run the query with <code>query with SQL UDF</code> query</li>
+</ol>
+<h2 is-upgraded><strong>Getting numbers from text</strong></h2>
+<ol type="1" start="8">
+<li>Review the <strong>number_string</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
+<li>Review and run the <code>create javascript udf</code> query</li>
+<li>Review the <strong>get_numbers</strong> UDF in the routines section</li>
+<li>Run the <code>query with javascript udf</code> query</li>
+<li>Look at documentation for stored procedures: <a href="https://cloud.google.com/bigquery/docs/procedures" target="_blank">https://cloud.google.com/bigquery/docs/procedures</a> </li>
+</ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>FINISHED!</li>
 </ul>
@@ -413,12 +388,11 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/norm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/norm_query.sql</a></li>
-<li>Copy the query into the BQ query editor</li>
-<li>Replace all instances of <strong>&lt;project-id&gt;</strong> with <code>roi-bq-demos</code> (or whatever project your instructor directs you to use)</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/norm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/norm_query.sql</a> </li>
+<li>Copy the first query into the BQ query editor</li>
 </ol>
 <h2 is-upgraded><strong>Try out query with joins</strong></h2>
-<ol type="1" start="5">
+<ol type="1" start="4">
 <li>Run the query and review the <strong>Job Information</strong> and <strong>Execution Details</strong></li>
 </ol>
 <aside class="special"><p>Some things to think about:</p>
@@ -432,7 +406,7 @@
 <li>What do you think about the performance?</li>
 </ul>
 </aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>How long did your query take to run?</li>
 </ul>
@@ -445,7 +419,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>View the denorm table in the project shared with you by your instructor</li>
+<li>Explore the <strong>denorm</strong> table in the project shared with you by your instructor</li>
 </ol>
 <aside class="special"><p>Some things to think about:</p>
 <ul>
@@ -454,7 +428,7 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/denorm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/denorm_query.sql</a> </li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/denorm_query.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/denorm_query.sql</a> </li>
 <li>Copy the query into the BQ query editor</li>
 <li>Replace <strong>&lt;project-id&gt;</strong> with the instructor&#39;s project name</li>
 </ol>
@@ -473,7 +447,7 @@
 <li>Is the price/performance tradeoff worthwhile?</li>
 </ul>
 </aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>How much faster was this query than the last?</li>
 </ul>
@@ -486,7 +460,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/arrays.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/arrays.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/arrays_examples.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/arrays_examples.sql</a> </li>
 </ol>
 <h2 is-upgraded><strong>Populating Arrays</strong></h2>
 <ol type="1" start="3">
@@ -603,7 +577,7 @@
 <li>Why?</li>
 </ul>
 </aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>FINISHED!</li>
 </ul>
@@ -627,11 +601,11 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql</a> </li>
 </ol>
 <h2 is-upgraded><strong>Querying the nested table</strong></h2>
 <ol type="1" start="4">
-<li>Read and run the <code>find sales/zip for march from nested_once table</code> query (replace <code><project-id></code> with the instructor&#39;s project name)</li>
+<li>Read and run the <code>find sales/zip for march from nested_once table</code> query (replace <code><project-id></code> with the instructor&#39;s project ID)</li>
 </ol>
 <aside class="special"><p>Some things to think about:</p>
 <ul>
@@ -640,7 +614,7 @@
 <li>How much data was processed?</li>
 </ul>
 </aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>How much faster was this query than the normalized query?</li>
 </ul>
@@ -661,7 +635,7 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql</a> </li>
 </ol>
 <h2 is-upgraded><strong>Querying the partitioned table</strong></h2>
 <ol type="1" start="4">
@@ -674,7 +648,7 @@
 <li>Why?</li>
 </ul>
 </aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>FINISHED!</li>
 </ul>
@@ -695,7 +669,7 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-schema-demo/nested_queries.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql</a> </li>
 </ol>
 <h2 is-upgraded><strong>Querying the partitioned table</strong></h2>
 <ol type="1" start="4">
@@ -703,7 +677,7 @@
 <li>Run the <code>find for 6 months in 8754 from nested/partitioned query</code> (replace <code><project-id></code> with the instructor&#39;s project name) and note the duration and data processed.</li>
 <li>Run the <code>find for 6 months in 8754 from nested/partitioned/clustered</code> query (replace <code><project-id></code> with the instructor&#39;s project name) and note the duration and data processed.</li>
 </ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>How much faster was the clustered/partitioned table compared to the table with no partitioning or clustering?</li>
 </ul>
@@ -739,7 +713,7 @@
 <li>How else might you achieve similar performance using the full table?</li>
 </ul>
 </aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>FINISHED!</li>
 </ul>
@@ -764,7 +738,7 @@
 </ul>
 </aside>
 <ol type="1" start="3">
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/mv.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/mv.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/mv_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/mv_example.sql</a> </li>
 </ol>
 <h2 is-upgraded><strong>Querying the materialized view</strong></h2>
 <ol type="1" start="4">
@@ -788,7 +762,7 @@
 <li>How would it be different if you ran this query and there was no materialized view?</li>
 </ul>
 </aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>FINISHED!</li>
 </ul>
@@ -801,7 +775,7 @@
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/approx.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/approx.sql</a></li>
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/approx_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/approx_example.sql</a> </li>
 </ol>
 <h2 is-upgraded><strong>Run exact and approx queries side-by-side</strong></h2>
 <ol type="1" start="3">
@@ -813,7 +787,7 @@
 <li>Calculate the % difference in query execution time between the two queries</li>
 <li>Calculate the % difference in reported number of unique titles </li>
 </ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
 <li>Query time difference</li>
 <li>% error in approximation</li>
@@ -823,106 +797,12 @@
 
       </google-codelab-step>
     
-      <google-codelab-step label="Miscellaneous Data Engineering Do-It-Nows" duration="0">
-        <aside class="warning"><p><strong>Warning</strong>: Do-It-Nows tagged with $ generate significant charges if run in your personal account. We assume that you are working in Qwiklabs-generated projects with Qwiklabs-provided accounts. You&#39;ve been warned</p>
-</aside>
-<p><br>The following activities cover a range of relevant Data Engineering topics. Enjoy!</p>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="DE - Dataflow Streaming with Python [$]" duration="0">
-        <h2 is-upgraded><strong>1. Overview</strong></h2>
-<p>This activity is intended to illustrate a variety of techniques, including:</p>
-<p><strong>Managing and using PubSub with Python</strong></p>
-<ul>
-<li>Creating topics and subscriptions</li>
-<li>Creating bytestring message bodies</li>
-<li>Sending messages</li>
-</ul>
-<p><strong>Various BEAM tricks when processing streams of data</strong></p>
-<ul>
-<li>Decoding bytestring message bodies</li>
-<li>Using one branch for writing each event into a BigQuery table</li>
-<li>Using a second branch for aggregating rows into windows and writing windows to BigQuery</li>
-<li>Writing nested/repeated data from BEAM to BigQuery</li>
-<li>Reading the end of window time</li>
-</ul>
-<h2 is-upgraded>2. <strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Open the Google Cloud console</li>
-<li>Activate Cloud Shell</li>
-<li>Click the button to open Cloud Shell in a new browser window</li>
-<li>Clone the <strong>gcp-demos</strong> repository into Cloud Shell with the following command:</li>
-</ol>
-<pre>git clone https://github.com/roitraining/gcp-demos.git
-cd gcp-demos/dflow-bq-stream-python</pre>
-<ol type="1" start="5">
-<li>Run the <code>setup.sh</code> script, providing the name of the service account you want the demo code to use. For example (with <code>demo-sa</code> as the service account name):</li>
-</ol>
-<pre>. ./setup.sh demo-sa</pre>
-<ol type="1" start="6">
-<li>Take a few minutes to review and understand the setup script. The diagram below indicates what&#39;s happening in the script.</li>
-</ol>
-<h2 is-upgraded><img style="width: 624.00px" src="img/e4b52eedaff69ff5.png"></h2>
-<h2 is-upgraded>3. <strong>Starting the pipeline</strong></h2>
-<ol type="1" start="7">
-<li>Make sure that you are in the <strong>dflow-bq-stream-python </strong>directory in your Cloud Shell window.</li>
-<li>Deploy the Dataflow job with the follow command (you&#39;ll review the code in a minute):</li>
-</ol>
-<pre>python3 process_events.py \
---runner DataflowRunner \
---region us-central1 \
---project $PROJECT_ID \
---staging_location gs://$PROJECT_ID-dflow-demo/ \
---temp_location gs://$PROJECT_ID-dflow-demo/</pre>
-<h2 is-upgraded><strong>4. Starting the event stream</strong></h2>
-<ol type="1" start="9">
-<li>Run the following command to start sending messages:</li>
-</ol>
-<pre>python3 send_events.py \
-    --project_id=$PROJECT_ID</pre>
-<h2 is-upgraded><strong>5. Understanding the code</strong></h2>
-<ol type="1" start="10">
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/send_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/dflow-bq-stream-python/send_events.py</a> </li>
-<li>Take a few minutes to review and understand the code. The diagram below highlights some key features:</li>
-</ol>
-<p class="image-container"><img style="width: 624.00px" src="img/c2f8eeefc77bc843.png"></p>
-<ol type="1" start="12">
-<li>Open <a href="https://github.com/roitraining/gcp-demos/blob/master/dflow-bq-stream-python/process_events.py" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bq-do-it-nows/dflow-bq-stream-python/process_events.py</a> </li>
-<li>Take a few minutes to review and understand the code. The diagrams below highlight some key features</li>
-</ol>
-<h2 is-upgraded><img style="width: 624.00px" src="img/2072fd183685cee3.png"></h2>
-<h2 is-upgraded><img style="width: 624.00px" src="img/f4db34e38b750e09.png"></h2>
-<h2 is-upgraded><strong>7. Check out the results</strong></h2>
-<ol type="1" start="14">
-<li>In the console, go to <strong>Dataflow</strong> and click on the running job.</li>
-<li>Click on the top node of the pipeline diagram. Wait until you see metrics showing the number of received messages on the right-hand side (it takes a while for the cluster to spin up and start processing messages).</li>
-<li>Explore the pipeline and the execution metrics in Dataflow.</li>
-<li>In the console, go to <strong>BigQuery</strong> and explore your new <strong>dflow_demo</strong> dataset. Check out the <strong>DETAILS</strong> and <strong>PREVIEW</strong> section for both of the tables in that dataset. Note that the nested table has one row per window, with an array of structs, each struct representing one message for that window. Note also that the <strong>DETAILS</strong> section shows the rows in in the streaming buffer and not the BigQuery storage service.</li>
-</ol>
-<h2 is-upgraded>8. <strong>Clean up</strong></h2>
-<ol type="1" start="18">
-<li>Stop the Dataflow job via the console</li>
-<li>Stop the sending of messages by closing the Cloud Shell window</li>
-<li>Delete the PubSub topic and subscription</li>
-<li>Delete the BigQuery dataset</li>
-</ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an ILT, enter the following into the chat window:</p>
-<ul>
-<li>FINISHED!</li>
-</ul>
-</aside>
-
-
-      </google-codelab-step>
-    
   </google-codelab>
 
-  <script src="https://storage.googleapis.com/codelab-elements-tmp/native-shim.js"></script>
-  <script src="https://storage.googleapis.com/codelab-elements-tmp/custom-elements.min.js"></script>
-  <script src="https://storage.googleapis.com/codelab-elements-tmp/prettify.js"></script>
-  <script src="https://storage.googleapis.com/codelab-elements-tmp/codelab-elements.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
   <script src="//support.google.com/inapp/api.js"></script>
 
 </body>

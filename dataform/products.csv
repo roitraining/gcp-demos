@@ -1,0 +1,6 @@
+product_id,product_name,category,cost_price,retail_price
+P101,Wireless Headphones,Electronics,20.00,29.99
+P102,Smart Watch,Electronics,35.00,49.99
+P103,Coffee Mug,Home,8.00,19.99
+P104,Laptop Stand,Electronics,45.00,89.99
+P105,Notebook Set,Office,5.00,15.99
