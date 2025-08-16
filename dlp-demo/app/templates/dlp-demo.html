@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>{{ title }}</title>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<style>
+  .text-input-area, .result-area {
+    height: 400px;
+    resize: none;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 14px;
+  }
+  .result-area {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  .btn-group .btn.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+  .status-indicator {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+  .matching-cards {
+    height: 100%;
+  }
+  .card-body-matching {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 3.5rem); /* Subtract header height */
+  }
+  .flex-grow-content {
+    flex-grow: 1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="app" class="container-fluid">
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="card matching-cards">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Source Text</h5>
+        </div>
+        <div class="card-body card-body-matching">
+          <textarea 
+            v-model="text_for_dlp" 
+            @input="onTextInput"
+            class="form-control text-input-area mb-3 flex-grow-content"
+            placeholder="Enter text containing sensitive information like emails, phone numbers, credit cards, etc.">
+          </textarea>
+          
+          <div class="d-flex justify-content-center mb-3">
+            <div class="btn-group" role="group">
+              <input type="radio" class="btn-check" id="inspect" value="inspect" v-model="activeAction" @change="processIfReady">
+              <label class="btn btn-outline-primary" for="inspect">Inspect</label>
+              
+              <input type="radio" class="btn-check" id="redact" value="redact" v-model="activeAction" @change="processIfReady">
+              <label class="btn btn-outline-primary" for="redact">Redact</label>
+              
+              <input type="radio" class="btn-check" id="replace" value="replace" v-model="activeAction" @change="processIfReady">
+              <label class="btn btn-outline-primary" for="replace">Replace</label>
+              
+              <input type="radio" class="btn-check" id="mask" value="mask" v-model="activeAction" @change="processIfReady">
+              <label class="btn btn-outline-primary" for="mask">Mask</label>
+            </div>
+          </div>
+          
+          <div class="status-indicator text-center">
+            <span v-if="loading" class="text-primary">
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Processing...
+            </span>
+            <span v-else-if="typing" class="text-muted">
+              <i class="bi bi-clock"></i> Waiting for input to finish...
+            </span>
+            <span v-else-if="result && text_for_dlp.trim()" class="text-success">
+              ✓ Processed
+            </span>
+            <span v-else class="text-muted">
+              Enter text above to see DLP results
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      <div class="card matching-cards">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">DLP Results</h5>
+        </div>
+        <div class="card-body card-body-matching">
+          <div class="result-area flex-grow-content" v-html="result || '&lt;em class=&quot;text-muted&quot;&gt;Results will appear here after processing text.&lt;/em&gt;'">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const { createApp } = Vue;
+
+createApp({
+  data() {
+    return {
+      text_for_dlp: '',
+      activeAction: 'inspect',
+      result: '',
+      loading: false,
+      typing: false,
+      typingTimeout: null
+    }
+  },
+  methods: {
+    onTextInput() {
+      this.typing = true;
+      
+      // Clear existing timeout
+      if (this.typingTimeout) {
+        clearTimeout(this.typingTimeout);
+      }
+      
+      // Set new timeout to process after user stops typing
+      this.typingTimeout = setTimeout(() => {
+        this.typing = false;
+        this.processIfReady();
+      }, 1000); // Wait 1 second after user stops typing
+    },
+    
+    processIfReady() {
+      if (this.text_for_dlp.trim() && this.activeAction && !this.loading) {
+        this.processDLP();
+      }
+    },
+
+    async processDLP() {
+      if (!this.text_for_dlp.trim() || !this.activeAction) {
+        this.result = '';
+        return;
+      }
+
+      this.loading = true;
+
+      try {
+        const response = await axios.post('/api/dlp', {
+          text: this.text_for_dlp,
+          action: this.activeAction
+        });
+
+        if (response.data && response.data.result) {
+          this.result = response.data.result;
+        } else {
+          this.result = '<em class="text-warning">No results returned.</em>';
+        }
+      } catch (error) {
+        console.error('Error processing DLP request:', error);
+        if (error.response && error.response.data && error.response.data.error) {
+          this.result = `<em class="text-danger">Error: ${error.response.data.error}</em>`;
+        } else {
+          this.result = '<em class="text-danger">An error occurred while processing your request.</em>';
+        }
+      } finally {
+        this.loading = false;
+      }
+    }
+  },
+  
+  beforeUnmount() {
+    // Clean up timeout when component is destroyed
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+  }
+}).mount('#app');
+</script>
+{% endblock %}

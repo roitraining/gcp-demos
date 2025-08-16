@@ -1,0 +1,11 @@
+transaction_id,store_id,register_id,timestamp,cashier_id,customer_id,payment_method,subtotal,tax_amount,discount_amount,total_amount,currency,receipt_number,status
+txn_pos_20240806_001,store_sf_001,reg_003,2024-08-06 14:00:15,cashier_101,cust_loyal_789456,credit_card,85.47,7.69,0.00,93.16,USD,RCP_20240806_001,completed
+txn_pos_20240806_002,store_sf_001,reg_001,2024-08-06 14:02:33,cashier_205,cust_walk_in,cash,24.99,2.25,2.50,24.74,USD,RCP_20240806_002,completed
+txn_pos_20240806_003,store_ny_002,reg_002,2024-08-06 14:03:45,cashier_302,,debit_card,156.78,14.11,15.68,155.21,USD,RCP_20240806_003,completed
+txn_pos_20240806_004,store_sf_001,reg_003,2024-08-06 14:05:12,cashier_101,cust_loyal_123789,credit_card,299.99,27.00,30.00,296.99,USD,RCP_20240806_004,refunded
+txn_pos_20240806_005,store_la_003,reg_001,2024-08-06 14:07:28,cashier_401,cust_loyal_456123,gift_card,67.45,6.07,0.00,73.52,USD,RCP_20240806_005,completed
+txn_pos_20240806_006,store_ny_002,reg_001,2024-08-06 14:08:19,cashier_301,cust_walk_in,cash,12.50,1.13,0.00,13.63,USD,RCP_20240806_006,void
+txn_pos_20240806_007,store_sf_001,reg_002,2024-08-06 14:10:41,cashier_206,cust_loyal_987654,credit_card,445.20,40.07,44.52,440.75,USD,RCP_20240806_007,completed
+txn_pos_20240806_008,store_la_003,reg_003,2024-08-06 14:12:05,,cust_walk_in,cash,89.99,8.10,0.00,98.09,USD,RCP_20240806_008,completed
+txn_pos_20240806_009,store_sf_001,reg_001,2024-08-06 14:14:22,cashier_205,cust_loyal_555888,debit_card,178.34,16.05,0.00,194.39,USD,RCP_20240806_009,completed
+txn_pos_20240806_010,store_ny_002,reg_002,2024-08-06 14:15:33,cashier_302,cust_walk_in,credit_card,INVALID_AMOUNT,5.42,0.00,ERROR,USD,RCP_20240806_010,error

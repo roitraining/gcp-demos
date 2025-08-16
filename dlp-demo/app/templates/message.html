@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>{{ title }}</title>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <div class="card">
+      <div class="card-header bg-warning text-dark">
+        <h4 class="mb-0">{{ headline }}</h4>
+      </div>
+      <div class="card-body text-center">
+        <p class="card-text">{{ message_text }}</p>
+        <a href="/" class="btn btn-primary">Go Home</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
