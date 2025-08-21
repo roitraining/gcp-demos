@@ -148,7 +148,6 @@ The following areas are under active development:
 - **Utilities**: Helper scripts and tools
 
 ---
----
 
 ## 📋 Quick Reference
 
