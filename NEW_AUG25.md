@@ -1,5 +1,5 @@
 # What's new in the August 25 update
-> [!Note] Updated August 20, 2025
+> [!NOTE]  Updated August 20, 2025
 
 ## BigQuery demos
 1. SQL transform examples
