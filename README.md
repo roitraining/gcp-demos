@@ -107,10 +107,7 @@ The `dlp-demo/` directory contains the complete application source:
 
 ## 7. Dataform
 
-Sample datasets and examples for:
-- Customer data modeling
-- Order processing workflows  
-- Product catalog management
+https://github.com/jwdavis/dataform-demo
 
 ---
 
