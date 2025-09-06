@@ -10,7 +10,19 @@ tabular data.
 ### Outline
 
 1. Initialize values and services
-2. 
+2. Create the dataset
+3. Create and run model training job (creates model)
+4. Make batch predictions
+5. Create a Looker Studio dashboard to show prediction results
+
+### Timing issues
+
+1. Training the model takes 1.5-2 hours to complete, so waiting for the job to complete is generally not feasible
+2. Doing batch prediction takes 25-30 minutes, so again, not feasible
+
+### Workarounds
+
+
 
 
 To use...
