@@ -22,7 +22,7 @@ tabular data.
 
 ### Workarounds
 
-
+1. Run the cells in the workbook before class to create the dataset
 
 
 To use...
