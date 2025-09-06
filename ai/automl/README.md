@@ -4,8 +4,16 @@
 
 ## Forecasting Demo
 
-This demo shows building a Liquor Sales forecasting model using AutoML and
-tabular data. To use...
+This demo shows building a liquor sales forecasting model using AutoML and
+tabular data.
+
+### Outline
+
+1. Initialize values and services
+2. 
+
+
+To use...
 
 1. Click on the **automl_forecasting** notebook
 2. Click the link to open in the console using Colab Enterprise
