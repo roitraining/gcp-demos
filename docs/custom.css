@@ -1,0 +1,441 @@
+/*
+ * Modern restyle layered over codelab-elements.css.
+ *
+ * Load AFTER https://storage.googleapis.com/claat-public/codelab-elements.css.
+ * Nothing here changes markup or element behavior; it only restyles.
+ *
+ * Most base rules in codelab-elements.css are scoped under
+ * `google-codelab:not([theme="minimal"]) google-codelab-step .instructions`,
+ * so overrides here repeat that prefix to win on specificity rather than
+ * reaching for !important.
+ */
+
+:root {
+  --cl-font-display: 'Google Sans Text', 'Google Sans', Roboto, Arial, sans-serif;
+  --cl-font-body: Roboto, Arial, sans-serif;
+  --cl-font-mono: 'Roboto Mono', 'Source Code Pro', monospace;
+
+  --cl-ink: #1f1f1f;
+  --cl-ink-muted: #5f6368;
+  --cl-line: #dadce0;
+  --cl-line-soft: #e8eaed;
+  --cl-surface: #ffffff;
+  --cl-canvas: #f8f9fa;
+
+  --cl-blue: #0b57d0;
+  --cl-blue-soft: #e8f0fe;
+  --cl-green: #146c2e;
+  --cl-green-soft: #e6f4ea;
+  --cl-amber: #a05e03;
+  --cl-amber-soft: #fef7e0;
+
+  --cl-code-bg: #f1f3f4;
+  --cl-radius: 12px;
+}
+
+/* ---------------------------------------------------------------- shell -- */
+
+body {
+  font-family: var(--cl-font-body);
+  color: var(--cl-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+google-codelab #main {
+  background: var(--cl-canvas);
+}
+
+/* Top bar: flatten the material shadow to a hairline. */
+google-codelab #codelab-title {
+  box-shadow: none;
+  border-bottom: 1px solid var(--cl-line);
+  color: var(--cl-ink);
+}
+
+google-codelab #codelab-title h1 {
+  font-family: var(--cl-font-display);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.1px;
+}
+
+/* ----------------------------------------------------------- step list -- */
+
+google-codelab #drawer {
+  width: 288px;
+  background: var(--cl-canvas);
+  border-right: 1px solid var(--cl-line);
+}
+
+google-codelab #drawer ol {
+  padding: 16px 12px;
+}
+
+/* Bordered cards, as on current codelabs: white tile, hairline, 8px radius. */
+google-codelab #drawer ol li a {
+  border: 1px solid var(--cl-line);
+  border-radius: 8px;
+  background: var(--cl-surface);
+  color: var(--cl-ink-muted);
+  min-height: 44px;
+  margin: 8px 0;
+  padding: 8px 12px;
+  font-family: var(--cl-font-body);
+  transition: border-color 120ms ease-in-out, box-shadow 120ms ease-in-out,
+    color 120ms ease-in-out;
+}
+
+google-codelab #drawer ol li a:hover {
+  border-color: #c4c7c5;
+  color: var(--cl-ink);
+}
+
+google-codelab #drawer ol li a:active,
+google-codelab #drawer ol li a:focus {
+  background: var(--cl-surface);
+  outline: 0;
+}
+
+/* Selected card: blue rule + tinted fill so it reads without a heavy shadow. */
+google-codelab #drawer ol li[selected] a,
+google-codelab #drawer ol li a:focus {
+  box-shadow: none;
+  color: var(--cl-blue);
+  font-weight: 500;
+}
+
+google-codelab #drawer ol li[selected] a {
+  background: var(--cl-blue-soft);
+  border-color: var(--cl-blue) !important;
+}
+
+/* Step number bubbles: blue when current, green once completed. */
+google-codelab #drawer ol li .step:before {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  line-height: 24px;
+  font-size: 12px;
+  background: #c4c7c5;
+  margin-right: 12px;
+}
+
+google-codelab #drawer ol li[completed] .step:before {
+  background: var(--cl-green);
+}
+
+/* The current step carries [completed] too, so this must come last to win. */
+google-codelab #drawer ol li[selected] .step:before {
+  background: var(--cl-blue);
+  font-weight: 500;
+}
+
+google-codelab #drawer .metadata {
+  color: var(--cl-ink-muted);
+  border-top: 1px solid var(--cl-line);
+}
+
+/* --------------------------------------------------------- step canvas -- */
+
+google-codelab google-codelab-step {
+  padding-top: 40px;
+}
+
+google-codelab-step {
+  line-height: 1.6;
+}
+
+/* The instructions card: wider, softer, hairline instead of drop shadow. */
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions {
+  max-width: 920px;
+  font-size: 16px;
+  background: var(--cl-surface);
+  border: 1px solid var(--cl-line);
+  border-radius: var(--cl-radius);
+  box-shadow: none;
+}
+
+google-codelab-step .instructions .inner {
+  padding: 40px 48px;
+}
+
+@media (max-width: 800px) {
+  google-codelab-step .instructions .inner {
+    padding: 24px;
+  }
+}
+
+/* ------------------------------------------------------------- headings -- */
+
+google-codelab-step h2.step-title {
+  font-family: var(--cl-font-display) !important;
+  font-size: 32px !important;
+  font-weight: 400 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.5px;
+  margin: 0 0 32px !important;
+  color: var(--cl-ink);
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions h2,
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions h3,
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions h4 {
+  font-family: var(--cl-font-display);
+  color: var(--cl-ink);
+  letter-spacing: -0.2px;
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions h2 {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.35;
+  margin: 40px 0 12px;
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions h3 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 32px 0 8px;
+}
+
+/* claat wraps many headings in <strong>; drop the double-bolding. */
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions h2 strong,
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions h3 strong {
+  font-weight: inherit;
+}
+
+/* ------------------------------------------------------ text and lists -- */
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions {
+  line-height: 1.6;
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions p {
+  margin: 12px 0;
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions li {
+  margin: 8px 0;
+  padding-left: 4px;
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions ol,
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions ul {
+  padding-left: 28px;
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions strong {
+  font-weight: 500;
+  color: var(--cl-ink);
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions a,
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions a:visited {
+  color: var(--cl-blue);
+  text-decoration: none;
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions a:hover {
+  text-decoration: underline;
+}
+
+/* -------------------------------------------------------------- code -- */
+
+google-codelab-step pre,
+google-codelab-step code {
+  font-family: var(--cl-font-mono);
+  border-radius: 8px;
+}
+
+/* Inline code: tinted, not a grey slab. */
+google-codelab-step code {
+  background-color: var(--cl-code-bg);
+  color: #37474f;
+  font-size: 0.875em;
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+}
+
+/* Blocks go light with a hairline, matching current devsite codelabs. */
+google-codelab-step pre {
+  background-color: var(--cl-code-bg);
+  color: #37474f;
+  border: 1px solid var(--cl-line-soft);
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 20px 0;
+}
+
+google-codelab-step pre > code {
+  background-color: transparent;
+  font-size: inherit;
+  padding: 0;
+}
+
+/* prettify token colors, retuned for the light background. */
+google-codelab-step pre .str, google-codelab-step code .str { color: #0d652d; }
+google-codelab-step pre .kwd, google-codelab-step code .kwd { color: #8430ce; }
+google-codelab-step pre .com, google-codelab-step code .com { color: #5f6368; font-style: italic; }
+google-codelab-step pre .typ, google-codelab-step code .typ { color: #007b83; }
+google-codelab-step pre .lit, google-codelab-step code .lit { color: #b93221; }
+google-codelab-step pre .pun, google-codelab-step code .pun { color: #444746; }
+google-codelab-step pre .pln, google-codelab-step code .pln { color: #37474f; }
+google-codelab-step pre .tag, google-codelab-step code .tag { color: #007b83; }
+google-codelab-step pre .atn, google-codelab-step code .atn { color: #a05e03; }
+google-codelab-step pre .atv, google-codelab-step code .atv { color: #0d652d; }
+google-codelab-step pre .dec, google-codelab-step code .dec { color: #1a73e8; }
+google-codelab-step code em { color: #1967d2; font-style: normal; font-weight: 500; }
+
+/* ------------------------------------------------------------ asides -- */
+
+/* Rounded tinted cards with a colored left rule. */
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions aside {
+  padding: 16px 20px;
+  margin: 24px 0;
+  border-left: 4px solid;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions aside p {
+  margin: 6px 0;
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions aside p:first-child { margin-top: 0; }
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions aside p:last-child { margin-bottom: 0; }
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions aside.note,
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions aside.notice {
+  border-color: var(--cl-amber);
+  background: var(--cl-amber-soft);
+  color: var(--cl-ink);
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions aside.tip,
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions aside.special {
+  border-color: var(--cl-green);
+  background: var(--cl-green-soft);
+  color: var(--cl-ink);
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions aside.warning {
+  border-color: #b3261e;
+  background: #fce8e6;
+  color: var(--cl-ink);
+}
+
+google-codelab-step .instructions aside.callout {
+  background: var(--cl-blue-soft);
+  border-left: 4px solid var(--cl-blue);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 24px 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+google-codelab-step aside.callout b {
+  color: var(--cl-blue);
+}
+
+/* Code inside a tinted aside needs its own contrast. */
+google-codelab-step .instructions aside code {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* ------------------------------------------------------------ tables -- */
+
+google-codelab-step .instructions table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  width: 100%;
+  margin: 24px 0;
+  font-size: 15px;
+}
+
+google-codelab-step .instructions table td {
+  border-bottom: 1px solid var(--cl-line-soft);
+  padding: 12px 16px;
+  vertical-align: top;
+}
+
+google-codelab-step .instructions table tr:first-child td {
+  font-family: var(--cl-font-display);
+  font-weight: 500;
+  color: var(--cl-ink);
+  border-bottom: 1px solid var(--cl-line);
+}
+
+/* ------------------------------------------------------------ images -- */
+
+google-codelab-step .instructions img {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--cl-line-soft);
+  vertical-align: bottom;
+}
+
+/* --------------------------------------------------------- nav buttons -- */
+
+/*
+ * The base stylesheet floats #controls over the scrolling step
+ * (position:absolute; bottom:32px), so content passes underneath the buttons.
+ * Pin the bar to the bottom of the pane and give it an opaque background, then
+ * reserve matching space below the instructions card so nothing hides behind it.
+ */
+google-codelab #controls {
+  bottom: 0;
+  padding: 16px 32px;
+  background: var(--cl-canvas);
+  border-top: 1px solid var(--cl-line);
+}
+
+google-codelab:not([theme="minimal"]) google-codelab-step .instructions {
+  margin-bottom: 40px;
+}
+
+/* Step pane scrolls under a ~73px control bar; keep the last content clear. */
+google-codelab google-codelab-step {
+  padding-bottom: 88px;
+}
+
+#previous-step,
+#next-step,
+#done {
+  font-family: var(--cl-font-display);
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  border-radius: 4px;
+  padding: 8px 24px;
+  box-shadow: none;
+  border: 1px solid transparent;
+  transition: background 150ms ease-in-out, box-shadow 150ms ease-in-out,
+    transform 300ms ease-in-out;
+}
+
+#previous-step {
+  background: var(--cl-surface);
+  color: var(--cl-blue);
+  border-color: var(--cl-line);
+}
+
+#previous-step:hover {
+  background: var(--cl-blue-soft);
+}
+
+#next-step {
+  background: var(--cl-blue);
+  color: #fff;
+}
+
+#next-step:hover {
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
+}
+
+#done {
+  background: var(--cl-green);
+  color: #fff;
+}
