@@ -1,5 +1,43 @@
 -- This file contains a list of example queries illustrating the power and benefit of using BigQuery INFORMATION_SCHEMA views.
 
+-- find the queries worth optimizing
+-- Use case: See the whole project's query bill for the last 7 days, sorted by total work done.
+-- Sort by total_slot_ms under capacity pricing, or by total_bytes_processed under on-demand pricing.
+-- The slowest-feeling query is often not the most expensive one; optimize by evidence, not by complaint volume.
+SELECT
+  job_id,
+  user_email,
+  total_bytes_processed,
+  total_slot_ms,
+  LEFT(query, 80) AS query_start
+FROM
+  `region-us.INFORMATION_SCHEMA.JOBS_BY_PROJECT`
+WHERE
+  job_type = 'QUERY'
+  AND creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
+ORDER BY
+  total_slot_ms DESC
+LIMIT 10;
+
+
+-- find jobs the console flagged
+-- Use case: Surface every job from the last day where BigQuery's performance insights fired,
+-- so you can hunt problem queries across the whole project instead of one job at a time.
+SELECT
+  job_id,
+  user_email,
+  LEFT(query, 80) AS query_start,
+  si.stage_id,
+  si.slot_contention,
+  si.insufficient_shuffle_quota,
+  ARRAY_LENGTH(si.high_cardinality_joins) > 0 AS high_cardinality_join
+FROM
+  `region-us.INFORMATION_SCHEMA.JOBS_BY_PROJECT`,
+  UNNEST(query_info.performance_insights.stage_performance_standalone_insights) AS si
+WHERE
+  creation_time > TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 1 DAY);
+
+
 -- Use case: Identify top users by query volume and bytes processed in the last 7 days.
 -- This query helps monitor user activity and analyze cost drivers, especially useful for environments with on-demand pricing.
 -- It works by aggregating the total bytes processed and number of queries per user from the JOBS_BY_PROJECT view, filtered to the past week, and sorts the results to show the most active users.

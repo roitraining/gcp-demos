@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <meta name="theme-color" content="#4F7DC9">
   <meta charset="UTF-8">
-  <title>Do-It-Now activities (gcp-demos)</title>
+  <title>BigQuery Do-It-Now Activities</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
   <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
@@ -27,7 +27,7 @@
   <google-codelab codelab-gaid=""
                   codelab-ga4id=""
                   id="docs"
-                  title="Do-It-Now activities (gcp-demos)"
+                  title="BigQuery Do-It-Now Activities"
                   environment="web"
                   feedback-link="-">
     
@@ -39,7 +39,6 @@
 
 
       </google-codelab-step>
-    
       <google-codelab-step label="BigQuery Do-It-Nows" duration="0">
         <h2 is-upgraded><strong>Overview</strong><br></h2>
 <ol type="1" start="1">
@@ -56,8 +55,7 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Wikipedia queries [$$]" duration="0">
+      <google-codelab-step label="Wikipedia queries [$$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Log into your lab-provided project with your lab user account.</li>
@@ -86,8 +84,7 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring projects, datasets, and tables []" duration="0">
+      <google-codelab-step label="Exploring projects, datasets, and tables []" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Open the console</li>
@@ -129,96 +126,7 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring views and jobs [$]" duration="0">
-        <h2 is-upgraded><strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/views_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/views_example.sql </a></li>
-</ol>
-<h2 is-upgraded><strong>Making the case for views</strong></h2>
-<ol type="1" start="3">
-<li>Enter the <code>query with subquery</code> query into the <strong>BigQuery</strong> editor</li>
-<li>Review the query - what does it do?</li>
-<li>Examine just the subquery</li>
-<li>Run just the subquery and note results (CMD-e)</li>
-<li>Next, run the whole query<br>a. It runs the subquery first, and generates an in-memory table<br>b. It then runs the outer query against the in-memory table<br>c. Run the query and check the results</li>
-<li>Rather than using subqueries, you can use WITH clauses. This behaves effectively the same. Try running the <code>with clause</code> query in <strong>BigQuery</strong></li>
-</ol>
-<p>What if you like that subquery a lot, and would like to use it in many other queries? Rather than copy/paste over and over, you can create a view. A view is just a saved, shared subquery.</p>
-<ol type="1" start="9">
-<li>Run the <code>create view</code> query in <strong>BigQuery</strong></li>
-<li>Check out the view in the UI</li>
-<li>Now try running the <code>query view</code> query, which queries the view</li>
-</ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
-<ul>
-<li>How much data is getting processed when you query the view?</li>
-<li>Do you save time/money?</li>
-</ul>
-</aside>
-<aside class="special"><p><strong>Why would you use views?</strong></p>
-<ol type="1" start="1">
-<li>To make sharing subqueries easier</li>
-<li>To make your code more readable</li>
-<li>To limit data shown to audience (though not securely)</li>
-</ol>
-</aside>
-<h2 is-upgraded><strong>See the jobs you&#39;ve run</strong><br></h2>
-<ol type="1" start="12">
-<li>Click on the history links at the bottom of the page and review the queries that you&#39;ve run</li>
-</ol>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring caching [$]" duration="0">
-        <h2 is-upgraded><strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-</ol>
-<h2 is-upgraded><strong>Working with cache</strong></h2>
-<ol type="1" start="2">
-<li>Run this query:</li>
-</ol>
-<pre><code>select * from `roi-bq-demos.bq_demo.customer` where cust_state = &#34;AK&#34;</code></pre>
-<ol type="1" start="3">
-<li>Look at <strong>JOB INFORMATION</strong></li>
-<li>Note the query  duration and bytes processed</li>
-<li>Click on the link for the <strong>Destination table. </strong>This temp table has the results of your query and lasts for 24 hours</li>
-<li>Re-run the query</li>
-<li>Note duration and bytes processed</li>
-<li>Disable cache and re-run query</li>
-</ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
-<ul>
-<li>FINISHED!</li>
-</ul>
-</aside>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring saved queries [$]" duration="0">
-        <h2 is-upgraded><strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-</ol>
-<h2 is-upgraded><strong>Working with saved queries</strong></h2>
-<ol type="1" start="2">
-<li>Write a query to find orders on one day in 2018 (from <code>roi-bq-demos.bq_demo.orders</code>)</li>
-<li>Save the query</li>
-<li>Close all the editor tabs</li>
-<li>Click on your saved query in the Explorer panel</li>
-<li>Run the query again</li>
-</ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, share the query publicly and the link into the chat window</p>
-</aside>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Time Travel [$]" duration="0">
+      <google-codelab-step label="Time Travel [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open</li>
@@ -271,109 +179,23 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring wildcard tables [$]" duration="0">
+      <google-codelab-step label="Exploring caching [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>Make sure you have the <code>bigquery-public-data.noaa_gsod</code> pinned.</li>
-<li>In the Explorer pane, expand <strong>bigquery-public-data.noaa_gsod</strong>. </li>
 </ol>
-<aside class="special"><p>Why are there so many tables?</p>
-</aside>
-<h2 is-upgraded><strong>Working with sharded tables</strong></h2>
-<ol type="1" start="4">
-<li>Write a query that finds all the entries for <code>stn 038110</code> in <code>1929</code></li>
-<li>How would you write a query that finds all the <code>03110</code> entries for <code>1929</code>, <code>1930</code>, <code>1931</code>?</li>
+<h2 is-upgraded><strong>Working with cache</strong></h2>
+<ol type="1" start="2">
+<li>Run this query:</li>
 </ol>
-<h2 is-upgraded><strong>Working with wildcard table queries</strong></h2>
-<ol type="1" start="6">
-<li>Review <a href="https://cloud.google.com/bigquery/docs/querying-wildcard-tables" target="_blank">https://cloud.google.com/bigquery/docs/querying-wildcard-tables</a> </li>
-<li>Write a query that finds all the <code>038110</code> entries for <code>1929-1939</code> using a wildcard table</li>
-<li>If you wanted to write a query to find <code>038110</code> entries in ALL the tables in the dataset?</li>
-</ol>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, paste your query into the chat window</p>
-</aside>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring external tables [$]" duration="0">
-        <h2 is-upgraded><strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/external_hive_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/external_hive_example.sql</a> </li>
-<li>In another new browser tab, open <a href="https://console.cloud.google.com/storage/browser/jwd-gcp-demos/orders_partitioned" target="_blank">https://console.cloud.google.com/storage/browser/jwd-gcp-demos/orders_partitioned</a></li>
-</ol>
-<aside class="special"><p><strong>Questions</strong>: </p>
-<ul>
-<li>How many &#34;directories&#34; are there in the bucket?</li>
-<li>How many files in each directory?</li>
-<li>What does the naming of the directories imply?</li>
-</ul>
-<p>What you are seeing is a Hive-partitioned dataset living in your Data Lake (within GCS), with each file being a Parquet file.</p>
-</aside>
-<h2 is-upgraded><strong>Create an external table</strong></h2>
-<ol type="1" start="4">
-<li>In the BigQuery UI&#39;s <strong>Explorer</strong> pane, select your dataset </li>
-<li>From three-dot menu, select <strong>create table</strong></li>
-<li>In <strong>Create table from</strong>, select <strong>Google Cloud Storage</strong></li>
-<li>In <strong>Select file...</strong> enter <code>jwd-gcp-demos/orders_partitioned/*</code></li>
-<li>In <strong>File format</strong> select <strong>parquet</strong></li>
-<li>Check <strong>Source data partitioning</strong></li>
-<li>In <strong>Select Source...</strong> enter <code>gs://jwd-gcp-demos/orders_partitioned/</code></li>
-<li>In <strong>Table</strong>, enter <code>ext_part</code> </li>
-<li>In <strong>Table type</strong> select <strong>External table</strong></li>
-<li>In <strong>Schema</strong>, select <strong>Auto detect</strong></li>
-<li><strong>Click CREATE TABLE</strong></li>
-<li>Check your table details</li>
-</ol>
-<h2 is-upgraded><strong>Query the external table</strong></h2>
-<ol type="1" start="16">
-<li>Run the <code>query the external table</code> query</li>
-</ol>
-<aside class="special"><p>How many rows are returned?</p>
-</aside>
-<ol type="1" start="17">
-<li>Run the <code>query external table with where clause</code> query;</li>
-</ol>
-<aside class="special"><p> Review the execution details; how much data was processed?</p>
-</aside>
-<ol type="1" start="18">
-<li>Run the <code>query external table on partition</code> query; </li>
-</ol>
-<aside class="special"><p> Review the execution details; how much data was processed? Why was it lower?</p>
-</aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
-<ul>
-<li>FINISHED!</li>
-</ul>
-</aside>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring routines [$]" duration="0">
-        <h2 is-upgraded><strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/udf_examples.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/udf_examples.sql</a> </li>
-</ol>
-<h2 is-upgraded><strong>Messy numbers</strong></h2>
+<pre><code>select * from `roi-bq-demos.bq_demo.customer` where cust_state = &#34;AK&#34;</code></pre>
 <ol type="1" start="3">
-<li>Look at the <strong>messy_text</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
-<li>Run the <code>trim strings</code> query. What does it do? How does it do it?</li>
-<li>Review and run the <code>create udf</code> query</li>
-<li>Select the <strong>tidy_string</strong> function in the routines section of the <strong>Explorer</strong> pane; review the details.</li>
-<li>Run the query with <code>query with SQL UDF</code> query</li>
-</ol>
-<h2 is-upgraded><strong>Getting numbers from text</strong></h2>
-<ol type="1" start="8">
-<li>Review the <strong>number_string</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
-<li>Review and run the <code>create javascript udf</code> query</li>
-<li>Review the <strong>get_numbers</strong> UDF in the routines section</li>
-<li>Run the <code>query with javascript udf</code> query</li>
-<li>Look at documentation for stored procedures: <a href="https://cloud.google.com/bigquery/docs/procedures" target="_blank">https://cloud.google.com/bigquery/docs/procedures</a> </li>
+<li>Look at <strong>JOB INFORMATION</strong></li>
+<li>Note the query  duration and bytes processed</li>
+<li>Click on the link for the <strong>Destination table. </strong>This temp table has the results of your query and lasts for 24 hours</li>
+<li>Re-run the query</li>
+<li>Note duration and bytes processed</li>
+<li>Disable cache and re-run query</li>
 </ol>
 <aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
 <ul>
@@ -383,8 +205,7 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring normalized data and joins [$$]" duration="0">
+      <google-codelab-step label="Exploring normalized data and joins [$$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -414,8 +235,7 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring denormalized data [$$]" duration="0">
+      <google-codelab-step label="Exploring denormalized data [$$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -455,8 +275,43 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring arrays [$]" duration="0">
+      <google-codelab-step label="Exploring nested data [$$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>View the <strong>nested_once</strong> table in your instructor&#39;s project</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Which col is repeated?</li>
+<li>How many line items are there per order?</li>
+<li>How much data does the table store?</li>
+<li>How does this compare to the denorm table?</li>
+</ul>
+</aside>
+<ol type="1" start="3">
+<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>Querying the nested table</strong></h2>
+<ol type="1" start="4">
+<li>Read and run the <code>find sales/zip for march from nested_once table</code> query (replace <code><project-id></code> with the instructor&#39;s project ID)</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How fast was it?</li>
+<li>How does this compare to normalized and denorm queries?</li>
+<li>How much data was processed?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>How much faster was this query than the normalized query?</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Exploring arrays [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -585,45 +440,7 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring nested data [$$]" duration="0">
-        <h2 is-upgraded><strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-<li>View the <strong>nested_once</strong> table in your instructor&#39;s project</li>
-</ol>
-<aside class="special"><p>Some things to think about:</p>
-<ul>
-<li>Which col is repeated?</li>
-<li>How many line items are there per order?</li>
-<li>How much data does the table store?</li>
-<li>How does this compare to the denorm table?</li>
-</ul>
-</aside>
-<ol type="1" start="3">
-<li>In a new browser window, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/schema-demo/nested_queries.sql</a> </li>
-</ol>
-<h2 is-upgraded><strong>Querying the nested table</strong></h2>
-<ol type="1" start="4">
-<li>Read and run the <code>find sales/zip for march from nested_once table</code> query (replace <code><project-id></code> with the instructor&#39;s project ID)</li>
-</ol>
-<aside class="special"><p>Some things to think about:</p>
-<ul>
-<li>How fast was it?</li>
-<li>How does this compare to normalized and denorm queries?</li>
-<li>How much data was processed?</li>
-</ul>
-</aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
-<ul>
-<li>How much faster was this query than the normalized query?</li>
-</ul>
-</aside>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring partitioned tables [$]" duration="0">
+      <google-codelab-step label="Exploring partitioned tables [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -656,8 +473,7 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring clustered tables [$$]" duration="0">
+      <google-codelab-step label="Exploring clustered tables [$$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -685,44 +501,7 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring derived tables [$$]" duration="0">
-        <h2 is-upgraded><strong>Setting up</strong></h2>
-<ol type="1" start="1">
-<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
-</ol>
-<h2 is-upgraded><strong>Querying the partitioned table</strong></h2>
-<ol type="1" start="2">
-<li>Write and run a query to find all the March 2018 orders from the instructor&#39;s nested/repeated table, projecting all the columns except the customer email and phone number, and storing the results in a derived table in your <code>class</code> dataset.</li>
-<li>Write and run a query to sum sales for AK customers orders in March 2018, using the full nested/repeated table. Note the query duration and bytes processed.</li>
-<li>Write and run a query to sum sales for AK customers orders in March 2018, using the derived table. Note the query duration and bytes processed.</li>
-</ol>
-<aside class="special"><p>Some things to think about:</p>
-<ul>
-<li>How much faster was querying the derived table?</li>
-<li>How much cheaper was querying the derive table?</li>
-<li>Consider the impact if AK analysts queried AK orders 100s of times per day</li>
-</ul>
-</aside>
-<ol type="1" start="5">
-<li>Schedule the query to run daily at 12.01am, overwriting the previous contents of the derived table.</li>
-</ol>
-<aside class="special"><p>Some things to think about:</p>
-<ul>
-<li>What are some downsides of derived tables?</li>
-<li>How else might you achieve similar performance using the full table?</li>
-</ul>
-</aside>
-<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
-<ul>
-<li>FINISHED!</li>
-</ul>
-</aside>
-
-
-      </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Exploring materialized views [$]" duration="0">
+      <google-codelab-step label="Exploring materialized views [$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -770,8 +549,431 @@
 
 
       </google-codelab-step>
-    
-      <google-codelab-step label="BigQuery - Approximate aggregation functions [$$]" duration="0">
+      <google-codelab-step label="Execution details: the five numbers that matter [$$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/execution_details_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/execution_details_example.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>Run a heavyweight query</strong></h2>
+<ol type="1" start="3">
+<li>Copy the <code>-- heavyweight query</code> query into the BigQuery editor and run it. It will take a couple of minutes; while it runs, don&#39;t touch anything, just watch the elapsed time tick.</li>
+<li>When the query completes, click on <strong>Job Information</strong> and note the <strong>Duration</strong> (elapsed time) and <strong>Bytes processed</strong>.</li>
+<li>Click on <strong>Execution Details</strong> and note the <strong>Slot time consumed</strong>, <strong>Bytes shuffled</strong>, and <strong>Bytes spilled to disk</strong>.</li>
+<li>Write down your five numbers: elapsed time, slot time consumed, bytes processed, bytes shuffled, bytes spilled to disk.</li>
+</ol>
+<aside class="special"><p>What each number means:</p>
+<ul>
+<li><strong>Elapsed time</strong> - what the user felt: the wall clock time waiting for results</li>
+<li><strong>Slot time consumed</strong> - the work: compute time summed across every slot</li>
+<li><strong>Bytes processed</strong> - the read: what the on-demand pricing model bills</li>
+<li><strong>Bytes shuffled</strong> - the movement: data moved between stages over the network</li>
+<li><strong>Bytes spilled to disk</strong> - the overflow: shuffle data that didn&#39;t fit in memory (0 is what healthy looks like; this query is not healthy, and the <strong>shuffle and spill</strong> activity digs into why)</li>
+</ul>
+</aside>
+<h2 is-upgraded><strong>Work vs. wait</strong></h2>
+<ol type="1" start="7">
+<li>Divide your slot time consumed by your elapsed time (make sure both are in seconds). The result is roughly the number of slots that were working on your query at once.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Hours of slot time with under a minute of elapsed time is not a contradiction; it&#39;s parallelism</li>
+<li>Which of the five numbers does on-demand billing care about? Which one do your users care about?</li>
+</ul>
+</aside>
+<h2 is-upgraded><strong>Run a lightweight query</strong></h2>
+<ol type="1" start="8">
+<li>Copy the <code>-- lightweight query</code> query into the BigQuery editor and run it.</li>
+<li>Collect the same five numbers from <strong>Job Information</strong> and <strong>Execution Details</strong>.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Which of the five numbers changed the most? Why?</li>
+<li>Where did all the bytes shuffled go? (Hint: what does a join do that a single-table scan doesn&#39;t?)</li>
+<li>Optimization in BigQuery means driving down bytes processed, slot time, or bytes shuffled. Elapsed time follows - it is a symptom, not a lever.</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>Your five numbers from the heavyweight query</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Shuffle and spill: data on the move [$$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/shuffle_spill_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/shuffle_spill_example.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>Watch nothing move</strong></h2>
+<ol type="1" start="3">
+<li>Copy the <code>-- scan and filter query</code> query into the BigQuery editor and run it.</li>
+<li>Open <strong>Execution Details</strong> and note the <strong>Bytes shuffled</strong>.</li>
+</ol>
+<aside class="special"><p>The query read gigabytes of data, but shuffled little to none of it. Each worker read its own chunk of the table and filtered it in place. No row needed to meet any other row, so nothing moved over the network.</p>
+</aside>
+<h2 is-upgraded><strong>Move a little</strong></h2>
+<ol type="1" start="5">
+<li>Copy the <code>-- aggregation query</code> query into the BigQuery editor and run it.</li>
+<li>Check <strong>Bytes shuffled</strong> again. It&#39;s bigger than zero this time, but still small.</li>
+</ol>
+<aside class="special"><p>Counting customers per state requires rows with the same state to meet. But each worker pre-aggregates its own chunk first, so only tiny partial counts travel through the shuffle, not the 75M customer rows.</p>
+</aside>
+<h2 is-upgraded><strong>Move a lot</strong></h2>
+<ol type="1" start="7">
+<li>If you completed the <strong>five numbers</strong> activity, don&#39;t pay for that query twice: click <strong>View all jobs</strong> at the bottom of the page.</li>
+<li>Select the most recent job that shows a <strong>Slot contention</strong> insight, click <strong>View in editor</strong>, and skip to step 10.</li>
+<li>If you don&#39;t have that job, copy the <code>-- join query</code> query into the BigQuery editor and run it. It will take a couple of minutes.</li>
+<li>Open <strong>Execution Details</strong> and note the <strong>Bytes shuffled</strong>. Compare it to the first two queries.</li>
+</ol>
+<aside class="special"><p>A join must co-locate rows from both tables by the join key. There is no way to pre-shrink a raw join: all 75B line items and all the March orders travel through the shuffle to meet each other. That is why joins dominate the shuffle meter.</p>
+</aside>
+<h2 is-upgraded><strong>Find the guilty stage</strong></h2>
+<ol type="1" start="11">
+<li>With the join query&#39;s results open, click on <strong>Execution Graph</strong>.</li>
+<li>Click through the stages and find the stage that wrote the most data to shuffle. Which table was it reading?</li>
+</ol>
+<h2 is-upgraded><strong>The check-engine light</strong></h2>
+<ol type="1" start="13">
+<li>For each of your queries, check <strong>Bytes spilled to disk</strong> in <strong>Execution Details</strong>. The first two queries should show <strong>0 B</strong>. The join query should show terabytes spilled.</li>
+</ol>
+<aside class="special"><p>Shuffle runs in a fast in-memory tier, until a stage produces more intermediate data than fits. The overflow goes to disk, and disk is orders of magnitude slower than memory. <strong>Bytes spilled &gt; 0</strong> is a check-engine light: a stage hit its memory ceiling. The join query lit it up, and the <strong>Slot contention</strong> insight is a related warning: the query wanted more compute than it could get. The fix is to shrink what reaches the shuffle: filter earlier, pre-aggregate before joins, or restructure the schema so the join disappears (the upcoming denormalized and nested activities do exactly that). Re-running the query changes nothing.</p>
+</aside>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Shuffle isn&#39;t on the on-demand invoice (that&#39;s bytes processed), so why should you care about it?</li>
+<li>The scan-and-filter query read 10x more data than the aggregation query, but shuffled less. What does that tell you about the relationship between bytes processed and bytes shuffled?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>Bytes shuffled for each of the three queries</li>
+<li>Bytes spilled by the join query</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Performance insights: the console diagnoses with you []" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/insights_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/insights_example.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>Trip the alarm</strong></h2>
+<ol type="1" start="3">
+<li>Review the <code>-- sales joined to price history query</code> query. It builds two tables with <strong>GENERATE_ARRAY</strong> (so it bills zero bytes): 100,000 sales of 100 products, and a price history holding every price each product has ever had. It joins them on <code>prod_code</code> to compute total revenue.</li>
+<li>Copy the query into the BigQuery editor and run it.</li>
+<li>Look at the result: <strong>100,000,000</strong> rows came out of a 100,000 row sales table, and total revenue is in the billions for products that cost under $100.</li>
+<li>Click on <strong>Execution Graph</strong> and find the flagged stage. Click it and review the notice: <strong>This stage has join(s) that produce significantly more rows than it consumes. The rows from one join side match multiple rows from the other.</strong> The console has diagnosed the fan-out for you; BigQuery calls this insight a <strong>high-cardinality join</strong>.</li>
+</ol>
+<aside class="special"><p>Each sale should match one price. But <strong>prod_code</strong> is not unique in the price history (1,000 rows per product), so each sale matched <strong>every price the product ever had</strong>: a 1,000x fan-out. The dangerous part isn&#39;t the cost; it&#39;s that the revenue total is 1,000x wrong while looking perfectly plausible. Joining a fact table to a history or versioned dimension without picking the right version is one of the most common accidental query bombs, and the console spots it for you.</p>
+</aside>
+<h2 is-upgraded><strong>Fix what the insight named</strong></h2>
+<ol type="1" start="7">
+<li>Review and run the <code>-- sales joined to current price query</code> query. Before joining, it reduces the price history to one row per product: the price currently in effect.</li>
+<li>Check the result: <strong>100,000</strong> rows (one per sale), a sane revenue total, and no flag in the <strong>Execution Graph</strong>.</li>
+</ol>
+<aside class="special"><p>The fix for a high-cardinality join is to make the key unique on one side before the join happens: pick the current version, pick the price in effect on the sale date, or pre-aggregate to the join key&#39;s grain. Which row is the <em>right</em> row is a business question, which is why BigQuery can only flag the problem, not fix it.</p>
+</aside>
+<h2 is-upgraded><strong>Read the diagnosis on a real query</strong></h2>
+<ol type="1" start="9">
+<li>If you completed the <strong>shuffle and spill</strong> activity: click <strong>View all jobs</strong> at the bottom of the page, select the join query job with the <strong>Slot contention</strong> insight, and click <strong>View in editor</strong>.</li>
+<li>Open its <strong>Execution Graph</strong> and review the performance insights shown for that job.</li>
+</ol>
+<aside class="special"><p>The insights you may see, and what each means:</p>
+<ul>
+<li><strong>Slot contention</strong> - stages sat in wait; the project was out of slots</li>
+<li><strong>Insufficient shuffle quota</strong> - intermediate data outgrew the shuffle tier</li>
+<li><strong>High-cardinality join</strong> - a join emitted far more rows than it read, usually duplicate keys on both sides</li>
+<li><strong>Data input scale change</strong> - this run read much more than previous runs of the same query</li>
+<li><strong>Partition skew</strong> - a few workers got most of the data</li>
+</ul>
+<p>Check insights first. If one fires, your diagnosis is done and the lever is named.</p>
+</aside>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>The alarm query billed $0 in bytes but still burned real slot time. Which pricing model would have felt that?</li>
+<li>Where else does this fan-out bite? Consider joining two child tables of the same parent, like line items and shipments both keyed on <strong>order_num</strong>.</li>
+<li>Ideally each sale would match the price in effect on the sale date, not just the current price. What would that join condition look like?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>The output row count reported by the flagged stage</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Finding the query worth optimizing []" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/information_schema_examples.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/information_schema_examples.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>See the whole project&#39;s bill</strong></h2>
+<ol type="1" start="3">
+<li>Copy the <code>-- find the queries worth optimizing</code> query into the BigQuery editor and run it. Every job&#39;s stats land in <strong>INFORMATION_SCHEMA.JOBS</strong> in real time, with 180 days of history.</li>
+<li>Review the results. The jobs you ran in the earlier activities should be near the top.</li>
+<li>Edit the query to sort by <code>total_bytes_processed</code> instead, and re-run it. Does the same job top both lists?</li>
+</ol>
+<aside class="special"><p>Sort by <strong>total_bytes_processed</strong> when you&#39;re on on-demand pricing, and by <strong>total_slot_ms</strong> under capacity pricing. A query can be cheap on one meter and expensive on the other. Optimize by evidence, not by complaint volume: the slowest-feeling query is often not the most expensive one.</p>
+</aside>
+<h2 is-upgraded><strong>Hunt flagged queries at project scale</strong></h2>
+<ol type="1" start="6">
+<li>Copy the <code>-- find jobs the console flagged</code> query into the BigQuery editor and run it. If you completed the <strong>performance insights</strong> activity, your high-cardinality join job appears, with the insight recorded in the job&#39;s metadata.</li>
+</ol>
+<aside class="special"><p>The <strong>Execution Graph</strong> diagnoses one query at a time. <strong>INFORMATION_SCHEMA</strong> lets you run that same diagnosis across every job in the project, which is how you find problems nobody complained about.</p>
+</aside>
+<h2 is-upgraded><strong>Explore further</strong></h2>
+<ol type="1" start="7">
+<li>The github file has more examples: top spenders by user, table compression ratios, full table scans, and tables nobody has queried in 90 days. Pick one, read it, and run it.</li>
+</ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>The <strong>query_start</strong> of your project&#39;s most expensive job</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="SELECT * reads everything, every time []" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/select_star_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/select_star_example.sql</a> </li>
+</ol>
+<aside class="warning"><p>This entire activity uses the query validator&#39;s estimate. Do <strong>NOT</strong> run the select star query: it would cost more than $15.</p>
+</aside>
+<h2 is-upgraded><strong>Read the meter before you run</strong></h2>
+<ol type="1" start="3">
+<li>Copy the <code>-- select star query</code> query into the BigQuery editor, but do not run it.</li>
+<li>Look at the estimate in the lower left of the editor: <strong>This query will process 2.44 TB when run</strong>. That is the price of touching every column.</li>
+<li>Replace it with the <code>-- two columns query</code> query. The estimate drops to about <strong>13 GB</strong>: roughly 190x cheaper for the same table and the same rows.</li>
+</ol>
+<aside class="special"><p>BigQuery storage is columnar: each column is stored as its own set of files, and you are billed for exactly the columns the query touches. Row count doesn&#39;t change the bill; column choice does.</p>
+</aside>
+<h2 is-upgraded><strong>The WHERE column counts too</strong></h2>
+<ol type="1" start="6">
+<li>Replace the query with the <code>-- filtered two columns query</code> query. The estimate goes <strong>up</strong> slightly, even though the query returns fewer rows.</li>
+</ol>
+<aside class="special"><p>The meter counts columns <strong>touched</strong>, not columns returned. Filtering on <strong>binary</strong> means reading the <strong>binary</strong> column, so it joins the bill.</p>
+</aside>
+<h2 is-upgraded><strong>Nearly all columns, without the blob</strong></h2>
+<ol type="1" start="7">
+<li>Replace the query with the <code>-- select star except query</code> query and check the estimate: about <strong>15.5 GB</strong> for every column except one.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>One column (<strong>content</strong>) holds 2.42 of the table&#39;s 2.44 TB. Which columns dominate your own tables?</li>
+<li>An analyst&#39;s <strong>SELECT *</strong> exploration query pasted into a dashboard runs hundreds of times a day. What does that cost?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>The validator estimate for the select star query</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Filters that prune, filters that don&#39;t []" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/pruning_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/pruning_example.sql</a> </li>
+</ol>
+<aside class="special"><p>This whole activity uses the query validator&#39;s estimate (lower left of the editor). You don&#39;t need to run anything.</p>
+</aside>
+<h2 is-upgraded><strong>Partition pruning</strong></h2>
+<ol type="1" start="3">
+<li>Paste the <code>-- unpartitioned table query</code> query into the editor and read the estimate: about <strong>112 GB</strong> to count one month&#39;s customers.</li>
+<li>Replace it with the <code>-- partitioned table query</code> query. Same filter, but the table is partitioned by <strong>order_date</strong>: about <strong>9.3 GB</strong>. Eleven months of partitions were never opened.</li>
+<li>Replace it with the <code>-- broken partition filter query</code> query. It asks for exactly the same rows, but the estimate is back to <strong>112 GB</strong>.</li>
+</ol>
+<aside class="special"><p>Pruning happens <strong>before</strong> execution, from partition metadata, and only when the filter compares the <strong>bare</strong> partition column against constants. Wrap the column in a function like <strong>FORMAT_DATE</strong> and BigQuery must read every row to evaluate it. The filter&#39;s <em>shape</em> matters, not its meaning.</p>
+</aside>
+<h2 is-upgraded><strong>Cluster pruning</strong></h2>
+<ol type="1" start="6">
+<li>Paste the <code>-- unclustered table query</code> query and read the estimate: about <strong>70 GB</strong>.</li>
+<li>Replace it with the <code>-- clustered table query</code> query. Same data, but the table is clustered on <strong>cust_state</strong>: about <strong>1.4 GB</strong>. Within the storage, blocks that can&#39;t contain <strong>AK</strong> are skipped.</li>
+<li>Replace it with the <code>-- broken cluster filter query</code> query: <strong>UPPER(cust_state)</strong> turns block skipping off, and the estimate returns to about <strong>70 GB</strong>.</li>
+</ol>
+<aside class="special"><p>Pruning is a contract with your WHERE clause: bare column on one side, constants on the other. If a table should never be scanned in full, <strong>require_partition_filter=TRUE</strong> turns &#34;forgot the date filter&#34; into an error instead of a 112 GB scan.</p>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>The estimates for the partitioned table query and the broken partition filter query</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Two kinds of join: broadcast and hash [$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/join_types_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/join_types_example.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>The join you get for free</strong></h2>
+<ol type="1" start="3">
+<li>Review the <code>-- broadcast join query</code> query: 3.75B line items joined to a 10,000 row product table.</li>
+<li>Copy the query into the BigQuery editor and run it. It will take a minute or so.</li>
+<li>Open <strong>Execution Graph</strong> and look at the shape of the plan. One data source feeds its own <strong>Input</strong> stage (the <strong>10K records</strong> edge tells you it&#39;s the product table). The other data source (the line item table) has no input stage at all: its arrow runs straight into the <strong>Join+</strong> stage, because the 3.75B row scan happens inside the join. That is also why <strong>Join+</strong> holds nearly all the query&#39;s slot time.</li>
+<li>Click the join stage and review the step list. The <strong>+</strong> in <strong>Join+</strong> means extra steps were fused into the stage: this one <strong>READ</strong>s, <strong>JOIN</strong>s, and pre-<strong>AGGREGATE</strong>s in a single pass, which is why it outputs millions of partial results rather than billions of joined rows.</li>
+<li>Find the <strong>JOIN</strong> step in that list: it reads <strong>EACH WITH ALL</strong>.</li>
+<li>Note the <strong>Bytes shuffled</strong> in <strong>Execution Details</strong>.</li>
+</ol>
+<aside class="special"><p>When one side of a join is small, BigQuery copies the whole small table to every worker (<strong>ALL</strong>), and each worker joins its own chunk of the big table in place (<strong>EACH</strong>). One pass, and 3.75B rows never cross the network. This is why star schemas with small dimension tables stay fast with no tuning at all.</p>
+</aside>
+<h2 is-upgraded><strong>When both sides are big</strong></h2>
+<ol type="1" start="9">
+<li>Review the <code>-- hash join query</code> query: 375M orders joined to 7.5M customers.</li>
+<li>Copy the query into the BigQuery editor and run it.</li>
+<li>Open <strong>Execution Graph</strong>: this time <strong>both</strong> tables get input stages feeding the join.</li>
+<li>Click the join stage and find the <strong>JOIN</strong> step: it reads <strong>EACH WITH EACH</strong>.</li>
+<li>Compare <strong>Bytes shuffled</strong> to the broadcast query. The hash join shuffled dozens of times more, on far less data.</li>
+</ol>
+<aside class="special"><p>The customer table is too big to copy to every worker, so BigQuery shuffles <strong>both</strong> tables by a hash of the join key: equal keys land in the same bucket, and one worker joins each bucket. Two full shuffles happen before any joining does.</p>
+</aside>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>You can&#39;t pick the join algorithm. What <em>can</em> you control? (Hint: how much data arrives at the join. The next activities pull exactly that lever.)</li>
+<li>What could make a dimension table stop being broadcastable? What would keep it lean?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>Bytes shuffled for each of the two queries</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Shrink before you join: aggregate first [$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/aggregate_first_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/aggregate_first_example.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>Join at raw grain</strong></h2>
+<ol type="1" start="3">
+<li>Review the <code>-- join at raw grain query</code> query. The question is &#34;orders per state&#34;, and the join exists only to look up each customer&#39;s state. (This is the same query the <strong>broadcast and hash</strong> activity used for its hash join; if you just ran it there, you can reuse that job&#39;s stats via <strong>View all jobs</strong>.)</li>
+<li>Run it, then note the <strong>Slot time consumed</strong> and <strong>Bytes shuffled</strong> in <strong>Execution Details</strong>.</li>
+<li>In the <strong>Execution Graph</strong>, click the join stage and note how many rows arrived at it: all 375M order rows, plus the customers.</li>
+</ol>
+<h2 is-upgraded><strong>Aggregate to the question&#39;s grain, then join</strong></h2>
+<ol type="1" start="6">
+<li>Review the <code>-- aggregate first query</code> query. Before the join, it collapses the orders to one row per customer: <code>COUNT(*)</code> grouped by <code>cust_id</code>. The count then survives the join as <code>SUM(n)</code>.</li>
+<li>Run it and compare the results to the first query: identical.</li>
+<li>Compare <strong>Slot time consumed</strong> and <strong>Bytes shuffled</strong>: roughly 4x less slot time and 9x less shuffle. Check the join stage in the <strong>Execution Graph</strong>: about 15M rows arrived instead of 382M.</li>
+</ol>
+<aside class="special"><p>Bytes processed is identical for both queries: same tables, same columns. The savings are all in work and movement, because 375M order rows collapsed to 7.5M per-customer counts <strong>before</strong> crossing the join. The optimizer pushes filters down for you; it will not change your query&#39;s grain. Only you know the question is per-state, not per-order.</p>
+</aside>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>When is this rewrite <em>not</em> valid? (What if you needed an order-level column, like the order date, in the result?)</li>
+<li>How would you make an <strong>average</strong> survive a join? (Hint: carry <strong>SUM</strong> and <strong>COUNT</strong> separately and divide at the end.)</li>
+<li>The join query that spilled terabytes in the <strong>shuffle and spill</strong> activity also joins at raw grain: all 75B line items arrive at its first join. Which side could you aggregate first, and to what grain?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>Slot time consumed for each of the two queries</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Help the planner: table order and declared keys [$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/constraints_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/constraints_example.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>A join that cannot change the answer</strong></h2>
+<ol type="1" start="3">
+<li>Review the <code>-- join before declaring anything query</code> query. It asks for order numbers on a single day. Look at the <strong>SELECT</strong> list: every column comes from the order table. The customer table is joined, but nothing from it is selected.</li>
+<li>Run the query and note the <strong>Slot time consumed</strong> in <strong>Execution Details</strong>.</li>
+<li>Open the <strong>Execution Graph</strong>. There is a <strong>Join</strong> stage, and about 12M customer rows arrive at it, purely to confirm that each order has a customer.</li>
+</ol>
+<aside class="special"><p>You can see the join is pointless, but BigQuery cannot. Nothing in the schema says an order always has exactly one matching customer, so dropping the join might change the row count. The optimizer has to do the work to be safe.</p>
+</aside>
+<h2 is-upgraded><strong>Tell the optimizer what you know</strong></h2>
+<ol type="1" start="6">
+<li>Review the <code>-- declare the primary key query</code> and <code>-- declare the foreign key query</code> queries. These declare that <code>cust_id</code> uniquely identifies a customer, and that every order&#39;s <code>cust_id</code> points at one.</li>
+<li>Note the <code>NOT ENFORCED</code> on both. It is required, and it means exactly what it says: BigQuery will never check the claim.</li>
+<li>Run both statements against your own copies of the tables in the <strong>class</strong> dataset, replacing <code>your_project</code>. They finish almost instantly and bill nothing: no data is read or rewritten, only metadata is updated.</li>
+<li>Run the <code>-- check what you declared query</code> query to see the two constraints listed.</li>
+</ol>
+<h2 is-upgraded><strong>Run the same query again</strong></h2>
+<ol type="1" start="10">
+<li>Run the <code>-- join before declaring anything query</code> query a second time, unchanged, against your declared tables.</li>
+<li>Compare the results to the first run: identical rows.</li>
+<li>Open the <strong>Execution Graph</strong> and compare it to the first run. The <strong>Join</strong> stage is gone entirely, and the customer table is never read.</li>
+<li>Compare <strong>Slot time consumed</strong>: roughly a quarter less, on a query whose text you never touched.</li>
+</ol>
+<aside class="special"><p>This is join elimination. Once the foreign key guarantees every order matches exactly one customer, and no customer column is selected, the join provably cannot change the result, so the optimizer removes it. Two lines of metadata sped up a query you did not edit, and they speed up every future query with the same shape.</p>
+</aside>
+<h2 is-upgraded><strong>What a false promise costs you</strong></h2>
+<ol type="1" start="14">
+<li>Review the <code>-- build a table pair that breaks the promise query</code> query. Employee 3 sits in department 99, which does not exist. Run it to create the two small tables.</li>
+<li>Run the <code>-- the honest answer query</code> query. It returns employees <strong>1</strong> and <strong>2</strong>. Employee 3 is dropped, correctly, because an inner join has nothing to match it to.</li>
+<li>Run the <code>-- declare the false foreign key query</code> query. It succeeds. Nothing was validated, and no warning was given.</li>
+<li>Run the <code>-- the honest answer query</code> query again, completely unchanged.</li>
+<li>Read the results: employee <strong>3</strong> is now included, in a join to a department that does not exist.</li>
+</ol>
+<aside class="special"><p>The query did not change, the data did not change, and the answer is now wrong. Because the declaration said every employee matches a department, BigQuery eliminated the join instead of performing it, and the unmatched row was never filtered out. No error, no warning, just a quietly incorrect result.</p>
+</aside>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>The habit of writing joins <strong>largest table first</strong> costs nothing and makes a good plan obvious, though the optimizer usually reorders anyway. Declared keys are the version of that idea it cannot work out for itself.</li>
+<li>Where would a false foreign key come from in real life? (Hint: nobody declares one they know is false. It becomes false later, when a delete or a bad load leaves rows orphaned.)</li>
+<li>If constraints are never enforced, what in your pipeline should be checking them? How would you find out you had orphaned rows <em>before</em> a query returned the wrong number?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>Slot time consumed before and after declaring the keys</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Exploring routines [$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a separate browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/udf_examples.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/udf_examples.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>Messy numbers</strong></h2>
+<ol type="1" start="3">
+<li>Look at the <strong>messy_text</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
+<li>Run the <code>trim strings</code> query. What does it do? How does it do it?</li>
+<li>Review and run the <code>create udf</code> query</li>
+<li>Select the <strong>tidy_string</strong> function in the routines section of the <strong>Explorer</strong> pane; review the details.</li>
+<li>Run the query with <code>query with SQL UDF</code> query</li>
+</ol>
+<h2 is-upgraded><strong>Getting numbers from text</strong></h2>
+<ol type="1" start="8">
+<li>Review the <strong>number_string</strong> table in the <strong>roi-bq-demos.bq_demo</strong> dataset; check out the data in the preview tab.</li>
+<li>Review and run the <code>create javascript udf</code> query</li>
+<li>Review the <strong>get_numbers</strong> UDF in the routines section</li>
+<li>Run the <code>query with javascript udf</code> query</li>
+<li>Look at documentation for stored procedures: <a href="https://cloud.google.com/bigquery/docs/procedures" target="_blank">https://cloud.google.com/bigquery/docs/procedures</a> </li>
+</ol>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Approximate aggregation functions [$$]" duration="0">
         <h2 is-upgraded><strong>Setting up</strong></h2>
 <ol type="1" start="1">
 <li>Make sure you have the <strong>BigQuery</strong> console open.</li>
@@ -791,6 +993,376 @@
 <ul>
 <li>Query time difference</li>
 <li>% error in approximation</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Loading data: console and CLI []" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>Make sure your project has a dataset named <code>class</code> (you created one in the exploring datasets activity).</li>
+</ol>
+<aside class="special"><p>A vendor drops a usage file into a Cloud Storage bucket every day. Monday&#39;s file is <strong>usage_2026-07-20.csv</strong>: a million rows of meeting data. You&#39;ll load it with the console, then append Tuesday&#39;s file with the CLI.</p>
+</aside>
+<h2 is-upgraded><strong>Loading with the console</strong></h2>
+<ol type="1" start="3">
+<li>In the <strong>Explorer</strong> panel, click the three-dot menu next to your <strong>class</strong> dataset and select <strong>Create table</strong>.</li>
+<li>Set <strong>Create table from</strong> to <strong>Google Cloud Storage</strong>.</li>
+<li>In the file field, enter <code>jwd-gcp-demos/ingest_demo/daily/usage_2026-07-20.csv</code> (no <strong>gs://</strong> prefix).</li>
+<li>Confirm the <strong>File format</strong> is <strong>CSV</strong>.</li>
+<li>Name the table <code>usage</code>.</li>
+<li>In the <strong>Schema</strong> section, check <strong>Auto detect</strong>.</li>
+<li>Click <strong>Create table</strong> and wait for the load to finish.</li>
+<li>Click the new <strong>usage</strong> table and open its <strong>Details</strong> tab: <strong>Number of rows</strong> is <strong>1,000,000</strong>.</li>
+<li>Check the <strong>Schema</strong> tab: <strong>minutes</strong> came out <strong>INTEGER</strong> and <strong>event_date</strong> came out <strong>DATE</strong>. Autodetect chose well here.</li>
+</ol>
+<h2 is-upgraded><strong>Appending with the CLI</strong></h2>
+<ol type="1" start="12">
+<li>Tuesday&#39;s file has arrived. Open the Cloud Shell and load it into the same table:</li>
+</ol>
+<pre><code>bq load --autodetect --source_format=CSV \
+  class.usage \
+  gs://jwd-gcp-demos/ingest_demo/daily/usage_2026-07-21.csv</code></pre>
+<ol type="1" start="13">
+<li>Back in the console, refresh the <strong>Details</strong> tab: <strong>2,000,000</strong> rows. Loads append by default; <code>--replace</code> would have truncated the table first.</li>
+<li>Click <strong>View all jobs</strong> and look at the two most recent jobs: both are <strong>Load</strong> jobs, identical in kind. The console form and the <code>bq load</code> command are two front ends for the same thing.</li>
+</ol>
+<aside class="special"><p>Neither load cost anything: batch loads are free and run on a shared pool of load capacity, not on your query slots. The bucket belongs to another project, and that&#39;s fine too; you need read access to the objects, nothing more.</p>
+</aside>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Both of these files were clean, so autodetect worked. What arrives in real files? The next activity finds out.</li>
+<li>The vendor drops one file per day. Would you rather run this by hand each morning, or script it? (Keep that thought for the <strong>LOAD DATA</strong> activity.)</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>The <strong>Number of rows</strong> in <strong>usage</strong> after both loads</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Schemas: autodetect is a starting point []" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>Open the Cloud Shell.</li>
+<li>Make sure your project has a dataset named <code>class</code> (you created one in the exploring datasets activity).</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/autodetect_demo.sh" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/autodetect_demo.sh</a> </li>
+<li>Copy the contents of the file and paste them into your Cloud Shell terminal. This creates two daily usage drops from a vendor, plus a schema file.</li>
+<li>Look at the first few rows of Monday&#39;s file:</li>
+</ol>
+<pre><code>head -3 daily_usage_mon.csv</code></pre>
+<ol type="1" start="7">
+<li>The vendor writes <strong>N/A</strong> in the <strong>minutes</strong> column for meetings that never started. Find those rows in both files:</li>
+</ol>
+<pre><code>grep -n "N/A" daily_usage_mon.csv daily_usage_tue.csv</code></pre>
+<aside class="special"><p>Monday&#39;s file has 100,000 rows with the <strong>N/A</strong> deep in the file (row <strong>90,000</strong>). Tuesday&#39;s has 1,000 rows with the <strong>N/A</strong> at row <strong>700</strong>. Keep that difference in mind.</p>
+</aside>
+<h2 is-upgraded><strong>The loud failure</strong></h2>
+<ol type="1" start="8">
+<li>Load Monday&#39;s file, letting autodetect choose the types:</li>
+</ol>
+<pre><code>bq load --autodetect --source_format=CSV class.daily_usage daily_usage_mon.csv</code></pre>
+<ol type="1" start="9">
+<li>The load <strong>fails</strong>. Read the error: <strong>Unable to parse</strong>. Autodetect sampled the start of the file, saw only numbers in <strong>minutes</strong>, chose <strong>INTEGER</strong>, and then row 90,000 said <strong>N/A</strong>.</li>
+</ol>
+<h2 is-upgraded><strong>The silent failure</strong></h2>
+<ol type="1" start="10">
+<li>Now load Tuesday&#39;s file the same way:</li>
+</ol>
+<pre><code>bq load --autodetect --source_format=CSV class.daily_usage daily_usage_tue.csv</code></pre>
+<ol type="1" start="11">
+<li>This load <strong>succeeds</strong>. Check what autodetect decided:</li>
+</ol>
+<pre><code>bq show --schema class.daily_usage</code></pre>
+<ol type="1" start="12">
+<li>Note the type of the <strong>minutes</strong> column: <strong>STRING</strong>. Tuesday&#39;s file is small enough that the <strong>N/A</strong> fell inside autodetect&#39;s sample, so it picked the only type that fits everything.</li>
+<li>In the BigQuery editor, try to use the data:</li>
+</ol>
+<pre><code>SELECT SUM(minutes) AS total_minutes FROM class.daily_usage</code></pre>
+<ol type="1" start="14">
+<li>The query fails: no version of <strong>SUM</strong> accepts a <strong>STRING</strong>.</li>
+</ol>
+<aside class="special"><p>Same bad value, two different outcomes, decided by where the value sat relative to autodetect&#39;s sample. Monday failed <em>loudly</em>: annoying, but you found out immediately. Tuesday failed <em>silently</em>: the load worked, the schema is wrong, and the damage surfaces later in every query that does math on <strong>minutes</strong>. The silent one is the one that costs you days.</p>
+</aside>
+<h2 is-upgraded><strong>Pin the schema, name the marker</strong></h2>
+<ol type="1" start="15">
+<li>Look at the schema file:</li>
+</ol>
+<pre><code>cat daily_usage_schema.json</code></pre>
+<ol type="1" start="16">
+<li>Reload Monday&#39;s file, pinning the schema and telling BigQuery what the vendor means by <strong>N/A</strong>:</li>
+</ol>
+<pre><code>bq load --replace --source_format=CSV \
+  --schema=daily_usage_schema.json \
+  --skip_leading_rows=1 \
+  --null_marker='N/A' \
+  class.daily_usage daily_usage_mon.csv</code></pre>
+<ol type="1" start="17">
+<li>Load Tuesday&#39;s file the same way, without <code>--replace</code> (loads append by default):</li>
+</ol>
+<pre><code>bq load --source_format=CSV \
+  --schema=daily_usage_schema.json \
+  --skip_leading_rows=1 \
+  --null_marker='N/A' \
+  class.daily_usage daily_usage_tue.csv</code></pre>
+<ol type="1" start="18">
+<li>In the BigQuery editor, verify the loads:</li>
+</ol>
+<pre><code>SELECT
+  COUNT(*) AS rows_loaded,
+  COUNTIF(minutes IS NULL) AS null_minutes,
+  SUM(minutes) AS total_minutes
+FROM class.daily_usage</code></pre>
+<ol type="1" start="19">
+<li>101,000 rows loaded, exactly two <strong>NULL</strong> minutes (the meetings that never started), and <strong>SUM</strong> works.</li>
+</ol>
+<aside class="special"><p>The cheap path to a schema file: let autodetect run once on a known-good file, dump it with <code>bq show --schema</code>, review and edit it, then load with <code>--schema</code> from then on. Note that <code>--skip_leading_rows=1</code> became necessary once the schema was pinned: autodetect was skipping the header for you. Pin schemas for anything recurring.</p>
+</aside>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>What else do vendors put in numeric columns? Empty strings, <strong>null</strong>, <strong>-</strong>, <strong>missing</strong>...</li>
+<li>What happens on the day the vendor adds a new column to the file?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>Your <strong>total_minutes</strong> value</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Load performance: file formats matter []" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>Make sure your project has a dataset named <code>class</code>.</li>
+<li>Open the Cloud Shell.</li>
+</ol>
+<h2 is-upgraded><strong>The same data, staged two ways</strong></h2>
+<ol type="1" start="4">
+<li>Sixty million rows of usage history sit in the demo bucket twice: once as a single gzipped CSV, once as 100 Parquet files. Look at both:</li>
+</ol>
+<pre><code>gcloud storage ls -l gs://jwd-gcp-demos/ingest_demo/big/</code></pre>
+<pre><code>gcloud storage du -s --readable-sizes gs://jwd-gcp-demos/ingest_demo/big_parquet</code></pre>
+<ol type="1" start="5">
+<li>The gzipped CSV is about <strong>317 MiB</strong>; the Parquet files total about <strong>829 MiB</strong>. Place your bet: which loads faster?</li>
+</ol>
+<h2 is-upgraded><strong>Load the gzipped CSV</strong></h2>
+<ol type="1" start="6">
+<li>Load the gzipped file, and keep an eye on the elapsed-seconds counter <code>bq</code> prints while it waits:</li>
+</ol>
+<pre><code>bq load --source_format=CSV \
+  --skip_leading_rows=1 \
+  --schema=meeting_id:STRING,user_id:STRING,minutes:INTEGER,event_date:DATE \
+  class.usage_history_csv \
+  gs://jwd-gcp-demos/ingest_demo/big/usage_big.csv.gz</code></pre>
+<ol type="1" start="7">
+<li>Note how long it took: around <strong>two minutes</strong>.</li>
+</ol>
+<h2 is-upgraded><strong>Load the Parquet files</strong></h2>
+<ol type="1" start="8">
+<li>Now load the Parquet copy of the same data. No <code>--schema</code> this time; Parquet files carry their own:</li>
+</ol>
+<pre><code>bq load --source_format=PARQUET \
+  class.usage_history_pq \
+  &#39;gs://jwd-gcp-demos/ingest_demo/big_parquet/usage_big-*.parquet&#39;</code></pre>
+<ol type="1" start="9">
+<li>Done in seconds, not minutes, despite being over twice the bytes.</li>
+<li>Confirm both tables hold the same data:</li>
+</ol>
+<pre><code>bq show class.usage_history_csv</code></pre>
+<pre><code>bq show class.usage_history_pq</code></pre>
+<ol type="1" start="11">
+<li>Both show <strong>60,000,000</strong> in <strong>Total Rows</strong>, and the Parquet-loaded table got the right types (<strong>INTEGER</strong>, <strong>DATE</strong>) from the files themselves.</li>
+</ol>
+<aside class="special"><p>A gzip file cannot be split: one worker has to decompress and parse it from start to finish, alone. The 100 Parquet files can be handed to 100 workers at once, and Parquet is a binary columnar format, so there is no text parsing at all. That&#39;s how &#34;more than twice the bytes&#34; became roughly <strong>20x faster</strong>. For anything big, prefer Parquet or Avro; if it must be CSV or JSON, prefer many smaller files, uncompressed, over one large gzip.</p>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>The elapsed time of each of your two loads</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="LOAD DATA: loading with SQL []" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>Make sure your project has a dataset named <code>class</code>.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/load_data_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/load_data_example.sql</a> </li>
+</ol>
+<h2 is-upgraded><strong>The load job goes SQL</strong></h2>
+<ol type="1" start="4">
+<li>Review the <code>-- load monday query</code> query. It re-does the console load from the basic loading activity, as a SQL statement: the column list pins the schema the way <code>--schema</code> did, and the <code>FROM FILES</code> options mirror the <code>bq load</code> flags.</li>
+<li>Run it in the query editor. It finishes in a few seconds and reports that it created the <strong>usage_sql</strong> table.</li>
+<li>Review the <code>-- load tuesday query</code> query: no column list this time, because the table now exists. <code>LOAD DATA INTO</code> appends; <code>LOAD DATA OVERWRITE</code> would replace.</li>
+<li>Run it.</li>
+<li>Run the <code>-- verify query</code> query: each of the two dates has <strong>1,000,000</strong> meetings.</li>
+</ol>
+<aside class="special"><p>Check <strong>Job information</strong> for either load: <strong>Bytes billed</strong> is <strong>0 B</strong>. <strong>LOAD DATA</strong> is a SQL statement, but it runs the same free load machinery as the console form and <code>bq load</code>. That makes it the loading tool for places where everything must be SQL: scheduled queries, stored procedures, and scripts that create, load, and transform in one place.</p>
+</aside>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>Yesterday&#39;s manual console clicks are now one statement. What would a scheduled query that loads <em>today&#39;s</em> file look like? (Hint: <strong>FORMAT_DATE</strong> can build the URI.)</li>
+<li><strong>LOAD DATA</strong> can also write into a partitioned destination. Which column here would you partition by?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>Your <strong>total_minutes</strong> for <strong>2026-07-20</strong></li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Streaming: the Storage Write API []" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>Make sure your project has a dataset named <code>class</code>.</li>
+<li>Open the Cloud Shell.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/storage_write_example.js" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/storage_write_example.js</a> </li>
+</ol>
+<aside class="special"><p>Everything in this series so far moved data in batches, after the fact. This activity streams rows in one at a time, as they happen, with the <strong>Storage Write API</strong> in its simplest arrangement: JSON rows appended to a table&#39;s <strong>default stream</strong>.</p>
+</aside>
+<h2 is-upgraded><strong>Set up the stream</strong></h2>
+<ol type="1" start="5">
+<li>Create the table the events will land in:</li>
+</ol>
+<pre><code>bq mk --table class.live_usage \
+  meeting_id:STRING,user_id:STRING,minutes:INTEGER,event_ts:TIMESTAMP</code></pre>
+<ol type="1" start="6">
+<li>Make a working directory and move into it:</li>
+</ol>
+<pre><code>mkdir ~/stream_demo &amp;&amp; cd ~/stream_demo</code></pre>
+<ol type="1" start="7">
+<li>Install the client library:</li>
+</ol>
+<pre><code>npm install @google-cloud/bigquery-storage</code></pre>
+<ol type="1" start="8">
+<li>Download the demo script:</li>
+</ol>
+<pre><code>curl -sO https://raw.githubusercontent.com/roitraining/gcp-demos/master/bigquery/storage_write_example.js</code></pre>
+<ol type="1" start="9">
+<li>Review the script in the browser tab you opened. It connects to the table&#39;s default stream, wraps the connection in a <strong>JSONWriter</strong>, then appends one JSON row per second for 30 seconds, as if meetings were ending live.</li>
+</ol>
+<h2 is-upgraded><strong>Watch rows arrive</strong></h2>
+<ol type="1" start="10">
+<li>Run the script:</li>
+</ol>
+<pre><code>node storage_write_example.js</code></pre>
+<ol type="1" start="11">
+<li>While it prints <strong>appended</strong> once a second, switch to the BigQuery editor and run this a few times:</li>
+</ol>
+<pre><code>SELECT COUNT(*) AS so_far FROM class.live_usage</code></pre>
+<ol type="1" start="12">
+<li>The count climbs while the script runs. A row is queryable about a second after the append; there is no waiting for a batch.</li>
+<li>When the script finishes, look at the last few events:</li>
+</ol>
+<pre><code>SELECT * FROM class.live_usage ORDER BY event_ts DESC LIMIT 5</code></pre>
+<aside class="special"><p>The Storage Write API speaks protocol buffers; the <strong>JSONWriter</strong> hides that by building a proto descriptor from the table&#39;s own schema and converting each JSON row for you (which is why the script passes the <strong>TIMESTAMP</strong> as microseconds since the epoch). The default stream gives at-least-once delivery, which is all most pipelines need. Application-created streams add exactly-once and transactional commits, and they&#39;re what Dataflow and the Kafka connectors use under the hood.</p>
+</aside>
+<aside class="special"><p>Unlike every load in this series, streaming is not free: ingestion bills at $0.025 per GiB, with the first 2 TiB per month free. These 30 tiny rows are far under that. The trade is cost for freshness; batch when you can, stream when the data can&#39;t wait.</p>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>Your final <strong>so_far</strong> count once the script finishes</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Exploring derived tables [$$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+</ol>
+<h2 is-upgraded><strong>Querying the partitioned table</strong></h2>
+<ol type="1" start="2">
+<li>Write and run a query to find all the March 2018 orders from the instructor&#39;s nested/repeated table, projecting all the columns except the customer email and phone number, and storing the results in a derived table in your <code>class</code> dataset.</li>
+<li>Write and run a query to sum sales for AK customers orders in March 2018, using the full nested/repeated table. Note the query duration and bytes processed.</li>
+<li>Write and run a query to sum sales for AK customers orders in March 2018, using the derived table. Note the query duration and bytes processed.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>How much faster was querying the derived table?</li>
+<li>How much cheaper was querying the derive table?</li>
+<li>Consider the impact if AK analysts queried AK orders 100s of times per day</li>
+</ul>
+</aside>
+<ol type="1" start="5">
+<li>Schedule the query to run daily at 12.01am, overwriting the previous contents of the derived table.</li>
+</ol>
+<aside class="special"><p>Some things to think about:</p>
+<ul>
+<li>What are some downsides of derived tables?</li>
+<li>How else might you achieve similar performance using the full table?</li>
+</ul>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
+</ul>
+</aside>
+
+
+      </google-codelab-step>
+      <google-codelab-step label="Exploring external tables [$]" duration="0">
+        <h2 is-upgraded><strong>Setting up</strong></h2>
+<ol type="1" start="1">
+<li>Make sure you have the <strong>BigQuery</strong> console open.</li>
+<li>In a new browser tab, open <a href="https://github.com/roitraining/gcp-demos/blob/master/bigquery/external_hive_example.sql" target="_blank">https://github.com/roitraining/gcp-demos/blob/master/bigquery/external_hive_example.sql</a> </li>
+<li>In another new browser tab, open <a href="https://console.cloud.google.com/storage/browser/jwd-gcp-demos/orders_partitioned" target="_blank">https://console.cloud.google.com/storage/browser/jwd-gcp-demos/orders_partitioned</a></li>
+</ol>
+<aside class="special"><p><strong>Questions</strong>: </p>
+<ul>
+<li>How many &#34;directories&#34; are there in the bucket?</li>
+<li>How many files in each directory?</li>
+<li>What does the naming of the directories imply?</li>
+</ul>
+<p>What you are seeing is a Hive-partitioned dataset living in your Data Lake (within GCS), with each file being a Parquet file.</p>
+</aside>
+<h2 is-upgraded><strong>Create an external table</strong></h2>
+<ol type="1" start="4">
+<li>In the BigQuery UI&#39;s <strong>Explorer</strong> pane, select your dataset </li>
+<li>From three-dot menu, select <strong>create table</strong></li>
+<li>In <strong>Create table from</strong>, select <strong>Google Cloud Storage</strong></li>
+<li>In <strong>Select file...</strong> enter <code>jwd-gcp-demos/orders_partitioned/*</code></li>
+<li>In <strong>File format</strong> select <strong>parquet</strong></li>
+<li>Check <strong>Source data partitioning</strong></li>
+<li>In <strong>Select Source...</strong> enter <code>gs://jwd-gcp-demos/orders_partitioned/</code></li>
+<li>In <strong>Table</strong>, enter <code>ext_part</code> </li>
+<li>In <strong>Table type</strong> select <strong>External table</strong></li>
+<li>In <strong>Schema</strong>, select <strong>Auto detect</strong></li>
+<li><strong>Click CREATE TABLE</strong></li>
+<li>Check your table details</li>
+</ol>
+<h2 is-upgraded><strong>Query the external table</strong></h2>
+<ol type="1" start="16">
+<li>Run the <code>query the external table</code> query</li>
+</ol>
+<aside class="special"><p>How many rows are returned?</p>
+</aside>
+<ol type="1" start="17">
+<li>Run the <code>query external table with where clause</code> query;</li>
+</ol>
+<aside class="special"><p> Review the execution details; how much data was processed?</p>
+</aside>
+<ol type="1" start="18">
+<li>Run the <code>query external table on partition</code> query; </li>
+</ol>
+<aside class="special"><p> Review the execution details; how much data was processed? Why was it lower?</p>
+</aside>
+<aside class="warning"><p>If you&#39;re doing this activity as part of an online ILT, enter the following into the chat window:</p>
+<ul>
+<li>FINISHED!</li>
 </ul>
 </aside>
 
