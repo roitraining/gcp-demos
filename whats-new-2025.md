@@ -1,6 +1,8 @@
-# What's new in the August 25 update
+# What's new — 2025 update
+
 > [!NOTE]
-> Updated August 20, 2025
+> Published August 20, 2025. For the current update, see
+> [What's new — 2026](whats-new-2026.md).
 
 ## BigQuery demos
 1. SQL transform examples
@@ -39,3 +41,9 @@
 - Finishing Dataform demo
 - Finishing Dataplex demo
 - Finishing custom log-sink -> pub/sub -> cloud function -> interesting action demo
+
+> [!NOTE]
+> Since publication: the Dataform demo moved to its own repository
+> ([jwdavis/dataform-demo](https://github.com/jwdavis/dataform-demo)), and the
+> Dataplex work continued with the lineage tools added in 2026. The log-sink
+> demo is still open.

@@ -135,6 +135,27 @@ google-codelab #drawer .metadata {
   border-top: 1px solid var(--cl-line);
 }
 
+/*
+ * "Report a mistake" fed the old claat/Google Doc flow. With no feedback-link
+ * attribute, codelab-elements renders it as href="#" -- an inert link -- so
+ * hide it rather than leave a dead control in the nav.
+ */
+google-codelab #drawer .metadata:has(#codelab-feedback),
+google-codelab #drawer .metadata #codelab-feedback {
+  display: none;
+}
+
+/*
+ * The close (X) button returns to the codelab *gallery* on Google's hosted
+ * site: it reads ?index= from the URL and falls back to "/". This page is
+ * standalone, so it resolves to the org root -- navigating users away from
+ * the activities to an unrelated page. Hidden; the menu button beside it
+ * (drawer toggle on narrow screens) still works.
+ */
+google-codelab #codelab-title #arrow-back {
+  display: none;
+}
+
 /* --------------------------------------------------------- step canvas -- */
 
 google-codelab google-codelab-step {
@@ -175,6 +196,69 @@ google-codelab-step h2.step-title {
   letter-spacing: -0.5px;
   margin: 0 0 32px !important;
   color: var(--cl-ink);
+}
+
+/* ------------------------------------------------------------ cost note -- */
+
+/*
+ * Sits directly under the step title as a subtitle. Three tiers: cost-none,
+ * cost-low, cost-high. The emoji is decorative (aria-hidden); the tier name
+ * carries the meaning for screen readers and when emoji fail to render.
+ *
+ * The tier name always stands alone. `.cost-detail` is an optional qualifier
+ * added only where the tier alone would be misleading or invite a "why?" --
+ * so a bare tier reads as complete rather than as a missing explanation.
+ */
+google-codelab-step .cost-note {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 8px;
+  margin: -20px 0 32px !important;
+  padding: 10px 14px;
+  border-radius: var(--cl-radius);
+  border-left: 3px solid currentColor;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+google-codelab-step .cost-note .cost-badge {
+  font-size: 16px;
+  line-height: 1;
+}
+
+google-codelab-step .cost-note .cost-label {
+  font-family: var(--cl-font-display);
+  font-weight: 500;
+  letter-spacing: -0.1px;
+}
+
+/* The qualifier stays neutral so the tier color reads as the signal, and is
+ * set off by a middot so it reads as an aside rather than a second sentence. */
+google-codelab-step .cost-note .cost-detail {
+  color: var(--cl-ink-muted);
+}
+
+google-codelab-step .cost-note .cost-detail::before {
+  content: "·";
+  margin-right: 8px;
+}
+
+google-codelab-step .cost-note.cost-none {
+  color: var(--cl-ink-muted);
+  background: var(--cl-code-bg);
+}
+
+/* Blue rather than green: the green `.special` asides are common in the body
+ * copy, and a green cost note next to one stops reading as its own signal. */
+google-codelab-step .cost-note.cost-low {
+  color: var(--cl-blue);
+  background: var(--cl-blue-soft);
+}
+
+google-codelab-step .cost-note.cost-high {
+  color: var(--cl-amber);
+  background: var(--cl-amber-soft);
 }
 
 google-codelab:not([theme="minimal"]) google-codelab-step .instructions h2,
