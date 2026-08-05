@@ -1,0 +1,90 @@
+
+<!doctype html>
+
+<!--
+  Dataflow Do-It-Now activities.
+
+  Hand-maintained; edit this file directly. Activities are
+  <google-codelab-step> elements; the label attribute supplies both the
+  left-hand nav card and the page title. Styling is in custom.css.
+
+  NOTE: despite the codelab machinery, these steps are NOT a sequential
+  tutorial. Each step is a standalone activity illustrating one concept, with
+  its own setup, meant to be done in any order or on its own. The codelab shell
+  is used as a navigation mechanism. Never write a step that depends on a
+  previous one having been run.
+
+  Currently Overview only -- activities are still to be written. Source
+  material lives in dataflow/simple_demos/ (local Beam basics) and
+  dataflow/dflow-bq-stream-python/ (a full Pub/Sub -> Dataflow -> BigQuery
+  streaming pipeline, with screenshots).
+
+  To add an activity, copy the pattern from bigquery.html: a
+  <google-codelab-step> with a label, a .cost-note paragraph in one of the
+  three tiers, a "Setting up" section, and numbered instructions.
+
+  index.html is the topic menu for all Do-It-Now pages.
+-->
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Dataflow Do-It-Now Activities</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,700|Roboto+Mono:400,500&display=swap">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <link rel="stylesheet" href="custom.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab codelab-gaid=""
+                  codelab-ga4id=""
+                  id="dataflow"
+                  title="Dataflow Do-It-Now Activities"
+                  environment="web">
+
+      <google-codelab-step label="Overview" duration="0">
+        <p>These are hands-on <strong>Do-It-Now</strong> activities for <strong>Dataflow</strong>, Google Cloud&#39;s managed runner for <a href="https://beam.apache.org/" target="_blank">Apache Beam</a> pipelines.</p>
+<p>Each activity is <strong>self-contained</strong>: it illustrates one concept, brings its own setup, and can be done on its own. Work them in any order, or do just the ones you need.</p>
+<aside class="warning"><p>Activities for this topic are still being written. In the meantime, the pipelines they will be built from are in the repository — see <strong>Sample code</strong> below.</p>
+</aside>
+<h2 is-upgraded><strong>Cost</strong></h2>
+<p>Every activity shows its cost under the title — 🟢 <strong>No cost</strong>, 💰 <strong>Low cost</strong>, or 💸 <strong>Higher cost</strong>.</p>
+<aside class="warning"><p><strong>Warning</strong>: Dataflow bills for worker VMs for as long as a job runs, and a <strong>streaming</strong> job runs until you stop it. Cancel or drain your jobs when you finish an activity. We assume that you are working in lab projects with lab-provided accounts.</p>
+</aside>
+<h2 is-upgraded><strong>What you&#39;ll need</strong></h2>
+<ul>
+<li>A lab-provided project, with the <strong>Dataflow</strong>, <strong>Pub/Sub</strong>, <strong>BigQuery</strong>, and <strong>Cloud Storage</strong> APIs enabled</li>
+<li>A Cloud Storage bucket for staging and temporary files</li>
+<li><strong>Cloud Shell</strong>, or a local Python environment with the Beam SDK installed</li>
+</ul>
+<h2 is-upgraded><strong>Sample code</strong></h2>
+<ul>
+<li>Basic Beam pipelines that run locally on the DirectRunner: <a href="https://github.com/roitraining/gcp-demos/tree/master/dataflow/simple_demos" target="_blank">dataflow/simple_demos</a></li>
+<li>A full streaming pipeline — Pub/Sub to Dataflow to BigQuery, with a setup script and an event generator: <a href="https://github.com/roitraining/gcp-demos/tree/master/dataflow/dflow-bq-stream-python" target="_blank">dataflow/dflow-bq-stream-python</a></li>
+</ul>
+
+
+      </google-codelab-step>
+
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+  <script src="din-nav.js"></script>
+
+</body>
+</html>

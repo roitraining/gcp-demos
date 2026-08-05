@@ -523,3 +523,417 @@ google-codelab google-codelab-step {
   background: var(--cl-green);
   color: #fff;
 }
+
+/* ==========================================================================
+ * Landing page (index.html)
+ *
+ * The menu page is plain HTML, not a <google-codelab>, so none of the rules
+ * above apply to it: nearly all of them are scoped under `google-codelab ...`.
+ * Everything here is namespaced `.din-*` so the reverse is also true and the
+ * two stylesheets can't collide. Tokens are shared, which is what keeps the
+ * menu and the activity pages reading as one product.
+ * ========================================================================== */
+
+body.din-home {
+  margin: 0;
+  background: var(--cl-canvas);
+  color: var(--cl-ink);
+  overflow-x: hidden;
+}
+
+/* Padding is part of every width here, so the max-width containers below stay
+ * inside the viewport instead of overflowing by their padding on small screens. */
+body.din-home *,
+body.din-home *::before,
+body.din-home *::after {
+  box-sizing: border-box;
+}
+
+/* Long dataset names and URLs must wrap rather than push the layout wide. */
+body.din-home p,
+body.din-home li,
+body.din-home .din-card {
+  overflow-wrap: break-word;
+}
+
+/* ------------------------------------------------------- landing top bar -- */
+
+/* Mirrors the codelab #codelab-title bar: same height, hairline, and type. */
+.din-topbar {
+  background: var(--cl-surface);
+  border-bottom: 1px solid var(--cl-line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.din-topbar-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.din-topbar-title {
+  font-family: var(--cl-font-display);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.1px;
+}
+
+.din-topbar-org {
+  font-size: 13px;
+  color: var(--cl-ink-muted);
+  margin-left: auto;
+}
+
+/* ------------------------------------------------------------- landing -- */
+
+.din-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 32px 24px;
+}
+
+.din-intro h1 {
+  font-family: var(--cl-font-display);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin: 0 0 16px;
+}
+
+.din-intro p {
+  max-width: 720px;
+  margin: 12px 0;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.din-lede {
+  font-size: 18px !important;
+  color: var(--cl-ink-muted);
+}
+
+.din-intro strong {
+  font-weight: 500;
+  color: var(--cl-ink);
+}
+
+.din-section {
+  margin-top: 48px;
+}
+
+.din-section-title {
+  font-family: var(--cl-font-display);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--cl-ink-muted);
+  margin: 0 0 16px;
+}
+
+/* ---------------------------------------------------------- topic cards -- */
+
+/*
+ * auto-fit + minmax means new topics need no rule changes: the grid adds a
+ * column when the viewport allows and collapses to one on narrow screens.
+ */
+.din-grid {
+  display: grid;
+  /* min() keeps the track from demanding 280px on a viewport narrower than
+   * that, which would force the grid wider than the screen. */
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: 20px;
+}
+
+.din-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--cl-surface);
+  border: 1px solid var(--cl-line);
+  border-radius: var(--cl-radius);
+  padding: 24px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 120ms ease-in-out, box-shadow 120ms ease-in-out,
+    transform 120ms ease-in-out;
+}
+
+.din-card:hover {
+  border-color: var(--cl-blue);
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15), 0 4px 8px 3px rgba(60, 64, 67, 0.08);
+  transform: translateY(-2px);
+}
+
+.din-card:focus-visible {
+  outline: 2px solid var(--cl-blue);
+  outline-offset: 2px;
+}
+
+.din-card-eyebrow {
+  font-family: var(--cl-font-display);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--cl-blue);
+  margin-bottom: 8px;
+}
+
+.din-card-title {
+  font-family: var(--cl-font-display);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: -0.2px;
+  margin-bottom: 10px;
+}
+
+.din-card-desc {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--cl-ink-muted);
+}
+
+/* margin-top:auto pins the meta row to the card bottom, so cards of differing
+ * description length still line their counts up across a row. */
+.din-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.din-card-count {
+  font-family: var(--cl-font-display);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cl-blue);
+  background: var(--cl-blue-soft);
+  border-radius: 100px;
+  padding: 4px 12px;
+}
+
+/* Placeholder state for a topic whose activities aren't written yet: reads as
+ * neutral information rather than as a count. */
+.din-card-count-soon {
+  color: var(--cl-ink-muted);
+  background: var(--cl-code-bg);
+}
+
+.din-card-go {
+  font-size: 18px;
+  color: var(--cl-ink-muted);
+  transition: transform 120ms ease-in-out, color 120ms ease-in-out;
+}
+
+.din-card:hover .din-card-go {
+  color: var(--cl-blue);
+  transform: translateX(3px);
+}
+
+/* -------------------------------------------------------------- panels -- */
+
+.din-panel {
+  background: var(--cl-surface);
+  border: 1px solid var(--cl-line);
+  border-radius: var(--cl-radius);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+
+.din-panel h3 {
+  font-family: var(--cl-font-display);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  margin: 0 0 8px;
+}
+
+.din-panel p {
+  margin: 12px 0;
+  line-height: 1.6;
+  font-size: 15px;
+  max-width: 720px;
+}
+
+.din-panel strong {
+  font-weight: 500;
+  color: var(--cl-ink);
+}
+
+.din-panel a,
+.din-footer a {
+  color: var(--cl-blue);
+  text-decoration: none;
+}
+
+.din-panel a:hover,
+.din-footer a:hover {
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------ cost key -- */
+
+.din-cost-key {
+  list-style: none;
+  margin: 16px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.din-cost-key li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Fixed width so the three chips form a column and the explanations align. */
+.din-cost-chip {
+  font-family: var(--cl-font-display);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 100px;
+  padding: 4px 12px;
+  white-space: nowrap;
+  min-width: 116px;
+}
+
+.din-cost-chip.din-cost-none {
+  color: var(--cl-ink-muted);
+  background: var(--cl-code-bg);
+}
+
+.din-cost-chip.din-cost-low {
+  color: var(--cl-blue);
+  background: var(--cl-blue-soft);
+}
+
+.din-cost-chip.din-cost-high {
+  color: var(--cl-amber);
+  background: var(--cl-amber-soft);
+}
+
+.din-cost-key li > span:last-child {
+  color: var(--cl-ink-muted);
+}
+
+/* -------------------------------------------------- asides (landing) -- */
+
+/* Same visual language as the codelab asides, restated here because those
+ * rules are scoped under `google-codelab`. */
+.din-aside {
+  padding: 16px 20px;
+  margin: 20px 0;
+  border-left: 4px solid;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1.55;
+  max-width: 720px;
+}
+
+.din-aside p {
+  margin: 6px 0;
+}
+
+.din-aside p:first-child { margin-top: 0; }
+.din-aside p:last-child { margin-bottom: 0; }
+
+.din-aside-special {
+  border-color: var(--cl-green);
+  background: var(--cl-green-soft);
+}
+
+.din-aside-warning {
+  border-color: #b3261e;
+  background: #fce8e6;
+}
+
+/* -------------------------------------------------------------- footer -- */
+
+.din-footer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 32px 48px;
+  border-top: 1px solid var(--cl-line);
+  margin-top: 32px;
+  font-size: 14px;
+  color: var(--cl-ink-muted);
+}
+
+@media (max-width: 600px) {
+  .din-topbar-inner,
+  .din-main,
+  .din-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .din-main {
+    padding-top: 32px;
+  }
+
+  .din-intro h1 {
+    font-size: 28px;
+  }
+
+  .din-topbar-org {
+    display: none;
+  }
+}
+
+/* ================================================== back link (codelabs) --
+ *
+ * #arrow-back stays hidden (see the note above it): codelab-elements resolves
+ * its target from ?index= and falls back to "/", which is not reliably this
+ * menu. An explicit link in each codelab's title bar is predictable instead.
+ * Injected as the first child of #codelab-title on the activity pages.
+ * ========================================================================== */
+
+google-codelab #codelab-title a.din-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 16px;
+  padding: 6px 12px;
+  border: 1px solid var(--cl-line);
+  border-radius: 100px;
+  background: var(--cl-surface);
+  color: var(--cl-ink-muted);
+  font-family: var(--cl-font-display);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  flex: none;
+  transition: border-color 120ms ease-in-out, color 120ms ease-in-out,
+    background 120ms ease-in-out;
+}
+
+google-codelab #codelab-title a.din-back:hover {
+  border-color: var(--cl-blue);
+  background: var(--cl-blue-soft);
+  color: var(--cl-blue);
+}
+
+@media (max-width: 600px) {
+  google-codelab #codelab-title a.din-back .din-back-text {
+    display: none;
+  }
+
+  google-codelab #codelab-title a.din-back {
+    margin-right: 8px;
+    padding: 6px 10px;
+  }
+}
