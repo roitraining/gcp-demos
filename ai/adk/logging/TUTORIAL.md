@@ -309,8 +309,8 @@ cloud-specific logging (Part 6 does that), you should see what Cloud Logging
 makes of the *unmodified* Part 1 script, because the answer is not what the
 common advice says.
 
-The script from 1.1 runs once and exits; it serves no HTTP. The honest way to
-run it on Cloud Run is therefore a **Job**, not a service (a service would fail
+The script from 1.1 runs once and exits; it serves no HTTP. The right way to
+run it on Cloud Run is a **Job**, not a service (a service would fail
 its readiness check with no port to probe). A Job runs the container to
 completion, and Cloud Run ingests its stdout and stderr into Cloud Logging
 automatically. [deploy/deploy_job.sh](deploy/deploy_job.sh) builds the image,
@@ -377,8 +377,8 @@ The line is on stderr (`.../logs/run.googleapis.com%2Fstderr`), and its severity
 is still Default, not ERROR. The often-repeated "stderr means ERROR" rule did not
 fire here. (It is real in some contexts, but it is not the blanket law it is
 usually stated as; 1.5 finds the same Default-not-ERROR result on a Cloud Run
-*service*.) The lesson is the same either way: **do not assume the severity of a
-plain line, check it**, because Cloud Run's guess is not reliably what you want.
+*service*.) So **do not assume the severity of a plain line, check it**: Cloud
+Run's guess is not reliably what you want.
 
 So the zero-effort deploy gets you two-thirds of the way. Your logs reach Cloud
 Logging, and the level still filters them. What you do *not* get is **correct,
@@ -577,7 +577,6 @@ the ADK CLI's timestamped `file:line` format, the same one you saw from
 `adk api_server` back in 1.3. Your `basicConfig(format=...)` did not take: the
 platform installs its own logging handler before your module runs, so it decides
 the format and the destination (stderr), and your handler config is ignored.
-This is the practical meaning of "you deploy the agent, not the server."
 
 What you *do* still control is the **level**, because setting a logger's level
 works regardless of who owns the handler. Redeploy at WARNING and send the same
@@ -598,14 +597,15 @@ SEVERITY  TEXT_PAYLOAD
 ```
 
 No `google_llm` request line, no `tool get_weather` line: the same run, silenced
-by level, exactly as it was on Cloud Run and on your laptop. So the scorecard for
+by level, exactly as it was on Cloud Run and on your laptop. The scorecard for
 native Agent Runtime is: **level, yours** (via `LOG_LEVEL`); **format, stream, and
-severity, the platform's.** Severity, incidentally, is blank/Default here too, the
-same limitation as Cloud Run, and the same reason Part 6 exists. This shapes what
-carries over from Part 4: the structured plugin you build there still works here
-(its records go through whatever handler the platform installed, and its `extra=`
-fields survive), but any formatting you try to impose from your own `dictConfig`
-will not.
+severity, the platform's.** Severity is blank/Default here too, the same
+limitation as Cloud Run, and the same reason Part 6 exists.
+
+This decides what carries over from Part 4. The structured plugin you build
+there still works here: its records go through whatever handler the platform
+installed, and its `extra=` fields survive. Any formatting you try to impose
+from your own `dictConfig` does not.
 
 > Two traps. First, `adk deploy agent_engine` **creates a new reasoning engine on
 > every deploy**; it does not update in place, so the WARNING redeploy has a new
@@ -618,8 +618,8 @@ will not.
 **Why you are here.** 1.6 deployed the agent object and let the platform serve it.
 But Agent Runtime also accepts a **container you build yourself** (bring your own
 container), which is how you run 1.5's kind of hand-written server on the managed
-platform instead of on Cloud Run. The catch, and the whole lesson of this
-section, is that the platform's contract constrains what that container must be.
+platform instead of on Cloud Run. The catch is that the platform's contract
+constrains what that container must be.
 
 A custom container on Agent Runtime is not free-form. The runtime contract
 requires it to listen on **port 8080** and implement two specific routes,
@@ -629,9 +629,9 @@ route like 1.5's is therefore not enough on its own. The smallest server that
 satisfies the contract wraps the agent in `vertexai.agent_engines.AdkApp` and
 dispatches the named method to it; that is what
 [agent_runtime_byoc/main.py](agent_runtime_byoc/main.py) does, in about ninety
-lines. Its logging is deliberately the same naive Part 1 config as 1.5, so the
-question this section answers is: with *your own* container, do you get your
-logging back, or does the platform still override it?
+lines. Its logging is deliberately the same naive Part 1 config as 1.5. This
+section tests whether your own container gives you your logging format back, or
+the platform overrides it the way it did in 1.6.
 
 **Do this.** Build, push, and register the container, then query it through the
 platform's `/api` passthrough:
@@ -693,10 +693,10 @@ on Cloud Run: the format above is yours, because your `main.py` installed the
 handler, not the platform. That is the concrete contrast with 1.6, where the same
 agent's logs came out in the platform's format. The price is implementing the
 platform's two-endpoint contract and working around the reserved-var model-region
-trap. So the choice between the two Agent Runtime deploys is really a choice about
-logging: take the managed agent object and accept the platform's format (1.6), or
-run your own container and keep your own (1.7). Severity is still Default in both;
-that is Part 6's problem regardless of which you pick.
+trap. The two Agent Runtime deploys therefore differ mainly in logging: the
+managed agent object accepts the platform's format (1.6), and your own container
+keeps your own (1.7). Severity is still Default in both; that is Part 6's problem
+regardless of which you pick.
 
 ## Part 2: why the level flag does not silence access logs
 
@@ -753,19 +753,19 @@ curl -s localhost:8081/           # then this once
 
 **What it means.** Three health checks produced **zero** log lines; the one real
 request produced exactly one. You did not lower a level, you filtered a specific
-stream. Silencing health-check spam this way is a high-value, low-effort change
-to a deployed agent. It also sets up the rest of this tutorial: to control agent
-logging well, you stop relying on a global level and start configuring each
+stream. On a busy service, that removes one log line per health check for the
+life of the deployment. It also sets up the rest of this tutorial: to control
+agent logging well, you stop relying on a global level and start configuring each
 stream deliberately.
 
 ## Part 3: a readable narration of the agent's steps
 
 **Why you are here.** INFO is too terse to debug a tool-calling problem (it tells
-you a request happened, not what the tool was called with), and DEBUG is a wall
-of raw JSON. In development you often want the middle ground: a clean,
-human-readable narration of the agentic steps, which tool ran, with which
-arguments, what it returned, how many tokens it cost, without writing that
-yourself. ADK ships two plugins for exactly this.
+you a request happened, not what the tool was called with), and DEBUG dumps the
+full model conversation as raw JSON. In development you often want the middle
+ground: a clean, human-readable narration of the agentic steps, which tool ran,
+with which arguments, what it returned, how many tokens it cost, without writing
+that yourself. ADK ships two plugins for exactly this.
 
 ### 3.1 LoggingPlugin: one line to wire up
 
@@ -810,8 +810,8 @@ information about the tool call, far less noise.
 > `print()` and ANSI color codes, **not** through the `logging` module. That is
 > perfect in a terminal and wrong for a deployed service: it ignores your
 > handlers, levels, and formatters, and the color bytes corrupt a JSON log line.
-> Use it for local debugging. When you need this information *in production*, you
-> use Part 4 instead, which is the whole reason Part 4 exists.
+> Use it for local debugging. When you need this information *in production*, use
+> the structured plugin in Part 4 instead.
 
 ### 3.2 DebugLoggingPlugin: capture one whole turn to a file
 
@@ -1045,8 +1045,8 @@ framework log all carry the same trace value:
 **What it means.** That third line is a framework log you did not write, and it
 still carries the trace, because the `ContextVar` threads it through everything
 that runs during the request. In the Logs Explorer, clicking that trace shows all
-three lines grouped as one request. For debugging a production agent, this
-correlation earns its keep faster than any other change here.
+three lines grouped as one request, so you can read a single request's whole
+lifecycle across all four streams without hunting for the lines that belong to it.
 
 ### 6.1 Deploying, and what to check afterwards
 
@@ -1107,7 +1107,8 @@ Cloud Run's own request log, which exists alongside uvicorn's `INFO:` access lin
 for the very same request. Stream 3 now has two writers, and neither is the
 `--log_level` flag's business.
 
-Now the reason Part 6 exists. Ask Cloud Logging for the severity of that tool line:
+Now ask Cloud Logging for the severity of that tool line, the problem Part 6
+exists to fix:
 
 ```bash
 gcloud logging read \
