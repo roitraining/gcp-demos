@@ -1,0 +1,15 @@
+# Dependencies for the CONTAINER built by `adk deploy cloud_run`.
+#
+# `adk deploy` only looks for a requirements.txt inside the agent folder; the
+# one at the project root is for your local venv and is never seen by the build.
+# Without this file ADK writes "# No requirements.txt found." into the generated
+# Dockerfile, and the container ships with google-adk alone.
+#
+# --otel_to_cloud makes ADK import the OTel exporters at startup, so they must
+# be installed here or the container crashes on boot with ModuleNotFoundError.
+google-adk>=2.8.0
+opentelemetry-exporter-otlp-proto-http>=1.27
+
+# Only ships pre-releases (every version is an alpha), and pip ignores those for
+# a >= range. Pin the exact version so it installs without --pre.
+opentelemetry-exporter-gcp-logging==1.15.0a0

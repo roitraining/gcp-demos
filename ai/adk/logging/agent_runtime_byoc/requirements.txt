@@ -1,0 +1,5 @@
+# Minimal deps for the BYOC container server (tutorial 1.7).
+fastapi>=0.115
+uvicorn>=0.34
+google-adk>=2.8.0
+google-cloud-aiplatform[agent_engines,adk]>=2.0
