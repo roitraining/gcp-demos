@@ -1,0 +1,23 @@
+# Container for the minimal API server (examples/09_min_api.py), tutorial 1.5.
+# Deliberately naive logging: plain text via basicConfig, uvicorn on defaults.
+# Cloud Run ingests stdout/stderr into Cloud Logging automatically, so this
+# lets you see the raw Part 1 logs (unstructured, wrong severities) in the cloud.
+
+FROM python:3.13-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY demo_agent/ ./demo_agent/
+COPY examples/_common.py ./examples/
+COPY examples/09_min_api.py ./examples/
+
+# Cloud Run sets PORT; the server reads it. Bind to 0.0.0.0 (the server does).
+ENV PORT=8080
+EXPOSE 8080
+
+# Vertex config and LOG_LEVEL are set via --set-env-vars at deploy time
+# (see deploy_api.sh); no .env is baked into the image.
+CMD ["python", "examples/09_min_api.py"]

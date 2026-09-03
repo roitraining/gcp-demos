@@ -1,0 +1,21 @@
+# Container for the plain script (examples/01_log_levels.py) as a Cloud Run Job,
+# tutorial 1.4. The script runs once and exits; a Job (not a Service) is the
+# honest fit, since the script listens on no port. Cloud Run ingests the
+# container's stdout/stderr into Cloud Logging, so this shows whether the
+# unmodified Part 1 console logs reach the cloud, and at what severity.
+
+FROM python:3.13-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY demo_agent/ ./demo_agent/
+COPY examples/_common.py ./examples/
+COPY examples/01_log_levels.py ./examples/
+
+# The level is passed as a Job argument at execution time
+# (gcloud run jobs execute ... --args=info|debug|warning), so the entrypoint
+# takes no fixed level here.
+ENTRYPOINT ["python", "examples/01_log_levels.py"]
