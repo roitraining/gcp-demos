@@ -784,9 +784,12 @@ app = App(name="demo", root_agent=root_agent, plugins=[LoggingPlugin()])
 The plugin's own docstring is blunt about its scope: it "is not a replacement of
 existing logging in ADK," but rather "helps terminal based debugging" and
 "serves as a simple demo for everyone to leverage when developing new plugins."
-Read this section as much for how to write a plugin as for what this one prints;
-the deployed sections that follow (3.2, 3.4) exist to show why a print-based dev
-tool does not belong in production, not to endorse shipping it.
+Read this section as much for how to write a plugin as for what this one prints.
+The two deployed sections that follow (3.2, 3.4) are optional. We ran these
+plugins on Cloud Run to satisfy a fair question, what would the cloud even do
+with them, and the answer is instructive. But the takeaway is that you would not
+actually ship either one; skip ahead to Part 4 if you only want the production
+path.
 
 **How the one line works.** A plugin is a set of lifecycle hooks. `BasePlugin`
 declares fourteen async callbacks, `on_user_message_callback`,
@@ -922,9 +925,12 @@ job, which is what 3.3 is for.
 
 ### 3.2 LoggingPlugin on Cloud Run
 
-**Why you are here.** The callout above is a claim about a deployed service. This
-section is the evidence. It is the same move as 1.4: deploy the unmodified script
-as a Cloud Run Job, run it, and read back what Cloud Logging did with each line.
+**Optional. Why you are here.** You would not deploy `LoggingPlugin` to a real
+service; this section exists only to satisfy the natural curiosity about what
+Cloud Run does with a print-based plugin, and the answer turns the 3.1 callout
+from a claim into evidence. It is the same move as 1.4: deploy the unmodified
+script as a Cloud Run Job, run it, and read back what Cloud Logging did with each
+line.
 [deploy/deploy_plugin_job.sh](deploy/deploy_plugin_job.sh) builds one image that
 can run either plugin example; the script to run is the Job argument, and
 `LOG_LEVEL` is an environment variable, so you can change the framework level
@@ -1117,9 +1123,11 @@ the container.
 
 ### 3.4 DebugLoggingPlugin on Cloud Run
 
-**Why you are here.** 3.3 wrote a file. A Cloud Run Job's filesystem is thrown
-away when the execution ends. So where does the capture go? The answer is a
-short, useful lesson about file-writing tools in ephemeral containers.
+**Optional. Why you are here.** Like 3.2, this is a curiosity-driven detour, not
+a step you need. You would not run `DebugLoggingPlugin` on Cloud Run in practice,
+but doing it once teaches a real lesson about file-writing tools in ephemeral
+containers. 3.3 wrote a file; a Cloud Run Job's filesystem is thrown away when
+the execution ends. So where does the capture go?
 
 **Do this**, part one, the naive deploy:
 
