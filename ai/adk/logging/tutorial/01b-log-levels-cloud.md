@@ -264,11 +264,17 @@ and implement two routes: `POST /api/reasoning_engine` (unary) and
 server that satisfies the contract, in about ninety lines. Its logging is the
 same naive Part 1 config as 1.5.
 
-**👉 Do this.** Deploy both. Each deploy script prints its reasoning engine id on
-a final `ENGINE_ID=` line, so we capture it straight into a variable instead of
-reading the resource name off and pasting it back.
+**👉 Do this.** Deploy both. Each deploy takes several minutes, and the two are
+independent (different resources, no shared files), so run them side by side in
+two terminals: start the native deploy in this terminal, then open a second
+terminal and start the BYOC deploy while the first is still running. Each deploy
+script prints its reasoning engine id on a final `ENGINE_ID=` line, so we capture
+it straight into a variable instead of reading the resource name off and pasting
+it back — and because each engine id lives in the terminal that deployed it, the
+testing below is naturally split the same way: native in terminal 1, BYOC in
+terminal 2.
 
-Set the project and region once.
+**Terminal 1 — native.** Set the project and region.
 
 **Command:**
 
@@ -279,7 +285,8 @@ export REGION=us-central1
 
 Deploy the agent object natively (the platform serves it) and capture its id. The
 deploy progress streams to stderr; the `ENGINE_ID=` marker is the one line we pull
-off stdout.
+off stdout. This runs for several minutes — leave it, and set up terminal 2 while
+it works.
 
 **Command:**
 
@@ -287,14 +294,26 @@ off stdout.
 export ENGINE_NATIVE=$(./deploy/deploy_agent_engine.sh | sed -n 's/^ENGINE_ID=//p')
 ```
 
-Then deploy your own container (BYOC — the platform hosts it) the same way.
+**Terminal 2 — BYOC.** Open a new terminal, change into the tutorial directory,
+and activate the virtualenv (the BYOC test query below needs it).
 
 **Command:**
 
 ```bash
-cd agent_runtime_byoc
-export ENGINE_BYOC=$(./deploy_byoc.sh | sed -n 's/^ENGINE_ID=//p')
-cd ..
+cd ai/adk/logging
+source .venv/bin/activate
+export PROJECT_ID=your_project
+export REGION=us-central1
+export LOCATION=$REGION
+```
+
+Then deploy your own container (BYOC — the platform hosts it) and capture its id,
+while the native deploy in terminal 1 is still running.
+
+**Command:**
+
+```bash
+export ENGINE_BYOC=$(./agent_runtime_byoc/deploy_byoc.sh | sed -n 's/^ENGINE_ID=//p')
 ```
 
 > [!WARNING]
@@ -312,7 +331,8 @@ cd ..
 >   in your own var (`MODEL_LOCATION`) and copy it over `GOOGLE_CLOUD_LOCATION`
 >   before the agent imports.
 
-**Test the native deploy.** Query through the SDK (the platform's query path is
+**Test the native deploy (terminal 1).** Once the native deploy finishes, query
+through the SDK (the platform's query path is
 not a plain REST URL you can curl), then read the logs by resource type
 (the agent and framework lines land on `reasoning_engine_stderr`, the access
 lines on `reasoning_engine_stdout`; filtering on `resource.type` catches both):
@@ -358,8 +378,9 @@ back in 1.3. Your `basicConfig(format=...)` did not take: the platform installs
 its own logging handler before your module runs, so it decides the format and the
 destination (stderr), and your handler config is ignored.
 
-**Test the BYOC deploy.** Query with the same SDK call (it is a reasoning engine
-too), then read its logs:
+**Test the BYOC deploy (terminal 2).** Once the BYOC deploy finishes, query with
+the same SDK call from terminal 2 (where `ENGINE_BYOC` is set — it is a reasoning
+engine too), then read its logs:
 
 ```bash
 .venv/bin/python - <<PY
