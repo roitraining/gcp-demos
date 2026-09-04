@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 #
-# Tutorial 3.2 and 3.4: deploy a plugin example script as a Cloud Run JOB and
-# execute it once, to see what the built-in ADK plugins send to Cloud Logging.
-# Each script runs once and exits, so a Job is the honest fit (a Service would
-# fail its readiness check with no port). One image serves both examples; the
-# script to run is the Job argument. OPTIONAL step.
+# Tutorial 3.2, 3.4, and 4: deploy a plugin example script as a Cloud Run JOB and
+# execute it once, to see what its plugin sends to Cloud Logging. Each script runs
+# once and exits, so a Job is the honest fit (a Service would fail its readiness
+# check with no port). One image serves every script; the script to run is the
+# Job argument. OPTIONAL step.
 #
 # Usage:
 #   export PROJECT_ID=your-project
@@ -20,6 +20,13 @@
 #   MOUNT=1 SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh
 #   gcloud storage cat "gs://$BUCKET/adk_debug.yaml" | head -40
 #
+#   # 4 -- StructuredTelemetryPlugin, then query the structured fields:
+#   SCRIPT=examples/05_structured_plugin.py ./deploy/deploy_plugin_job.sh
+#   gcloud logging read \
+#     'resource.type="cloud_run_job" jsonPayload.event="tool_end"' \
+#     --project="$PROJECT_ID" --freshness=15m \
+#     --format='table(jsonPayload.tool, jsonPayload.latency_ms, jsonPayload.status)'
+#
 set -euo pipefail
 
 PROJECT_ID="${PROJECT_ID:?set PROJECT_ID}"
@@ -30,8 +37,9 @@ LOG_LEVEL="${LOG_LEVEL:-INFO}"
 
 # Job name derives from the script so 03 and 04 get distinct jobs by default.
 case "$SCRIPT" in
-  *04_debug_plugin.py) DEFAULT_JOB="adk-debug-plugin-job" ;;
-  *)                   DEFAULT_JOB="adk-plugin-job" ;;
+  *04_debug_plugin.py)      DEFAULT_JOB="adk-debug-plugin-job" ;;
+  *05_structured_plugin.py) DEFAULT_JOB="adk-structured-job" ;;
+  *)                        DEFAULT_JOB="adk-plugin-job" ;;
 esac
 JOB="${JOB:-$DEFAULT_JOB}"
 
