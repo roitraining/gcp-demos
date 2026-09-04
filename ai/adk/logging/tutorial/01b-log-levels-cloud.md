@@ -33,7 +33,9 @@ gcloud run jobs execute adk-logging-job \
   --project="$PROJECT_ID" --region="$REGION" --args=warning --wait
 ```
 
-Then read the two runs back, asking for the severity of each line:
+Then read the two runs back, asking for the severity of each line.
+
+**Command:**
 
 ```bash
 gcloud logging read \
@@ -72,7 +74,9 @@ INFO      Container called exit(0).
 > `logging.basicConfig` writes to stderr, so by that rule every `INFO -
 > google_adk...` line above should read as ERROR. Look at the severity column: it
 > does not. Those lines came through with **blank (Default) severity, not ERROR**.
-> You can confirm they really are on stderr:
+> You can confirm they really are on stderr.
+
+**Command:**
 
 ```bash
 gcloud logging read \
@@ -144,7 +148,9 @@ curl -s -X POST "$API_URL_W/chat" -H 'content-type: application/json' \
      -d '{"message":"What'\''s the weather in Tokyo?"}'
 ```
 
-Read the INFO service's logs:
+Read the INFO service's logs.
+
+**Command:**
 
 ```bash
 gcloud logging read \
@@ -166,7 +172,9 @@ SEVERITY  TEXT_PAYLOAD
           INFO:     169.254.169.126:2186 - "POST /chat HTTP/1.1" 200 OK
 ```
 
-Now read the WARNING service:
+Now read the WARNING service.
+
+**Command:**
 
 ```bash
 gcloud logging read \

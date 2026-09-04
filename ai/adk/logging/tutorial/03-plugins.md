@@ -229,7 +229,9 @@ gcloud run jobs execute adk-plugin-job \
   --update-env-vars=LOG_LEVEL=WARNING --wait
 ```
 
-Then read the plugin's own lines, and separately the framework's, back:
+Then read the plugin's own lines, and separately the framework's, back.
+
+**Command:**
 
 ```bash
 # The plugin narration (stdout):
@@ -286,7 +288,9 @@ literally in the payload:
 > this information queryable is the job of Part 4, which feeds the same hook data
 > through the `logging` module instead of `print()`.
 
-Tear down when you are done:
+Tear down when you are done.
+
+**Command:**
 
 ```bash
 gcloud run jobs delete adk-plugin-job --project="$PROJECT_ID" --region="$REGION" --quiet
@@ -486,7 +490,9 @@ WARNING - google_adk.google.adk.plugins.debug_logging_plugin - Debug output file
 > Cloud Logging as one large text payload. It works, but it throws away the
 > "file, not stream" property that made the plugin worth using.
 
-Tear down when you are done:
+Tear down when you are done.
+
+**Command:**
 
 ```bash
 gcloud run jobs delete adk-debug-plugin-job --project="$PROJECT_ID" --region="$REGION" --quiet

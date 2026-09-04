@@ -219,13 +219,17 @@ framework log all carry the same trace value (trimmed):
 `06_custom_server.py` with `gcloud run deploy --source`, then runs one real turn
 against the result and fails loudly if it does not return 200.
 
+**Command:**
+
 ```bash
 export PROJECT_ID=your-project REGION=us-central1
 ./deploy/deploy_cloudrun.sh
 ```
 
 Send a turn and read back the severity of your lines, the problem this part exists
-to fix:
+to fix.
+
+**Command:**
 
 ```bash
 URL=$(gcloud run services describe adk-logging-demo \
@@ -253,7 +257,9 @@ INFO      tool_end
 ```
 
 Because each line is JSON, Cloud Logging parsed it into a `jsonPayload` object,
-so your plugin's fields are columns you can query, not text to grep:
+so your plugin's fields are columns you can query, not text to grep.
+
+**Command:**
 
 ```bash
 gcloud logging read \
@@ -287,7 +293,9 @@ get_weather  0.3         ok
 > var (via `--set-env-vars`) so it beats any default, which is why the smoke test,
 > not the deploy's exit code, is the real success check.
 
-Tear down when you are done:
+Tear down when you are done.
+
+**Command:**
 
 ```bash
 gcloud run services delete adk-logging-demo --project="$PROJECT_ID" --region="$REGION" --quiet

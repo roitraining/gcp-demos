@@ -27,6 +27,8 @@ what you see is only streams 1 and 2.
 
 #### 1.1.1 Start at INFO (the default)
 
+**Command:**
+
 ```bash
 .venv/bin/python examples/01_log_levels.py info
 ```
@@ -90,6 +92,8 @@ That is the right trade for day-to-day "is it doing roughly the right thing."
 
 #### 1.1.2 Turn it up to DEBUG
 
+**Command:**
+
 ```bash
 .venv/bin/python examples/01_log_levels.py debug
 ```
@@ -137,6 +141,8 @@ will not leak your bearer token.)
 
 #### 1.1.3 Turn it down to WARNING, then ERROR
 
+**Command:**
+
 ```bash
 .venv/bin/python examples/01_log_levels.py warning
 ```
@@ -177,6 +183,8 @@ the thing launching the process. Run it at `INFO` so the output lines up with
 
 Start the dev UI, open the URL it prints, pick **demo_agent** from the app
 dropdown, and send the same question as before:
+
+**Command:**
 
 ```bash
 adk web --log_level INFO ./

@@ -45,6 +45,8 @@ hooks = get_gcp_exporters(enable_cloud_tracing=True, enable_cloud_logging=True)
 maybe_set_otel_providers([hooks])   # note: a LIST of hooks
 ```
 
+**Command:**
+
 ```bash
 .venv/bin/python examples/08_otel_cloud.py cloud
 ```
