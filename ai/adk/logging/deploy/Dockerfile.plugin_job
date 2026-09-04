@@ -1,0 +1,20 @@
+# Container for the plugin example scripts (examples/03_logging_plugin.py and
+# examples/04_debug_plugin.py) as a Cloud Run Job, tutorial 3.2 and 3.4. Like
+# Dockerfile.job, each script runs once and exits, so a Job (not a Service) is
+# the honest fit. The difference: the script path is passed as the Job argument
+# at execution time, so one image serves both examples.
+
+FROM python:3.13-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY demo_agent/ ./demo_agent/
+COPY examples/ ./examples/
+
+# The script to run is the Job argument
+# (gcloud run jobs execute ... --args=examples/03_logging_plugin.py), so the
+# entrypoint is the interpreter with no fixed script.
+ENTRYPOINT ["python"]
