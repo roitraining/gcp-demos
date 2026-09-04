@@ -56,9 +56,17 @@ the root once.
 
 ```bash
 .venv/bin/python examples/02_tame_uvicorn.py
-# in another terminal:
-curl -s localhost:8081/healthz    # run this 3 times
-curl -s localhost:8081/           # then this once
+```
+
+In another terminal, hit the health endpoint three times and the root once.
+
+**Command:**
+
+```bash
+curl -s localhost:8081/healthz
+curl -s localhost:8081/healthz
+curl -s localhost:8081/healthz
+curl -s localhost:8081/
 ```
 
 **Expected output** — in the server terminal:

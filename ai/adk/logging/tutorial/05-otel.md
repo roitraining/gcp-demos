@@ -67,8 +67,7 @@ are elided. One environment variable controls it, and it must be set **before AD
 is imported**:
 
 ```bash
-OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT   # safe default
-# other values that DO include content: SPAN_ONLY | EVENT_ONLY | SPAN_AND_EVENT
+OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT
 ```
 
 > [!IMPORTANT]

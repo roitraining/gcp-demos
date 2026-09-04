@@ -181,7 +181,13 @@ sequenceDiagram
 
 ```bash
 GOOGLE_CLOUD_PROJECT=your_project .venv/bin/python examples/06_custom_server.py
-# in another terminal:
+```
+
+In another terminal, send the turn with a trace header.
+
+**Command:**
+
+```bash
 curl -s -X POST localhost:8080/chat \
   -H 'content-type: application/json' \
   -H 'X-Cloud-Trace-Context: 105445aa7843bc8bf206b12000100000/1;o=1' \

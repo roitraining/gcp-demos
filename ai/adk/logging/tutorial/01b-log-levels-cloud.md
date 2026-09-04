@@ -31,7 +31,7 @@ re-run at a different level without rebuilding.
 ```bash
 export PROJECT_ID=your_project
 export REGION=us-central1
-./deploy/deploy_job.sh                 # deploys, then executes at info
+./deploy/deploy_job.sh
 gcloud run jobs execute adk-logging-job \
   --project="$PROJECT_ID" \
   --region="$REGION" \
@@ -94,7 +94,6 @@ gcloud logging read \
   --limit=1 \
   --format='value(logName,textPayload)' \
   --freshness=15m
-# projects/.../logs/run.googleapis.com%2Fstderr  INFO - demo_agent.agent - tool get_weather called ...
 ```
 
 The line is on stderr (`.../logs/run.googleapis.com%2Fstderr`), and its severity
@@ -146,8 +145,8 @@ to each.
 ```bash
 export PROJECT_ID=your_project
 export REGION=us-central1
-./deploy/deploy_api.sh                                                    # INFO (default)
-SERVICE=adk-logging-api-warn LOG_LEVEL=warning ./deploy/deploy_api.sh     # WARNING
+./deploy/deploy_api.sh
+SERVICE=adk-logging-api-warn LOG_LEVEL=warning ./deploy/deploy_api.sh
 ```
 
 ```bash

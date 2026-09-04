@@ -228,7 +228,7 @@ between runs without rebuilding. Example 03 configures no logging of its own, so
 ```bash
 export PROJECT_ID=your_project
 export REGION=us-central1
-SCRIPT=examples/03_logging_plugin.py ./deploy/deploy_plugin_job.sh   # deploys adk-plugin-job, runs at INFO
+SCRIPT=examples/03_logging_plugin.py ./deploy/deploy_plugin_job.sh
 gcloud run jobs execute adk-plugin-job \
   --project="$PROJECT_ID" \
   --region="$REGION" \
@@ -241,7 +241,6 @@ Then read the plugin's own lines, and separately the framework's, back.
 **Command:**
 
 ```bash
-# The plugin narration (stdout):
 gcloud logging read \
   'resource.type="cloud_run_job" resource.labels.job_name="adk-plugin-job"
    textPayload:"logging_plugin"' \
@@ -250,7 +249,6 @@ gcloud logging read \
   --format='value(severity,textPayload)' \
   --freshness=15m
 
-# The framework lines (stderr):
 gcloud logging read \
   'resource.type="cloud_run_job" resource.labels.job_name="adk-plugin-job"
    textPayload:"google_adk"' \
@@ -443,7 +441,7 @@ the container.
 **Command:**
 
 ```bash
-SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh   # deploys adk-debug-plugin-job
+SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh
 gcloud logging read \
   'resource.type="cloud_run_job" resource.labels.job_name="adk-debug-plugin-job"' \
   --project="$PROJECT_ID" \
@@ -477,7 +475,7 @@ the per-invocation buffer, so the first entry is dropped. Notice it is a real
 **Command:**
 
 ```bash
-export BUCKET="${PROJECT_ID}-adk-debug"   # any bucket you own; created in $REGION if missing
+export BUCKET="${PROJECT_ID}-adk-debug"
 MOUNT=1 SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh
 gcloud storage cat "gs://$BUCKET/adk_debug.yaml" | head -40
 ```

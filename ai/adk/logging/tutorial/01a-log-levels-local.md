@@ -214,11 +214,9 @@ adk api_server --log_level INFO ./
 **Step 2 — Create a session and send the question (terminal 2):**
 
 ```bash
-# create a session (app name = the agent directory, demo_agent)
 curl -s -X POST localhost:8000/apps/demo_agent/users/u1/sessions/s1 \
      -H 'content-type: application/json' -d '{}'
 
-# send the turn
 curl -s -X POST localhost:8000/run \
      -H 'content-type: application/json' \
      -d '{"app_name":"demo_agent","user_id":"u1","session_id":"s1",
@@ -231,7 +229,6 @@ pull out just the answer, pipe it through:
 
 ```bash
 ... | python3 -c "import sys,json; print([p['text'] for e in json.load(sys.stdin) for p in (e.get('content') or {}).get('parts',[]) if p.get('text')][-1])"
-# The current weather in Tokyo is 27°C and humid.
 ```
 
 If the session-create call returns `409 Conflict`, that session id already
