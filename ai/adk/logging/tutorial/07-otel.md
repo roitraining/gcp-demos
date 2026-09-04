@@ -17,7 +17,7 @@ spans:
 .venv/bin/python examples/08_otel_cloud.py
 ```
 
-**You will see** the span hierarchy:
+**Expected output** — the span hierarchy:
 
 ```console
 "name": "invocation"
@@ -28,7 +28,7 @@ spans:
     "name": "call_llm"
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** This is the same run you have watched all tutorial, now shown
 > as nested timed spans: the whole invocation contains the agent, which makes a
 > first model call, executes the tool, then makes a second model call. Exported to
@@ -54,6 +54,8 @@ log name `adk-otel`. This mode needs two extra packages, already in
 `requirements.txt`: `opentelemetry-exporter-otlp-proto-http` and
 `opentelemetry-exporter-gcp-logging`.
 
+---
+
 ### 7.1 The privacy knob you must know about
 
 By default, this telemetry carries **metadata only**; prompt and response text
@@ -65,7 +67,7 @@ OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT   # safe default
 # other values that DO include content: SPAN_ONLY | EVENT_ONLY | SPAN_AND_EVENT
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** Leave it at `NO_CONTENT` in production unless you have a
 > specific, reviewed reason to capture prompts and responses, because captured
 > content then lives in your logging backend under its retention and access rules.

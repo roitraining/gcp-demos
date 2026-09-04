@@ -13,6 +13,8 @@
 > locally first, then deploys each one to Cloud Run so you can see what a plugin
 > sends to Cloud Logging, and closes with when to reach for a plugin at all.
 
+---
+
 ### 3.1 LoggingPlugin: one line to wire up
 
 A plugin attaches to the `App`. That is the whole setup, shown in
@@ -103,9 +105,10 @@ it, called out at the end of this section.
 .venv/bin/python examples/03_logging_plugin.py
 ```
 
-The example asks *"What's the weather in London?"* **You will see** the whole
-invocation narrated, one hook at a time (lightly trimmed, repeated field lines
-removed):
+The example asks *"What's the weather in London?"*
+
+**Expected output** — the whole invocation narrated, one hook at a time (lightly
+trimmed, repeated field lines removed):
 
 <details>
 <summary><b>Output</b> — full agentic-loop narration (29 lines)</summary>
@@ -144,7 +147,7 @@ removed):
 
 </details>
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** That is the full agentic loop, in order: the model saw the
 > tools and chose `get_weather`, the tool ran with `{'city': 'London'}` and
 > returned its report, the model was called a second time with that result and
@@ -173,6 +176,8 @@ job, which is what 3.3 is for.
 > Use it for local debugging. When you need this information *in production*, use
 > the structured plugin in Part 4 instead. The next section shows exactly what
 > that catch looks like once the same script runs on Cloud Run.
+
+---
 
 ### 3.2 LoggingPlugin on Cloud Run
 
@@ -218,7 +223,7 @@ gcloud logging read \
   --format='value(severity,textPayload)' --freshness=15m
 ```
 
-**You will see** two things worth stopping on.
+**Expected output** — two things worth stopping on.
 
 First, the narration is unchanged by the level. Both the INFO run and the
 WARNING run carry the full `[logging_plugin]` narration; the WARNING run just has
@@ -240,7 +245,7 @@ literally in the payload:
 <no severity>  ^[[90m[logging_plugin]    Arguments: {'city': 'London'}^[[0m
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means, finding one: the plugin is independent of the level dial.**
 > Turning stream 2 down to WARNING removed the framework's lifecycle lines and left
 > the plugin narration completely intact, because the plugin never goes through
@@ -248,7 +253,7 @@ literally in the payload:
 > is the wrong tool in production: you cannot turn it down without deleting it from
 > the code.
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means, finding two: the narration is not queryable.** Every plugin
 > line lands on stdout with Default severity and its grey ANSI codes embedded in
 > the text. It is readable in the console, but nothing in it is a field you can
@@ -262,6 +267,8 @@ Tear down when you are done:
 ```bash
 gcloud run jobs delete adk-plugin-job --project="$PROJECT_ID" --region="$REGION" --quiet
 ```
+
+---
 
 ### 3.3 DebugLoggingPlugin: capture one whole turn to a file
 
@@ -339,7 +346,7 @@ Example 04 passes `include_session_state=True` and
 `include_system_instruction=True` explicitly. Both are already the defaults; they
 are written out so you can see the knobs exist.
 
-**You will see** one YAML document for the invocation, a list of timestamped
+**Expected output** — one YAML document for the invocation, a list of timestamped
 entries:
 
 ```console
@@ -361,7 +368,7 @@ narrates: `invocation_start`, `agent_start`, `llm_request`, `llm_response`,
 `llm_response`, `event`, `agent_end`, `session_state_snapshot`,
 `invocation_end`.
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** It is the full turn on disk: exact prompt, system instruction,
 > tool arguments, tool results, token counts, and session state. Two properties
 > matter. It is buffered, so nothing reaches the file until the invocation
@@ -378,6 +385,8 @@ treated as sensitive. This is a debugging capture, not a log sink you leave
 running. Example 04 also reads its output path from a `DEBUG_OUTPUT` environment
 variable when one is set, which the next section uses to redirect the capture off
 the container.
+
+---
 
 ### 3.4 DebugLoggingPlugin on Cloud Run
 
@@ -398,7 +407,7 @@ gcloud logging read \
   --format='value(severity,textPayload)' --freshness=15m
 ```
 
-**You will see** the script's two `print()` lines and nothing resembling the
+**Expected output** — the script's two `print()` lines and nothing resembling the
 YAML:
 
 ```console
@@ -413,7 +422,7 @@ plugin's `on_user_message_callback` fires before `before_run_callback` creates
 the per-invocation buffer, so the first entry is dropped. Notice it is a real
 `logging` record on stderr, unlike anything `LoggingPlugin` emits.)
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** A file-writing plugin needs a filesystem that outlives the
 > execution. Cloud Run can mount a Cloud Storage bucket as a volume, and example 04
 > already reads its path from `DEBUG_OUTPUT`.
@@ -429,7 +438,7 @@ gcloud storage cat "gs://$BUCKET/adk_debug.yaml" | head -40
 With `MOUNT=1` the deploy script mounts `$BUCKET` at `/mnt/out` and sets
 `DEBUG_OUTPUT=/mnt/out/adk_debug.yaml` on the Job.
 
-**You will see** the same YAML document as 3.3, now read back from the bucket,
+**Expected output** — the same YAML document as 3.3, now read back from the bucket,
 with the full `entry_type` sequence intact. Check Cloud Logging for one more
 line the plugin emits about the file it just wrote:
 
@@ -437,7 +446,7 @@ line the plugin emits about the file it just wrote:
 WARNING - google_adk.google.adk.plugins.debug_logging_plugin - Debug output file /mnt/out/adk_debug.yaml is readable beyond its owner and holds whole prompts and responses; restrict it to mode 600.
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** The plugin behaved exactly as on your laptop; only the disk
 > changed. The mode warning is the plugin doing its job: the Cloud Storage FUSE
 > mount reports a mode wider than `0600`, so the plugin cannot guarantee the file
@@ -458,6 +467,8 @@ Tear down when you are done:
 ```bash
 gcloud run jobs delete adk-debug-plugin-job --project="$PROJECT_ID" --region="$REGION" --quiet
 ```
+
+---
 
 ### 3.5 Plugin or level dial?
 

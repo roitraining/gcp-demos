@@ -129,20 +129,25 @@ it is already all tables and scans fine; it only needs C4.
    -> verified each file: word sequence identical to the split commit after
    reversing the title styling and stripping alert tags (prose untouched);
    one H1 per file; no stray `▶`/`💡`
+5. [x] Change "What it means" callouts from TIP → IMPORTANT (23 swaps)
+6. [x] Scannability pass: horizontal dividers, output labels, step numbering
+   - `---` before every `##`/`###`/`####` heading (24 dividers)
+   - `**You will see**` → `**Expected output** —` (17 renames + 1 manual split)
+   - Numbered step labels on 01a section 1.3's multi-terminal flow
 
 ## Decisions (confirmed)
 
 - **D1: the beat treatments (C2), revised after pilot review.**
-  - **What it means** → a `> [!TIP]` callout (was an inline `💡` label). The
-    interpretation is now a green box that closes each section. Where it
-    introduces a table, the table rides inside the callout; elaboration
-    paragraphs after it stay as body.
+  - **What it means** → a `> [!IMPORTANT]` callout (was `[!TIP]`, was an
+    inline `💡` label). The interpretation is now a purple box that closes
+    each section. Where it introduces a table, the table rides inside the
+    callout; elaboration paragraphs after it stay as body.
   - **Do this** → inline bold label with the 👉 emoji (was `▶`; the play
     button is dropped for an action-oriented glyph).
   - Prose inside is left verbatim — markers only.
 - **D2: `<details>` collapses the >12-line blocks only.** ✅ Short blocks stay
   inline.
 - **D3: pilot both `01a` and `03`.** ✅ Short file + hardest file.
-- **D4: alert-type palette.** NOTE = framing/why-you're-here; TIP = the
-  takeaway ("What it means"), optional detours, and handy shortcuts; WARNING =
-  the gotcha that bites.
+- **D4: alert-type palette.** NOTE = framing/why-you're-here; IMPORTANT =
+  the takeaway ("What it means"); TIP = optional detours and handy shortcuts;
+  WARNING = the gotcha that bites.

@@ -14,6 +14,8 @@ Part 1 runs the same one question, *"What's the weather in Tokyo?"*, three ways:
 first through a plain script where you control the level directly (1.1), then
 through each of the two servers ADK ships (1.2, 1.3).
 
+---
+
 ### 1.1 The basic test harness
 
 [examples/01_log_levels.py](../examples/01_log_levels.py) runs that one question at
@@ -21,13 +23,15 @@ whichever level you name, using nothing but Python's standard `logging`: it sets
 the root logger and the `google_adk` group to that level. No server, no HTTP, so
 what you see is only streams 1 and 2.
 
+---
+
 #### 1.1.1 Start at INFO (the default)
 
 ```bash
 .venv/bin/python examples/01_log_levels.py info
 ```
 
-You will see:
+**Expected output:**
 
 ```console
 INFO - google_adk.google.adk.models.google_llm - Sending out request, model: gemini-3.7-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
@@ -39,7 +43,7 @@ INFO - google_adk.google.adk.models.google_llm - Response received from the mode
 >>> ANSWER: The weather in Tokyo is currently 27°C and humid.
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** Those five lines are the agent loop, in order:
 >
 > | Line | Logger | What happened |
@@ -59,14 +63,16 @@ INFO gives you the **shape** of the run without the contents: which steps ran, i
 what order, how many model calls. It does not show you the prompt or the answer.
 That is the right trade for day-to-day "is it doing roughly the right thing."
 
+---
+
 #### 1.1.2 Turn it up to DEBUG
 
 ```bash
 .venv/bin/python examples/01_log_levels.py debug
 ```
 
-Now the same run dumps the full model conversation. The important new block is
-`LLM Request`:
+**Expected output** — the same run now dumps the full model conversation. The
+important new block is `LLM Request`:
 
 ```console
 LLM Request:
@@ -82,7 +88,7 @@ Function calls:
 name: get_weather, args: {'city': 'Tokyo'}
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** DEBUG keeps every INFO line and adds the *contents* of each
 > model call. The new block breaks down as:
 >
@@ -104,17 +110,21 @@ It is verbose and includes full response bodies, so it is a debugging level, not
 something to leave on. (ADK omits auth headers from these dumps, so a DEBUG log
 will not leak your bearer token.)
 
+---
+
 #### 1.1.3 Turn it down to WARNING, then ERROR
 
 ```bash
 .venv/bin/python examples/01_log_levels.py warning
 ```
 
+**Expected output:**
+
 ```console
 >>> ANSWER: The weather in Tokyo is currently 27°C and humid.
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** Nothing from the framework at all, just your answer. At
 > WARNING and ERROR, a healthy run is silent; you only hear from the log when
 > something is wrong. Try asking about a city the tool does not know and you would
@@ -122,6 +132,8 @@ will not leak your bearer token.)
 > This is why the guidance is **INFO or WARNING in production**: WARNING keeps the
 > log quiet until there is a problem, INFO gives you a lifecycle trail if you can
 > afford the volume. Reserve DEBUG for when you are actively debugging.
+
+---
 
 ### 1.2 The same dial on `adk web`
 
@@ -156,23 +168,26 @@ as the script: two `google_llm` round trips with your `tool get_weather called
 for city='Tokyo'` line in the middle. Same agent, same level, same logs, only the
 thing driving it has changed.
 
+---
+
 ### 1.3 The same dial on `adk api_server`
 
-`adk api_server` has no UI, so you drive it with HTTP. It is a two-step flow:
-create a session, then post a message to it.
+`adk api_server` has no UI, so you drive it with HTTP.
+
+**Step 1 — Start the server (terminal 1):**
 
 ```bash
 adk api_server --log_level INFO ./
 ```
 
-In another terminal:
+**Step 2 — Create a session and send the question (terminal 2):**
 
 ```bash
-# 1. create a session (app name = the agent directory, demo_agent)
+# create a session (app name = the agent directory, demo_agent)
 curl -s -X POST localhost:8000/apps/demo_agent/users/u1/sessions/s1 \
      -H 'content-type: application/json' -d '{}'
 
-# 2. send the turn
+# send the turn
 curl -s -X POST localhost:8000/run \
      -H 'content-type: application/json' \
      -d '{"app_name":"demo_agent","user_id":"u1","session_id":"s1",
@@ -188,11 +203,12 @@ pull out just the answer, pipe it through:
 # The current weather in Tokyo is 27°C and humid.
 ```
 
-If step 1 returns `409 Conflict`, that session id already exists: sessions are
-persisted to `demo_agent/.adk/session.db` and survive restarts. Use a new id.
+If the session-create call returns `409 Conflict`, that session id already
+exists: sessions are persisted to `demo_agent/.adk/session.db` and survive
+restarts. Use a new id.
 
-Now look at the server's terminal. The framework lines are the ones you expect,
-but note the format, and note what is sitting between them:
+**Step 3 — Check the server terminal.** The framework lines are the ones you
+expect, but note the format, and note what is sitting between them:
 
 ```console
 INFO:     127.0.0.1:57453 - "POST /apps/demo_agent/users/u1/sessions/s1 HTTP/1.1" 200 OK
@@ -210,7 +226,9 @@ your tool, formatted by the ADK CLI. The bare `INFO:` lines are uvicorn's access
 log, one per HTTP request.
 
 Now turn the dial down and watch what does *not* happen. Restart with
-`--log_level WARNING` and send the same two requests:
+`--log_level WARNING` and send the same two requests.
+
+**Expected output:**
 
 ```console
 INFO:     Started server process [12706]

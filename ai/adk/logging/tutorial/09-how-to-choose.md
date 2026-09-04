@@ -2,6 +2,8 @@
 
 *The decision table, best-practice summary, verification status, and links.*
 
+---
+
 ## How to choose
 
 | You are... | Use | Why |
@@ -33,6 +35,8 @@ Best-practice summary:
 - Remember which stream a flag configures. Most confusion is a flag aimed at the
   wrong stream.
 
+---
+
 ## Beyond logging
 
 This tutorial stopped at logging and the log-facing side of tracing. The wider
@@ -46,6 +50,8 @@ observability story, briefly:
   integrate over OpenTelemetry for session replays and dashboards.
 
 The ADK observability skill and `https://adk.dev/observability/` cover these.
+
+---
 
 ## Verification status
 
@@ -85,6 +91,8 @@ Not verified here (documented, run them yourself):
   is not.
 - Reading the exported `adk-otel` entries back with `gcloud logging read`
   (needs an interactive `gcloud auth login` in your shell).
+
+---
 
 ## References
 

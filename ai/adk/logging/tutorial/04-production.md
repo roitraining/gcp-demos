@@ -37,7 +37,7 @@ asks *"What's the weather in New York?"*:
 .venv/bin/python examples/05_structured_plugin.py
 ```
 
-**You will see** one structured line per event:
+**Expected output** — one structured line per event:
 
 ```console
 {"severity": "INFO", "message": "llm_response", "agent": "weather_agent", "latency_ms": 1617.0, "input_tokens": 141, "output_tokens": 6}
@@ -45,7 +45,7 @@ asks *"What's the weather in New York?"*:
 {"severity": "INFO", "message": "tool_end", "tool": "get_weather", "latency_ms": 0.2, "status": "ok"}
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** Every line is now a machine-readable event, not prose. That is
 > the prerequisite for querying: the fields you see here (`latency_ms`, `status`,
 > `input_tokens`) become keys you can filter, aggregate, and alert on the moment
@@ -73,7 +73,7 @@ gcloud logging read \
   --format='table(jsonPayload.tool, jsonPayload.latency_ms, jsonPayload.status)'
 ```
 
-**You will see** the structured fields returned as query columns, not text you
+**Expected output** — the structured fields returned as query columns, not text you
 have to parse:
 
 ```console
@@ -81,7 +81,7 @@ TOOL         LATENCY_MS  STATUS
 get_weather  0.5         ok
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** No formatter change was needed: the JSON you saw on your laptop
 > is the JSON Cloud Logging indexed. `jsonPayload.status="error"` is now an alerting
 > condition and `jsonPayload.latency_ms` is a metric you can chart, both because the
@@ -103,6 +103,8 @@ One detail this example teaches by doing:
   `LogRecord` attributes (`args`, `name`, `message`, `module`). The example uses
   `tool_args`, not `args`, precisely because `args` collides and raises a
   `KeyError` inside the log call. (This one bites everyone once.)
+
+---
 
 ### 4.1 Callback or plugin?
 

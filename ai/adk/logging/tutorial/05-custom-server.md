@@ -53,7 +53,7 @@ curl -s -X POST localhost:8080/chat -H 'content-type: application/json' \
      -d '{"message":"weather in Tokyo?"}'
 ```
 
-**You will see** the structured telemetry from your Part 4 plugin on the server's
+**Expected output** — the structured telemetry from your Part 4 plugin on the server's
 stdout, followed by the HTTP response to the client:
 
 ```console
@@ -62,7 +62,7 @@ stdout, followed by the HTTP response to the client:
 {"response": "The weather in Tokyo is currently 27°C and humid."}
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** One process, all four streams under your control in one config
 > block, and the same structured events you designed in Part 4 now flowing out of a
 > real HTTP server. This server is what Part 6 containerizes and ships.

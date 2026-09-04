@@ -3,6 +3,8 @@
 *The same run on a Cloud Run Job and service, and on Agent Runtime — native and
 BYOC. Sections 1.1–1.3 (on your laptop) are in the [previous file](01a-log-levels-local.md).*
 
+---
+
 ### 1.4 The same script on Cloud Run, and what Cloud Logging does to it
 
 > [!NOTE]
@@ -40,7 +42,7 @@ gcloud logging read \
   --format='table(severity,textPayload)' --freshness=15m
 ```
 
-**You will see** the INFO execution carry the full lifecycle and the WARNING
+**Expected output** — the INFO execution carry the full lifecycle and the WARNING
 execution carry almost nothing (trimmed, most recent first):
 
 ```console
@@ -56,14 +58,14 @@ INFO      Container called exit(0).
 INFO      Container called exit(0).
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means, finding one: the level dial works in the cloud, unchanged.**
 > The WARNING execution shows the banner and the answer and *no* `google_adk` or
 > tool lines; the INFO execution shows the whole five-line lifecycle you know from
 > 1.1.1. Nothing about deploying changed what the level controls. This is the
 > reassuring half.
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means, finding two: severity is not what you were told.** There is a
 > rule repeated all over the Cloud Run docs and even in ADK's own source comments:
 > *a line written to stderr is recorded as ERROR severity regardless of content.*
@@ -99,6 +101,8 @@ of Part 6.
 > script's lines can arrive grouped under one Cloud Logging entry (you will see
 > the `===== running =====` banner and the lifecycle lines share an entry
 > above). That is a grouping artifact of the read, not a change to your logs.
+
+---
 
 ### 1.5 The same logging behind a real HTTP server
 
@@ -145,7 +149,7 @@ gcloud logging read \
   --format='table(severity,textPayload)' --freshness=10m
 ```
 
-**You will see** all of Part 1's streams in one place (trimmed):
+**Expected output** — all of Part 1's streams in one place (trimmed):
 
 ```console
 SEVERITY  TEXT_PAYLOAD
@@ -158,7 +162,7 @@ SEVERITY  TEXT_PAYLOAD
           INFO:     169.254.169.126:2186 - "POST /chat HTTP/1.1" 200 OK
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** Four sources, interleaved, exactly as they were on your
 > laptop: your server's own `agent.server` line, the `google_adk` framework lines,
 > your tool's `demo_agent.agent` line, and, new for a server, uvicorn's
@@ -191,7 +195,7 @@ gcloud logging read \
   --format='table(severity,textPayload)' --freshness=5m
 ```
 
-**You will see** the framework and tool lines gone, and the access line still
+**Expected output** — the framework and tool lines gone, and the access line still
 there:
 
 ```console
@@ -201,7 +205,7 @@ WARNING
           INFO:     169.254.169.126:37562 - "GET /favicon.ico HTTP/1.1" 404 Not Found
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** `LOG_LEVEL=warning` reached streams 1 and 2 (your code and
 > `google_adk`), which is why the lifecycle lines vanished, exactly as 1.1.3 taught
 > you. It did **not** reach uvicorn's access log: the `"POST /chat" 200 OK` line
@@ -216,6 +220,8 @@ WARNING
 > they are from the previous INFO revision still inside the read's freshness
 > window (you will see `Reason: DEPLOYMENT_ROLLOUT` entries marking the switch).
 > Wait for the old revision to drain, or narrow `--freshness`.
+
+---
 
 ### 1.6 The same agent on Agent Runtime, where the platform logs for you
 
@@ -272,7 +278,7 @@ gcloud logging read \
   --format='table(severity,textPayload)' --freshness=15m
 ```
 
-**You will see** the familiar lifecycle, but not in your format:
+**Expected output** — the familiar lifecycle, but not in your format:
 
 ```console
 SEVERITY  TEXT_PAYLOAD
@@ -282,7 +288,7 @@ SEVERITY  TEXT_PAYLOAD
           INFO:     169.254.169.126:54632 - "POST /api/stream_reasoning_engine HTTP/1.1" 200 OK
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means: the platform owns your log format and stream, you keep the
 > level.** Compare that tool line to 1.5. On Cloud Run it read
 > `INFO - demo_agent.agent - tool get_weather...`, your `basicConfig` format. Here
@@ -302,7 +308,7 @@ export ENGINE_ID_W=<the NEW number; a redeploy creates a new engine>
 # ...query it the same way, then read its logs...
 ```
 
-**You will see** the framework and tool lines gone:
+**Expected output** — the framework and tool lines gone:
 
 ```console
 SEVERITY  TEXT_PAYLOAD
@@ -327,6 +333,8 @@ from your own `dictConfig` does not.
 > `ENGINE_ID`. Delete the old ones when you are done (the deploy script prints the
 > teardown command). Second, `adk deploy` exits 0 even when the underlying deploy
 > failed, so the query is the real success check, not the exit code.
+
+---
 
 ### 1.7 The same server as a custom container on Agent Runtime
 
@@ -390,7 +398,7 @@ worth knowing:
   #    which initializes the genai client.
   ```
 
-**You will see** your logs in **your** format, unlike 1.6. The tool line reads
+**Expected output** — your logs in **your** format, unlike 1.6. The tool line reads
 `INFO - demo_agent.agent - tool get_weather called for city='Tokyo'` — the plain
 `basicConfig` format from 1.5, not the platform's timestamped `agent.py:53` form
 from 1.6:
@@ -403,7 +411,7 @@ SEVERITY  TEXT_PAYLOAD
           INFO:     169.254.169.126:1392 - "POST /api/stream_reasoning_engine HTTP/1.1" 200 OK
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** The BYOC container is the one place in Part 1 where, on Agent
 > Runtime, you write the server and therefore own its logging config the way you do
 > on Cloud Run: the format above is yours, because your `main.py` installed the

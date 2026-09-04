@@ -59,7 +59,7 @@ curl -s -X POST localhost:8082/chat \
   -d '{"message":"weather in San Francisco?"}'
 ```
 
-**You will see** that your app log, your plugin telemetry, **and** ADK's own
+**Expected output** — that your app log, your plugin telemetry, **and** ADK's own
 framework log all carry the same trace value:
 
 ```console
@@ -68,12 +68,14 @@ framework log all carry the same trace value:
 {"severity": "INFO", "message": "Sending out request, model: gemini-3.7-flash...", "logging.googleapis.com/trace": "projects/jwd-gcp-demos/traces/105445aa..."}
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** That third line is a framework log you did not write, and it
 > still carries the trace, because the `ContextVar` threads it through everything
 > that runs during the request. In the Logs Explorer, clicking that trace shows all
 > three lines grouped as one request, so you can read a single request's whole
 > lifecycle across all four streams without hunting for the lines that belong to it.
+
+---
 
 ### 6.1 Deploying, and what to check afterwards
 
@@ -86,6 +88,8 @@ The script deploys `demo_agent` with `adk deploy cloud_run`, then runs one real
 turn against the result. It fails loudly if the service is not `Ready` or if that
 turn does not return 200, because a Cloud Run deploy can report success and still
 be broken (see the traps below).
+
+---
 
 #### Testing the deployed service
 
@@ -115,6 +119,8 @@ Then read what it logged:
 gcloud run services logs read adk-logging-demo --region="$REGION" --limit=25
 ```
 
+**Expected output:**
+
 ```console
 POST 200 https://adk-logging-demo-....run.app/apps/demo_agent/users/u1/sessions/s1
 2026-09-03 20:57:58,739 - INFO - api_server.py:1092 - New session created: s1
@@ -128,7 +134,7 @@ POST 200 https://adk-logging-demo-....run.app/run
 INFO:     169.254.169.126:48806 - "POST /run HTTP/1.1" 200 OK
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** The five-line lifecycle trail from 1.1.1 is intact, unchanged
 > by deployment. What is new is a *third* line format: `POST 200 https://...` is
 > Cloud Run's own request log, which exists alongside uvicorn's `INFO:` access line
@@ -144,6 +150,8 @@ gcloud logging read \
   --limit=1 --format='value(severity,textPayload)'
 ```
 
+**Expected output:**
+
 ```console
 	2026-09-03 20:58:00,414 - INFO - agent.py:40 - tool get_weather called for city='Tokyo'
 ```
@@ -154,6 +162,8 @@ Logs Explorer shows it at default level. Nothing correlates it to a request
 either. This is the plain-text baseline the JSON formatter above replaces: emit
 `severity` and `logging.googleapis.com/trace` as real fields and both problems go
 away.
+
+---
 
 #### Traps
 

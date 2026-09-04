@@ -48,13 +48,13 @@ curl -s localhost:8081/healthz    # run this 3 times
 curl -s localhost:8081/           # then this once
 ```
 
-**You will see**, in the server terminal:
+**Expected output** — in the server terminal:
 
 ```console
 2026-08-31 20:08:06 - ACCESS - 127.0.0.1:51868 "GET / HTTP/1.1" 200 OK
 ```
 
-> [!TIP]
+> [!IMPORTANT]
 > **What it means.** Three health checks produced **zero** log lines; the one real
 > request produced exactly one. You did not lower a level, you filtered a specific
 > stream. On a busy service, that removes one log line per health check for the
