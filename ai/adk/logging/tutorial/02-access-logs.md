@@ -10,6 +10,17 @@
 > from your load balancer's health checks, no matter how far down you turn the
 > flag.
 
+```mermaid
+flowchart LR
+  CLI["adk web / api_server<br/>--log_level"]
+  CLI -->|"setLevel()"| S1["1 · your code"]
+  CLI -->|"setLevel()"| S2["2 · google_adk"]
+  CLI --x|"never reaches"| S3["3 · uvicorn.access"]
+  UV["uvicorn startup"] -.->|"configures<br/>independently"| S3
+```
+
+*What `--log_level` reaches. Streams 1 and 2 obey the flag; stream 3 is configured by uvicorn itself.*
+
 **The flag worked. It just does not reach this stream.** Recall the four
 streams. `--log_level` configures streams 1 and 2 (your code and `google_adk`).
 The request/access lines come from stream 3, uvicorn's `uvicorn.access` logger,

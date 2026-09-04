@@ -423,6 +423,22 @@ SEVERITY  TEXT_PAYLOAD
 > keeps your own (1.7). Severity is still Default in both; that is Part 6's problem
 > regardless of which you pick.
 
+```mermaid
+flowchart LR
+  subgraph native["1.6 · native deploy"]
+    NA["your agent code"] --> PS["platform's server"]
+    PS --> PH["platform's handler"]
+    PH --> PF["platform's format<br/>(timestamped file:line)"]
+  end
+  subgraph byoc["1.7 · BYOC container"]
+    BA["your agent code"] --> YS["your main.py + AdkApp"]
+    YS --> YH["your handler<br/>(basicConfig / dictConfig)"]
+    YH --> YF["your format"]
+  end
+```
+
+*Native vs. BYOC: who installs the logging handler decides the format. The managed deploy (1.6) uses the platform's; your container (1.7) uses yours.*
+
 ---
 
 ← Prev: [1. Log levels — local](01a-log-levels-local.md) · [Tutorial index](../TUTORIAL.md) · Next: [2. Access logs](02-access-logs.md) →

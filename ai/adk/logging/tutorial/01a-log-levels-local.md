@@ -54,6 +54,29 @@ INFO - google_adk.google.adk.models.google_llm - Response received from the mode
 > | 4 | `google_adk...google_llm` | Framework sends the tool's result back |
 > | 5 | `google_adk...google_llm` | Model answers again, this time with prose |
 
+```mermaid
+sequenceDiagram
+  participant U as user
+  participant R as runner
+  participant M as model
+  participant T as get_weather
+  U->>R: "What's the weather in Tokyo?"
+  Note right of R: ① Sending out request (google_adk)
+  R->>M: call 1 (question + tool schema)
+  M-->>R: functionCall: get_weather
+  Note right of R: ② Response received (google_adk)
+  R->>T: city = 'Tokyo'
+  Note right of R: ③ tool get_weather called (demo_agent)
+  T-->>R: 27°C and humid
+  Note right of R: ④ Sending out request (google_adk)
+  R->>M: call 2 (with tool result)
+  M-->>R: text answer
+  Note right of R: ⑤ Response received (google_adk)
+  R->>U: "27°C and humid"
+```
+
+*The agent loop with the five INFO lines. A tool call costs two model round trips; your log (③) sits between the framework's.*
+
 Two things to take away. **One round trip per model call**: a tool call always
 costs two, because the model must be re-asked once it has the tool's result.
 **Your log sits in the middle of the framework's**, distinguishable only by

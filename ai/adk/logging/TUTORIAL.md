@@ -22,6 +22,32 @@ Almost every "why don't my logs look right" problem is really "I configured one
 stream and expected it to cover another." Keep the four streams in mind as you
 read.
 
+```mermaid
+flowchart LR
+  subgraph proc["one agent process"]
+    s1["1 · your code<br/>logging.getLogger(module name)"]
+    s2["2 · ADK framework<br/>google_adk.*"]
+    s3["3 · web server<br/>uvicorn.access"]
+    s4["4 · OpenTelemetry<br/>spans + GenAI events"]
+  end
+  subgraph cfg["configured by"]
+    c1["your logging config"]
+    c2["getLogger('google_adk')<br/>or --log_level"]
+    c3["uvicorn's own log_config"]
+    c4["an exporter you install"]
+  end
+  subgraph dst["lands in"]
+    d1["stdout / stderr<br/>→ Cloud Logging"]
+    d2["Cloud Trace<br/>+ Cloud Logging (adk-otel)"]
+  end
+  s1 --> c1 --> d1
+  s2 --> c2 --> d1
+  s3 -.-> c3 -.-> d1
+  s4 --> c4 --> d2
+```
+
+*The four log streams, what configures each, and where they land.*
+
 > Verified against **google-adk 2.8.0** on Python 3.13, serving Gemini 3.7 Flash
 > through Vertex AI. Every command and every output block below is from a real
 > run. Version-sensitive details are called out inline.
@@ -90,3 +116,19 @@ One fact carries much of this tutorial: **all ADK framework loggers are children
 of `google_adk`.** You configure them as a group with
 `logging.getLogger("google_adk")`, and you can tell any framework line by its
 name, for example `google_adk.google.adk.models.google_llm`.
+
+```mermaid
+flowchart TD
+  root["root logger"]
+  root --> ga["google_adk<br/>(stream 2 · the framework group)"]
+  root --> da["demo_agent.agent<br/>(stream 1 · your tool)"]
+  root --> uv["uvicorn"]
+  root --> at["agent.telemetry<br/>(Part 4 · your namespace)"]
+  ga --> gllm["google_adk...google_llm"]
+  ga --> gsess["google_adk...sessions"]
+  ga --> gplug["google_adk...plugin_manager"]
+  uv --> ua["uvicorn.access<br/>(stream 3 · own handler)"]
+  uv --> ue["uvicorn.error"]
+```
+
+*The Python logger tree. Setting a level on `google_adk` controls every child under it; `uvicorn.access` is a separate subtree.*

@@ -52,6 +52,30 @@ before any per-agent callback. The manager uses an early-exit rule:
 > that specific event is halted, and the returned value is propagated up the
 > call stack.
 
+```mermaid
+sequenceDiagram
+  participant U as user
+  participant R as runner + plugins
+  participant M as model
+  participant T as get_weather
+  U->>R: message
+  Note over R: on_user_message · before_run · before_agent
+  Note over R: before_model
+  R->>M: call 1 (contents + tool schema)
+  M-->>R: functionCall get_weather
+  Note over R: after_model · on_event
+  Note over R: before_tool
+  R->>T: {'city': 'London'}
+  T-->>R: {'status': 'ok', …}
+  Note over R: after_tool · on_event · before_model
+  R->>M: call 2 (with tool result)
+  M-->>R: text answer
+  Note over R: after_model · on_event · after_agent · after_run
+  R->>U: answer
+```
+
+*Where the lifecycle hooks fire. The 29-line narration below walks this sequence top to bottom.*
+
 `LoggingPlugin` returns `None` from every hook, so it never short-circuits
 anything. It is a pure observer that prints and gets out of the way.
 
@@ -488,6 +512,19 @@ those lines are ever formatted. That difference buys four things:
 | Independent of the level | 3.2 proved it: WARNING silenced the framework and the plugin narration kept going |
 | One registration, app-wide | a plugin fires for every agent and tool in the `App`; a per-agent callback has to be wired onto each agent |
 | You own the sink | the same hook data feeds `print()` (3.1), a YAML file (3.3), JSON `logging` records (Part 4), or BigQuery |
+
+```mermaid
+flowchart LR
+  H["plugin hook<br/>(receives objects)"]
+  H --> P["print() → stdout<br/>3.1 · LoggingPlugin"]
+  H --> Y["YAML file<br/>3.3 · DebugLoggingPlugin"]
+  H --> L["logging record<br/>Part 4 · BasePlugin"]
+  L --> HF["handler + formatter"]
+  HF --> TXT["text on your laptop"]
+  HF --> JSON["JSON in the cloud"]
+```
+
+*Same hooks, three sinks. The Part 4 path is the one that works everywhere you deploy.*
 
 What the level dial still does better: DEBUG shows the framework's own internals,
 the wire-level request, HTTP retries, and session-service work, none of which

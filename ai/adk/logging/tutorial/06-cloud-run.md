@@ -24,6 +24,18 @@ stream is a guess, and it is not the level you logged at.) The fix is the same
 regardless of which guess your environment makes: write JSON to stdout with an
 explicit `severity` field, and stop leaving it to inference.
 
+```mermaid
+flowchart LR
+  subgraph after["after · JSON to stdout"]
+    B1["{severity: INFO, ...}"] -->|"Cloud Logging<br/>parses"| B2["severity = INFO ✓"]
+  end
+  subgraph before["before · plain text to stderr"]
+    A1["INFO - google_adk..."] -->|"Cloud Run<br/>guesses"| A2["severity = Default ✗"]
+  end
+```
+
+*Plain text vs. JSON: the severity you get depends on whether you set it yourself or let Cloud Run guess.*
+
 **Fact two: correlate every stream by trace.** Cloud Run sets an
 `X-Cloud-Trace-Context` header on each request. If you put it into the special
 `logging.googleapis.com/trace` field, formatted as
@@ -47,6 +59,24 @@ class CloudRunJsonFormatter(logging.Formatter):
         # ... plus any extra= fields from your plugin ...
         return json.dumps(entry, default=str)
 ```
+
+```mermaid
+sequenceDiagram
+  participant CR as Cloud Run
+  participant MW as middleware
+  participant Code as app + google_adk
+  participant F as formatter
+  CR->>MW: request with X-Cloud-Trace-Context
+  MW->>MW: ContextVar.set(trace id)
+  Code->>F: record: chat_request_received
+  Code->>F: record: llm_request (plugin)
+  Code->>F: record: Sending out request (google_adk)
+  Note over F: each format() reads the ContextVar
+  F-->>CR: all carry logging.googleapis.com/trace
+  Note over CR: Logs Explorer groups them as one request
+```
+
+*How the `ContextVar` threads the trace through every record, including framework logs you never touch.*
 
 **👉 Do this**, passing the trace header the way Cloud Run would:
 
