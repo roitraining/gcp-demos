@@ -12,7 +12,7 @@ BYOC. Sections 1.1–1.3 (on your laptop) are in the [previous file](01a-log-lev
 > just text on your terminal. The moment you deploy, a second system gets an
 > opinion about your logs: Cloud Logging reads each line, assigns it a
 > **severity**, and files it under a stream. Before you write a single line of
-> cloud-specific logging (Part 6 does that), you should see what Cloud Logging
+> cloud-specific logging (Part 4 does that), you should see what Cloud Logging
 > makes of the *unmodified* Part 1 script, because the answer is not what the
 > common advice says.
 
@@ -94,7 +94,7 @@ Logging, and the level still filters them. What you do *not* get is **correct,
 queryable severity**: every one of these `INFO -` lines is filed as Default, so a
 severity-based query or alert cannot tell an error from a routine step. Making
 severity a field you set, not a guess Cloud Run makes from the stream, is the job
-of Part 6.
+of Part 4.
 
 > [!NOTE]
 > One display note: Cloud Run batches burst console output, so several of the
@@ -123,24 +123,28 @@ own default access logging is left untouched. It exposes one real route,
 the servers in Parts 5 and 6, which take control of every stream; this one takes
 control of none, on purpose.)
 
-**👉 Do this.** Deploy it (unauthenticated, for demo simplicity), then send the same
-Tokyo question:
+**👉 Do this.** Deploy two copies, one at each level, then send the same question
+to each:
 
 ```bash
 export PROJECT_ID=your-project REGION=us-central1
-./deploy/deploy_api.sh                 # deploys at LOG_LEVEL=info
+./deploy/deploy_api.sh                                                    # INFO (default)
+SERVICE=adk-logging-api-warn LOG_LEVEL=warning ./deploy/deploy_api.sh     # WARNING
+```
+
+```bash
 API_URL=$(gcloud run services describe adk-logging-api \
+  --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
+API_URL_W=$(gcloud run services describe adk-logging-api-warn \
   --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
 
 curl -s -X POST "$API_URL/chat" -H 'content-type: application/json' \
      -d '{"message":"What'\''s the weather in Tokyo?"}'
+curl -s -X POST "$API_URL_W/chat" -H 'content-type: application/json' \
+     -d '{"message":"What'\''s the weather in Tokyo?"}'
 ```
 
-```json
-{"response":"The weather in Tokyo is currently 27°C and humid."}
-```
-
-Now read the logs:
+Read the INFO service's logs:
 
 ```bash
 gcloud logging read \
@@ -162,40 +166,16 @@ SEVERITY  TEXT_PAYLOAD
           INFO:     169.254.169.126:2186 - "POST /chat HTTP/1.1" 200 OK
 ```
 
-> [!IMPORTANT]
-> **What it means.** Four sources, interleaved, exactly as they were on your
-> laptop: your server's own `agent.server` line, the `google_adk` framework lines,
-> your tool's `demo_agent.agent` line, and, new for a server, uvicorn's
-> `INFO: ... "POST /chat HTTP/1.1" 200 OK` access line. Nothing here is
-> cloud-shaped; it is the raw Part 1 output, now arriving from a container.
-
-And the severity column repeats 1.4's finding on a service: every `INFO -` line
-is filed as **Default, not ERROR**, even though `basicConfig` writes them to
-stderr. So the folklore does not hold on a Cloud Run service either. Two kinds of
-line *do* carry a real severity, and neither is your application's:
-
-- `INFO` on the `Starting new instance` / `STARTUP TCP probe` lines: those are
-  Cloud Run's own platform logs, which it labels correctly.
-- `WARNING` on some rows with blank text: those are Cloud Run's built-in
-  **request log** (`run.googleapis.com/requests`), one per HTTP request, marked
-  WARNING here because the requests were `404`s (a browser hitting `/` and
-  `/favicon.ico`). That log is separate from uvicorn's access line and from your
-  app entirely.
-
-**Now turn the level down and watch the split.** Redeploy at WARNING and send the
-same request again:
+Now read the WARNING service:
 
 ```bash
-LOG_LEVEL=warning ./deploy/deploy_api.sh
-curl -s -X POST "$API_URL/chat" -H 'content-type: application/json' \
-     -d '{"message":"What'\''s the weather in Tokyo?"}'
 gcloud logging read \
-  'resource.type="cloud_run_revision" resource.labels.service_name="adk-logging-api"' \
+  'resource.type="cloud_run_revision" resource.labels.service_name="adk-logging-api-warn"' \
   --project="$PROJECT_ID" --limit=40 \
-  --format='table(severity,textPayload)' --freshness=5m
+  --format='table(severity,textPayload)' --freshness=10m
 ```
 
-**Expected output** — the framework and tool lines gone, and the access line still
+**Expected output** — the framework and tool lines gone, the access line still
 there:
 
 ```console
@@ -206,74 +186,108 @@ WARNING
 ```
 
 > [!IMPORTANT]
-> **What it means.** `LOG_LEVEL=warning` reached streams 1 and 2 (your code and
-> `google_adk`), which is why the lifecycle lines vanished, exactly as 1.1.3 taught
-> you. It did **not** reach uvicorn's access log: the `"POST /chat" 200 OK` line
-> prints regardless, because that stream is configured by uvicorn, not by your
-> level. That is the whole of Part 2, now visible in the cloud: on a busy service
-> this is one access line per request forever, health checks included, no matter
-> how far down you turn your level. Part 2 fixes it; Part 6 makes the rest of these
-> lines into structured entries with severity you can query.
-
-> [!NOTE]
-> If, right after a WARNING redeploy, you still see a few `google_adk` lines,
-> they are from the previous INFO revision still inside the read's freshness
-> window (you will see `Reason: DEPLOYMENT_ROLLOUT` entries marking the switch).
-> Wait for the old revision to drain, or narrow `--freshness`.
+> **What it means.** Four sources interleave in the INFO service, exactly as they
+> were on your laptop: your server's `agent.server` line, the `google_adk`
+> framework lines, your tool's `demo_agent.agent` line, and uvicorn's
+> `INFO: ... "POST /chat" 200 OK` access line. The severity column repeats 1.4's
+> finding: every `INFO -` line is filed as **Default, not ERROR**, even though
+> `basicConfig` writes them to stderr.
+>
+> The WARNING service confirms the split: `LOG_LEVEL=warning` reached streams 1
+> and 2 (your code and `google_adk`), so the lifecycle lines vanished. It did
+> **not** reach uvicorn's access log: the `"POST /chat" 200 OK` line prints
+> regardless, because that stream is configured by uvicorn, not by your level.
+> On a busy service this is one access line per request forever, health checks
+> included, no matter how far down you turn your level. Part 2 fixes the access
+> log; Part 4 makes the rest of these lines into structured entries with severity
+> you can query.
 
 ---
 
-### 1.6 The same agent on Agent Runtime, where the platform logs for you
+### 1.6 The same agent on Agent Runtime, two ways
 
 > [!NOTE]
 > **Why you are here.** Cloud Run (1.4, 1.5) gave you a container and got out of
 > the way: whatever you wrote to stdout/stderr is what you got. Agent Runtime
-> (Vertex AI Agent Engine) is the other place you deploy, and it is different in a
-> way that matters for logging: you deploy the **agent**, not a web server, and the
-> platform runs it for you. That means the platform, not your code, decides how
-> your logs are handled. This section shows exactly which parts of Part 1 you still
-> control there, and which the platform takes over.
+> (Vertex AI Agent Engine) is the other place you deploy, and it offers two modes:
+> you deploy the **agent object** and the platform serves it (*native*), or you
+> deploy your **own container** and the platform hosts it (*BYOC*). The key
+> question for logging is who owns the format. This section deploys both and
+> compares.
 
-You deploy with `adk deploy agent_engine`, which packages the agent directory and
+**Native deploy.** `adk deploy agent_engine` packages the agent directory and
 hands it to the platform. There is no server of yours in the picture, so there is
 no `uvicorn.run` and no `configure()` call at a `__main__`. The one hook you have
 for the log level is an environment variable: `demo_agent/agent.py` reads
 `LOG_LEVEL` at import and applies it (this tutorial added that). `adk deploy
 agent_engine` has no env flag, but it carries the agent directory's `.env` into
 the deployment, so [deploy/deploy_agent_engine.sh](../deploy/deploy_agent_engine.sh)
-writes `LOG_LEVEL` there before deploying.
+temporarily writes `LOG_LEVEL` into `.env` for the deploy and restores the
+original afterward. (Without the restore, a `LOG_LEVEL=warning` left behind by a
+deploy would override `--log_level INFO` on a later `adk web` run, because ADK
+loads the agent's `.env` at startup.)
 
-**👉 Do this.** Deploy at INFO, note the reasoning engine id it prints, and send one
-query. The query goes through the SDK (the platform's query path is not a plain
-REST URL you can curl):
+**BYOC deploy.** A custom container on Agent Runtime must listen on **port 8080**
+and implement two routes: `POST /api/reasoning_engine` (unary) and
+`POST /api/stream_reasoning_engine` (streaming), each taking a
+`{"class_method", "input"}` body.
+[agent_runtime_byoc/main.py](../agent_runtime_byoc/main.py) is the smallest
+server that satisfies the contract, in about ninety lines. Its logging is the
+same naive Part 1 config as 1.5.
+
+**👉 Do this.** Deploy both, noting the engine ID each prints:
 
 ```bash
 export PROJECT_ID=your-project REGION=us-central1
-./deploy/deploy_agent_engine.sh                 # writes LOG_LEVEL=info, deploys
-export ENGINE_ID=<the number at the end of the resource name it printed>
 
+# Native: deploy the agent object, platform serves it
+./deploy/deploy_agent_engine.sh
+export ENGINE_NATIVE=<number at the end of the resource name>
+
+# BYOC: deploy your container, platform hosts it
+cd agent_runtime_byoc
+./deploy_byoc.sh
+export ENGINE_BYOC=<number at the end of the resource name>
+cd ..
+```
+
+> [!WARNING]
+> **Setup traps the BYOC deploy surfaces.** Both are handled by the script but
+> worth knowing:
+>
+> - **The platform's service agent must be able to pull your image.** Registration
+>   fails with `FAILED_PRECONDITION` until the Reasoning Engine service agent has
+>   `roles/artifactregistry.reader`. The script grants it.
+> - **Some env var names are reserved, which breaks the model region.** Setting
+>   `GOOGLE_CLOUD_PROJECT` or `GOOGLE_CLOUD_LOCATION` in the deployment env is
+>   rejected. The platform injects those itself, but it sets
+>   `GOOGLE_CLOUD_LOCATION` to the deploy region (`us-central1`), while
+>   `gemini-3.7-flash` is served from `global`. The fix: pass the model's location
+>   in your own var (`MODEL_LOCATION`) and copy it over `GOOGLE_CLOUD_LOCATION`
+>   before the agent imports.
+
+**Test the native deploy.** Query through the SDK (the platform's query path is
+not a plain REST URL you can curl), then read the logs by resource type
+(the agent and framework lines land on `reasoning_engine_stderr`, the access
+lines on `reasoning_engine_stdout`; filtering on `resource.type` catches both):
+
+```bash
 .venv/bin/python - <<PY
 import vertexai
 c = vertexai.Client(project="$PROJECT_ID", location="$REGION")
 agent = c.agent_engines.get(
-    name="projects/$PROJECT_ID/locations/$REGION/reasoningEngines/$ENGINE_ID")
+    name="projects/$PROJECT_ID/locations/$REGION/reasoningEngines/$ENGINE_NATIVE")
 for ev in agent.stream_query(user_id="u1", message="What's the weather in Tokyo?"):
     for part in ((ev or {}).get("content") or {}).get("parts", []):
         if part.get("text"):
             print(part["text"])
 PY
-# -> The weather in Tokyo is currently 27°C and humid.
 ```
-
-Then read the logs. Read by **resource**, not by log name: the agent and
-framework lines land on the `reasoning_engine_stderr` log, while
-`reasoning_engine_stdout` carries only the web server's access lines. Filtering on
-`resource.type` catches both.
 
 ```bash
 gcloud logging read \
   'resource.type="aiplatform.googleapis.com/ReasoningEngine"
-   resource.labels.reasoning_engine_id="'"$ENGINE_ID"'"' \
+   resource.labels.reasoning_engine_id="'"$ENGINE_NATIVE"'"' \
   --project="$PROJECT_ID" --limit=30 \
   --format='table(severity,textPayload)' --freshness=15m
 ```
@@ -288,120 +302,39 @@ SEVERITY  TEXT_PAYLOAD
           INFO:     169.254.169.126:54632 - "POST /api/stream_reasoning_engine HTTP/1.1" 200 OK
 ```
 
-> [!IMPORTANT]
-> **What it means: the platform owns your log format and stream, you keep the
-> level.** Compare that tool line to 1.5. On Cloud Run it read
-> `INFO - demo_agent.agent - tool get_weather...`, your `basicConfig` format. Here
-> it reads `2026-09-03 21:51:45,037 - INFO - agent.py:53 - tool get_weather...`,
-> the ADK CLI's timestamped `file:line` format, the same one you saw from
-> `adk api_server` back in 1.3. Your `basicConfig(format=...)` did not take: the
-> platform installs its own logging handler before your module runs, so it decides
-> the format and the destination (stderr), and your handler config is ignored.
+Compare that tool line to 1.5. On Cloud Run it read
+`INFO - demo_agent.agent - tool get_weather...`, your `basicConfig` format. Here
+it reads `2026-09-03 ... - INFO - agent.py:53 - tool get_weather...`, the ADK
+CLI's timestamped `file:line` format, the same one you saw from `adk api_server`
+back in 1.3. Your `basicConfig(format=...)` did not take: the platform installs
+its own logging handler before your module runs, so it decides the format and the
+destination (stderr), and your handler config is ignored.
 
-What you *do* still control is the **level**, because setting a logger's level
-works regardless of who owns the handler. Redeploy at WARNING and send the same
-query:
+**Test the BYOC deploy.** Query with the same SDK call (it is a reasoning engine
+too), then read its logs:
 
 ```bash
-LOG_LEVEL=warning ./deploy/deploy_agent_engine.sh
-export ENGINE_ID_W=<the NEW number; a redeploy creates a new engine>
-# ...query it the same way, then read its logs...
+.venv/bin/python - <<PY
+import vertexai
+c = vertexai.Client(project="$PROJECT_ID", location="$REGION")
+agent = c.agent_engines.get(
+    name="projects/$PROJECT_ID/locations/$REGION/reasoningEngines/$ENGINE_BYOC")
+for ev in agent.stream_query(user_id="u1", message="What's the weather in Tokyo?"):
+    for part in ((ev or {}).get("content") or {}).get("parts", []):
+        if part.get("text"):
+            print(part["text"])
+PY
 ```
-
-**Expected output** — the framework and tool lines gone:
-
-```console
-SEVERITY  TEXT_PAYLOAD
-          INFO:     169.254.169.126:14600 - "POST /api/stream_reasoning_engine HTTP/1.1" 200 OK
-          2026-09-03 22:03:22,566 - INFO - envs.py:83 - Loaded .env file for demo_agent
-```
-
-No `google_llm` request line, no `tool get_weather` line: the same run, silenced
-by level, exactly as it was on Cloud Run and on your laptop. The scorecard for
-native Agent Runtime is: **level, yours** (via `LOG_LEVEL`); **format, stream, and
-severity, the platform's.** Severity is blank/Default here too, the same
-limitation as Cloud Run, and the same reason Part 6 exists.
-
-This decides what carries over from Part 4. The structured plugin you build
-there still works here: its records go through whatever handler the platform
-installed, and its `extra=` fields survive. Any formatting you try to impose
-from your own `dictConfig` does not.
-
-> [!WARNING]
-> Two traps. First, `adk deploy agent_engine` **creates a new reasoning engine on
-> every deploy**; it does not update in place, so the WARNING redeploy has a new
-> `ENGINE_ID`. Delete the old ones when you are done (the deploy script prints the
-> teardown command). Second, `adk deploy` exits 0 even when the underlying deploy
-> failed, so the query is the real success check, not the exit code.
-
----
-
-### 1.7 The same server as a custom container on Agent Runtime
-
-> [!NOTE]
-> **Why you are here.** 1.6 deployed the agent object and let the platform serve it.
-> But Agent Runtime also accepts a **container you build yourself** (bring your own
-> container), which is how you run 1.5's kind of hand-written server on the managed
-> platform instead of on Cloud Run. The catch is that the platform's contract
-> constrains what that container must be.
-
-A custom container on Agent Runtime is not free-form. The runtime contract
-requires it to listen on **port 8080** and implement two specific routes,
-`POST /api/reasoning_engine` (unary) and `POST /api/stream_reasoning_engine`
-(streaming), each taking a `{"class_method", "input"}` body. A plain `/chat`
-route like 1.5's is therefore not enough on its own. The smallest server that
-satisfies the contract wraps the agent in `vertexai.agent_engines.AdkApp` and
-dispatches the named method to it; that is what
-[agent_runtime_byoc/main.py](../agent_runtime_byoc/main.py) does, in about ninety
-lines. Its logging is deliberately the same naive Part 1 config as 1.5. This
-section tests whether your own container gives you your logging format back, or
-the platform overrides it the way it did in 1.6.
-
-**👉 Do this.** Build, push, and register the container, then query it through the
-platform's `/api` passthrough:
 
 ```bash
-cd agent_runtime_byoc
-export PROJECT_ID=your-project LOCATION=us-central1
-./deploy_byoc.sh                 # builds, pushes, grants IAM, registers
+gcloud logging read \
+  'resource.type="aiplatform.googleapis.com/ReasoningEngine"
+   resource.labels.reasoning_engine_id="'"$ENGINE_BYOC"'"' \
+  --project="$PROJECT_ID" --limit=30 \
+  --format='table(severity,textPayload)' --freshness=15m
 ```
 
-The script prints the reasoning engine resource name. Query it with the same SDK
-call as 1.6 (`stream_query`), then read its logs the same way (by
-`resource.type`, at `reasoning_engine_stderr`).
-
-**Two real setup requirements this surfaced**, both now handled by the script but
-worth knowing:
-
-- **The platform's service agent must be able to pull your image.** Registration
-  fails with `FAILED_PRECONDITION ... could not access the container image` until
-  the Reasoning Engine service agent
-  (`service-PROJECT_NUMBER@gcp-sa-aiplatform-re.iam.gserviceaccount.com`) has
-  `roles/artifactregistry.reader` on the repository. The script grants it.
-- **Some env var names are reserved, which breaks the model region.** Setting
-  `GOOGLE_CLOUD_PROJECT` or `GOOGLE_CLOUD_LOCATION` in the deployment env is
-  rejected (`'GOOGLE_CLOUD_PROJECT' is reserved`); the platform injects those
-  itself. That is a problem, not just a restriction: the platform sets
-  `GOOGLE_CLOUD_LOCATION` to the **deploy region** (`us-central1`), but
-  `gemini-3.7-flash` is served from `global`, so the first query fails with
-  `NOT_FOUND ... models/gemini-3.7-flash was not found ... in the specified
-  region`. The passthrough and the container are fine; the model lookup is in the
-  wrong place. The fix is to pass the model's location in a var of *your own*
-  (not a reserved one) and apply it before the agent imports.
-  [main.py](../agent_runtime_byoc/main.py) reads `MODEL_LOCATION` and copies it over
-  `GOOGLE_CLOUD_LOCATION` at startup:
-
-  ```python
-  if os.getenv("MODEL_LOCATION"):
-      os.environ["GOOGLE_CLOUD_LOCATION"] = os.environ["MODEL_LOCATION"]
-  # ...must run BEFORE `from demo_agent.agent import root_agent`,
-  #    which initializes the genai client.
-  ```
-
-**Expected output** — your logs in **your** format, unlike 1.6. The tool line reads
-`INFO - demo_agent.agent - tool get_weather called for city='Tokyo'` — the plain
-`basicConfig` format from 1.5, not the platform's timestamped `agent.py:53` form
-from 1.6:
+**Expected output** — your logs in **your** format, unlike the native deploy:
 
 ```console
 SEVERITY  TEXT_PAYLOAD
@@ -412,32 +345,45 @@ SEVERITY  TEXT_PAYLOAD
 ```
 
 > [!IMPORTANT]
-> **What it means.** The BYOC container is the one place in Part 1 where, on Agent
-> Runtime, you write the server and therefore own its logging config the way you do
-> on Cloud Run: the format above is yours, because your `main.py` installed the
-> handler, not the platform. That is the concrete contrast with 1.6, where the same
-> agent's logs came out in the platform's format. The price is implementing the
-> platform's two-endpoint contract and working around the reserved-var model-region
-> trap. The two Agent Runtime deploys therefore differ mainly in logging: the
-> managed agent object accepts the platform's format (1.6), and your own container
-> keeps your own (1.7). Severity is still Default in both; that is Part 6's problem
-> regardless of which you pick.
+> **What it means: who installs the handler decides the format.**
+>
+> | | Native | BYOC |
+> |---|---|---|
+> | **Level** | yours (via `LOG_LEVEL`) | yours (via `LOG_LEVEL`) |
+> | **Format** | platform's (timestamped `file:line`) | yours (`basicConfig` / `dictConfig`) |
+> | **Stream / destination** | platform's (stderr) | yours |
+> | **Severity in Cloud Logging** | Default (same as Cloud Run) | Default (same as Cloud Run) |
+>
+> The native deploy is simpler (no server to write), but the platform takes your
+> format. The BYOC deploy gives you back control of the format, at the cost of
+> implementing the two-endpoint contract and the `MODEL_LOCATION` workaround. In
+> both cases you keep the level, and in both cases severity is still
+> blank/Default. That is Part 4's problem regardless of which you pick.
 
 ```mermaid
 flowchart LR
-  subgraph native["1.6 · native deploy"]
+  subgraph native["native deploy"]
     NA["your agent code"] --> PS["platform's server"]
     PS --> PH["platform's handler"]
     PH --> PF["platform's format<br/>(timestamped file:line)"]
   end
-  subgraph byoc["1.7 · BYOC container"]
+  subgraph byoc["BYOC container"]
     BA["your agent code"] --> YS["your main.py + AdkApp"]
     YS --> YH["your handler<br/>(basicConfig / dictConfig)"]
     YH --> YF["your format"]
   end
 ```
 
-*Native vs. BYOC: who installs the logging handler decides the format. The managed deploy (1.6) uses the platform's; your container (1.7) uses yours.*
+This decides what carries over from Part 4. The structured plugin you build
+there still works in both deploys: its records go through whatever handler is
+installed, and its `extra=` fields survive. Any formatting you try to impose from
+your own `dictConfig` works in BYOC and is ignored in native.
+
+> [!WARNING]
+> `adk deploy agent_engine` **creates a new reasoning engine on every deploy**; it
+> does not update in place. Delete the old ones when you are done (both deploy
+> scripts print teardown commands). And `adk deploy` exits 0 even when the deploy
+> failed, so the query is the real success check, not the exit code.
 
 ---
 

@@ -52,7 +52,7 @@ Done. The script's stdout/stderr went to Cloud Logging. Read it back:
 Watch the SEVERITY column. Because 01_log_levels.py uses logging.basicConfig,
 its records are written to stderr, which Cloud Run records as ERROR severity
 regardless of the record's own level (the print()ed answer, on stdout, comes
-through as Default/INFO). That mismatch is the problem Part 6 fixes with JSON
+through as Default/INFO). That mismatch is the problem Part 4 fixes with JSON
 on stdout and an explicit severity field.
 
   # Re-run at a different level without redeploying:

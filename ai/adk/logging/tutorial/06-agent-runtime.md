@@ -1,12 +1,13 @@
-# Part 8 · Agent Runtime
+# Part 6 · Agent Runtime
 
 *The telemetry layer on Vertex AI Agent Engine, and what plugin code carries over.*
 
 > [!NOTE]
 > **Why you are here.** Agent Engine is the other place you deploy. You already met
 > its logging behavior hands-on in 1.6 (deploy the agent object, the platform owns
-> the format) and 1.7 (deploy your own container, you keep your format). This part
-> adds the telemetry layer on top of that and states the operational facts once.
+> the format) and BYOC (deploy your own container, you keep your format). This
+> part adds the telemetry layer on top of that and states the operational facts
+> once.
 
 What deploying the agent (1.6, native) means in practice:
 
@@ -33,16 +34,16 @@ gcloud logging read \
 **The reuse that matters.** Your Part 4 structured plugin still works here
 unchanged: its records go to stdout and are captured, so you get the same
 structured fields on Agent Engine that you get on Cloud Run. The one thing you
-drop is the trace-header parsing from Part 6, because the platform handles request
+drop is the trace-header parsing from Part 4, because the platform handles request
 correlation for you. Write the plugin once, use it in three places (local server,
 Cloud Run, Agent Engine).
 
 If you scaffold with `agents-cli`, the generated project wires a
 `setup_telemetry()` for you and gates a richer prompt-response logging tier on a
 `LOGS_BUCKET_NAME` (exported to GCS and BigQuery). That is the same OTel machinery
-from Part 7, pre-wired.
+from Part 5, pre-wired.
 
 ---
 
-← Prev: [7. OpenTelemetry](07-otel.md) · [Tutorial index](../TUTORIAL.md) · Next: [How to choose & reference](09-how-to-choose.md) →
+← Prev: [5. OpenTelemetry](05-otel.md) · [Tutorial index](../TUTORIAL.md) · Next: [How to choose & reference](07-how-to-choose.md) →
 

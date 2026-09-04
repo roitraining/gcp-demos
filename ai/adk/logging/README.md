@@ -27,8 +27,7 @@ Start with **[TUTORIAL.md](TUTORIAL.md)**.
 | [examples/03_logging_plugin.py](examples/03_logging_plugin.py) | Built-in `LoggingPlugin` for live terminal narration. |
 | [examples/04_debug_plugin.py](examples/04_debug_plugin.py) | `DebugLoggingPlugin`: full invocation capture to YAML. |
 | [examples/05_structured_plugin.py](examples/05_structured_plugin.py) | Custom `BasePlugin` emitting real JSON `logging` records. |
-| [examples/06_custom_server.py](examples/06_custom_server.py) | Streamlined ADK 2.x server; you own the `dictConfig`. |
-| [examples/07_cloudrun_json.py](examples/07_cloudrun_json.py) | Cloud Run JSON logs with trace correlation. |
+| [examples/06_custom_server.py](examples/06_custom_server.py) | Cloud Run-ready ADK 2.x server; you own the `dictConfig`, with explicit `severity` and per-request trace correlation. |
 | [examples/08_otel_cloud.py](examples/08_otel_cloud.py) | OTel GenAI telemetry to Cloud Trace + Cloud Logging. |
 | [deploy/](deploy/) | Dockerfile and deploy scripts for Cloud Run and Agent Engine. |
 

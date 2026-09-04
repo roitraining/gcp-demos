@@ -63,12 +63,10 @@ one you need.
 | [1. Log levels — cloud & Agent Runtime](tutorial/01b-log-levels-cloud.md) | The same run on a Cloud Run Job and service, and on Agent Runtime (native and BYOC). |
 | [2. Access logs](tutorial/02-access-logs.md) | Why `--log_level` never silences uvicorn's access log, and how to filter it. |
 | [3. Plugins](tutorial/03-plugins.md) | `LoggingPlugin` and `DebugLoggingPlugin` for readable step narration, local and on Cloud Run. |
-| [4. Production logging](tutorial/04-production.md) | A `BasePlugin` that emits queryable JSON `logging` records; callback vs. plugin. |
-| [5. Custom server](tutorial/05-custom-server.md) | A hand-written FastAPI server where one `dictConfig` owns all four streams. |
-| [6. Cloud Run](tutorial/06-cloud-run.md) | First-class logs: explicit `severity` and a trace field that groups a request. |
-| [7. OpenTelemetry](tutorial/07-otel.md) | Stream 4: GenAI spans to Cloud Trace, and the content-capture privacy knob. |
-| [8. Agent Runtime](tutorial/08-agent-runtime.md) | The telemetry layer on Vertex AI Agent Engine, and what plugin code carries over. |
-| [How to choose & reference](tutorial/09-how-to-choose.md) | The decision table, best-practice summary, verification status, and references. |
+| [4. Structured logging](tutorial/04-production.md) | A JSON `BasePlugin`, a custom server that owns all four streams, and that server on Cloud Run with explicit `severity` and a trace field that groups a request. |
+| [5. OpenTelemetry](tutorial/05-otel.md) | Stream 4: GenAI spans to Cloud Trace, and the content-capture privacy knob. |
+| [6. Agent Runtime](tutorial/06-agent-runtime.md) | The telemetry layer on Vertex AI Agent Engine, and what plugin code carries over. |
+| [How to choose & reference](tutorial/07-how-to-choose.md) | The decision table, best-practice summary, verification status, and references. |
 
 ## Setup
 

@@ -13,7 +13,7 @@ What to notice
   ``on_tool_error_callback``) are where you hook in.
 * It logs through ``logging.getLogger("agent.telemetry")``, so it obeys whatever
   handler/formatter you configure. Here we attach a tiny JSON formatter to prove
-  the point; example 07 reuses this exact idea for Cloud Run.
+  the point; example 06 reuses this exact idea for the custom server.
 * It records latency and token usage. ``extra={...}`` fields ride along on the
   record and become structured fields in the JSON output.
 * Plugin vs callback: a plugin is app-wide (every agent, every tool). Per-agent
@@ -141,7 +141,7 @@ class StructuredTelemetryPlugin(BasePlugin):
 
 
 class JsonFormatter(logging.Formatter):
-    """Minimal JSON line formatter. Example 07 extends this for Cloud Run."""
+    """Minimal JSON line formatter. Example 06 extends this for Cloud Run."""
 
     # Attributes present on every LogRecord; anything else was passed via extra.
     _RESERVED = set(

@@ -1,16 +1,20 @@
-# Part 4 · Production logging
+# Part 4 · Structured logging
 
-*A `BasePlugin` that emits queryable JSON `logging` records — plus callback vs.
-plugin.*
+*A JSON plugin, a custom server that owns all four streams, and the same server
+shipped to Cloud Run with first-class severity and per-request trace grouping.*
 
 > [!NOTE]
 > **Why you are here.** You want the visibility of Part 3, but for a running
 > service you can query, alert on, and correlate. That rules out `LoggingPlugin`
-> (it prints) and DEBUG (it is unstructured text). The answer is to write a small
-> plugin whose callbacks emit **real `logging` records** with structured fields.
-> Because they go through the `logging` module, your handlers and formatters apply,
-> so the *same plugin* prints readable text on your laptop and clean JSON in the
-> cloud (Part 6). Write it once, reuse it everywhere you deploy.
+> (it prints) and DEBUG (it is unstructured text). This part builds the answer in
+> three moves: a plugin that emits structured `logging` records (4.1), a
+> hand-written server where one config owns every stream (4.2), and that exact
+> server deployed to Cloud Run, where the JSON you saw on your laptop becomes
+> queryable Cloud Logging entries with correct severity and a shared trace (4.3).
+
+---
+
+### 4.1 The structured plugin
 
 A plugin's callbacks are the hook points. From
 [examples/05_structured_plugin.py](../examples/05_structured_plugin.py), the
@@ -50,52 +54,7 @@ asks *"What's the weather in New York?"*:
 > the prerequisite for querying: the fields you see here (`latency_ms`, `status`,
 > `input_tokens`) become keys you can filter, aggregate, and alert on the moment
 > these lines reach a log store. Nothing here is terminal-specific either, so the
-> same script proves the point in the cloud.
-
-**👉 Do this on Cloud Run.** Example 05 runs once and exits, so it is a Cloud Run
-Job, exactly like the plugin scripts in 3.2 and 3.4, and the same deploy helper
-takes this script as its argument:
-
-```bash
-export PROJECT_ID=your-project REGION=us-central1
-SCRIPT=examples/05_structured_plugin.py ./deploy/deploy_plugin_job.sh
-```
-
-Cloud Run ingests the container's stdout automatically, and because each line is
-JSON, Cloud Logging parses it into a `jsonPayload` object with your fields as keys.
-The claim above is now a real query, filtering to one event type and reading
-latency as a number:
-
-```bash
-gcloud logging read \
-  'resource.type="cloud_run_job" jsonPayload.event="tool_end"' \
-  --project="$PROJECT_ID" --freshness=15m \
-  --format='table(jsonPayload.tool, jsonPayload.latency_ms, jsonPayload.status)'
-```
-
-**Expected output** — the structured fields returned as query columns, not text you
-have to parse:
-
-```console
-TOOL         LATENCY_MS  STATUS
-get_weather  0.5         ok
-```
-
-> [!IMPORTANT]
-> **What it means.** No formatter change was needed: the JSON you saw on your laptop
-> is the JSON Cloud Logging indexed. `jsonPayload.status="error"` is now an alerting
-> condition and `jsonPayload.latency_ms` is a metric you can chart, both because the
-> plugin emitted structured fields instead of prose, and `severity` rode along in
-> the JSON, so Cloud Logging shows these as `INFO` rather than guessing. Part 6
-> extends that to a long-running Service, putting the same correct severity *and* a
-> shared trace id on **every** stream, including the framework and access logs your
-> plugin never touches, so all of one request's lines group together.
-
-Tear down the job when you are done:
-
-```bash
-gcloud run jobs delete adk-structured-job --project="$PROJECT_ID" --region="$REGION" --quiet
-```
+> same records prove the point in the cloud once a server emits them.
 
 One detail this example teaches by doing:
 
@@ -106,7 +65,237 @@ One detail this example teaches by doing:
 
 ---
 
-### 4.1 Callback or plugin?
+### 4.2 A custom server that owns all four streams
+
+> [!NOTE]
+> **Why you are here.** You are not using `adk web`, `adk api_server`, or ADK's
+> `get_fast_api_app` helper. You have a hand-written FastAPI service (a common
+> situation once you need custom routes, auth, or streaming), and you want to
+> configure all four streams in one place. `get_fast_api_app` has no `log_level`
+> parameter either, so owning the logging config is the norm for any custom
+> server, not an edge case. Because you own it, the same config that reads well on
+> your laptop is the one that produces Cloud Run-ready JSON, so 4.3 ships this
+> server unchanged.
+
+[examples/06_custom_server.py](../examples/06_custom_server.py) is a complete,
+minimal server built on current ADK 2.x idioms. The shape to copy:
+
+```python
+# Build an App with your plugins, hand it to a Runner, close it on shutdown.
+adk_app = App(name="custom_server", root_agent=root_agent,
+              plugins=[StructuredTelemetryPlugin()])   # the 4.1 plugin
+
+@asynccontextmanager
+async def lifespan(app):
+    app.state.runner = Runner(app=adk_app, session_service=InMemorySessionService())
+    yield
+    await app.state.runner.close()      # releases plugin/toolset resources
+```
+
+Passing `app=` to the `Runner` is the recommended ADK 2.x form; passing
+`plugins=` to the `Runner` still works but is deprecated. For logging, a single
+`dictConfig` at startup is the clean way to set up every stream at once: your
+telemetry logger, the `google_adk` group's level, the root handler, and the
+`uvicorn.access` filter from Part 2. It is also where you tame framework noise
+with a truncating filter, so one runaway DEBUG line cannot blow out your log:
+
+```python
+class TruncateFilter(logging.Filter):
+    def __init__(self, max_length=200):
+        super().__init__(); self.max_length = max_length
+    def filter(self, record):
+        msg = record.getMessage()
+        if len(msg) > self.max_length:
+            record.msg = msg[: self.max_length] + " ...[truncated]"
+            record.args = ()
+        return True
+```
+
+**Two Cloud Run facts the formatter encodes.** Because this server writes to
+stdout and Cloud Run ingests stdout into Cloud Logging for free, the only job left
+is to make each line a good JSON object. Two special fields do it:
+
+- **`severity` lives in the JSON, not in the stream.** You saw in 1.4 and 1.5 that
+  Cloud Run does *not* reliably map a stream to a severity: the plain `INFO -`
+  lines landed as **Default**. The fix is to write the level as a field, not leave
+  it to inference. `CloudRunJsonFormatter` sets `severity` from the record's own
+  level.
+- **`logging.googleapis.com/trace` groups a request.** Cloud Run sets an
+  `X-Cloud-Trace-Context` header on each request. Put it into that special field,
+  formatted as `projects/PROJECT_ID/traces/TRACE_ID`, and the Logs Explorer groups
+  every line of one request together, across all four streams.
+
+```mermaid
+flowchart LR
+  subgraph after["after · JSON to stdout"]
+    B1["{severity: INFO, ...}"] -->|"Cloud Logging<br/>parses"| B2["severity = INFO ✓"]
+  end
+  subgraph before["before · plain text to stderr"]
+    A1["INFO - google_adk..."] -->|"Cloud Run<br/>guesses"| A2["severity = Default ✗"]
+  end
+```
+
+*Plain text vs. JSON: the severity you get depends on whether you set it yourself or let Cloud Run guess.*
+
+The clever part is a `contextvars.ContextVar`: the server parses the trace once at
+the start of each request, and the formatter reads it for **every** record emitted
+while that request is handled, including the deep `google_adk` framework logs you
+never touch:
+
+```python
+current_trace: ContextVar[str | None] = ContextVar("current_trace", default=None)
+
+class CloudRunJsonFormatter(logging.Formatter):
+    def format(self, record):
+        entry = {"severity": record.levelname, "message": record.getMessage()}
+        trace_id = current_trace.get()
+        if trace_id and PROJECT_ID:
+            entry["logging.googleapis.com/trace"] = f"projects/{PROJECT_ID}/traces/{trace_id}"
+        # ... plus any extra= fields from your plugin ...
+        return json.dumps(entry, default=str)
+```
+
+```mermaid
+sequenceDiagram
+  participant CR as Cloud Run
+  participant MW as middleware
+  participant Code as app + google_adk
+  participant F as formatter
+  CR->>MW: request with X-Cloud-Trace-Context
+  MW->>MW: ContextVar.set(trace id)
+  Code->>F: record: chat_request_received
+  Code->>F: record: llm_request (plugin)
+  Code->>F: record: Sending out request (google_adk)
+  Note over F: each format() reads the ContextVar
+  F-->>CR: all carry logging.googleapis.com/trace
+  Note over CR: Logs Explorer groups them as one request
+```
+
+*How the `ContextVar` threads the trace through every record, including framework logs you never touch.*
+
+**👉 Do this**, passing the trace header the way Cloud Run would:
+
+```bash
+GOOGLE_CLOUD_PROJECT=your-project .venv/bin/python examples/06_custom_server.py
+# in another terminal:
+curl -s -X POST localhost:8080/chat \
+  -H 'content-type: application/json' \
+  -H 'X-Cloud-Trace-Context: 105445aa7843bc8bf206b12000100000/1;o=1' \
+  -d '{"message":"weather in Tokyo?"}'
+```
+
+**Expected output** — your app log, your plugin telemetry, **and** ADK's own
+framework log all carry the same trace value (trimmed):
+
+```console
+{"severity": "INFO", "message": "chat_request_received", "logging.googleapis.com/trace": "projects/jwd-gcp-demos/traces/105445aa...", "user_id": "web-user"}
+{"severity": "INFO", "message": "llm_request", "logging.googleapis.com/trace": "projects/jwd-gcp-demos/traces/105445aa...", "event": "llm_request", "agent": "weather_agent"}
+{"severity": "INFO", "message": "Sending out request, model: gemini-3.7-flash, ...", "logging.googleapis.com/trace": "projects/jwd-gcp-demos/traces/105445aa..."}
+{"severity": "INFO", "message": "tool_start", "logging.googleapis.com/trace": "projects/jwd-gcp-demos/traces/105445aa...", "event": "tool_start", "tool": "get_weather", "tool_args": {"city": "Tokyo"}}
+{"severity": "INFO", "message": "tool get_weather called for city='Tokyo'", "logging.googleapis.com/trace": "projects/jwd-gcp-demos/traces/105445aa..."}
+{"severity": "INFO", "message": "tool_end", "logging.googleapis.com/trace": "projects/jwd-gcp-demos/traces/105445aa...", "event": "tool_end", "tool": "get_weather", "latency_ms": 0.3, "status": "ok"}
+```
+
+> [!IMPORTANT]
+> **What it means.** One process, all four streams under your control in one config
+> block, and the same structured events you designed in 4.1 now flowing out of a
+> real HTTP server. That third-from-last group is worth a second look: the
+> `tool get_weather called` line and the `Sending out request` line are logs you
+> did **not** write, and they still carry the trace, because the `ContextVar`
+> threads it through everything that runs during the request. This is the server
+> 4.3 containerizes and ships, unchanged.
+
+---
+
+### 4.3 The same server on Cloud Run
+
+> [!NOTE]
+> **Why you are here.** On your laptop the JSON is just text on your terminal. The
+> payoff is what Cloud Logging does with it: `severity` becomes a queryable level
+> and the trace field groups a request. This is the fix for the blank-severity
+> problem you diagnosed in 1.4 and 1.5, now applied to the server you actually run.
+
+[deploy/deploy_cloudrun.sh](../deploy/deploy_cloudrun.sh) containerizes
+`06_custom_server.py` with `gcloud run deploy --source`, then runs one real turn
+against the result and fails loudly if it does not return 200.
+
+```bash
+export PROJECT_ID=your-project REGION=us-central1
+./deploy/deploy_cloudrun.sh
+```
+
+Send a turn and read back the severity of your lines, the problem this part exists
+to fix:
+
+```bash
+URL=$(gcloud run services describe adk-logging-demo \
+        --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
+
+curl -s -X POST "$URL/chat" -H 'content-type: application/json' \
+     -d '{"message":"What'\''s the weather in Tokyo?"}'
+
+gcloud logging read \
+  'resource.type="cloud_run_revision" resource.labels.service_name="adk-logging-demo" severity>=INFO' \
+  --project="$PROJECT_ID" --limit=20 \
+  --format='table(severity, jsonPayload.message)' --freshness=10m
+```
+
+**Expected output** — a real `INFO` in the severity column, not the blank you got
+from plain text in 1.5:
+
+```console
+SEVERITY  MESSAGE
+INFO      chat_request_received
+INFO      llm_request
+INFO      Sending out request, model: gemini-3.7-flash, ...
+INFO      tool get_weather called for city='Tokyo'
+INFO      tool_end
+```
+
+Because each line is JSON, Cloud Logging parsed it into a `jsonPayload` object,
+so your plugin's fields are columns you can query, not text to grep:
+
+```bash
+gcloud logging read \
+  'resource.type="cloud_run_revision" jsonPayload.event="tool_end"' \
+  --project="$PROJECT_ID" --limit=5 \
+  --format='table(jsonPayload.tool, jsonPayload.latency_ms, jsonPayload.status)' --freshness=10m
+```
+
+**Expected output** — the structured fields returned as query columns:
+
+```console
+TOOL         LATENCY_MS  STATUS
+get_weather  0.3         ok
+```
+
+> [!IMPORTANT]
+> **What it means.** No formatter change between laptop and cloud: the JSON you saw
+> in 4.2 is the JSON Cloud Logging indexed. `jsonPayload.status="error"` is now an
+> alerting condition and `jsonPayload.latency_ms` is a metric you can chart, both
+> because the plugin emitted structured fields, and `severity` rode along so Cloud
+> Logging shows these at their real level rather than guessing. And because Cloud
+> Run supplies a real `X-Cloud-Trace-Context` per request, clicking one line's
+> trace in the Logs Explorer shows the whole request's lifecycle grouped, framework
+> and access lines included, without hunting for the lines that belong to it.
+
+> [!WARNING]
+> **Your model's region is not your service's region.** This agent's model lives in
+> `global` while the service runs in `us-central1`. If the container resolves the
+> wrong one the deploy *succeeds* and then every `/chat` returns 500 wrapping a 404
+> for the model. The script sets `GOOGLE_CLOUD_LOCATION` as a real Cloud Run env
+> var (via `--set-env-vars`) so it beats any default, which is why the smoke test,
+> not the deploy's exit code, is the real success check.
+
+Tear down when you are done:
+
+```bash
+gcloud run services delete adk-logging-demo --project="$PROJECT_ID" --region="$REGION" --quiet
+```
+
+---
+
+### 4.4 Callback or plugin?
 
 > [!NOTE]
 > **Why you are here.** The plugin above is one of two ways to emit your own
@@ -182,5 +371,4 @@ same queryable record.
 
 ---
 
-← Prev: [3. Plugins](03-plugins.md) · [Tutorial index](../TUTORIAL.md) · Next: [5. Custom server](05-custom-server.md) →
-
+← Prev: [3. Plugins](03-plugins.md) · [Tutorial index](../TUTORIAL.md) · Next: [5. OpenTelemetry](05-otel.md) →

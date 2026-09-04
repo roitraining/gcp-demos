@@ -12,7 +12,7 @@ show up unchanged.
 The point is to deploy this to Cloud Run (tutorial 1.5) and see the raw,
 unstructured Part 1 logs land in Cloud Logging: your ``demo_agent.agent`` line,
 the ``google_adk`` framework lines, and uvicorn's access lines, all as plain
-text, none of them structured. That is the "before" picture. Part 5 onward is
+text, none of them structured. That is the "before" picture. Part 4 onward is
 the "after".
 
 Contrast with examples 06/07: those own the logging config with a ``dictConfig``

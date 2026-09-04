@@ -1,4 +1,4 @@
-# Part 7 · OpenTelemetry
+# Part 5 · OpenTelemetry
 
 *Stream 4 — GenAI spans to Cloud Trace, and the content-capture privacy knob.*
 
@@ -82,5 +82,5 @@ OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT   # safe default
 
 ---
 
-← Prev: [6. Cloud Run](06-cloud-run.md) · [Tutorial index](../TUTORIAL.md) · Next: [8. Agent Runtime](08-agent-runtime.md) →
+← Prev: [4. Structured logging](04-production.md) · [Tutorial index](../TUTORIAL.md) · Next: [6. Agent Runtime](06-agent-runtime.md) →
 

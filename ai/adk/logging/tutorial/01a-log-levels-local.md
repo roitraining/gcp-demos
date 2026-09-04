@@ -168,7 +168,7 @@ each take a **`--log_level`** flag (plus `-v`, shorthand for `--log_level
 DEBUG`). The flag is not part of your agent and not part of the ADK library. It
 belongs to those two commands, and all it does is make the same `logging` calls
 on your behalf before starting the server. Launch the agent any other way and the
-flag does not exist: in Part 5 you write your own server and configure logging
+flag does not exist: in Part 4 you write your own server and configure logging
 yourself, because there is no CLI in the picture to do it for you.
 
 So: same dial as 1.1, reachable from the command line only because the ADK CLI is

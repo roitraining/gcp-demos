@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Tutorial 1.7: build the minimal custom container and deploy it to Agent
+# Tutorial 1.6 (BYOC): build the minimal custom container and deploy it to Agent
 # Runtime (bring-your-own-container). Unlike deploy_agent_engine.sh (which
 # deploys the AGENT object via `adk deploy`), this ships OUR own FastAPI server
 # (main.py) as a container. There is no gcloud CLI for Agent Runtime, so the

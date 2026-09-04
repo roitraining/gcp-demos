@@ -7,8 +7,9 @@
 # Log level: on a native deploy there is no server script of ours to set the
 # level, so demo_agent/agent.py reads it from the LOG_LEVEL env var. `adk deploy
 # agent_engine` has no env-var flag; it carries the agent directory's .env into
-# the deployed agent, so this script writes LOG_LEVEL into demo_agent/.env (plus
-# the Vertex config the agent needs) before deploying.
+# the deployed agent, so this script temporarily writes LOG_LEVEL into
+# demo_agent/.env for the deploy and restores the original afterward, so the
+# deploy value does not leak into local `adk web` runs.
 #
 # Usage:
 #   export PROJECT_ID=your-project
@@ -22,6 +23,11 @@ PROJECT_ID="${PROJECT_ID:?set PROJECT_ID}"
 REGION="${REGION:-us-central1}"
 LOG_LEVEL="${LOG_LEVEL:-info}"
 MODEL_LOCATION="${MODEL_LOCATION:-global}"
+
+# Save the original .env and restore it after deploy (success or failure), so
+# LOG_LEVEL does not leak into local runs like `adk web`.
+_ORIG_ENV="$(cat ./demo_agent/.env 2>/dev/null || true)"
+trap 'printf "%s\n" "$_ORIG_ENV" > ./demo_agent/.env' EXIT
 
 # Write the env the deployed agent needs. `adk deploy agent_engine` copies the
 # agent directory's .env into the deployment.
