@@ -122,12 +122,13 @@ it is already all tables and scans fine; it only needs C4.
 
 ## Rollout
 
-1. [ ] Pilot on `01a` (short, representative) — apply C1-C4, push, review rendered on GitHub
-2. [ ] Adjust the glyph/emoji taste call from the pilot
-3. [ ] Apply the agreed system to `01b, 02–08`
-4. [ ] `09`: C4 only
-   -> verify each step: `git diff --word-diff` shows **only** marker/alert/`<details>`
-   lines added, never a changed word of prose
+1. [x] Pilot on `01a` + `03`, push, review rendered on GitHub
+2. [x] Adjust from review: What it means → TIP callout; Do this → 👉 (dropped ▶)
+3. [x] Apply the agreed system to `01b, 02, 04–08`
+4. [x] `09`: title + dek only
+   -> verified each file: word sequence identical to the split commit after
+   reversing the title styling and stripping alert tags (prose untouched);
+   one H1 per file; no stray `▶`/`💡`
 
 ## Decisions (confirmed)
 

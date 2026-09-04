@@ -1,12 +1,16 @@
-## Part 4: production logging you own
+# Part 4 · Production logging
 
-**Why you are here.** You want the visibility of Part 3, but for a running
-service you can query, alert on, and correlate. That rules out `LoggingPlugin`
-(it prints) and DEBUG (it is unstructured text). The answer is to write a small
-plugin whose callbacks emit **real `logging` records** with structured fields.
-Because they go through the `logging` module, your handlers and formatters apply,
-so the *same plugin* prints readable text on your laptop and clean JSON in the
-cloud (Part 6). Write it once, reuse it everywhere you deploy.
+*A `BasePlugin` that emits queryable JSON `logging` records — plus callback vs.
+plugin.*
+
+> [!NOTE]
+> **Why you are here.** You want the visibility of Part 3, but for a running
+> service you can query, alert on, and correlate. That rules out `LoggingPlugin`
+> (it prints) and DEBUG (it is unstructured text). The answer is to write a small
+> plugin whose callbacks emit **real `logging` records** with structured fields.
+> Because they go through the `logging` module, your handlers and formatters apply,
+> so the *same plugin* prints readable text on your laptop and clean JSON in the
+> cloud (Part 6). Write it once, reuse it everywhere you deploy.
 
 A plugin's callbacks are the hook points. From
 [examples/05_structured_plugin.py](../examples/05_structured_plugin.py), the
@@ -26,7 +30,7 @@ class StructuredTelemetryPlugin(BasePlugin):
         return None   # returning None means "proceed normally"
 ```
 
-**Do this.** The example attaches a JSON formatter to the telemetry logger and
+**👉 Do this.** The example attaches a JSON formatter to the telemetry logger and
 asks *"What's the weather in New York?"*:
 
 ```bash
@@ -41,13 +45,14 @@ asks *"What's the weather in New York?"*:
 {"severity": "INFO", "message": "tool_end", "tool": "get_weather", "latency_ms": 0.2, "status": "ok"}
 ```
 
-**What it means.** Every line is now a machine-readable event, not prose. That is
-the prerequisite for querying: the fields you see here (`latency_ms`, `status`,
-`input_tokens`) become keys you can filter, aggregate, and alert on the moment
-these lines reach a log store. Nothing here is terminal-specific either, so the
-same script proves the point in the cloud.
+> [!TIP]
+> **What it means.** Every line is now a machine-readable event, not prose. That is
+> the prerequisite for querying: the fields you see here (`latency_ms`, `status`,
+> `input_tokens`) become keys you can filter, aggregate, and alert on the moment
+> these lines reach a log store. Nothing here is terminal-specific either, so the
+> same script proves the point in the cloud.
 
-**Do this on Cloud Run.** Example 05 runs once and exits, so it is a Cloud Run
+**👉 Do this on Cloud Run.** Example 05 runs once and exits, so it is a Cloud Run
 Job, exactly like the plugin scripts in 3.2 and 3.4, and the same deploy helper
 takes this script as its argument:
 
@@ -76,15 +81,17 @@ TOOL         LATENCY_MS  STATUS
 get_weather  0.5         ok
 ```
 
-**What it means.** No formatter change was needed: the JSON you saw on your laptop
-is the JSON Cloud Logging indexed. `jsonPayload.status="error"` is now an alerting
-condition and `jsonPayload.latency_ms` is a metric you can chart, both because the
-plugin emitted structured fields instead of prose, and `severity` rode along in
-the JSON, so Cloud Logging shows these as `INFO` rather than guessing. Part 6
-extends that to a long-running Service, putting the same correct severity *and* a
-shared trace id on **every** stream, including the framework and access logs your
-plugin never touches, so all of one request's lines group together. Tear down the
-job when you are done:
+> [!TIP]
+> **What it means.** No formatter change was needed: the JSON you saw on your laptop
+> is the JSON Cloud Logging indexed. `jsonPayload.status="error"` is now an alerting
+> condition and `jsonPayload.latency_ms` is a metric you can chart, both because the
+> plugin emitted structured fields instead of prose, and `severity` rode along in
+> the JSON, so Cloud Logging shows these as `INFO` rather than guessing. Part 6
+> extends that to a long-running Service, putting the same correct severity *and* a
+> shared trace id on **every** stream, including the framework and access logs your
+> plugin never touches, so all of one request's lines group together.
+
+Tear down the job when you are done:
 
 ```bash
 gcloud run jobs delete adk-structured-job --project="$PROJECT_ID" --region="$REGION" --quiet
@@ -99,11 +106,12 @@ One detail this example teaches by doing:
 
 ### 4.1 Callback or plugin?
 
-**Why you are here.** The plugin above is one of two ways to emit your own
-records; the other is a per-agent callback, and you have probably seen that style
-elsewhere. Before choosing between them, be clear on what this logging is for. It
-does not replace ADK's built-in logging. It sits alongside it, because the two
-answer different questions.
+> [!NOTE]
+> **Why you are here.** The plugin above is one of two ways to emit your own
+> records; the other is a per-agent callback, and you have probably seen that style
+> elsewhere. Before choosing between them, be clear on what this logging is for. It
+> does not replace ADK's built-in logging. It sits alongside it, because the two
+> answer different questions.
 
 To operate the agent you have to be able to answer questions like:
 

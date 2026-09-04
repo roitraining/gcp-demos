@@ -1,9 +1,12 @@
-## Part 8: Agent Runtime (Vertex AI Agent Engine)
+# Part 8 · Agent Runtime
 
-**Why you are here.** Agent Engine is the other place you deploy. You already met
-its logging behavior hands-on in 1.6 (deploy the agent object, the platform owns
-the format) and 1.7 (deploy your own container, you keep your format). This part
-adds the telemetry layer on top of that and states the operational facts once.
+*The telemetry layer on Vertex AI Agent Engine, and what plugin code carries over.*
+
+> [!NOTE]
+> **Why you are here.** Agent Engine is the other place you deploy. You already met
+> its logging behavior hands-on in 1.6 (deploy the agent object, the platform owns
+> the format) and 1.7 (deploy your own container, you keep your format). This part
+> adds the telemetry layer on top of that and states the operational facts once.
 
 What deploying the agent (1.6, native) means in practice:
 

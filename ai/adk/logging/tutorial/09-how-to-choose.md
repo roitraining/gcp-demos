@@ -1,3 +1,7 @@
+# How to choose & reference
+
+*The decision table, best-practice summary, verification status, and links.*
+
 ## How to choose
 
 | You are... | Use | Why |

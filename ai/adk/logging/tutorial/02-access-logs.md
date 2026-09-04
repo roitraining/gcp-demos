@@ -1,11 +1,14 @@
-## Part 2: why the level flag does not silence access logs
+# Part 2 · Access logs
 
-**Why you are here.** You saw it at the end of 1.3: `--log_level WARNING`
-silenced the whole framework and your tool, and the `INFO:` access lines kept
-right on printing. That is a small annoyance on your laptop and a real problem in
-production, where it means one log line per request forever, including a flood
-from your load balancer's health checks, no matter how far down you turn the
-flag.
+*Why `--log_level` never silences uvicorn's access log — and how to filter it.*
+
+> [!NOTE]
+> **Why you are here.** You saw it at the end of 1.3: `--log_level WARNING`
+> silenced the whole framework and your tool, and the `INFO:` access lines kept
+> right on printing. That is a small annoyance on your laptop and a real problem in
+> production, where it means one log line per request forever, including a flood
+> from your load balancer's health checks, no matter how far down you turn the
+> flag.
 
 **The flag worked. It just does not reach this stream.** Recall the four
 streams. `--log_level` configures streams 1 and 2 (your code and `google_adk`).
@@ -35,7 +38,7 @@ class DropHealthChecks(logging.Filter):
         return True
 ```
 
-**Do this.** Start the demo server, then hit the health endpoint three times and
+**👉 Do this.** Start the demo server, then hit the health endpoint three times and
 the root once:
 
 ```bash
@@ -51,12 +54,13 @@ curl -s localhost:8081/           # then this once
 2026-08-31 20:08:06 - ACCESS - 127.0.0.1:51868 "GET / HTTP/1.1" 200 OK
 ```
 
-**What it means.** Three health checks produced **zero** log lines; the one real
-request produced exactly one. You did not lower a level, you filtered a specific
-stream. On a busy service, that removes one log line per health check for the
-life of the deployment. It also sets up the rest of this tutorial: to control
-agent logging well, you stop relying on a global level and start configuring each
-stream deliberately.
+> [!TIP]
+> **What it means.** Three health checks produced **zero** log lines; the one real
+> request produced exactly one. You did not lower a level, you filtered a specific
+> stream. On a busy service, that removes one log line per health check for the
+> life of the deployment. It also sets up the rest of this tutorial: to control
+> agent logging well, you stop relying on a global level and start configuring each
+> stream deliberately.
 
 ---
 

@@ -1,16 +1,18 @@
-## Part 1, continued: the same run in the cloud
+# Part 1 · The log level, in the cloud
 
-*Sections 1.1–1.3 (on your laptop) are in the [previous file](01a-log-levels-local.md).*
+*The same run on a Cloud Run Job and service, and on Agent Runtime — native and
+BYOC. Sections 1.1–1.3 (on your laptop) are in the [previous file](01a-log-levels-local.md).*
 
 ### 1.4 The same script on Cloud Run, and what Cloud Logging does to it
 
-**Why you are here.** So far every run was on your laptop, where a log line is
-just text on your terminal. The moment you deploy, a second system gets an
-opinion about your logs: Cloud Logging reads each line, assigns it a
-**severity**, and files it under a stream. Before you write a single line of
-cloud-specific logging (Part 6 does that), you should see what Cloud Logging
-makes of the *unmodified* Part 1 script, because the answer is not what the
-common advice says.
+> [!NOTE]
+> **Why you are here.** So far every run was on your laptop, where a log line is
+> just text on your terminal. The moment you deploy, a second system gets an
+> opinion about your logs: Cloud Logging reads each line, assigns it a
+> **severity**, and files it under a stream. Before you write a single line of
+> cloud-specific logging (Part 6 does that), you should see what Cloud Logging
+> makes of the *unmodified* Part 1 script, because the answer is not what the
+> common advice says.
 
 The script from 1.1 runs once and exits; it serves no HTTP. The right way to
 run it on Cloud Run is a **Job**, not a service (a service would fail
@@ -20,7 +22,7 @@ automatically. [deploy/deploy_job.sh](../deploy/deploy_job.sh) builds the image,
 deploys the Job, and runs it once; the level is a Job argument, so you can
 re-run at a different level without rebuilding.
 
-**Do this.** Deploy and run at INFO, then run again at WARNING:
+**👉 Do this.** Deploy and run at INFO, then run again at WARNING:
 
 ```bash
 export PROJECT_ID=your-project REGION=us-central1
@@ -54,19 +56,21 @@ INFO      Container called exit(0).
 INFO      Container called exit(0).
 ```
 
-**What it means, finding one: the level dial works in the cloud, unchanged.**
-The WARNING execution shows the banner and the answer and *no* `google_adk` or
-tool lines; the INFO execution shows the whole five-line lifecycle you know from
-1.1.1. Nothing about deploying changed what the level controls. This is the
-reassuring half.
+> [!TIP]
+> **What it means, finding one: the level dial works in the cloud, unchanged.**
+> The WARNING execution shows the banner and the answer and *no* `google_adk` or
+> tool lines; the INFO execution shows the whole five-line lifecycle you know from
+> 1.1.1. Nothing about deploying changed what the level controls. This is the
+> reassuring half.
 
-**What it means, finding two: severity is not what you were told.** There is a
-rule repeated all over the Cloud Run docs and even in ADK's own source comments:
-*a line written to stderr is recorded as ERROR severity regardless of content.*
-`logging.basicConfig` writes to stderr, so by that rule every `INFO -
-google_adk...` line above should read as ERROR. Look at the severity column: it
-does not. Those lines came through with **blank (Default) severity, not ERROR**.
-You can confirm they really are on stderr:
+> [!TIP]
+> **What it means, finding two: severity is not what you were told.** There is a
+> rule repeated all over the Cloud Run docs and even in ADK's own source comments:
+> *a line written to stderr is recorded as ERROR severity regardless of content.*
+> `logging.basicConfig` writes to stderr, so by that rule every `INFO -
+> google_adk...` line above should read as ERROR. Look at the severity column: it
+> does not. Those lines came through with **blank (Default) severity, not ERROR**.
+> You can confirm they really are on stderr:
 
 ```bash
 gcloud logging read \
@@ -90,6 +94,7 @@ severity-based query or alert cannot tell an error from a routine step. Making
 severity a field you set, not a guess Cloud Run makes from the stream, is the job
 of Part 6.
 
+> [!NOTE]
 > One display note: Cloud Run batches burst console output, so several of the
 > script's lines can arrive grouped under one Cloud Logging entry (you will see
 > the `===== running =====` banner and the lifecycle lines share an entry
@@ -97,12 +102,13 @@ of Part 6.
 
 ### 1.5 The same logging behind a real HTTP server
 
-**Why you are here.** A Job runs once and exits. A real service stays up and
-takes requests, which adds the one stream a script never has: the web server's
-own access log (stream 3 from the introduction). This section deploys the
-smallest possible ADK HTTP server, one that does *nothing* special about
-logging, so you can see all of Part 1's streams land in Cloud Logging together,
-and confirm on a long-running service what 1.4 found on a Job.
+> [!NOTE]
+> **Why you are here.** A Job runs once and exits. A real service stays up and
+> takes requests, which adds the one stream a script never has: the web server's
+> own access log (stream 3 from the introduction). This section deploys the
+> smallest possible ADK HTTP server, one that does *nothing* special about
+> logging, so you can see all of Part 1's streams land in Cloud Logging together,
+> and confirm on a long-running service what 1.4 found on a Job.
 
 [examples/09_min_api.py](../examples/09_min_api.py) is that server. It is
 deliberately naive: it configures logging with the exact `configure(level)` from
@@ -113,7 +119,7 @@ own default access logging is left untouched. It exposes one real route,
 the servers in Parts 5 and 6, which take control of every stream; this one takes
 control of none, on purpose.)
 
-**Do this.** Deploy it (unauthenticated, for demo simplicity), then send the same
+**👉 Do this.** Deploy it (unauthenticated, for demo simplicity), then send the same
 Tokyo question:
 
 ```bash
@@ -152,11 +158,12 @@ SEVERITY  TEXT_PAYLOAD
           INFO:     169.254.169.126:2186 - "POST /chat HTTP/1.1" 200 OK
 ```
 
-**What it means.** Four sources, interleaved, exactly as they were on your
-laptop: your server's own `agent.server` line, the `google_adk` framework lines,
-your tool's `demo_agent.agent` line, and, new for a server, uvicorn's
-`INFO: ... "POST /chat HTTP/1.1" 200 OK` access line. Nothing here is
-cloud-shaped; it is the raw Part 1 output, now arriving from a container.
+> [!TIP]
+> **What it means.** Four sources, interleaved, exactly as they were on your
+> laptop: your server's own `agent.server` line, the `google_adk` framework lines,
+> your tool's `demo_agent.agent` line, and, new for a server, uvicorn's
+> `INFO: ... "POST /chat HTTP/1.1" 200 OK` access line. Nothing here is
+> cloud-shaped; it is the raw Part 1 output, now arriving from a container.
 
 And the severity column repeats 1.4's finding on a service: every `INFO -` line
 is filed as **Default, not ERROR**, even though `basicConfig` writes them to
@@ -194,15 +201,17 @@ WARNING
           INFO:     169.254.169.126:37562 - "GET /favicon.ico HTTP/1.1" 404 Not Found
 ```
 
-**What it means.** `LOG_LEVEL=warning` reached streams 1 and 2 (your code and
-`google_adk`), which is why the lifecycle lines vanished, exactly as 1.1.3 taught
-you. It did **not** reach uvicorn's access log: the `"POST /chat" 200 OK` line
-prints regardless, because that stream is configured by uvicorn, not by your
-level. That is the whole of Part 2, now visible in the cloud: on a busy service
-this is one access line per request forever, health checks included, no matter
-how far down you turn your level. Part 2 fixes it; Part 6 makes the rest of these
-lines into structured entries with severity you can query.
+> [!TIP]
+> **What it means.** `LOG_LEVEL=warning` reached streams 1 and 2 (your code and
+> `google_adk`), which is why the lifecycle lines vanished, exactly as 1.1.3 taught
+> you. It did **not** reach uvicorn's access log: the `"POST /chat" 200 OK` line
+> prints regardless, because that stream is configured by uvicorn, not by your
+> level. That is the whole of Part 2, now visible in the cloud: on a busy service
+> this is one access line per request forever, health checks included, no matter
+> how far down you turn your level. Part 2 fixes it; Part 6 makes the rest of these
+> lines into structured entries with severity you can query.
 
+> [!NOTE]
 > If, right after a WARNING redeploy, you still see a few `google_adk` lines,
 > they are from the previous INFO revision still inside the read's freshness
 > window (you will see `Reason: DEPLOYMENT_ROLLOUT` entries marking the switch).
@@ -210,13 +219,14 @@ lines into structured entries with severity you can query.
 
 ### 1.6 The same agent on Agent Runtime, where the platform logs for you
 
-**Why you are here.** Cloud Run (1.4, 1.5) gave you a container and got out of
-the way: whatever you wrote to stdout/stderr is what you got. Agent Runtime
-(Vertex AI Agent Engine) is the other place you deploy, and it is different in a
-way that matters for logging: you deploy the **agent**, not a web server, and the
-platform runs it for you. That means the platform, not your code, decides how
-your logs are handled. This section shows exactly which parts of Part 1 you still
-control there, and which the platform takes over.
+> [!NOTE]
+> **Why you are here.** Cloud Run (1.4, 1.5) gave you a container and got out of
+> the way: whatever you wrote to stdout/stderr is what you got. Agent Runtime
+> (Vertex AI Agent Engine) is the other place you deploy, and it is different in a
+> way that matters for logging: you deploy the **agent**, not a web server, and the
+> platform runs it for you. That means the platform, not your code, decides how
+> your logs are handled. This section shows exactly which parts of Part 1 you still
+> control there, and which the platform takes over.
 
 You deploy with `adk deploy agent_engine`, which packages the agent directory and
 hands it to the platform. There is no server of yours in the picture, so there is
@@ -227,7 +237,7 @@ agent_engine` has no env flag, but it carries the agent directory's `.env` into
 the deployment, so [deploy/deploy_agent_engine.sh](../deploy/deploy_agent_engine.sh)
 writes `LOG_LEVEL` there before deploying.
 
-**Do this.** Deploy at INFO, note the reasoning engine id it prints, and send one
+**👉 Do this.** Deploy at INFO, note the reasoning engine id it prints, and send one
 query. The query goes through the SDK (the platform's query path is not a plain
 REST URL you can curl):
 
@@ -272,14 +282,15 @@ SEVERITY  TEXT_PAYLOAD
           INFO:     169.254.169.126:54632 - "POST /api/stream_reasoning_engine HTTP/1.1" 200 OK
 ```
 
-**What it means: the platform owns your log format and stream, you keep the
-level.** Compare that tool line to 1.5. On Cloud Run it read
-`INFO - demo_agent.agent - tool get_weather...`, your `basicConfig` format. Here
-it reads `2026-09-03 21:51:45,037 - INFO - agent.py:53 - tool get_weather...`,
-the ADK CLI's timestamped `file:line` format, the same one you saw from
-`adk api_server` back in 1.3. Your `basicConfig(format=...)` did not take: the
-platform installs its own logging handler before your module runs, so it decides
-the format and the destination (stderr), and your handler config is ignored.
+> [!TIP]
+> **What it means: the platform owns your log format and stream, you keep the
+> level.** Compare that tool line to 1.5. On Cloud Run it read
+> `INFO - demo_agent.agent - tool get_weather...`, your `basicConfig` format. Here
+> it reads `2026-09-03 21:51:45,037 - INFO - agent.py:53 - tool get_weather...`,
+> the ADK CLI's timestamped `file:line` format, the same one you saw from
+> `adk api_server` back in 1.3. Your `basicConfig(format=...)` did not take: the
+> platform installs its own logging handler before your module runs, so it decides
+> the format and the destination (stderr), and your handler config is ignored.
 
 What you *do* still control is the **level**, because setting a logger's level
 works regardless of who owns the handler. Redeploy at WARNING and send the same
@@ -310,6 +321,7 @@ there still works here: its records go through whatever handler the platform
 installed, and its `extra=` fields survive. Any formatting you try to impose
 from your own `dictConfig` does not.
 
+> [!WARNING]
 > Two traps. First, `adk deploy agent_engine` **creates a new reasoning engine on
 > every deploy**; it does not update in place, so the WARNING redeploy has a new
 > `ENGINE_ID`. Delete the old ones when you are done (the deploy script prints the
@@ -318,11 +330,12 @@ from your own `dictConfig` does not.
 
 ### 1.7 The same server as a custom container on Agent Runtime
 
-**Why you are here.** 1.6 deployed the agent object and let the platform serve it.
-But Agent Runtime also accepts a **container you build yourself** (bring your own
-container), which is how you run 1.5's kind of hand-written server on the managed
-platform instead of on Cloud Run. The catch is that the platform's contract
-constrains what that container must be.
+> [!NOTE]
+> **Why you are here.** 1.6 deployed the agent object and let the platform serve it.
+> But Agent Runtime also accepts a **container you build yourself** (bring your own
+> container), which is how you run 1.5's kind of hand-written server on the managed
+> platform instead of on Cloud Run. The catch is that the platform's contract
+> constrains what that container must be.
 
 A custom container on Agent Runtime is not free-form. The runtime contract
 requires it to listen on **port 8080** and implement two specific routes,
@@ -336,7 +349,7 @@ lines. Its logging is deliberately the same naive Part 1 config as 1.5. This
 section tests whether your own container gives you your logging format back, or
 the platform overrides it the way it did in 1.6.
 
-**Do this.** Build, push, and register the container, then query it through the
+**👉 Do this.** Build, push, and register the container, then query it through the
 platform's `/api` passthrough:
 
 ```bash
@@ -390,16 +403,17 @@ SEVERITY  TEXT_PAYLOAD
           INFO:     169.254.169.126:1392 - "POST /api/stream_reasoning_engine HTTP/1.1" 200 OK
 ```
 
-**What it means.** The BYOC container is the one place in Part 1 where, on Agent
-Runtime, you write the server and therefore own its logging config the way you do
-on Cloud Run: the format above is yours, because your `main.py` installed the
-handler, not the platform. That is the concrete contrast with 1.6, where the same
-agent's logs came out in the platform's format. The price is implementing the
-platform's two-endpoint contract and working around the reserved-var model-region
-trap. The two Agent Runtime deploys therefore differ mainly in logging: the
-managed agent object accepts the platform's format (1.6), and your own container
-keeps your own (1.7). Severity is still Default in both; that is Part 6's problem
-regardless of which you pick.
+> [!TIP]
+> **What it means.** The BYOC container is the one place in Part 1 where, on Agent
+> Runtime, you write the server and therefore own its logging config the way you do
+> on Cloud Run: the format above is yours, because your `main.py` installed the
+> handler, not the platform. That is the concrete contrast with 1.6, where the same
+> agent's logs came out in the platform's format. The price is implementing the
+> platform's two-endpoint contract and working around the reserved-var model-region
+> trap. The two Agent Runtime deploys therefore differ mainly in logging: the
+> managed agent object accepts the platform's format (1.6), and your own container
+> keeps your own (1.7). Severity is still Default in both; that is Part 6's problem
+> regardless of which you pick.
 
 ---
 

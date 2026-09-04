@@ -1,12 +1,15 @@
-## Part 6: Cloud Run
+# Part 6 · Cloud Run
 
-**Why you are here.** In 1.5 you deployed a server to Cloud Run and got its logs
-into Cloud Logging for free, but as raw text with the wrong severity. Now you fix
-that: you want the logs to be first-class, correct severity, and grouped by
-request. Cloud Run's contract makes the ingestion part free, **anything a
-container writes to stdout/stderr is ingested into Cloud Logging automatically**,
-no sink to install. Your only job is to make each line a good JSON object. Two
-Cloud Run facts decide how.
+*First-class logs: an explicit `severity` and a trace field that groups a request.*
+
+> [!NOTE]
+> **Why you are here.** In 1.5 you deployed a server to Cloud Run and got its logs
+> into Cloud Logging for free, but as raw text with the wrong severity. Now you fix
+> that: you want the logs to be first-class, correct severity, and grouped by
+> request. Cloud Run's contract makes the ingestion part free, **anything a
+> container writes to stdout/stderr is ingested into Cloud Logging automatically**,
+> no sink to install. Your only job is to make each line a good JSON object. Two
+> Cloud Run facts decide how.
 
 **Fact one: severity lives in the JSON, not in the stream, and Cloud Run's guess
 is unreliable.** You saw in 1.4 and 1.5 that Cloud Run does *not* reliably map a
@@ -45,7 +48,7 @@ class CloudRunJsonFormatter(logging.Formatter):
         return json.dumps(entry, default=str)
 ```
 
-**Do this**, passing the trace header the way Cloud Run would:
+**👉 Do this**, passing the trace header the way Cloud Run would:
 
 ```bash
 GOOGLE_CLOUD_PROJECT=your-project .venv/bin/python examples/07_cloudrun_json.py
@@ -65,11 +68,12 @@ framework log all carry the same trace value:
 {"severity": "INFO", "message": "Sending out request, model: gemini-3.7-flash...", "logging.googleapis.com/trace": "projects/jwd-gcp-demos/traces/105445aa..."}
 ```
 
-**What it means.** That third line is a framework log you did not write, and it
-still carries the trace, because the `ContextVar` threads it through everything
-that runs during the request. In the Logs Explorer, clicking that trace shows all
-three lines grouped as one request, so you can read a single request's whole
-lifecycle across all four streams without hunting for the lines that belong to it.
+> [!TIP]
+> **What it means.** That third line is a framework log you did not write, and it
+> still carries the trace, because the `ContextVar` threads it through everything
+> that runs during the request. In the Logs Explorer, clicking that trace shows all
+> three lines grouped as one request, so you can read a single request's whole
+> lifecycle across all four streams without hunting for the lines that belong to it.
 
 ### 6.1 Deploying, and what to check afterwards
 
@@ -124,11 +128,12 @@ POST 200 https://adk-logging-demo-....run.app/run
 INFO:     169.254.169.126:48806 - "POST /run HTTP/1.1" 200 OK
 ```
 
-**What it means.** The five-line lifecycle trail from 1.1.1 is intact, unchanged
-by deployment. What is new is a *third* line format: `POST 200 https://...` is
-Cloud Run's own request log, which exists alongside uvicorn's `INFO:` access line
-for the very same request. Stream 3 now has two writers, and neither is the
-`--log_level` flag's business.
+> [!TIP]
+> **What it means.** The five-line lifecycle trail from 1.1.1 is intact, unchanged
+> by deployment. What is new is a *third* line format: `POST 200 https://...` is
+> Cloud Run's own request log, which exists alongside uvicorn's `INFO:` access line
+> for the very same request. Stream 3 now has two writers, and neither is the
+> `--log_level` flag's business.
 
 Now ask Cloud Logging for the severity of that tool line, the problem Part 6
 exists to fix:
