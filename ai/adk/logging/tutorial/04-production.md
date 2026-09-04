@@ -180,7 +180,7 @@ sequenceDiagram
 **Command:**
 
 ```bash
-GOOGLE_CLOUD_PROJECT=your-project .venv/bin/python examples/06_custom_server.py
+GOOGLE_CLOUD_PROJECT=your_project .venv/bin/python examples/06_custom_server.py
 # in another terminal:
 curl -s -X POST localhost:8080/chat \
   -H 'content-type: application/json' \
@@ -226,7 +226,7 @@ against the result and fails loudly if it does not return 200.
 **Command:**
 
 ```bash
-export PROJECT_ID=your-project
+export PROJECT_ID=your_project
 export REGION=us-central1
 ./deploy/deploy_cloudrun.sh
 ```

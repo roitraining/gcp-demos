@@ -29,7 +29,7 @@ re-run at a different level without rebuilding.
 **Command:**
 
 ```bash
-export PROJECT_ID=your-project
+export PROJECT_ID=your_project
 export REGION=us-central1
 ./deploy/deploy_job.sh                 # deploys, then executes at info
 gcloud run jobs execute adk-logging-job \
@@ -144,7 +144,7 @@ to each.
 **Command:**
 
 ```bash
-export PROJECT_ID=your-project
+export PROJECT_ID=your_project
 export REGION=us-central1
 ./deploy/deploy_api.sh                                                    # INFO (default)
 SERVICE=adk-logging-api-warn LOG_LEVEL=warning ./deploy/deploy_api.sh     # WARNING
@@ -270,7 +270,7 @@ same naive Part 1 config as 1.5.
 **Command:**
 
 ```bash
-export PROJECT_ID=your-project
+export PROJECT_ID=your_project
 export REGION=us-central1
 
 # Native: deploy the agent object, platform serves it

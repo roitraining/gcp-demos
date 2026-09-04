@@ -89,7 +89,7 @@ existing `gcloud` credentials:
 cp .env.example .env
 # edit .env to contain:
 #   GOOGLE_GENAI_USE_VERTEXAI=TRUE
-#   GOOGLE_CLOUD_PROJECT=your-project-id
+#   GOOGLE_CLOUD_PROJECT=your_project_id
 #   GOOGLE_CLOUD_LOCATION=global
 gcloud auth application-default login   # if you have not already
 ```

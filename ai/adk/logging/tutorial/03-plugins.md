@@ -226,7 +226,7 @@ between runs without rebuilding. Example 03 configures no logging of its own, so
 **Command:**
 
 ```bash
-export PROJECT_ID=your-project
+export PROJECT_ID=your_project
 export REGION=us-central1
 SCRIPT=examples/03_logging_plugin.py ./deploy/deploy_plugin_job.sh   # deploys adk-plugin-job, runs at INFO
 gcloud run jobs execute adk-plugin-job \
