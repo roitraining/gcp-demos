@@ -25,6 +25,7 @@ Run it
 from __future__ import annotations
 
 import asyncio
+import os
 from pathlib import Path
 
 from _common import ask, bootstrap
@@ -37,7 +38,9 @@ from google.adk.runners import InMemoryRunner
 
 from demo_agent.agent import root_agent
 
-OUTPUT = Path(__file__).resolve().parent.parent / "adk_debug.yaml"
+# Default next to the tutorial; tutorial 3.4 sets DEBUG_OUTPUT to a mounted
+# Cloud Storage path so the capture survives a Cloud Run Job execution.
+OUTPUT = Path(os.getenv("DEBUG_OUTPUT") or Path(__file__).resolve().parent.parent / "adk_debug.yaml")
 
 
 async def main() -> None:

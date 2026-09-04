@@ -30,11 +30,10 @@ from _common import ask, bootstrap
 
 bootstrap()
 
+from demo_agent.agent import root_agent
 from google.adk.apps.app import App
 from google.adk.plugins import LoggingPlugin
 from google.adk.runners import InMemoryRunner
-
-from demo_agent.agent import root_agent
 
 
 async def main() -> None:
