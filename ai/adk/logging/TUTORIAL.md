@@ -781,6 +781,13 @@ from google.adk.plugins import LoggingPlugin
 app = App(name="demo", root_agent=root_agent, plugins=[LoggingPlugin()])
 ```
 
+The plugin's own docstring is blunt about its scope: it "is not a replacement of
+existing logging in ADK," but rather "helps terminal based debugging" and
+"serves as a simple demo for everyone to leverage when developing new plugins."
+Read this section as much for how to write a plugin as for what this one prints;
+the deployed sections that follow (3.2, 3.4) exist to show why a print-based dev
+tool does not belong in production, not to endorse shipping it.
+
 **How the one line works.** A plugin is a set of lifecycle hooks. `BasePlugin`
 declares fourteen async callbacks, `on_user_message_callback`,
 `before_run_callback`, `before/after_agent_callback`,
