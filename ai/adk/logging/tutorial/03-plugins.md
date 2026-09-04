@@ -97,7 +97,7 @@ Because everything goes through `print()`, neither `--log_level` nor a
 `dictConfig` can reach this output. That is the trait that decides where you use
 it, called out at the end of this section.
 
-**▶ Do this.**
+**👉 Do this.**
 
 ```bash
 .venv/bin/python examples/03_logging_plugin.py
@@ -144,13 +144,14 @@ removed):
 
 </details>
 
-**💡 What it means.** That is the full agentic loop, in order: the model saw the
-tools and chose `get_weather`, the tool ran with `{'city': 'London'}` and
-returned its report, the model was called a second time with that result and
-produced the final text, and the run ended. Two model calls, one tool call, and
-their token costs (167 plus 16 to decide the call, 228 plus 15 to write the
-answer), all without parsing DEBUG. This is the view you want when a tool is
-called with the wrong arguments, or not called when it should be.
+> [!TIP]
+> **What it means.** That is the full agentic loop, in order: the model saw the
+> tools and chose `get_weather`, the tool ran with `{'city': 'London'}` and
+> returned its report, the model was called a second time with that result and
+> produced the final text, and the run ended. Two model calls, one tool call, and
+> their token costs (167 plus 16 to decide the call, 228 plus 15 to write the
+> answer), all without parsing DEBUG. This is the view you want when a tool is
+> called with the wrong arguments, or not called when it should be.
 
 **What you will not see.** `LLM REQUEST` prints the model, the first 200
 characters of the system instruction, and the tool names, but not the
@@ -189,7 +190,7 @@ can run either plugin example; the script to run is the Job argument, and
 between runs without rebuilding. Example 03 configures no logging of its own, so
 `LOG_LEVEL` controls only the framework logger (stream 2), never the plugin.
 
-**▶ Do this.** Deploy and run once at INFO, then run again at WARNING:
+**👉 Do this.** Deploy and run once at INFO, then run again at WARNING:
 
 ```bash
 export PROJECT_ID=your-project REGION=us-central1
@@ -239,20 +240,22 @@ literally in the payload:
 <no severity>  ^[[90m[logging_plugin]    Arguments: {'city': 'London'}^[[0m
 ```
 
-**💡 What it means, finding one: the plugin is independent of the level dial.**
-Turning stream 2 down to WARNING removed the framework's lifecycle lines and left
-the plugin narration completely intact, because the plugin never goes through
-`logging`. That is exactly what makes it great in development, and exactly why it
-is the wrong tool in production: you cannot turn it down without deleting it from
-the code.
+> [!TIP]
+> **What it means, finding one: the plugin is independent of the level dial.**
+> Turning stream 2 down to WARNING removed the framework's lifecycle lines and left
+> the plugin narration completely intact, because the plugin never goes through
+> `logging`. That is exactly what makes it great in development, and exactly why it
+> is the wrong tool in production: you cannot turn it down without deleting it from
+> the code.
 
-**💡 What it means, finding two: the narration is not queryable.** Every plugin
-line lands on stdout with Default severity and its grey ANSI codes embedded in
-the text. It is readable in the console, but nothing in it is a field you can
-filter, alert on, or group. (The `google_adk` lines have the same problem 1.4
-found: they are on stderr and still come through as Default, not ERROR.) Making
-this information queryable is the job of Part 4, which feeds the same hook data
-through the `logging` module instead of `print()`.
+> [!TIP]
+> **What it means, finding two: the narration is not queryable.** Every plugin
+> line lands on stdout with Default severity and its grey ANSI codes embedded in
+> the text. It is readable in the console, but nothing in it is a field you can
+> filter, alert on, or group. (The `google_adk` lines have the same problem 1.4
+> found: they are on stderr and still come through as Default, not ERROR.) Making
+> this information queryable is the job of Part 4, which feeds the same hook data
+> through the `logging` module instead of `print()`.
 
 Tear down when you are done:
 
@@ -325,7 +328,7 @@ with os.fdopen(fd, "a", encoding="utf-8") as f:
               allow_unicode=True, sort_keys=False, width=120)
 ```
 
-**▶ Do this**, then open the file it writes:
+**👉 Do this**, then open the file it writes:
 
 ```bash
 .venv/bin/python examples/04_debug_plugin.py
@@ -358,11 +361,12 @@ narrates: `invocation_start`, `agent_start`, `llm_request`, `llm_response`,
 `llm_response`, `event`, `agent_end`, `session_state_snapshot`,
 `invocation_end`.
 
-**💡 What it means.** It is the full turn on disk: exact prompt, system instruction,
-tool arguments, tool results, token counts, and session state. Two properties
-matter. It is buffered, so nothing reaches the file until the invocation
-completes; if the process dies mid-turn, that turn is lost. And it redacts by
-design, but broadly:
+> [!TIP]
+> **What it means.** It is the full turn on disk: exact prompt, system instruction,
+> tool arguments, tool results, token counts, and session state. Two properties
+> matter. It is buffered, so nothing reaches the file until the invocation
+> completes; if the process dies mid-turn, that turn is lost. And it redacts by
+> design, but broadly:
 
 > [!NOTE]
 > That last rule blanks all temporary state, not
@@ -384,7 +388,7 @@ the container.
 > containers. 3.3 wrote a file; a Cloud Run Job's filesystem is thrown away when
 > the execution ends. So where does the capture go?
 
-**▶ Do this**, part one, the naive deploy:
+**👉 Do this**, part one, the naive deploy:
 
 ```bash
 SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh   # deploys adk-debug-plugin-job
@@ -409,11 +413,12 @@ plugin's `on_user_message_callback` fires before `before_run_callback` creates
 the per-invocation buffer, so the first entry is dropped. Notice it is a real
 `logging` record on stderr, unlike anything `LoggingPlugin` emits.)
 
-**💡 What it means.** A file-writing plugin needs a filesystem that outlives the
-execution. Cloud Run can mount a Cloud Storage bucket as a volume, and example 04
-already reads its path from `DEBUG_OUTPUT`.
+> [!TIP]
+> **What it means.** A file-writing plugin needs a filesystem that outlives the
+> execution. Cloud Run can mount a Cloud Storage bucket as a volume, and example 04
+> already reads its path from `DEBUG_OUTPUT`.
 
-**▶ Do this**, part two, mount a bucket:
+**👉 Do this**, part two, mount a bucket:
 
 ```bash
 export BUCKET="${PROJECT_ID}-adk-debug"   # any bucket you own; created in $REGION if missing
@@ -432,14 +437,15 @@ line the plugin emits about the file it just wrote:
 WARNING - google_adk.google.adk.plugins.debug_logging_plugin - Debug output file /mnt/out/adk_debug.yaml is readable beyond its owner and holds whole prompts and responses; restrict it to mode 600.
 ```
 
-**💡 What it means.** The plugin behaved exactly as on your laptop; only the disk
-changed. The mode warning is the plugin doing its job: the Cloud Storage FUSE
-mount reports a mode wider than `0600`, so the plugin cannot guarantee the file
-is owner-only and says so, through the `logging` module, on stderr. Two cautions
-follow from that. The capture now lives in a bucket and still holds full prompts,
-so bucket IAM is your new `0600`. And this is still a debugging capture, not a
-log pipeline; if you find yourself running it routinely in the cloud, you want
-the structured plugin in Part 4 instead.
+> [!TIP]
+> **What it means.** The plugin behaved exactly as on your laptop; only the disk
+> changed. The mode warning is the plugin doing its job: the Cloud Storage FUSE
+> mount reports a mode wider than `0600`, so the plugin cannot guarantee the file
+> is owner-only and says so, through the `logging` module, on stderr. Two cautions
+> follow from that. The capture now lives in a bucket and still holds full prompts,
+> so bucket IAM is your new `0600`. And this is still a debugging capture, not a
+> log pipeline; if you find yourself running it routinely in the cloud, you want
+> the structured plugin in Part 4 instead.
 
 > [!TIP]
 > A quick alternative, if you only need the capture once and do not want a

@@ -9,6 +9,7 @@
 > `WARNING`, and `ERROR` each reveal, so you can pick the right one instead of
 > drowning in output or flying blind. This part is a guided tour of that dial.
 
+
 Part 1 runs the same one question, *"What's the weather in Tokyo?"*, three ways:
 first through a plain script where you control the level directly (1.1), then
 through each of the two servers ADK ships (1.2, 1.3).
@@ -38,15 +39,16 @@ INFO - google_adk.google.adk.models.google_llm - Response received from the mode
 >>> ANSWER: The weather in Tokyo is currently 27°C and humid.
 ```
 
-**💡 What it means.** Those five lines are the agent loop, in order:
-
-| Line | Logger | What happened |
-|---|---|---|
-| 1 | `google_adk...google_llm` | Framework sends your question to the model |
-| 2 | `google_adk...google_llm` | Model answers: *call `get_weather`* |
-| 3 | `demo_agent.agent` | **Your tool** runs (stream 1, not `google_adk`) |
-| 4 | `google_adk...google_llm` | Framework sends the tool's result back |
-| 5 | `google_adk...google_llm` | Model answers again, this time with prose |
+> [!TIP]
+> **What it means.** Those five lines are the agent loop, in order:
+>
+> | Line | Logger | What happened |
+> |---|---|---|
+> | 1 | `google_adk...google_llm` | Framework sends your question to the model |
+> | 2 | `google_adk...google_llm` | Model answers: *call `get_weather`* |
+> | 3 | `demo_agent.agent` | **Your tool** runs (stream 1, not `google_adk`) |
+> | 4 | `google_adk...google_llm` | Framework sends the tool's result back |
+> | 5 | `google_adk...google_llm` | Model answers again, this time with prose |
 
 Two things to take away. **One round trip per model call**: a tool call always
 costs two, because the model must be re-asked once it has the tool's result.
@@ -80,15 +82,16 @@ Function calls:
 name: get_weather, args: {'city': 'Tokyo'}
 ```
 
-**💡 What it means.** DEBUG keeps every INFO line and adds the *contents* of each
-model call. The new block breaks down as:
-
-| Block | What it is | Where it came from |
-|---|---|---|
-| `System Instruction` | The agent's standing orders | your `instruction=` in `agent.py` |
-| `Contents` | Full message history sent this call | the user turn, plus prior turns |
-| `Functions` | Tool schema the model can choose from | generated from your Python signature and docstring |
-| `LLM Response` | What came back, here a `functionCall` | the model |
+> [!TIP]
+> **What it means.** DEBUG keeps every INFO line and adds the *contents* of each
+> model call. The new block breaks down as:
+>
+> | Block | What it is | Where it came from |
+> |---|---|---|
+> | `System Instruction` | The agent's standing orders | your `instruction=` in `agent.py` |
+> | `Contents` | Full message history sent this call | the user turn, plus prior turns |
+> | `Functions` | Tool schema the model can choose from | generated from your Python signature and docstring |
+> | `LLM Response` | What came back, here a `functionCall` | the model |
 
 The single most useful thing here is `Functions`. ADK builds that JSON schema
 from your Python function's signature and docstring, and DEBUG is the only place
@@ -111,13 +114,14 @@ will not leak your bearer token.)
 >>> ANSWER: The weather in Tokyo is currently 27°C and humid.
 ```
 
-**💡 What it means.** Nothing from the framework at all, just your answer. At
-WARNING and ERROR, a healthy run is silent; you only hear from the log when
-something is wrong. Try asking about a city the tool does not know and you would
-see the one `WARNING` line the tool itself emits (`no weather data for ...`).
-This is why the guidance is **INFO or WARNING in production**: WARNING keeps the
-log quiet until there is a problem, INFO gives you a lifecycle trail if you can
-afford the volume. Reserve DEBUG for when you are actively debugging.
+> [!TIP]
+> **What it means.** Nothing from the framework at all, just your answer. At
+> WARNING and ERROR, a healthy run is silent; you only hear from the log when
+> something is wrong. Try asking about a city the tool does not know and you would
+> see the one `WARNING` line the tool itself emits (`no weather data for ...`).
+> This is why the guidance is **INFO or WARNING in production**: WARNING keeps the
+> log quiet until there is a problem, INFO gives you a lifecycle trail if you can
+> afford the volume. Reserve DEBUG for when you are actively debugging.
 
 ### 1.2 The same dial on `adk web`
 

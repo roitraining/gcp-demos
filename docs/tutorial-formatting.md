@@ -131,10 +131,17 @@ it is already all tables and scans fine; it only needs C4.
 
 ## Decisions (confirmed)
 
-- **D1: glyphs on the beats (C2).** ✅ Use `▶ Do this` and `💡 What it means`.
-  Markers are pure prefixes — the label text, period, and following prose are
-  left verbatim (e.g. `**💡 What it means.** Those five lines...`), so no word
-  or capitalization changes.
+- **D1: the beat treatments (C2), revised after pilot review.**
+  - **What it means** → a `> [!TIP]` callout (was an inline `💡` label). The
+    interpretation is now a green box that closes each section. Where it
+    introduces a table, the table rides inside the callout; elaboration
+    paragraphs after it stay as body.
+  - **Do this** → inline bold label with the 👉 emoji (was `▶`; the play
+    button is dropped for an action-oriented glyph).
+  - Prose inside is left verbatim — markers only.
 - **D2: `<details>` collapses the >12-line blocks only.** ✅ Short blocks stay
   inline.
 - **D3: pilot both `01a` and `03`.** ✅ Short file + hardest file.
+- **D4: alert-type palette.** NOTE = framing/why-you're-here; TIP = the
+  takeaway ("What it means"), optional detours, and handy shortcuts; WARNING =
+  the gotcha that bites.
