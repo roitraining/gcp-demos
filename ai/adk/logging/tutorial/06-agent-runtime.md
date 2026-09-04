@@ -22,15 +22,25 @@ What deploying the agent (1.6, native) means in practice:
   carries only the web server's access lines (this trips people up, as 1.6
   showed). Read by resource type to catch both.
 
+Deploy and capture the engine id (the script prints it on a final `ENGINE_ID=`
+line, which we read straight into a variable).
+
 **Command:**
 
 ```bash
 export PROJECT_ID=your_project
 export REGION=us-central1
-./deploy/deploy_agent_engine.sh
+export ENGINE_ID=$(./deploy/deploy_agent_engine.sh | sed -n 's/^ENGINE_ID=//p')
+```
+
+Then read the logs by resource type, filtering on the id we just captured.
+
+**Command:**
+
+```bash
 gcloud logging read \
   'resource.type="aiplatform.googleapis.com/ReasoningEngine"
-   resource.labels.reasoning_engine_id="ENGINE_ID"' \
+   resource.labels.reasoning_engine_id="'"$ENGINE_ID"'"' \
   --project="$PROJECT_ID" \
   --limit=20 \
   --format='table(severity,textPayload)'

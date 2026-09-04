@@ -265,22 +265,36 @@ and implement two routes: `POST /api/reasoning_engine` (unary) and
 server that satisfies the contract, in about ninety lines. Its logging is the
 same naive Part 1 config as 1.5.
 
-**👉 Do this.** Deploy both, noting the engine ID each prints.
+**👉 Do this.** Deploy both. Each deploy script prints its reasoning engine id on
+a final `ENGINE_ID=` line, so we capture it straight into a variable instead of
+reading the resource name off and pasting it back.
+
+Set the project and region once.
 
 **Command:**
 
 ```bash
 export PROJECT_ID=your_project
 export REGION=us-central1
+```
 
-# Native: deploy the agent object, platform serves it
-./deploy/deploy_agent_engine.sh
-export ENGINE_NATIVE=<number at the end of the resource name>
+Deploy the agent object natively (the platform serves it) and capture its id. The
+deploy progress streams to stderr; the `ENGINE_ID=` marker is the one line we pull
+off stdout.
 
-# BYOC: deploy your container, platform hosts it
+**Command:**
+
+```bash
+export ENGINE_NATIVE=$(./deploy/deploy_agent_engine.sh | sed -n 's/^ENGINE_ID=//p')
+```
+
+Then deploy your own container (BYOC — the platform hosts it) the same way.
+
+**Command:**
+
+```bash
 cd agent_runtime_byoc
-./deploy_byoc.sh
-export ENGINE_BYOC=<number at the end of the resource name>
+export ENGINE_BYOC=$(./deploy_byoc.sh | sed -n 's/^ENGINE_ID=//p')
 cd ..
 ```
 

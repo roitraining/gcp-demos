@@ -40,12 +40,21 @@ ENV
 
 # --otel_to_cloud turns on telemetry export; under the hood it sets
 # GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true on the deployed agent.
-adk deploy agent_engine \
+# Tee the output so the reader still sees progress, and capture it so we can
+# pull the resource name out for a machine-readable marker line at the end.
+_DEPLOY_OUT="$(adk deploy agent_engine \
   --project="$PROJECT_ID" \
   --region="$REGION" \
   --display_name="adk-logging-demo" \
   --otel_to_cloud \
-  ./demo_agent
+  ./demo_agent 2>&1 | tee /dev/stderr)"
+
+# Extract the reasoning engine resource name that adk prints, e.g.
+# projects/P/locations/R/reasoningEngines/1234567890. Last match wins.
+ENGINE_RESOURCE="$(printf '%s\n' "$_DEPLOY_OUT" \
+  | grep -oE 'projects/[^ "]+/locations/[^ "]+/reasoningEngines/[0-9]+' \
+  | tail -n1)"
+ENGINE_ID="${ENGINE_RESOURCE##*/}"
 
 cat <<EOF
 
@@ -64,11 +73,15 @@ Deployed to Agent Engine. What differs from Cloud Run for logging:
   * Traces appear in Cloud Trace automatically (no --otel_to_cloud needed for
     traces on Agent Engine; the flag additionally routes logs and metrics).
 
-Read the agent logs (replace ENGINE_ID with the reasoning engine id printed
-above) — note it is the STDERR log, and use the resource filter so you catch
-both streams:
+Read the agent logs — note it is the STDERR log, and use the resource filter so
+you catch both streams:
 
   gcloud logging read \\
-    'resource.type="aiplatform.googleapis.com/ReasoningEngine" resource.labels.reasoning_engine_id="ENGINE_ID"' \\
+    'resource.type="aiplatform.googleapis.com/ReasoningEngine" resource.labels.reasoning_engine_id="\${ENGINE_ID}"' \\
     --project="$PROJECT_ID" --limit=30 --format='table(severity,textPayload)'
 EOF
+
+# Machine-readable marker on the LAST stdout line (the progress above went to
+# stderr via tee), so a caller can capture the bare engine id with:
+#   export ENGINE_NATIVE=$(./deploy/deploy_agent_engine.sh | sed -n 's/^ENGINE_ID=//p')
+printf 'ENGINE_ID=%s\n' "$ENGINE_ID"
