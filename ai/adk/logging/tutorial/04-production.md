@@ -35,7 +35,9 @@ class StructuredTelemetryPlugin(BasePlugin):
 ```
 
 **👉 Do this.** The example attaches a JSON formatter to the telemetry logger and
-asks *"What's the weather in New York?"*:
+asks *"What's the weather in New York?"*.
+
+**Command:**
 
 ```bash
 .venv/bin/python examples/05_structured_plugin.py
@@ -173,7 +175,9 @@ sequenceDiagram
 
 *How the `ContextVar` threads the trace through every record, including framework logs you never touch.*
 
-**👉 Do this**, passing the trace header the way Cloud Run would:
+**👉 Do this**, passing the trace header the way Cloud Run would.
+
+**Command:**
 
 ```bash
 GOOGLE_CLOUD_PROJECT=your-project .venv/bin/python examples/06_custom_server.py
@@ -222,7 +226,8 @@ against the result and fails loudly if it does not return 200.
 **Command:**
 
 ```bash
-export PROJECT_ID=your-project REGION=us-central1
+export PROJECT_ID=your-project
+export REGION=us-central1
 ./deploy/deploy_cloudrun.sh
 ```
 
@@ -233,15 +238,19 @@ to fix.
 
 ```bash
 URL=$(gcloud run services describe adk-logging-demo \
-        --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
+        --project="$PROJECT_ID" \
+        --region="$REGION" \
+        --format='value(status.url)')
 
 curl -s -X POST "$URL/chat" -H 'content-type: application/json' \
      -d '{"message":"What'\''s the weather in Tokyo?"}'
 
 gcloud logging read \
   'resource.type="cloud_run_revision" resource.labels.service_name="adk-logging-demo" severity>=INFO' \
-  --project="$PROJECT_ID" --limit=20 \
-  --format='table(severity, jsonPayload.message)' --freshness=10m
+  --project="$PROJECT_ID" \
+  --limit=20 \
+  --format='table(severity, jsonPayload.message)' \
+  --freshness=10m
 ```
 
 **Expected output** — a real `INFO` in the severity column, not the blank you got
@@ -264,8 +273,10 @@ so your plugin's fields are columns you can query, not text to grep.
 ```bash
 gcloud logging read \
   'resource.type="cloud_run_revision" jsonPayload.event="tool_end"' \
-  --project="$PROJECT_ID" --limit=5 \
-  --format='table(jsonPayload.tool, jsonPayload.latency_ms, jsonPayload.status)' --freshness=10m
+  --project="$PROJECT_ID" \
+  --limit=5 \
+  --format='table(jsonPayload.tool, jsonPayload.latency_ms, jsonPayload.status)' \
+  --freshness=10m
 ```
 
 **Expected output** — the structured fields returned as query columns:

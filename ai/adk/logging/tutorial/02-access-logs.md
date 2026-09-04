@@ -50,7 +50,9 @@ class DropHealthChecks(logging.Filter):
 ```
 
 **👉 Do this.** Start the demo server, then hit the health endpoint three times and
-the root once:
+the root once.
+
+**Command:**
 
 ```bash
 .venv/bin/python examples/02_tame_uvicorn.py

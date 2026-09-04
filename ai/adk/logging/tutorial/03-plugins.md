@@ -125,6 +125,8 @@ it, called out at the end of this section.
 
 **👉 Do this.**
 
+**Command:**
+
 ```bash
 .venv/bin/python examples/03_logging_plugin.py
 ```
@@ -219,14 +221,19 @@ can run either plugin example; the script to run is the Job argument, and
 between runs without rebuilding. Example 03 configures no logging of its own, so
 `LOG_LEVEL` controls only the framework logger (stream 2), never the plugin.
 
-**👉 Do this.** Deploy and run once at INFO, then run again at WARNING:
+**👉 Do this.** Deploy and run once at INFO, then run again at WARNING.
+
+**Command:**
 
 ```bash
-export PROJECT_ID=your-project REGION=us-central1
+export PROJECT_ID=your-project
+export REGION=us-central1
 SCRIPT=examples/03_logging_plugin.py ./deploy/deploy_plugin_job.sh   # deploys adk-plugin-job, runs at INFO
 gcloud run jobs execute adk-plugin-job \
-  --project="$PROJECT_ID" --region="$REGION" \
-  --update-env-vars=LOG_LEVEL=WARNING --wait
+  --project="$PROJECT_ID" \
+  --region="$REGION" \
+  --update-env-vars=LOG_LEVEL=WARNING \
+  --wait
 ```
 
 Then read the plugin's own lines, and separately the framework's, back.
@@ -238,15 +245,19 @@ Then read the plugin's own lines, and separately the framework's, back.
 gcloud logging read \
   'resource.type="cloud_run_job" resource.labels.job_name="adk-plugin-job"
    textPayload:"logging_plugin"' \
-  --project="$PROJECT_ID" --limit=10 \
-  --format='value(severity,textPayload)' --freshness=15m
+  --project="$PROJECT_ID" \
+  --limit=10 \
+  --format='value(severity,textPayload)' \
+  --freshness=15m
 
 # The framework lines (stderr):
 gcloud logging read \
   'resource.type="cloud_run_job" resource.labels.job_name="adk-plugin-job"
    textPayload:"google_adk"' \
-  --project="$PROJECT_ID" --limit=10 \
-  --format='value(severity,textPayload)' --freshness=15m
+  --project="$PROJECT_ID" \
+  --limit=10 \
+  --format='value(severity,textPayload)' \
+  --freshness=15m
 ```
 
 **Expected output** — two things worth stopping on.
@@ -363,7 +374,9 @@ with os.fdopen(fd, "a", encoding="utf-8") as f:
               allow_unicode=True, sort_keys=False, width=120)
 ```
 
-**👉 Do this**, then open the file it writes:
+**👉 Do this**, then open the file it writes.
+
+**Command:**
 
 ```bash
 .venv/bin/python examples/04_debug_plugin.py
@@ -425,14 +438,18 @@ the container.
 > containers. 3.3 wrote a file; a Cloud Run Job's filesystem is thrown away when
 > the execution ends. So where does the capture go?
 
-**👉 Do this**, part one, the naive deploy:
+**👉 Do this**, part one, the naive deploy.
+
+**Command:**
 
 ```bash
 SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh   # deploys adk-debug-plugin-job
 gcloud logging read \
   'resource.type="cloud_run_job" resource.labels.job_name="adk-debug-plugin-job"' \
-  --project="$PROJECT_ID" --limit=20 \
-  --format='value(severity,textPayload)' --freshness=15m
+  --project="$PROJECT_ID" \
+  --limit=20 \
+  --format='value(severity,textPayload)' \
+  --freshness=15m
 ```
 
 **Expected output** — the script's two `print()` lines and nothing resembling the
@@ -455,7 +472,9 @@ the per-invocation buffer, so the first entry is dropped. Notice it is a real
 > execution. Cloud Run can mount a Cloud Storage bucket as a volume, and example 04
 > already reads its path from `DEBUG_OUTPUT`.
 
-**👉 Do this**, part two, mount a bucket:
+**👉 Do this**, part two, mount a bucket.
+
+**Command:**
 
 ```bash
 export BUCKET="${PROJECT_ID}-adk-debug"   # any bucket you own; created in $REGION if missing

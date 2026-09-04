@@ -25,12 +25,15 @@ What deploying the agent (1.6, native) means in practice:
 **Command:**
 
 ```bash
-export PROJECT_ID=your-project REGION=us-central1
+export PROJECT_ID=your-project
+export REGION=us-central1
 ./deploy/deploy_agent_engine.sh
 gcloud logging read \
   'resource.type="aiplatform.googleapis.com/ReasoningEngine"
    resource.labels.reasoning_engine_id="ENGINE_ID"' \
-  --project="$PROJECT_ID" --limit=20 --format='table(severity,textPayload)'
+  --project="$PROJECT_ID" \
+  --limit=20 \
+  --format='table(severity,textPayload)'
 ```
 
 **The reuse that matters.** Your Part 4 structured plugin still works here

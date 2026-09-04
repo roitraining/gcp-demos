@@ -11,7 +11,9 @@
 > you can drive it yourself.
 
 **👉 Do this** in console mode, which needs no cloud access and just prints the
-spans:
+spans.
+
+**Command:**
 
 ```bash
 .venv/bin/python examples/08_otel_cloud.py

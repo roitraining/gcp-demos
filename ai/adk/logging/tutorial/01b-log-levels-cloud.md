@@ -24,13 +24,19 @@ automatically. [deploy/deploy_job.sh](../deploy/deploy_job.sh) builds the image,
 deploys the Job, and runs it once; the level is a Job argument, so you can
 re-run at a different level without rebuilding.
 
-**👉 Do this.** Deploy and run at INFO, then run again at WARNING:
+**👉 Do this.** Deploy and run at INFO, then run again at WARNING.
+
+**Command:**
 
 ```bash
-export PROJECT_ID=your-project REGION=us-central1
+export PROJECT_ID=your-project
+export REGION=us-central1
 ./deploy/deploy_job.sh                 # deploys, then executes at info
 gcloud run jobs execute adk-logging-job \
-  --project="$PROJECT_ID" --region="$REGION" --args=warning --wait
+  --project="$PROJECT_ID" \
+  --region="$REGION" \
+  --args=warning \
+  --wait
 ```
 
 Then read the two runs back, asking for the severity of each line.
@@ -40,8 +46,10 @@ Then read the two runs back, asking for the severity of each line.
 ```bash
 gcloud logging read \
   'resource.type="cloud_run_job" resource.labels.job_name="adk-logging-job"' \
-  --project="$PROJECT_ID" --limit=40 \
-  --format='table(severity,textPayload)' --freshness=15m
+  --project="$PROJECT_ID" \
+  --limit=40 \
+  --format='table(severity,textPayload)' \
+  --freshness=15m
 ```
 
 **Expected output** — the INFO execution carry the full lifecycle and the WARNING
@@ -82,7 +90,10 @@ INFO      Container called exit(0).
 gcloud logging read \
   'resource.type="cloud_run_job" resource.labels.job_name="adk-logging-job"
    textPayload:"get_weather"' \
-  --project="$PROJECT_ID" --limit=1 --format='value(logName,textPayload)' --freshness=15m
+  --project="$PROJECT_ID" \
+  --limit=1 \
+  --format='value(logName,textPayload)' \
+  --freshness=15m
 # projects/.../logs/run.googleapis.com%2Fstderr  INFO - demo_agent.agent - tool get_weather called ...
 ```
 
@@ -128,19 +139,26 @@ the servers in Parts 5 and 6, which take control of every stream; this one takes
 control of none, on purpose.)
 
 **👉 Do this.** Deploy two copies, one at each level, then send the same question
-to each:
+to each.
+
+**Command:**
 
 ```bash
-export PROJECT_ID=your-project REGION=us-central1
+export PROJECT_ID=your-project
+export REGION=us-central1
 ./deploy/deploy_api.sh                                                    # INFO (default)
 SERVICE=adk-logging-api-warn LOG_LEVEL=warning ./deploy/deploy_api.sh     # WARNING
 ```
 
 ```bash
 API_URL=$(gcloud run services describe adk-logging-api \
-  --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
+  --project="$PROJECT_ID" \
+  --region="$REGION" \
+  --format='value(status.url)')
 API_URL_W=$(gcloud run services describe adk-logging-api-warn \
-  --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
+  --project="$PROJECT_ID" \
+  --region="$REGION" \
+  --format='value(status.url)')
 
 curl -s -X POST "$API_URL/chat" -H 'content-type: application/json' \
      -d '{"message":"What'\''s the weather in Tokyo?"}'
@@ -155,8 +173,10 @@ Read the INFO service's logs.
 ```bash
 gcloud logging read \
   'resource.type="cloud_run_revision" resource.labels.service_name="adk-logging-api"' \
-  --project="$PROJECT_ID" --limit=40 \
-  --format='table(severity,textPayload)' --freshness=10m
+  --project="$PROJECT_ID" \
+  --limit=40 \
+  --format='table(severity,textPayload)' \
+  --freshness=10m
 ```
 
 **Expected output** — all of Part 1's streams in one place (trimmed):
@@ -179,8 +199,10 @@ Now read the WARNING service.
 ```bash
 gcloud logging read \
   'resource.type="cloud_run_revision" resource.labels.service_name="adk-logging-api-warn"' \
-  --project="$PROJECT_ID" --limit=40 \
-  --format='table(severity,textPayload)' --freshness=10m
+  --project="$PROJECT_ID" \
+  --limit=40 \
+  --format='table(severity,textPayload)' \
+  --freshness=10m
 ```
 
 **Expected output** — the framework and tool lines gone, the access line still
@@ -243,10 +265,13 @@ and implement two routes: `POST /api/reasoning_engine` (unary) and
 server that satisfies the contract, in about ninety lines. Its logging is the
 same naive Part 1 config as 1.5.
 
-**👉 Do this.** Deploy both, noting the engine ID each prints:
+**👉 Do this.** Deploy both, noting the engine ID each prints.
+
+**Command:**
 
 ```bash
-export PROJECT_ID=your-project REGION=us-central1
+export PROJECT_ID=your-project
+export REGION=us-central1
 
 # Native: deploy the agent object, platform serves it
 ./deploy/deploy_agent_engine.sh
@@ -296,8 +321,10 @@ PY
 gcloud logging read \
   'resource.type="aiplatform.googleapis.com/ReasoningEngine"
    resource.labels.reasoning_engine_id="'"$ENGINE_NATIVE"'"' \
-  --project="$PROJECT_ID" --limit=30 \
-  --format='table(severity,textPayload)' --freshness=15m
+  --project="$PROJECT_ID" \
+  --limit=30 \
+  --format='table(severity,textPayload)' \
+  --freshness=15m
 ```
 
 **Expected output** — the familiar lifecycle, but not in your format:
@@ -338,8 +365,10 @@ PY
 gcloud logging read \
   'resource.type="aiplatform.googleapis.com/ReasoningEngine"
    resource.labels.reasoning_engine_id="'"$ENGINE_BYOC"'"' \
-  --project="$PROJECT_ID" --limit=30 \
-  --format='table(severity,textPayload)' --freshness=15m
+  --project="$PROJECT_ID" \
+  --limit=30 \
+  --format='table(severity,textPayload)' \
+  --freshness=15m
 ```
 
 **Expected output** — your logs in **your** format, unlike the native deploy:
