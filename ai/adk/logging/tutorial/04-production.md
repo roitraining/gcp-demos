@@ -180,7 +180,8 @@ sequenceDiagram
 **Command:**
 
 ```bash
-GOOGLE_CLOUD_PROJECT=your_project .venv/bin/python examples/06_custom_server.py
+source env.sh
+.venv/bin/python examples/06_custom_server.py
 ```
 
 In another terminal, send the turn with a trace header.
@@ -232,8 +233,7 @@ against the result and fails loudly if it does not return 200.
 **Command:**
 
 ```bash
-export PROJECT_ID=your_project
-export REGION=us-central1
+source env.sh
 ./deploy/deploy_cloudrun.sh
 ```
 

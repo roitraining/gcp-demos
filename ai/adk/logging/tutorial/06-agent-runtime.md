@@ -28,8 +28,7 @@ line, which we read straight into a variable).
 **Command:**
 
 ```bash
-export PROJECT_ID=your_project
-export REGION=us-central1
+source env.sh
 export ENGINE_ID=$(./deploy/deploy_agent_engine.sh | sed -n 's/^ENGINE_ID=//p')
 ```
 

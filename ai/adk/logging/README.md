@@ -38,6 +38,7 @@ cd ai/adk/logging
 python3.13 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp .env.example .env          # then set your project / model config
+cp env.sh.example env.sh      # shell vars for the cloud parts; set PROJECT_ID, then `source env.sh`
 .venv/bin/python examples/01_log_levels.py debug   # start here, then read the tutorial
 ```
 

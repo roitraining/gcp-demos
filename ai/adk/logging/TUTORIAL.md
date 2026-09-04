@@ -94,6 +94,23 @@ cp .env.example .env
 gcloud auth application-default login   # if you have not already
 ```
 
+### Set your shell variables
+
+The cloud parts (1.4 onward) run `gcloud` and the deploy scripts, which read a
+few shell variables — your project, region, and a couple derived from them. Set
+them once in a file you `source`, instead of re-typing `export PROJECT_ID=...`
+in every step.
+
+```bash
+cp env.sh.example env.sh
+# edit env.sh: set PROJECT_ID to your real project
+source env.sh
+```
+
+`env.sh` is gitignored. **`source env.sh` again in each new terminal** — the
+tutorial opens a second one for the Agent Runtime BYOC deploy, and variables do
+not cross terminals.
+
 ### Meet the agent
 
 Every example shares one tiny agent, [demo_agent/agent.py](demo_agent/agent.py):

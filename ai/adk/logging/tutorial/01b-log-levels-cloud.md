@@ -29,8 +29,7 @@ re-run at a different level without rebuilding.
 **Command:**
 
 ```bash
-export PROJECT_ID=your_project
-export REGION=us-central1
+source env.sh
 ./deploy/deploy_job.sh
 gcloud run jobs execute adk-logging-job \
   --project="$PROJECT_ID" \
@@ -143,8 +142,7 @@ to each.
 **Command:**
 
 ```bash
-export PROJECT_ID=your_project
-export REGION=us-central1
+source env.sh
 ./deploy/deploy_api.sh
 SERVICE=adk-logging-api-warn LOG_LEVEL=warning ./deploy/deploy_api.sh
 ```
@@ -274,13 +272,12 @@ it back — and because each engine id lives in the terminal that deployed it, t
 testing below is naturally split the same way: native in terminal 1, BYOC in
 terminal 2.
 
-**Terminal 1 — native.** Set the project and region.
+**Terminal 1 — native.** Load your shell variables.
 
 **Command:**
 
 ```bash
-export PROJECT_ID=your_project
-export REGION=us-central1
+source env.sh
 ```
 
 Deploy the agent object natively (the platform serves it) and capture its id. The
@@ -302,9 +299,7 @@ and activate the virtualenv (the BYOC test query below needs it).
 ```bash
 cd ai/adk/logging
 source .venv/bin/activate
-export PROJECT_ID=your_project
-export REGION=us-central1
-export LOCATION=$REGION
+source env.sh
 ```
 
 Then deploy your own container (BYOC — the platform hosts it) and capture its id,
