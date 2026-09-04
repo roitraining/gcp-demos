@@ -85,13 +85,23 @@ AI, Gemini 3.7 Flash):
   parsed into queryable `jsonPayload` fields (`event`, `tool`, `latency_ms`,
   `status`) and its `severity` landed as `INFO`, not Default.
 
+- The **Part 5 cloud export was run** against `jwd-gcp-demos` (2026-09-04) with
+  [examples/08_otel_cloud.py](../examples/08_otel_cloud.py) in `cloud` mode, and
+  the results confirmed end to end. Three findings: `maybe_set_otel_providers`
+  needs a project-scoped `get_gcp_resource(project)` or the
+  `telemetry.googleapis.com` endpoint rejects every span batch with a 400; the
+  GenAI events land under `gen_ai.*` log names, not `adk-otel`; and the
+  `NO_CONTENT` default was confirmed by reading a `gen_ai.user.message` entry
+  back with its `content` field `<elided>`. The `invocation` spans appear in
+  Cloud Trace, in the console Trace explorer and via the v1 `traces.list` API
+  (query with a user token from `gcloud auth print-access-token` and
+  `orderBy=start desc`).
+
 Not verified here (documented, run them yourself):
 
 - The `deploy/deploy_cloudrun.sh` deploy of the Part 4 custom server end to end.
   The formatter and trace correlation are verified locally (4.2); the
   containerized Cloud Run deploy of it (4.3) is not.
-- Reading the exported `adk-otel` entries back with `gcloud logging read`
-  (needs an interactive `gcloud auth login` in your shell).
 
 ---
 

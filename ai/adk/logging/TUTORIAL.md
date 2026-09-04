@@ -38,7 +38,7 @@ flowchart LR
   end
   subgraph dst["lands in"]
     d1["stdout / stderr<br/>→ Cloud Logging"]
-    d2["Cloud Trace<br/>+ Cloud Logging (adk-otel)"]
+    d2["Cloud Trace<br/>+ Cloud Logging (gen_ai.*)"]
   end
   s1 --> c1 --> d1
   s2 --> c2 --> d1

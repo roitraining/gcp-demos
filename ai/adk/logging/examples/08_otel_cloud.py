@@ -17,7 +17,8 @@ Two modes
   OTel spans locally with no cloud access. Good for understanding what ADK emits.
 * ``cloud``: install the Google Cloud exporters
   (``get_gcp_exporters(enable_cloud_tracing=True, enable_cloud_logging=True)``)
-  so spans go to Cloud Trace and GenAI events go to Cloud Logging. Requires
+  so spans go to Cloud Trace and GenAI events go to Cloud Logging (under
+  per-event ``gen_ai.*`` log names, e.g. ``gen_ai.user.message``). Requires
   ``GOOGLE_CLOUD_PROJECT`` and these extra packages::
 
       pip install opentelemetry-exporter-gcp-logging \\
@@ -76,7 +77,7 @@ def install_console_exporter() -> None:
 
 def install_cloud_exporters() -> None:
     """Send spans to Cloud Trace and GenAI events to Cloud Logging."""
-    from google.adk.telemetry.google_cloud import get_gcp_exporters
+    from google.adk.telemetry.google_cloud import get_gcp_exporters, get_gcp_resource
 
     project = os.getenv("GOOGLE_CLOUD_PROJECT")
     if not project:
@@ -86,10 +87,13 @@ def install_cloud_exporters() -> None:
         enable_cloud_tracing=True,
         enable_cloud_logging=True,
     )
-    maybe_set_otel_providers([hooks])
+    # The telemetry.googleapis.com OTLP endpoint routes spans by the
+    # gcp.project_id attribute on the OTel resource. Without it the export is
+    # rejected with a 400. get_gcp_resource(project) supplies it.
+    maybe_set_otel_providers([hooks], otel_resource=get_gcp_resource(project))
     print(f"Exporting OTel telemetry to project {project!r}.")
     print("  Traces:  Cloud Console > Trace > Trace explorer")
-    print("  Logs:    Cloud Console > Logging  (log name 'adk-otel')")
+    print("  Logs:    Cloud Console > Logging  (log names 'gen_ai.*')")
 
 
 async def main(mode: str) -> None:
