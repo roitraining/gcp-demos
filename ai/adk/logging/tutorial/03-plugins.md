@@ -433,44 +433,16 @@ the container.
 > **Optional. Why you are here.** Like 3.2, this is a curiosity-driven detour, not
 > a step you need. You would not run `DebugLoggingPlugin` on Cloud Run in practice,
 > but doing it once teaches a real lesson about file-writing tools in ephemeral
-> containers. 3.3 wrote a file; a Cloud Run Job's filesystem is thrown away when
-> the execution ends. So where does the capture go?
+> containers: 3.3 wrote a file, and a Cloud Run Job's filesystem is thrown away
+> when the execution ends, so the capture has to land somewhere that outlives it.
 
-**👉 Do this**, part one, the naive deploy.
+A file-writing plugin needs a filesystem that outlives the execution: a Cloud Run
+Job's own disk is discarded when the execution ends, so a file at
+`/app/adk_debug.yaml` would vanish with the container. Cloud Run can mount a Cloud
+Storage bucket as a volume instead, and example 04 already reads its output path
+from `DEBUG_OUTPUT`.
 
-**Command:**
-
-```bash
-SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh
-gcloud logging read \
-  'resource.type="cloud_run_job" resource.labels.job_name="adk-debug-plugin-job"' \
-  --project="$PROJECT_ID" \
-  --limit=20 \
-  --format='value(severity,textPayload)' \
-  --freshness=15m
-```
-
-**Expected output** — the script's two `print()` lines and nothing resembling the
-YAML:
-
-```console
-FINAL ANSWER: I do not have weather data for Paris.
-Full invocation captured to: /app/adk_debug.yaml
-WARNING - google_adk.google.adk.plugins.debug_logging_plugin - No debug state for invocation e-..., skipping entry
-```
-
-The file was written to `/app/adk_debug.yaml` inside the container and discarded
-with it. (The `skipping entry` warning is a harmless ADK ordering quirk: the
-plugin's `on_user_message_callback` fires before `before_run_callback` creates
-the per-invocation buffer, so the first entry is dropped. Notice it is a real
-`logging` record on stderr, unlike anything `LoggingPlugin` emits.)
-
-> [!IMPORTANT]
-> **What it means.** A file-writing plugin needs a filesystem that outlives the
-> execution. Cloud Run can mount a Cloud Storage bucket as a volume, and example 04
-> already reads its path from `DEBUG_OUTPUT`.
-
-**👉 Do this**, part two, mount a bucket.
+**👉 Do this.** Deploy with a bucket mounted.
 
 **Command:**
 
