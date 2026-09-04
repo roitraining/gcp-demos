@@ -19,7 +19,8 @@ Start with **[TUTORIAL.md](TUTORIAL.md)**.
 
 | Path | What it is |
 |---|---|
-| [TUTORIAL.md](TUTORIAL.md) | The tutorial. Read this. |
+| [TUTORIAL.md](TUTORIAL.md) | The tutorial index: intro, the four-streams idea, setup, and the table of contents. Start here. |
+| [tutorial/](tutorial/) | The tutorial itself, one short file per part (log levels, plugins, Cloud Run, and so on). |
 | [demo_agent/agent.py](demo_agent/agent.py) | The tiny shared agent (a weather tool that logs). |
 | [examples/01_log_levels.py](examples/01_log_levels.py) | Run one prompt at DEBUG/INFO/WARNING/ERROR and compare. |
 | [examples/02_tame_uvicorn.py](examples/02_tame_uvicorn.py) | Configure uvicorn logging; drop health-check access spam. |
