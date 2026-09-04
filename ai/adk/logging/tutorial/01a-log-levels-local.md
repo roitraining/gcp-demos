@@ -1,9 +1,13 @@
-## Part 1: the log level, and what each one shows you
+# Part 1 · The log level
 
-**Why you are here.** The log level is the first and bluntest dial. Before adding
-any plugin or custom formatter, you need to know exactly what `DEBUG`, `INFO`,
-`WARNING`, and `ERROR` each reveal, so you can pick the right one instead of
-drowning in output or flying blind. This part is a guided tour of that dial.
+*What `DEBUG`, `INFO`, `WARNING`, and `ERROR` each reveal — on a script,
+`adk web`, and `adk api_server`.*
+
+> [!NOTE]
+> **Why you are here.** The log level is the first and bluntest dial. Before adding
+> any plugin or custom formatter, you need to know exactly what `DEBUG`, `INFO`,
+> `WARNING`, and `ERROR` each reveal, so you can pick the right one instead of
+> drowning in output or flying blind. This part is a guided tour of that dial.
 
 Part 1 runs the same one question, *"What's the weather in Tokyo?"*, three ways:
 first through a plain script where you control the level directly (1.1), then
@@ -34,7 +38,7 @@ INFO - google_adk.google.adk.models.google_llm - Response received from the mode
 >>> ANSWER: The weather in Tokyo is currently 27°C and humid.
 ```
 
-**What it means.** Those five lines are the agent loop, in order:
+**💡 What it means.** Those five lines are the agent loop, in order:
 
 | Line | Logger | What happened |
 |---|---|---|
@@ -76,7 +80,7 @@ Function calls:
 name: get_weather, args: {'city': 'Tokyo'}
 ```
 
-**What it means.** DEBUG keeps every INFO line and adds the *contents* of each
+**💡 What it means.** DEBUG keeps every INFO line and adds the *contents* of each
 model call. The new block breaks down as:
 
 | Block | What it is | Where it came from |
@@ -107,7 +111,7 @@ will not leak your bearer token.)
 >>> ANSWER: The weather in Tokyo is currently 27°C and humid.
 ```
 
-**What it means.** Nothing from the framework at all, just your answer. At
+**💡 What it means.** Nothing from the framework at all, just your answer. At
 WARNING and ERROR, a healthy run is silent; you only hear from the log when
 something is wrong. Try asking about a city the tool does not know and you would
 see the one `WARNING` line the tool itself emits (`no weather data for ...`).
@@ -216,13 +220,14 @@ Every timestamped line is gone, exactly as 1.1.3 taught you to expect. But the
 not fail: those lines are stream 3, and `--log_level` never reaches it. That is
 what Part 2 is about.
 
-One trap worth knowing now: `adk run` (the terminal REPL) does **not** print
-framework logs to your screen. It redirects them to a temp file and clears the
-console handlers. If you use it and wonder where the logs went:
-
-```bash
-tail -F "${TMPDIR:-/tmp}/agents_log/agent.latest.log"
-```
+> [!TIP]
+> One trap worth knowing now: `adk run` (the terminal REPL) does **not** print
+> framework logs to your screen. It redirects them to a temp file and clears the
+> console handlers. If you use it and wonder where the logs went:
+>
+> ```bash
+> tail -F "${TMPDIR:-/tmp}/agents_log/agent.latest.log"
+> ```
 
 ---
 

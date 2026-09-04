@@ -1,13 +1,17 @@
-## Part 3: a readable narration of the agent's steps
+# Part 3 · Plugins
 
-**Why you are here.** INFO is too terse to debug a tool-calling problem (it tells
-you a request happened, not what the tool was called with), and DEBUG dumps the
-full model conversation as raw JSON. In development you often want the middle
-ground: a clean, human-readable narration of the agentic steps, which tool ran,
-with which arguments, what it returned, how many tokens it cost, without writing
-that yourself. ADK ships two plugins for exactly this. This part uses them
-locally first, then deploys each one to Cloud Run so you can see what a plugin
-sends to Cloud Logging, and closes with when to reach for a plugin at all.
+*A clean, human-readable narration of the agent's steps —
+`LoggingPlugin` and `DebugLoggingPlugin`, locally and on Cloud Run.*
+
+> [!NOTE]
+> **Why you are here.** INFO is too terse to debug a tool-calling problem (it tells
+> you a request happened, not what the tool was called with), and DEBUG dumps the
+> full model conversation as raw JSON. In development you often want the middle
+> ground: a clean, human-readable narration of the agentic steps, which tool ran,
+> with which arguments, what it returned, how many tokens it cost, without writing
+> that yourself. ADK ships two plugins for exactly this. This part uses them
+> locally first, then deploys each one to Cloud Run so you can see what a plugin
+> sends to Cloud Logging, and closes with when to reach for a plugin at all.
 
 ### 3.1 LoggingPlugin: one line to wire up
 
@@ -93,7 +97,7 @@ Because everything goes through `print()`, neither `--log_level` nor a
 `dictConfig` can reach this output. That is the trait that decides where you use
 it, called out at the end of this section.
 
-**Do this.**
+**▶ Do this.**
 
 ```bash
 .venv/bin/python examples/03_logging_plugin.py
@@ -102,6 +106,9 @@ it, called out at the end of this section.
 The example asks *"What's the weather in London?"* **You will see** the whole
 invocation narrated, one hook at a time (lightly trimmed, repeated field lines
 removed):
+
+<details>
+<summary><b>Output</b> — full agentic-loop narration (29 lines)</summary>
 
 ```console
 [logging_plugin] 🚀 USER MESSAGE RECEIVED
@@ -135,7 +142,9 @@ removed):
 [logging_plugin] ✅ INVOCATION COMPLETED
 ```
 
-**What it means.** That is the full agentic loop, in order: the model saw the
+</details>
+
+**💡 What it means.** That is the full agentic loop, in order: the model saw the
 tools and chose `get_weather`, the tool ran with `{'city': 'London'}` and
 returned its report, the model was called a second time with that result and
 produced the final text, and the run ended. Two model calls, one tool call, and
@@ -155,6 +164,7 @@ conversation contents. The source removed that on purpose:
 So the exact prompt sent to the model is still a DEBUG or `DebugLoggingPlugin`
 job, which is what 3.3 is for.
 
+> [!WARNING]
 > **The catch that decides where you use it.** `LoggingPlugin` writes with
 > `print()` and ANSI color codes, **not** through the `logging` module. That is
 > perfect in a terminal and wrong for a deployed service: it ignores your
@@ -165,19 +175,21 @@ job, which is what 3.3 is for.
 
 ### 3.2 LoggingPlugin on Cloud Run
 
-**Optional. Why you are here.** You would not deploy `LoggingPlugin` to a real
-service; this section exists only to satisfy the natural curiosity about what
-Cloud Run does with a print-based plugin, and the answer turns the 3.1 callout
-from a claim into evidence. It is the same move as 1.4: deploy the unmodified
-script as a Cloud Run Job, run it, and read back what Cloud Logging did with each
-line.
+> [!TIP]
+> **Optional. Why you are here.** You would not deploy `LoggingPlugin` to a real
+> service; this section exists only to satisfy the natural curiosity about what
+> Cloud Run does with a print-based plugin, and the answer turns the 3.1 callout
+> from a claim into evidence. It is the same move as 1.4: deploy the unmodified
+> script as a Cloud Run Job, run it, and read back what Cloud Logging did with each
+> line.
+
 [deploy/deploy_plugin_job.sh](../deploy/deploy_plugin_job.sh) builds one image that
 can run either plugin example; the script to run is the Job argument, and
 `LOG_LEVEL` is an environment variable, so you can change the framework level
 between runs without rebuilding. Example 03 configures no logging of its own, so
 `LOG_LEVEL` controls only the framework logger (stream 2), never the plugin.
 
-**Do this.** Deploy and run once at INFO, then run again at WARNING:
+**▶ Do this.** Deploy and run once at INFO, then run again at WARNING:
 
 ```bash
 export PROJECT_ID=your-project REGION=us-central1
@@ -227,14 +239,14 @@ literally in the payload:
 <no severity>  ^[[90m[logging_plugin]    Arguments: {'city': 'London'}^[[0m
 ```
 
-**What it means, finding one: the plugin is independent of the level dial.**
+**💡 What it means, finding one: the plugin is independent of the level dial.**
 Turning stream 2 down to WARNING removed the framework's lifecycle lines and left
 the plugin narration completely intact, because the plugin never goes through
 `logging`. That is exactly what makes it great in development, and exactly why it
 is the wrong tool in production: you cannot turn it down without deleting it from
 the code.
 
-**What it means, finding two: the narration is not queryable.** Every plugin
+**💡 What it means, finding two: the narration is not queryable.** Every plugin
 line lands on stdout with Default severity and its grey ANSI codes embedded in
 the text. It is readable in the console, but nothing in it is a field you can
 filter, alert on, or group. (The `google_adk` lines have the same problem 1.4
@@ -250,9 +262,10 @@ gcloud run jobs delete adk-plugin-job --project="$PROJECT_ID" --region="$REGION"
 
 ### 3.3 DebugLoggingPlugin: capture one whole turn to a file
 
-**Why.** Sometimes one specific turn misbehaves and you want the complete,
-inspectable record to diff or attach to a bug report, not a stream you have to
-watch live.
+> [!NOTE]
+> **Why.** Sometimes one specific turn misbehaves and you want the complete,
+> inspectable record to diff or attach to a bug report, not a stream you have to
+> watch live.
 
 ```python
 from google.adk.plugins import DebugLoggingPlugin
@@ -312,7 +325,7 @@ with os.fdopen(fd, "a", encoding="utf-8") as f:
               allow_unicode=True, sort_keys=False, width=120)
 ```
 
-**Do this**, then open the file it writes:
+**▶ Do this**, then open the file it writes:
 
 ```bash
 .venv/bin/python examples/04_debug_plugin.py
@@ -345,12 +358,13 @@ narrates: `invocation_start`, `agent_start`, `llm_request`, `llm_response`,
 `llm_response`, `event`, `agent_end`, `session_state_snapshot`,
 `invocation_end`.
 
-**What it means.** It is the full turn on disk: exact prompt, system instruction,
+**💡 What it means.** It is the full turn on disk: exact prompt, system instruction,
 tool arguments, tool results, token counts, and session state. Two properties
 matter. It is buffered, so nothing reaches the file until the invocation
 completes; if the process dies mid-turn, that turn is lost. And it redacts by
 design, but broadly:
 
+> [!NOTE]
 > That last rule blanks all temporary state, not
 > only credentials, so an intermediate value passed between agents under a
 > `temp:` key reads as `[REDACTED]` here.
@@ -363,13 +377,14 @@ the container.
 
 ### 3.4 DebugLoggingPlugin on Cloud Run
 
-**Optional. Why you are here.** Like 3.2, this is a curiosity-driven detour, not
-a step you need. You would not run `DebugLoggingPlugin` on Cloud Run in practice,
-but doing it once teaches a real lesson about file-writing tools in ephemeral
-containers. 3.3 wrote a file; a Cloud Run Job's filesystem is thrown away when
-the execution ends. So where does the capture go?
+> [!TIP]
+> **Optional. Why you are here.** Like 3.2, this is a curiosity-driven detour, not
+> a step you need. You would not run `DebugLoggingPlugin` on Cloud Run in practice,
+> but doing it once teaches a real lesson about file-writing tools in ephemeral
+> containers. 3.3 wrote a file; a Cloud Run Job's filesystem is thrown away when
+> the execution ends. So where does the capture go?
 
-**Do this**, part one, the naive deploy:
+**▶ Do this**, part one, the naive deploy:
 
 ```bash
 SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh   # deploys adk-debug-plugin-job
@@ -394,11 +409,11 @@ plugin's `on_user_message_callback` fires before `before_run_callback` creates
 the per-invocation buffer, so the first entry is dropped. Notice it is a real
 `logging` record on stderr, unlike anything `LoggingPlugin` emits.)
 
-**What it means.** A file-writing plugin needs a filesystem that outlives the
+**💡 What it means.** A file-writing plugin needs a filesystem that outlives the
 execution. Cloud Run can mount a Cloud Storage bucket as a volume, and example 04
 already reads its path from `DEBUG_OUTPUT`.
 
-**Do this**, part two, mount a bucket:
+**▶ Do this**, part two, mount a bucket:
 
 ```bash
 export BUCKET="${PROJECT_ID}-adk-debug"   # any bucket you own; created in $REGION if missing
@@ -417,7 +432,7 @@ line the plugin emits about the file it just wrote:
 WARNING - google_adk.google.adk.plugins.debug_logging_plugin - Debug output file /mnt/out/adk_debug.yaml is readable beyond its owner and holds whole prompts and responses; restrict it to mode 600.
 ```
 
-**What it means.** The plugin behaved exactly as on your laptop; only the disk
+**💡 What it means.** The plugin behaved exactly as on your laptop; only the disk
 changed. The mode warning is the plugin doing its job: the Cloud Storage FUSE
 mount reports a mode wider than `0600`, so the plugin cannot guarantee the file
 is owner-only and says so, through the `logging` module, on stderr. Two cautions
@@ -426,6 +441,7 @@ so bucket IAM is your new `0600`. And this is still a debugging capture, not a
 log pipeline; if you find yourself running it routinely in the cloud, you want
 the structured plugin in Part 4 instead.
 
+> [!TIP]
 > A quick alternative, if you only need the capture once and do not want a
 > bucket: have the script `cat` the file to stdout at the end, and it lands in
 > Cloud Logging as one large text payload. It works, but it throws away the
@@ -439,10 +455,11 @@ gcloud run jobs delete adk-debug-plugin-job --project="$PROJECT_ID" --region="$R
 
 ### 3.5 Plugin or level dial?
 
-**Why you are here.** You have now seen both plugins, locally and deployed. When
-should you reach for one instead of just turning the `google_adk` level up? The
-short answer: when you want structured facts about the agent's steps rather than
-the framework's own log prose.
+> [!NOTE]
+> **Why you are here.** You have now seen both plugins, locally and deployed. When
+> should you reach for one instead of just turning the `google_adk` level up? The
+> short answer: when you want structured facts about the agent's steps rather than
+> the framework's own log prose.
 
 Built-in ADK logging is text lines under `google_adk`, at whatever level you set.
 A plugin hooks the same lifecycle but receives objects, at named points, before
