@@ -174,8 +174,26 @@ Not verified here (documented, run them yourself):
 - Whether an Agent Runtime deploy **without** `--otel_to_cloud` and without
   `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY` in `.env` produces traces. An
   earlier version of Part 6 said traces appear automatically; every deploy run
-  here passed the flag, so that case was never exercised. Part 6 now says "the
-  platform decides; set it explicitly" and claims no default.
+  here passed the flag or set the var, so that case was never exercised. Part 6
+  now says "the platform decides; set it explicitly" and claims no default.
+- **Where the OTel `gen_ai.*` telemetry lands on a native Agent Runtime deploy
+  (2026-09-05, VERIFIED NEGATIVE).** Two control deploys were run: one with
+  `--otel_to_cloud` (6.2) and one with `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true`
+  + both content knobs in `.env` (6.3). **What we confirmed:** each route writes
+  the expected env vars to the deployment (the flag also adds
+  `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false`; the `.env` route adds only what
+  `.env` carried), read back via the `vertexai` SDK
+  (`engine.api_resource.spec.deployment_spec.env` — `gcloud ai reasoning-engines`
+  does not exist in this install). The deployed agent answered queries and its
+  framework INFO logs landed on `aiplatform.googleapis.com/reasoning_engine_stderr`.
+  **What we could NOT confirm:** the `gen_ai.*` OTel events (which DO appear in
+  Cloud Logging on local and Cloud Run runs, 5.2-5.5) did **not** surface in
+  Cloud Logging under any `gen_ai.*` log name, and **no Cloud Trace spans**
+  appeared for the engine across a 40-minute window and multiple queries. So on
+  native Agent Runtime the telemetry destination is unresolved: it may require
+  Console-side enablement, a longer export path than we waited for, or a wrapper
+  exporter set we did not identify. Part 6 states only what was observed. Both
+  control engines were deleted after the runs.
 
 ---
 

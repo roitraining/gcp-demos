@@ -11,10 +11,20 @@
 # demo_agent/.env for the deploy and restores the original afterward, so the
 # deploy value does not leak into local `adk web` runs.
 #
+# Two telemetry routes (tutorial 6.2 / 6.3):
+#   default            — pass --otel_to_cloud. The CLI writes
+#                        GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true AND
+#                        ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false for you.
+#   ENABLE_VIA_ENV=1   — no flag. This script writes the telemetry env var and
+#                        BOTH content knobs into the temporary .env itself, so
+#                        the CLI adds nothing. Shows the .env route where you
+#                        must set the knobs yourself.
+#
 # Usage:
 #   export PROJECT_ID=your-project
 #   export REGION=us-central1
-#   ./deploy/deploy_agent_engine.sh                 # deploy at LOG_LEVEL=info
+#   ./deploy/deploy_agent_engine.sh                 # flag route (6.2)
+#   ENABLE_VIA_ENV=1 ./deploy/deploy_agent_engine.sh # .env route (6.3)
 #   LOG_LEVEL=warning ./deploy/deploy_agent_engine.sh
 #
 set -euo pipefail
@@ -23,6 +33,7 @@ PROJECT_ID="${PROJECT_ID:?set PROJECT_ID}"
 REGION="${REGION:-us-central1}"
 LOG_LEVEL="${LOG_LEVEL:-info}"
 MODEL_LOCATION="${MODEL_LOCATION:-global}"
+ENABLE_VIA_ENV="${ENABLE_VIA_ENV:-0}"
 
 # Save the original .env and restore it after deploy (success or failure), so
 # LOG_LEVEL does not leak into local runs like `adk web`.
@@ -38,16 +49,33 @@ GOOGLE_CLOUD_LOCATION=${MODEL_LOCATION}
 LOG_LEVEL=${LOG_LEVEL}
 ENV
 
-# --otel_to_cloud turns on telemetry export; under the hood it sets
-# GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true on the deployed agent.
-# Tee the output so the reader still sees progress, and capture it so we can
-# pull the resource name out for a machine-readable marker line at the end.
-_DEPLOY_OUT="$(adk deploy agent_engine \
-  --project="$PROJECT_ID" \
-  --region="$REGION" \
-  --display_name="adk-logging-demo" \
-  --otel_to_cloud \
-  ./demo_agent 2>&1 | tee /dev/stderr)"
+if [[ "$ENABLE_VIA_ENV" == "1" ]]; then
+  # The .env route (6.3): turn telemetry on and set BOTH content knobs to their
+  # safe values ourselves, since the CLI sets nothing without the flag. Then
+  # deploy with NO --otel_to_cloud.
+  cat >> ./demo_agent/.env <<ENV
+GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true
+ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false
+OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT
+ENV
+  echo "ENABLE_VIA_ENV=1: telemetry + both content knobs written into .env; deploying WITHOUT --otel_to_cloud." >&2
+  # No flag. (bash 3.2 on macOS errors on empty-array expansion under set -u,
+  # so branch the whole command rather than splat a possibly-empty flag array.)
+  _DEPLOY_OUT="$(./.venv/bin/adk deploy agent_engine \
+    --project="$PROJECT_ID" \
+    --region="$REGION" \
+    --display_name="adk-logging-demo" \
+    ./demo_agent 2>&1 | tee /dev/stderr)"
+else
+  # The flag route (6.2): --otel_to_cloud sets the telemetry var and the span
+  # knob (ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false) for you.
+  _DEPLOY_OUT="$(./.venv/bin/adk deploy agent_engine \
+    --project="$PROJECT_ID" \
+    --region="$REGION" \
+    --display_name="adk-logging-demo" \
+    --otel_to_cloud \
+    ./demo_agent 2>&1 | tee /dev/stderr)"
+fi
 
 # Extract the reasoning engine resource name that adk prints, e.g.
 # projects/P/locations/R/reasoningEngines/1234567890. Last match wins.
