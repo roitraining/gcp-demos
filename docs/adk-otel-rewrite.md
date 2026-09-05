@@ -522,7 +522,7 @@ Each stage leaves the docs coherent if we stop after it. "M" = mechanical,
 - Content, all prose and one command block that is shown but not part of the run path: for CLI-launched servers the flag is replaced by env vars, honored when `--otel_to_cloud` is absent (`api_server.py:657-658`, `setup.py:124-147`); a four-row table of the vars (`OTEL_EXPORTER_OTLP_ENDPOINT` or the per-signal `_TRACES_`/`_METRICS_`/`_LOGS_ENDPOINT`, `OTEL_EXPORTER_OTLP_HEADERS`, `OTEL_SERVICE_NAME`/`OTEL_RESOURCE_ATTRIBUTES`) with the opentelemetry.io defaults; **for CLI-launched servers these must be shell exports, not `.env`** (Q1 timing finding, cited) — but note the contrast established in 5.5: **on your own server they can live in `.env`** because the server loads `.env` before building the exporters. http/protobuf only (no gRPC exporter is imported); for your own server, point back to the 5.5 second snippet (`maybe_set_otel_providers()` no-arg). Close with the adk.dev integrations list (`/integrations/?topic=observability`) and the note that some vendors document a code path rather than env vars (MLflow is the example: `http://localhost:5000/v1/traces` with an `x-mlflow-experiment-id` header). Everything in this section is labeled "not run here". **This stage runs nothing — pure reference from code citations; safe to write without a live run.**
 - Verify: see Verification, Stage 6.
 
-### Stage 7 · 5.8 Logging interplay (J)
+### Stage 7 · 5.8 Logging interplay (J) — DONE (2026-09-05, verified live)
 
 - Goal: one turn, seen in the four places at once, with the independent/correlated/duplicated table from Q5 and the join key.
 - Problems: P8, P7.
