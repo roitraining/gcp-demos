@@ -85,17 +85,17 @@ AI, Gemini 3.7 Flash):
   parsed into queryable `jsonPayload` fields (`event`, `tool`, `latency_ms`,
   `status`) and its `severity` landed as `INFO`, not Default.
 
-- The **Part 5 cloud export was run** against `jwd-gcp-demos` (2026-09-04) with
-  [examples/08_otel_cloud.py](../examples/08_otel_cloud.py) in `cloud` mode, and
-  the results confirmed end to end. Three findings: `maybe_set_otel_providers`
-  needs a project-scoped `get_gcp_resource(project)` or the
-  `telemetry.googleapis.com` endpoint rejects every span batch with a 400; the
-  GenAI events land under `gen_ai.*` log names, not `adk-otel`; and the
-  `NO_CONTENT` default was confirmed by reading a `gen_ai.user.message` entry
-  back with its `content` field `<elided>`. The `invocation` spans appear in
-  Cloud Trace, in the console Trace explorer and via the v1 `traces.list` API
-  (query with a user token from `gcloud auth print-access-token` and
-  `orderBy=start desc`).
+- **5.5's minimal OTel server was run locally** against `jwd-gcp-demos`
+  (2026-09-05) with [examples/08_otel_server.py](../examples/08_otel_server.py):
+  the server starts, `/chat` returns a weather answer, and the `gen_ai.*` events
+  land in Cloud Logging on a `generic_task` resource whose `resource.labels.job`
+  is the `OTEL_SERVICE_NAME` (`weather-agent`). Content knob verified live via
+  `.env`: `...CAPTURE_MESSAGE_CONTENT=true` → the prompt text rides in the
+  entry; `NO_CONTENT` → every entry's `content` is `<elided>`. Logging-only
+  export needs **no** `get_gcp_resource` (that was a spans/`telemetry.googleapis.com`
+  concern); the Cloud Logging exporter takes the project from ADC. **5.5's Cloud
+  Run deploy is NEEDS-RUN** — the inline `gcloud run deploy --source` path and
+  `deploy/Dockerfile.otel_server` are written but not yet deployed.
 - **Part 5's local and Cloud Run runs (sections 5.0-5.4) were executed** against
   `jwd-gcp-demos` (2026-09-04); every block in those sections is from them.
   - 5.1: plain `adk web` traces one turn into process memory with nothing
@@ -138,13 +138,14 @@ AI, Gemini 3.7 Flash):
     exports, curl in, Cloud Logging out; content `NO_CONTENT`) and its output
     blocks are `TODO(verify)` placeholders pending a fresh run — the Cloud Run
     deploy that the earlier 5.3 folded in now lives entirely in 5.4.
-  - 5.4: [deploy/deploy_otel_cloudrun.sh](../deploy/deploy_otel_cloudrun.sh)
-    deployed the agent to Cloud Run with the flag; one turn read back in Cloud
-    Trace with `gcp_cloud_run` resource labels and `llm_request` `{}` (proving
-    `demo_agent/.env` shipped in the image), `gen_ai.*` logs on a `generic_task`
-    resource. On Cloud Run the metrics export needs no `OTEL_RESOURCE_ATTRIBUTES`.
-    A bare-`google-adk` container boot-crashes at the OTLP exporter import, which
-    the agent-folder `requirements.txt` prevents. The service was deleted after
+  - 5.4: `adk deploy cloud_run --otel_to_cloud ./demo_agent` deployed the agent
+    with the flag; one turn read back with `gen_ai.*` logs on a `generic_task`
+    resource (job = service name), content `<elided>` proving `demo_agent/.env`'s
+    `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` shipped in the image. On Cloud
+    Run the metrics export needs no `OTEL_RESOURCE_ATTRIBUTES`. A bare-`google-adk`
+    container boot-crashes at the OTLP exporter import, which the agent-folder
+    `requirements.txt` prevents. 5.4 is now inline copy-paste commands (the
+    `deploy_otel_cloudrun.sh` wrapper was dropped). The service was deleted after
     the run.
   - Re-run checklist: `gcloud auth application-default login`; enable
     `telemetry.googleapis.com`; `export OTEL_RESOURCE_ATTRIBUTES=…` for a local

@@ -28,7 +28,7 @@ Start with **[TUTORIAL.md](TUTORIAL.md)**.
 | [examples/04_debug_plugin.py](examples/04_debug_plugin.py) | `DebugLoggingPlugin`: full invocation capture to YAML. |
 | [examples/05_structured_plugin.py](examples/05_structured_plugin.py) | Custom `BasePlugin` emitting real JSON `logging` records. |
 | [examples/06_custom_server.py](examples/06_custom_server.py) | Cloud Run-ready ADK 2.x server; you own the `dictConfig`, with explicit `severity` and per-request trace correlation. |
-| [examples/08_otel_cloud.py](examples/08_otel_cloud.py) | OTel GenAI telemetry to Cloud Trace + Cloud Logging. |
+| [examples/08_otel_server.py](examples/08_otel_server.py) | Minimal ADK server that installs the OTel exporter and sends `gen_ai.*` events to Cloud Logging. |
 | [deploy/](deploy/) | Dockerfile and deploy scripts for Cloud Run and Agent Engine. |
 
 ## Quick start
