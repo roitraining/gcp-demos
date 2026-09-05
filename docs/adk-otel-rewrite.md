@@ -1,5 +1,21 @@
 # Rewrite the ADK OpenTelemetry tutorial (Part 5 + Part 6 telemetry)
 
+> **Tutorial restructured 2026-09-05, after this plan completed.** The tutorial
+> is now **one page per numbered subtask** under `tutorial/part-N/`, not one file
+> per part. Historical citations below still name the old flat files and their
+> line numbers (a faithful record of what was edited); resolve them with this map,
+> and note the split means the old `:line` suffixes no longer point anywhere:
+>
+> | Old path | New location |
+> |---|---|
+> | `tutorial/05-otel.md` (5.0–5.8) | `tutorial/part-5/index.md` + `tutorial/part-5/5.N-*.md` |
+> | `tutorial/06-agent-runtime.md` (6.1–6.4) | `tutorial/part-6/index.md` + `tutorial/part-6/6.N-*.md` |
+> | `tutorial/07-how-to-choose.md` | `tutorial/how-to-choose.md` |
+> | "Part 7" (as a place) | the **How to choose & reference** page (`tutorial/how-to-choose.md`) |
+>
+> The "In scope" table below is updated to the new paths; the stage, verification,
+> and open-question sections keep the old paths as history.
+
 Folder: `ai/adk/logging/`. Status: **ALL STAGES 1–8 DONE** (2026-09-05).
 Part 5 (5.0–5.8) and Part 6 telemetry (6.1–6.4) rewritten, other-backends
 reference (5.7), logging interplay (5.8), and cross-refs/link-check complete.
@@ -380,10 +396,10 @@ logging (adk.dev/observability/logging/ does not address it).
 
 | File                                                           | Role in this rewrite                                                                                                                                                    |
 | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ai/adk/logging/tutorial/05-otel.md`                           | Rewritten top to bottom (Stages 2–4, 6, 7).                                                                                                                             |
-| `ai/adk/logging/tutorial/06-agent-runtime.md`                  | Telemetry paragraphs rewritten (Stages 1, 5).                                                                                                                           |
-| `ai/adk/logging/tutorial/07-how-to-choose.md`                  | Decision-table rows, "Beyond logging", Verification status, References (Stages 1, 5, 6, 8).                                                                             |
-| `ai/adk/logging/TUTORIAL.md`                                   | Contents row for Part 5; stream-4 "lands in" label (Stage 8).                                                                                                           |
+| `ai/adk/logging/tutorial/part-5/` (`index.md` + `5.0`–`5.8` pages) | Rewritten top to bottom (Stages 2–4, 6, 7). Was `tutorial/05-otel.md` before the 2026-09-05 split.                                                                    |
+| `ai/adk/logging/tutorial/part-6/` (`index.md` + `6.1`–`6.4` pages) | Telemetry paragraphs rewritten (Stages 1, 5). Was `tutorial/06-agent-runtime.md`.                                                                                     |
+| `ai/adk/logging/tutorial/how-to-choose.md`                     | Decision-table rows, "Beyond logging", Verification status, References (Stages 1, 5, 6, 8). Was `tutorial/07-how-to-choose.md`.                                          |
+| `ai/adk/logging/TUTORIAL.md`                                   | Contents row for Part 5; stream-4 "lands in" label (Stage 8). Setup section later moved to `tutorial/00-setup.md` in the split.                                          |
 | `ai/adk/logging/README.md`                                     | Files table rows for example 08 and new `otel/` assets (Stage 8).                                                                                                       |
 | ~~`ai/adk/logging/examples/08_otel_cloud.py`~~ → `08_otel_server.py` | **Renamed and rewritten (Stage 4, 2026-09-05).** No longer an InMemoryRunner script; it is a minimal FastAPI OTel **server** (App + Runner + lifespan + `/chat`) whose only telemetry lines are `get_gcp_exporters(enable_cloud_logging=True)` + `maybe_set_otel_providers([hooks])`. Logging-only, no tracing, no console mode. |
 | `ai/adk/logging/deploy/Dockerfile.otel_server` (new, Stage 4)  | Container for `08_otel_server.py`, following the `deploy/Dockerfile` (06 custom-server) pattern; `CMD python examples/08_otel_server.py`, no `.env` baked in (knob set via `--set-env-vars`). Used by 5.5's inline Cloud Run deploy. |
