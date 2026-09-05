@@ -70,8 +70,12 @@ Deployed to Agent Engine. What differs from Cloud Run for logging:
     platform installs its OWN logging handler, so your log FORMAT is the ADK
     CLI's timestamped "file:line" format, not your basicConfig format; a
     basicConfig(format=...) in the agent module is overridden.
-  * Traces appear in Cloud Trace automatically (no --otel_to_cloud needed for
-    traces on Agent Engine; the flag additionally routes logs and metrics).
+  * Telemetry (traces, logs, metrics) is governed by one env var on the
+    deployment, GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY. --otel_to_cloud
+    wrote it to "true" for this deploy; a line in the agent's .env does the same
+    on a plain 'adk deploy agent_engine' (this script writes its own temporary
+    .env, so it uses the flag; Part 6 shows the .env route). Set neither and the
+    platform decides. Do not rely on that.
 
 Read the agent logs — note it is the STDERR log, and use the resource filter so
 you catch both streams:

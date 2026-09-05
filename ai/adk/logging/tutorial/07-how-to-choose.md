@@ -96,12 +96,85 @@ AI, Gemini 3.7 Flash):
   Cloud Trace, in the console Trace explorer and via the v1 `traces.list` API
   (query with a user token from `gcloud auth print-access-token` and
   `orderBy=start desc`).
+- **Part 5's local and Cloud Run runs (sections 5.0-5.4) were executed** against
+  `jwd-gcp-demos` (2026-09-04); every block in those sections is from them.
+  - 5.1: plain `adk web` traces one turn into process memory with nothing
+    configured; the seven expected spans were read back from the dev server's
+    `/dev/apps/demo_agent/debug/trace/session/{id}` (the endpoint the **Trace tab**
+    reads, which the rewritten 5.1 now points readers to instead of curl).
+    `adk api_server` installs the same exporters but serves no `/dev` route
+    (confirmed `404`), so [otel/check_local.sh](../otel/check_local.sh) uses
+    `adk web`.
+  - 5.2: `adk web --otel_to_cloud` exported the same turn to Cloud Trace, Cloud
+    Logging (`gen_ai.*`) and Cloud Monitoring. Findings: OTLP metrics land as
+    `prometheus.googleapis.com/gen_ai.*` on the `prometheus_target` resource and
+    need `OTEL_RESOURCE_ATTRIBUTES` (a `service.instance.id` and a real
+    `cloud.region`) locally or every batch returns `400`; `google-adk[otel-gcp]`
+    does not duplicate the `generate_content` span. **Restructured, verify by
+    console:** the rewritten 5.2 is five steps read back in the Cloud console (Logs
+    Explorer, Trace Explorer), no `gcloud logging read` blocks. Step 1 runs under
+    **stable** semconv (`NO_CONTENT`): eight split `gen_ai.system.message` /
+    `user.message` / `choice` logs for the turn, content elided in `jsonPayload`,
+    on `generic_node` — the shown `gen_ai.choice` JSON is a real capture (trace
+    `c5fdba98…`, 2026-09-05). Step 2 sets
+    `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`: the same eight logs
+    now carry the messages in `jsonPayload.content` — real capture (system message
+    and final `gen_ai.choice`, trace `9d24673b…`, 2026-09-05) — then checks whether
+    the content also lands on the `call_llm` **span** attributes. Step 3 sets
+    `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` to turn span content off while the
+    log content stays. Step 4 adds the **experimental** opt-in
+    (`OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`) with `NO_CONTENT`:
+    one consolidated `gen_ai.client.inference.operation.details` entry per model
+    call, metadata in `labels`, no `jsonPayload`, on `generic_node` — the shown JSON
+    entry is a real capture (trace `3b80ad2b…`, 2026-09-05). Step 5 sets `EVENT_ONLY`
+    on that same shape: the two consolidated entries now carry
+    `gen_ai.system_instructions` / `input.messages` / `output.messages` in `labels`
+    (no `jsonPayload`, unlike stable) — real capture (trace `acacdad7…`, 2026-09-05).
+    Verify-by-console beat still open: the Step 2/3 span attributes in Trace Explorer
+    (whether `=true` reaches `gcp.vertex.agent.llm_request` / `llm_response`, and
+    whether `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` empties them), not captured.
+  - 5.3: `adk api_server --otel_to_cloud` produced the same tree (trace
+    `fb802902…`) in the original run. The rewritten 5.3 is logs-only (three shell
+    exports, curl in, Cloud Logging out; content `NO_CONTENT`) and its output
+    blocks are `TODO(verify)` placeholders pending a fresh run — the Cloud Run
+    deploy that the earlier 5.3 folded in now lives entirely in 5.4.
+  - 5.4: [deploy/deploy_otel_cloudrun.sh](../deploy/deploy_otel_cloudrun.sh)
+    deployed the agent to Cloud Run with the flag; one turn read back in Cloud
+    Trace with `gcp_cloud_run` resource labels and `llm_request` `{}` (proving
+    `demo_agent/.env` shipped in the image), `gen_ai.*` logs on a `generic_task`
+    resource. On Cloud Run the metrics export needs no `OTEL_RESOURCE_ATTRIBUTES`.
+    A bare-`google-adk` container boot-crashes at the OTLP exporter import, which
+    the agent-folder `requirements.txt` prevents. The service was deleted after
+    the run.
+  - Re-run checklist: `gcloud auth application-default login`; enable
+    `telemetry.googleapis.com`; `export OTEL_RESOURCE_ATTRIBUTES=…` for a local
+    `--otel_to_cloud` run; keep the `.env` knob line; prompt
+    "What's the weather in London?".
 
 Not verified here (documented, run them yourself):
 
+- **5.2's span-content check (Steps 2-3, Trace Explorer).** One thing in the
+  restructured 5.2 is described from the source but not stored as a capture: the
+  **span** attributes — whether `=true` (Step 2) also puts the prompt/reply on the
+  `call_llm` span's `gcp.vertex.agent.llm_request` / `llm_response`, and whether
+  `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` (Step 3) empties them while the logs
+  keep content. Every log-side block in 5.2 is a real capture: Steps 1, 2, 4, and 5
+  (traces `c5fdba98…`, `9d24673b…`, `3b80ad2b…`, `acacdad7…`).
+- **The rewritten 5.3 local run.** Re-run `adk api_server --otel_to_cloud` with the
+  three shell exports (`OTEL_RESOURCE_ATTRIBUTES`, `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`,
+  `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT`), curl the London
+  turn, read `gen_ai.*` back from Cloud Logging. Both output blocks in 5.3 are
+  `TODO(verify)` (response text; the eight-row `<elided>` logging table with real
+  trace/span ids). The original 5.3 run above (trace `fb802902…`) predates the
+  three-export rewrite.
 - The `deploy/deploy_cloudrun.sh` deploy of the Part 4 custom server end to end.
   The formatter and trace correlation are verified locally (4.2); the
   containerized Cloud Run deploy of it (4.3) is not.
+- Whether an Agent Runtime deploy **without** `--otel_to_cloud` and without
+  `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY` in `.env` produces traces. An
+  earlier version of Part 6 said traces appear automatically; every deploy run
+  here passed the flag, so that case was never exercised. Part 6 now says "the
+  platform decides; set it explicitly" and claims no default.
 
 ---
 

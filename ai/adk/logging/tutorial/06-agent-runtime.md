@@ -13,9 +13,18 @@ What deploying the agent (1.6, native) means in practice:
 
 - You do **not** run uvicorn or write JSON lines. The platform captures the
   container's output and the OTel signals for you.
-- **Traces** appear in Cloud Trace automatically. Adding `--otel_to_cloud` exports
-  logs and metrics too; under the hood the flag sets
-  `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true` on the deployed agent.
+- **Telemetry** (traces, logs, and metrics) is governed by one environment
+  variable on the deployment, `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY`. The
+  `--otel_to_cloud` flag writes it to `true` for you
+  (`cli/cli_deploy.py:1273-1280`), or a line in the agent's `.env` does: the
+  CLI reads the agent's `.env` into the deployment's env vars and honors that
+  value (`cli/cli_deploy.py:1226-1234`, `:1283-1292`, `:1293-1303`). The two
+  routes are not equivalent: only the flag also sets
+  `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` for you (`:1281-1282`); the
+  `.env` route sets nothing else, so add that line yourself. If you set neither,
+  the platform decides, so set it explicitly. Whether traces appear without it
+  has not been verified here; see the Verification status in
+  [Part 7](07-how-to-choose.md).
 - Logs land on the `aiplatform.googleapis.com/ReasoningEngine` monitored
   resource. Note the stream: the agent and framework lines are on
   `aiplatform.googleapis.com/reasoning_engine_**stderr**`, not stdout, which

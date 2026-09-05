@@ -32,7 +32,9 @@ and response text rides along:
 * ``NO_CONTENT`` (or unset): metadata only. The safe production default.
 * ``SPAN_ONLY`` / ``EVENT_ONLY`` / ``SPAN_AND_EVENT``: include content.
 
-Set it BEFORE importing ADK. This example defaults it to ``NO_CONTENT``.
+ADK reads it when each invocation builds its ``TelemetryConfig``, not at import,
+so it can be set any time before the turn, including in ``.env``. This example
+defaults it to ``NO_CONTENT``.
 
 Run it
 ------
@@ -50,7 +52,8 @@ from _common import ask, bootstrap
 
 bootstrap()
 
-# Content-capture mode must be set before ADK reads it. Keep the safe default.
+# Read per invocation (when TelemetryConfig is built), not at import. Keep the
+# safe default.
 os.environ.setdefault("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "NO_CONTENT")
 
 from google.adk.runners import InMemoryRunner

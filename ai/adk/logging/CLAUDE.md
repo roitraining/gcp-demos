@@ -43,6 +43,17 @@ run versus read.
   pipe fragments, browser-input blocks, or a second block paired under one
   lead-in.
 
+## Callouts after an output block
+
+Two `> [!IMPORTANT]` callout labels follow an **Expected output** block:
+
+- **`**What it means.**`** interprets the run: why the output looks the way it
+  does and what to take away.
+- **`**What you are looking at.**`** (Part 5 onward) names the fields in a
+  payload block one by one, usually as a table of `field | value | what it is`.
+  Use it when the block is a span, log entry, or metric series whose keys a
+  reader has not met before; use **What it means** for everything else.
+
 ## Bash formatting in code blocks
 
 - One value per line for multi-flag commands: put each `--flag` on its own
