@@ -10,13 +10,11 @@
 shipped to Cloud Run with first-class severity and per-request trace grouping.*
 
 > [!NOTE]
-> **Why you are here.** You want the visibility of Part 3, but for a running
-> service you can query, alert on, and correlate. That rules out `LoggingPlugin`
-> (it prints) and DEBUG (it is unstructured text). This part builds the answer in
-> three moves: a plugin that emits structured `logging` records (4.1), a
-> hand-written server where one config owns every stream (4.2), and that exact
-> server deployed to Cloud Run, where the JSON you saw on your laptop becomes
-> queryable Cloud Logging entries with correct severity and a shared trace (4.3).
+> **Why you are here.** You want Part 3's visibility for a running service you
+> can query, alert on, and correlate. That rules out `LoggingPlugin` (it prints)
+> and DEBUG (unstructured text). This part builds a plugin that emits structured
+> `logging` records, a server where one config owns every stream, and that
+> server on Cloud Run.
 
 ## In this part
 

@@ -31,10 +31,8 @@ gcloud auth application-default login   # if you have not already
 
 ## Set your shell variables
 
-The cloud parts (1.4 onward) run `gcloud` and the deploy scripts, which read a
-few shell variables — your project, region, and a couple derived from them. Set
-them once in a file you `source`, instead of re-typing `export PROJECT_ID=...`
-in every step.
+The cloud parts (1.4 onward) read your project, region, and a few derived
+values from shell variables. Set them once in a file you `source`.
 
 ```bash
 cp env.sh.example env.sh
@@ -42,17 +40,16 @@ cp env.sh.example env.sh
 source env.sh
 ```
 
-`env.sh` is gitignored. **`source env.sh` again in each new terminal** — the
-tutorial opens a second one for the Agent Runtime BYOC deploy, and variables do
-not cross terminals.
+`env.sh` is gitignored. **`source env.sh` again in each new terminal.** The
+tutorial opens a second terminal in 1.6, and variables do not cross terminals.
 
 ## Meet the agent
 
-Every example shares one tiny agent, [demo_agent/agent.py](../demo_agent/agent.py):
-a weather assistant with a single `get_weather` tool that knows four cities. The
-tool logs a line of its own through a normal module logger. That means in every
-example you can watch **your** log (stream 1) sit next to the **framework's** logs
-(stream 2), and tell them apart by their logger name.
+Every example shares one agent, [demo_agent/agent.py](../demo_agent/agent.py): a
+weather assistant with a single `get_weather` tool that knows four cities. The
+tool logs one line through a normal module logger, so in every example you can
+watch **your** log (stream 1) next to the **framework's** logs (stream 2) and
+tell them apart by logger name.
 
 ```python
 logger = logging.getLogger(__name__)   # -> "demo_agent.agent", NOT under google_adk

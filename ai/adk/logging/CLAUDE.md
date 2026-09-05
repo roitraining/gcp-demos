@@ -102,3 +102,20 @@ with this framing and the stream numbering.
 - The model region is `global` while services run in `us-central1`; set
   `GOOGLE_CLOUD_LOCATION` as a real Cloud Run env var, since a copied `.env` loses
   to the environment ADK re-applies on top.
+
+## Concision and deep dives
+
+- A subtask page reaches its first **Command:** within a few sentences. The
+  **Why you are here** note is at most two sentences.
+- Explanation the reader does not need in order to run a step goes in a
+  **`## Deep dives`** section after the last step and before the bottom nav, one
+  `### Title` per topic, titled as the question it answers. The inline text keeps
+  one sentence plus `See [Title](#anchor).` Headings use plain text (no
+  backticks) so GitHub's auto-anchor is predictable: lowercase, punctuation
+  dropped, underscores kept, spaces to hyphens.
+- Explanation that sits next to the code or output it explains (a **What it
+  means** callout, a snippet with a paragraph) stays inline.
+- Show a prompt block once per page; later steps say "ask the London question
+  in a new session."
+- Point at an existing reference page (5.6 for content knobs, 5.7 for backends)
+  before writing a new deep dive.

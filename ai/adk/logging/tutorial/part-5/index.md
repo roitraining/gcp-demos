@@ -6,21 +6,14 @@
 
 # Part 5 · OpenTelemetry
 
-*Stream 4 — the spans ADK already emits with nothing configured, and where they
+*Stream 4: the spans ADK already emits with nothing configured, and where they
 go once you point them at Google Cloud.*
 
 > [!NOTE]
-> **Why you are here.** Parts 1-4 were all the `logging` module: streams 1, 2 and 3,
-> text you read a line at a time or query a field at a time. Stream 4 is different
-> machinery. ADK emits **OpenTelemetry** spans, GenAI log events, and metrics, and
-> none of them print. They leave through an exporter. You want them because a span
-> tree answers *where did the time go* and *what did each step actually receive*,
-> which no flat log line can. The surprise this part opens with is that you do not
-> configure anything to get them: `adk web` traces every turn already. What the
-> flag in 5.2 adds is not tracing, it is **export**.
-
-Part 5 starts from what is already running (5.0, 5.1), adds one flag to send it to
-Google Cloud (5.2 onward), and only writes code in the one situation that needs it.
+> **Why you are here.** Parts 1-4 were the `logging` module. Stream 4 is
+> different machinery: ADK emits OpenTelemetry spans, GenAI log events, and
+> metrics, none of which print. `adk web` traces every turn already; the flag in
+> 5.2 adds **export**, not tracing.
 
 ## In this part
 

@@ -6,19 +6,17 @@
 
 # Part 1 · The log level
 
-*What `DEBUG`, `INFO`, `WARNING`, and `ERROR` each reveal — on a script,
-`adk web`, and `adk api_server`.*
+*What `DEBUG`, `INFO`, `WARNING`, and `ERROR` each reveal, on a script,
+`adk web`, `adk api_server`, Cloud Run, and Agent Runtime.*
 
 > [!NOTE]
-> **Why you are here.** The log level is the first and bluntest dial. Before adding
-> any plugin or custom formatter, you need to know exactly what `DEBUG`, `INFO`,
-> `WARNING`, and `ERROR` each reveal, so you can pick the right one instead of
-> drowning in output or flying blind. This part is a guided tour of that dial.
+> **Why you are here.** The log level is the first and bluntest dial. This part
+> shows exactly what each level reveals, so you can pick one instead of drowning
+> in output or flying blind.
 
-
-Part 1 runs the same one question, *"What's the weather in Tokyo?"*, three ways:
-first through a plain script where you control the level directly (1.1), then
-through each of the two servers ADK ships (1.2, 1.3).
+Part 1 asks the same question, *"What's the weather in Tokyo?"*, through a plain
+script (1.1), the two servers ADK ships (1.2, 1.3), and then the two places you
+deploy (1.4 to 1.6).
 
 ## In this part
 

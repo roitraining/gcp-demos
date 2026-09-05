@@ -6,18 +6,14 @@
 
 # Part 3 · Plugins
 
-*A clean, human-readable narration of the agent's steps —
+*A clean, human-readable narration of the agent's steps:
 `LoggingPlugin` and `DebugLoggingPlugin`, locally and on Cloud Run.*
 
 > [!NOTE]
-> **Why you are here.** INFO is too terse to debug a tool-calling problem (it tells
-> you a request happened, not what the tool was called with), and DEBUG dumps the
-> full model conversation as raw JSON. In development you often want the middle
-> ground: a clean, human-readable narration of the agentic steps, which tool ran,
-> with which arguments, what it returned, how many tokens it cost, without writing
-> that yourself. ADK ships two plugins for exactly this. This part uses them
-> locally first, then deploys each one to Cloud Run so you can see what a plugin
-> sends to Cloud Logging, and closes with when to reach for a plugin at all.
+> **Why you are here.** INFO is too terse to debug a tool-calling problem and
+> DEBUG dumps the whole conversation as raw JSON. ADK ships two plugins for the
+> middle ground: which tool ran, with which arguments, what it returned, and what
+> it cost.
 
 ## In this part
 

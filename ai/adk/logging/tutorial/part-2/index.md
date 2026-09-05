@@ -6,15 +6,12 @@
 
 # Part 2 · Access logs
 
-*Why `--log_level` never silences uvicorn's access log — and how to filter it.*
+*Why `--log_level` never silences uvicorn's access log, and how to filter it.*
 
 > [!NOTE]
-> **Why you are here.** You saw it at the end of 1.3: `--log_level WARNING`
-> silenced the whole framework and your tool, and the `INFO:` access lines kept
-> right on printing. That is a small annoyance on your laptop and a real problem in
-> production, where it means one log line per request forever, including a flood
-> from your load balancer's health checks, no matter how far down you turn the
-> flag.
+> **Why you are here.** In 1.3 and 1.5, `WARNING` silenced the framework and
+> your tool, and the `INFO:` access lines kept printing. In production that is
+> one line per request forever, including every load-balancer health check.
 
 ```mermaid
 flowchart LR
@@ -27,20 +24,15 @@ flowchart LR
 
 *What `--log_level` reaches. Streams 1 and 2 obey the flag; stream 3 is configured by uvicorn itself.*
 
-**The flag worked. It just does not reach this stream.** Recall the four
-streams. `--log_level` configures streams 1 and 2 (your code and `google_adk`).
-The request/access lines come from stream 3, uvicorn's `uvicorn.access` logger,
-and **uvicorn configures that logger itself**, with its own level and its own
-handler, the moment it starts. ADK launches uvicorn without overriding that, so
-the access logger stays at its own INFO regardless of what you passed to
-`--log_level`. This is not an ADK quirk; it is how every uvicorn/FastAPI app
-behaves. The access log is simply a different stream than the one the flag
-controls.
+**The flag worked. It does not reach this stream.** The access lines come from
+`uvicorn.access`, and uvicorn configures that logger itself, with its own level
+and handler, when it starts. ADK does not override it. This is how every
+uvicorn/FastAPI app behaves, not an ADK quirk.
 
-Once you see it that way, the fix is obvious: when you run your own server, hand
-uvicorn a logging config and put a filter on `uvicorn.access`. The key piece from
-[examples/02_tame_uvicorn.py](../../examples/02_tame_uvicorn.py) drops health-check
-paths entirely:
+The fix, when you run your own server, is to hand uvicorn a logging config with a
+filter on `uvicorn.access`. The key piece from
+[examples/02_tame_uvicorn.py](../../examples/02_tame_uvicorn.py) drops
+health-check paths:
 
 ```python
 class DropHealthChecks(logging.Filter):
@@ -55,8 +47,7 @@ class DropHealthChecks(logging.Filter):
         return True
 ```
 
-**👉 Do this.** Start the demo server, then hit the health endpoint three times and
-the root once.
+**👉 Do this.** Start the demo server.
 
 **Command:**
 
@@ -82,12 +73,10 @@ curl -s localhost:8081/
 ```
 
 > [!IMPORTANT]
-> **What it means.** Three health checks produced **zero** log lines; the one real
-> request produced exactly one. You did not lower a level, you filtered a specific
-> stream. On a busy service, that removes one log line per health check for the
-> life of the deployment. It also sets up the rest of this tutorial: to control
-> agent logging well, you stop relying on a global level and start configuring each
-> stream deliberately.
+> **What it means.** Three health checks produced **zero** log lines; the one
+> real request produced one. You did not lower a level, you filtered a specific
+> stream. That is the move the rest of this tutorial builds on: stop relying on a
+> global level and configure each stream deliberately.
 
 ---
 
