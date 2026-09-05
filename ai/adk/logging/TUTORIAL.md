@@ -54,96 +54,21 @@ flowchart LR
 
 ## Contents
 
-The tutorial is split into short parts. Read them in order, or jump to the
-one you need.
+The tutorial is split into short pages — one per part, and one per numbered
+subtask under it. Read them in order (each page has a **Next →** link), or jump
+to the one you need. Start with **Setup**, then work down.
+
+**[0. Setup](tutorial/00-setup.md)** — do this once: environment, model, shell
+variables, and the shared demo agent.
 
 | Part | What it covers |
 |---|---|
-| [1. Log levels — local](tutorial/01a-log-levels-local.md) | The `DEBUG`/`INFO`/`WARNING`/`ERROR` dial on a script, `adk web`, and `adk api_server`. |
-| [1. Log levels — cloud & Agent Runtime](tutorial/01b-log-levels-cloud.md) | The same run on a Cloud Run Job and service, and on Agent Runtime (native and BYOC). |
-| [2. Access logs](tutorial/02-access-logs.md) | Why `--log_level` never silences uvicorn's access log, and how to filter it. |
-| [3. Plugins](tutorial/03-plugins.md) | `LoggingPlugin` and `DebugLoggingPlugin` for readable step narration, local and on Cloud Run. |
-| [4. Structured logging](tutorial/04-production.md) | A JSON `BasePlugin`, a custom server that owns all four streams, and that server on Cloud Run with explicit `severity` and a trace field that groups a request. |
-| [5. OpenTelemetry](tutorial/05-otel.md) | Stream 4: GenAI `gen_ai.*` events read back from Cloud Logging (locally, `adk api_server`, Cloud Run, your own server, other OTLP backends), and the content-capture privacy knob. |
-| [6. Agent Runtime](tutorial/06-agent-runtime.md) | The telemetry layer on Vertex AI Agent Engine, and what plugin code carries over. |
-| [How to choose & reference](tutorial/07-how-to-choose.md) | The decision table, best-practice summary, verification status, and references. |
+| [1. Log levels](tutorial/part-1/index.md) | The `DEBUG`/`INFO`/`WARNING`/`ERROR` dial on a script, `adk web`, `adk api_server`, Cloud Run, a real HTTP server, and Agent Runtime (1.1–1.6). |
+| [2. Access logs](tutorial/part-2/index.md) | Why `--log_level` never silences uvicorn's access log, and how to filter it. |
+| [3. Plugins](tutorial/part-3/index.md) | `LoggingPlugin` and `DebugLoggingPlugin` for readable step narration, local and on Cloud Run (3.1–3.5). |
+| [4. Structured logging](tutorial/part-4/index.md) | A JSON `BasePlugin`, a custom server that owns all four streams, and that server on Cloud Run with explicit `severity` and a trace field that groups a request (4.1–4.4). |
+| [5. OpenTelemetry](tutorial/part-5/index.md) | Stream 4: GenAI `gen_ai.*` events read back from Cloud Logging (locally, `adk api_server`, Cloud Run, your own server, other OTLP backends), and the content-capture privacy knob (5.0–5.8). |
+| [6. Agent Runtime](tutorial/part-6/index.md) | The telemetry layer on Vertex AI Agent Engine, and what plugin code carries over (6.1–6.4). |
+| [How to choose & reference](tutorial/how-to-choose.md) | The decision table, best-practice summary, verification status, and references. |
 
-## Setup
-
-All commands run from this folder. Do this once.
-
-### Create the environment
-
-```bash
-cd ai/adk/logging
-python3.13 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-```
-
-### Point the agent at a model
-
-Copy `.env.example` to `.env`. On GCP the simplest path is Vertex AI with your
-existing `gcloud` credentials:
-
-```bash
-cp .env.example .env
-# edit .env to contain:
-#   GOOGLE_GENAI_USE_VERTEXAI=TRUE
-#   GOOGLE_CLOUD_PROJECT=your_project_id
-#   GOOGLE_CLOUD_LOCATION=global
-gcloud auth application-default login   # if you have not already
-```
-
-### Set your shell variables
-
-The cloud parts (1.4 onward) run `gcloud` and the deploy scripts, which read a
-few shell variables — your project, region, and a couple derived from them. Set
-them once in a file you `source`, instead of re-typing `export PROJECT_ID=...`
-in every step.
-
-```bash
-cp env.sh.example env.sh
-# edit env.sh: set PROJECT_ID to your real project
-source env.sh
-```
-
-`env.sh` is gitignored. **`source env.sh` again in each new terminal** — the
-tutorial opens a second one for the Agent Runtime BYOC deploy, and variables do
-not cross terminals.
-
-### Meet the agent
-
-Every example shares one tiny agent, [demo_agent/agent.py](demo_agent/agent.py):
-a weather assistant with a single `get_weather` tool that knows four cities. The
-tool logs a line of its own through a normal module logger. That means in every
-example you can watch **your** log (stream 1) sit next to the **framework's** logs
-(stream 2), and tell them apart by their logger name.
-
-```python
-logger = logging.getLogger(__name__)   # -> "demo_agent.agent", NOT under google_adk
-
-def get_weather(city: str) -> dict:
-    logger.info("tool get_weather called for city=%r", city)
-    ...
-```
-
-One fact carries much of this tutorial: **all ADK framework loggers are children
-of `google_adk`.** You configure them as a group with
-`logging.getLogger("google_adk")`, and you can tell any framework line by its
-name, for example `google_adk.google.adk.models.google_llm`.
-
-```mermaid
-flowchart TD
-  root["root logger"]
-  root --> ga["google_adk<br/>(stream 2 · the framework group)"]
-  root --> da["demo_agent.agent<br/>(stream 1 · your tool)"]
-  root --> uv["uvicorn"]
-  root --> at["agent.telemetry<br/>(Part 4 · your namespace)"]
-  ga --> gllm["google_adk...google_llm"]
-  ga --> gsess["google_adk...sessions"]
-  ga --> gplug["google_adk...plugin_manager"]
-  uv --> ua["uvicorn.access<br/>(stream 3 · own handler)"]
-  uv --> ue["uvicorn.error"]
-```
-
-*The Python logger tree. Setting a level on `google_adk` controls every child under it; `uvicorn.access` is a separate subtree.*
+Ready? **[Start with Setup →](tutorial/00-setup.md)**

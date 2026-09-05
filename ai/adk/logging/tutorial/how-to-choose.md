@@ -1,3 +1,8 @@
+[← 6.4 · What the platform changes](part-6/6.4-platform-changes.md)<br>
+[Tutorial index](../TUTORIAL.md)
+
+---
+
 # How to choose & reference
 
 *The decision table, best-practice summary, verification status, and links.*
@@ -220,5 +225,5 @@ Not verified here (documented, run them yourself):
 
 ---
 
-← Prev: [6. Agent Runtime](06-agent-runtime.md) · [Tutorial index](../TUTORIAL.md)
-
+[← 6.4 · What the platform changes](part-6/6.4-platform-changes.md)<br>
+[Tutorial index](../TUTORIAL.md)

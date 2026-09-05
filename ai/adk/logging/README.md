@@ -19,8 +19,8 @@ Start with **[TUTORIAL.md](TUTORIAL.md)**.
 
 | Path | What it is |
 |---|---|
-| [TUTORIAL.md](TUTORIAL.md) | The tutorial index: intro, the four-streams idea, setup, and the table of contents. Start here. |
-| [tutorial/](tutorial/) | The tutorial itself, one short file per part (log levels, plugins, Cloud Run, and so on). |
+| [TUTORIAL.md](TUTORIAL.md) | The tutorial index: intro, the four-streams idea, and the table of contents. Start here. |
+| [tutorial/](tutorial/) | The tutorial itself: a Setup page, then one short page per numbered subtask, grouped into `part-N/` folders (log levels, plugins, Cloud Run, and so on). |
 | [demo_agent/agent.py](demo_agent/agent.py) | The tiny shared agent (a weather tool that logs). |
 | [examples/01_log_levels.py](examples/01_log_levels.py) | Run one prompt at DEBUG/INFO/WARNING/ERROR and compare. |
 | [examples/02_tame_uvicorn.py](examples/02_tame_uvicorn.py) | Configure uvicorn logging; drop health-check access spam. |
@@ -47,4 +47,5 @@ cp env.sh.example env.sh      # shell vars for the cloud parts; set PROJECT_ID, 
 The Python examples (02 to 08) are verified end to end against a real GCP
 project. The `deploy/` scripts are syntax-checked with flags matching
 `adk 2.8.0`, but the deploys themselves are left for you to run. See the
-Verification status section in [TUTORIAL.md](TUTORIAL.md) for the precise split.
+Verification status section in
+[How to choose & reference](tutorial/how-to-choose.md) for the precise split.

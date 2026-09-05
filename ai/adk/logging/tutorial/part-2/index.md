@@ -1,3 +1,9 @@
+[→ Part 3 · Plugins](../part-3/index.md)<br>
+[← 1.6 · The same agent on Agent Runtime, two ways](../part-1/1.6-agent-runtime.md)<br>
+[Tutorial index](../../TUTORIAL.md)
+
+---
+
 # Part 2 · Access logs
 
 *Why `--log_level` never silences uvicorn's access log — and how to filter it.*
@@ -33,7 +39,7 @@ controls.
 
 Once you see it that way, the fix is obvious: when you run your own server, hand
 uvicorn a logging config and put a filter on `uvicorn.access`. The key piece from
-[examples/02_tame_uvicorn.py](../examples/02_tame_uvicorn.py) drops health-check
+[examples/02_tame_uvicorn.py](../../examples/02_tame_uvicorn.py) drops health-check
 paths entirely:
 
 ```python
@@ -85,5 +91,6 @@ curl -s localhost:8081/
 
 ---
 
-← Prev: [1. Log levels — cloud & Agent Runtime](01b-log-levels-cloud.md) · [Tutorial index](../TUTORIAL.md) · Next: [3. Plugins](03-plugins.md) →
-
+[→ Part 3 · Plugins](../part-3/index.md)<br>
+[← 1.6 · The same agent on Agent Runtime, two ways](../part-1/1.6-agent-runtime.md)<br>
+[Tutorial index](../../TUTORIAL.md)

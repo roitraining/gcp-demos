@@ -5,17 +5,36 @@ docs, examples, or deploy scripts here.
 
 ## Tutorial structure
 
-- The tutorial is `TUTORIAL.md` (index) plus one file per part in `tutorial/`,
-  named `NN-topic.md` (Part 1 is split into `01a`/`01b`). Each part opens with a
-  `# Part N · Title` heading and a one-line italic subtitle, and ends with a
-  `← Prev · Tutorial index · Next →` nav footer.
-- Renumbering a part means renaming its file **and** fixing every cross-reference:
-  nav footers, the `TUTORIAL.md` contents table, `README.md`, and inline
-  `Part N` / `NN-topic.md` mentions elsewhere. Grep for both the number and the
-  filename before considering it done.
+- The tutorial is `TUTORIAL.md` (index) plus **one page per numbered subtask**,
+  grouped into per-part folders under `tutorial/`:
+  - `tutorial/00-setup.md` — the one-time Setup page (page 0 in the sequence).
+  - `tutorial/part-N/index.md` — a **landing page** for each multi-subtask part:
+    its `# Part N · Title` heading, italic subtitle, the "why you are here" note,
+    and a mini-TOC linking its subtasks. Single-subtask parts (Part 2 access
+    logs, and the final page) are one page that *is* their own landing:
+    `tutorial/part-2/index.md` and `tutorial/how-to-choose.md`.
+  - `tutorial/part-N/N.M-slug.md` — one file per subtask (e.g.
+    `part-5/5.4-cloud-run.md`). H1 is `# N.M · Title`; a `*Part N · Title*`
+    subtitle line follows.
+- **Nav is hand-authored** (no build step; the markdown is read directly on
+  GitHub). Every subtask page carries an **identical top and bottom** nav block:
+  an `↑ [Part N · Title](index.md)` up-link, then a
+  `← Prev · [Tutorial index] · Next →` line. Landing pages and single-subtask
+  pages omit the up-link. The linear thread runs
+  index → 00-setup → part-1/index → 1.1 … → part-2/index → part-3/index → 3.1 …
+  → how-to-choose; a part's last subtask's **Next** points to the *next part's*
+  `index.md`.
+- Links to shared assets (`examples/`, `deploy/`, `otel/`, `demo_agent/`,
+  `agent_runtime_byoc/`) are `../../` from a `part-N/` subtask page, but `../`
+  from `00-setup.md` / `how-to-choose.md` (which sit at `tutorial/` root).
+- Renumbering a subtask means renaming its file **and** fixing every
+  cross-reference: the top+bottom nav of the renamed page *and its two
+  neighbors*, the parent `part-N/index.md` mini-TOC, the `TUTORIAL.md` contents
+  table, `README.md`, and inline `Part N` / `N.M` mentions elsewhere. Grep for
+  both the number and the filename before considering it done.
 - Every code and console block is captured from a **real run** against a real GCP
   project — do not invent output. If a block can't be verified yet, say so in the
-  Verification status section of `07-how-to-choose.md` rather than faking it.
+  Verification status section of `tutorial/how-to-choose.md` rather than faking it.
 
 ## Code-block labels
 
