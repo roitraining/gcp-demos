@@ -1023,4 +1023,55 @@ covers what each Agent Runtime enablement route sets and does not set.
 
 ---
 
+### 5.7 Other backends, for reference
+
+> [!NOTE]
+> **Why you are here.** Everything so far exported to Google Cloud. The same OTel
+> machinery points at any OTLP backend — Honeycomb, Grafana, Jaeger, a local
+> collector — and only the exporter target changes. This section is reference:
+> nothing here is run against a non-Google backend, but every mechanism is the
+> one you already used, redirected.
+
+**CLI-launched servers: env vars replace the flag.** For `adk web` and
+`adk api_server`, drop `--otel_to_cloud` and set the OTLP env vars instead. ADK
+honors them whenever the flag is absent and an endpoint variable is present
+(`cli/api_server.py:657-658`, `telemetry/setup.py:124-147`):
+
+| Variable | What it sets | Default |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | one base endpoint for all signals (or use the per-signal vars below) | none |
+| `OTEL_EXPORTER_OTLP_{TRACES,METRICS,LOGS}_ENDPOINT` | per-signal endpoint, overrides the base | none |
+| `OTEL_EXPORTER_OTLP_HEADERS` | auth/tenant headers, e.g. `x-honeycomb-team=…` | none |
+| `OTEL_SERVICE_NAME` / `OTEL_RESOURCE_ATTRIBUTES` | resource identity on every signal | none |
+
+Two limits carry over from the Google path:
+
+- **Shell exports, not `.env`** — for CLI-launched servers, same timing reason as
+  5.2: the CLI builds the exporters before it loads the agent's `.env`. (On
+  **your own server**, 5.5, they *can* live in `.env`, because you load `.env`
+  before building the exporters — that is the one place the rule flips.)
+- **HTTP/protobuf only.** ADK imports the `http/protobuf` OTLP exporters and no
+  gRPC exporter (`telemetry/setup.py`; grep for `grpc` in the telemetry package
+  returns nothing). `OTEL_EXPORTER_OTLP_PROTOCOL=grpc` has no effect.
+
+**Your own server: the no-arg call.** For a hand-written server (5.5), set the
+same env vars in the process, then call `maybe_set_otel_providers()` with no
+arguments — it appends the generic OTLP exporters from those variables
+(`telemetry/setup.py:45-74`, `:124-147`). This is the 5.5 second snippet.
+
+**Where the vendor list is.** The ADK docs maintain an integrations list at
+[adk.dev/integrations](https://adk.dev/integrations/?topic=observability). Some
+vendors document a code path rather than env vars — MLflow, for example, points
+its tracer at `http://localhost:5000/v1/traces` with an
+`x-mlflow-experiment-id` header. Everything in this section is the same provider
+you have used all along; only the exporter's destination changes.
+
+---
+
+### 5.8 How this relates to Parts 1-4
+
+<!-- STAGE7_5.8 -->
+
+---
+
 ← Prev: [4. Structured logging](04-production.md) · [Tutorial index](../TUTORIAL.md) · Next: [6. Agent Runtime](06-agent-runtime.md) →

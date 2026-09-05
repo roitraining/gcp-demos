@@ -203,6 +203,13 @@ Not verified here (documented, run them yourself):
   `google_adk` tree, content-capture env var.
 - [ADK observability overview](https://adk.dev/observability/) — logging,
   tracing, metrics, integrations.
+- [ADK traces](https://adk.dev/observability/traces/) and
+  [ADK metrics](https://adk.dev/observability/metrics/) — the `OTEL_EXPORTER_OTLP_*`
+  env-var route for CLI-launched servers (5.7).
+- [ADK observability integrations](https://adk.dev/integrations/?topic=observability) —
+  the vendor list (Honeycomb, Grafana, MLflow, …) for non-Google backends (5.7).
+- [OTLP exporter configuration](https://opentelemetry.io/docs/languages/sdk-configuration/otlp-exporter/) —
+  the `OTEL_EXPORTER_OTLP_*` variable defaults ADK inherits.
 - [Cloud Trace for ADK](https://adk.dev/integrations/cloud-trace/) — the span
   hierarchy and per-deployment setup.
 - [Structured logging on Cloud Run](https://cloud.google.com/run/docs/logging) —

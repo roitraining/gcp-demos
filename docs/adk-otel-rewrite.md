@@ -514,7 +514,7 @@ Each stage leaves the docs coherent if we stop after it. "M" = mechanical,
 - 6.4: only items the read-backs actually showed (root span name if a trace is visible, log name, resource type, whether a metric appeared) — VERIFY LIVE, state only observed facts (Q4 items 4/6).
 - Verify: see Verification, Stage 5. **Two real Agent Runtime deploys required; NEEDS-RUN. If the deploys are not run this pass, write the prose and mark every read-back block NEEDS-RUN rather than inventing output (CLAUDE.md).**
 
-### Stage 6 · 5.7 Other backends, reference only (J, small)
+### Stage 6 · 5.7 Other backends, reference only (J, small) — DONE (2026-09-05)
 
 - Goal: a reader who needs a non-Google backend knows the mechanism and its limits without the tutorial running one.
 - Problems: P6.
