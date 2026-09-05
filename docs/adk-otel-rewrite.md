@@ -1,8 +1,11 @@
 # Rewrite the ADK OpenTelemetry tutorial (Part 5 + Part 6 telemetry)
 
-Folder: `ai/adk/logging/`. Status: **Stages 1–4 done** (5.0–5.6, incl. the Cloud
-Run deploy and example 08 restructure). Remaining: Stage 5 (Part 6 telemetry),
-Stage 6 (5.7 other backends), Stage 7 (5.8 logging interplay), Stage 8 (cross-refs).
+Folder: `ai/adk/logging/`. Status: **ALL STAGES 1–8 DONE** (2026-09-05).
+Part 5 (5.0–5.8) and Part 6 telemetry (6.1–6.4) rewritten, other-backends
+reference (5.7), logging interplay (5.8), and cross-refs/link-check complete.
+Two NEEDS-RUN items remain (not blockers): 5.5's Cloud Run deploy of
+`08_otel_server.py`, and the open question of where native Agent Runtime OTel
+telemetry lands (verified negative: `gen_ai.*`/traces did not surface; see Part 7).
 Research done 2026-09-04
 against the tutorial's own venv (`ai/adk/logging/.venv`: google-adk 2.8.0,
 google-cloud-aiplatform 2.1.0, opentelemetry-sdk 1.42.1, Python 3.13.3).
@@ -532,7 +535,7 @@ Each stage leaves the docs coherent if we stop after it. "M" = mechanical,
 - The independent/correlated/duplicated content is Q5 (fully cited): Python logging ↔ OTel = independent; LoggingPlugin ↔ OTel = independent; `gen_ai.*` events ↔ spans = correlated (trace/span id stamped); Part 4 `X-Cloud-Trace-Context` trace ↔ OTel span trace = different ids. Join key: `Invocation ID` in plugin output = `gcp.vertex.agent.invocation_id` on spans = `gen_ai.conversation.id` (session id).
 - Verify: see Verification, Stage 7.
 
-### Stage 8 · Cross-references, tables, verification status, link check (M)
+### Stage 8 · Cross-references, tables, verification status, link check (M) — DONE (2026-09-05)
 
 - Goal: index, README, decision table, references, and nav footers agree with the shipped Part 5/6.
 - Problems: closes P7's "explains what you are looking at" for the index diagram.

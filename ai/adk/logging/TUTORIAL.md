@@ -38,7 +38,7 @@ flowchart LR
   end
   subgraph dst["lands in"]
     d1["stdout / stderr<br/>→ Cloud Logging"]
-    d2["Cloud Trace<br/>+ Cloud Logging (gen_ai.*)"]
+    d2["Cloud Logging (gen_ai.*)<br/>+ Cloud Trace, or any OTLP collector"]
   end
   s1 --> c1 --> d1
   s2 --> c2 --> d1
@@ -64,7 +64,7 @@ one you need.
 | [2. Access logs](tutorial/02-access-logs.md) | Why `--log_level` never silences uvicorn's access log, and how to filter it. |
 | [3. Plugins](tutorial/03-plugins.md) | `LoggingPlugin` and `DebugLoggingPlugin` for readable step narration, local and on Cloud Run. |
 | [4. Structured logging](tutorial/04-production.md) | A JSON `BasePlugin`, a custom server that owns all four streams, and that server on Cloud Run with explicit `severity` and a trace field that groups a request. |
-| [5. OpenTelemetry](tutorial/05-otel.md) | Stream 4: GenAI spans to Cloud Trace, and the content-capture privacy knob. |
+| [5. OpenTelemetry](tutorial/05-otel.md) | Stream 4: GenAI `gen_ai.*` events read back from Cloud Logging (locally, `adk api_server`, Cloud Run, your own server, other OTLP backends), and the content-capture privacy knob. |
 | [6. Agent Runtime](tutorial/06-agent-runtime.md) | The telemetry layer on Vertex AI Agent Engine, and what plugin code carries over. |
 | [How to choose & reference](tutorial/07-how-to-choose.md) | The decision table, best-practice summary, verification status, and references. |
 
