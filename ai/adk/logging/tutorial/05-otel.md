@@ -695,45 +695,13 @@ curl -s -X POST localhost:8000/run \
           "new_message":{"role":"user","parts":[{"text":"What'\''s the weather in London?"}]}}'
 ```
 
-```console
-TODO(verify): adk api_server --otel_to_cloud ./, with the three exports from
-Step 1 set, run against the curl /run block above (session s5-api, London
-question). Expect the same event-list response shape as 5.1/5.2, ending in a
-weather-report sentence, and the same five INFO lines in terminal 1. Capture
-the actual response text here.
-```
-
-**Step 4 — Read the `gen_ai.*` events back from Cloud Logging.** Same query shape as 5.2 Step 4, filtered to this run's window.
-
-**Command:**
-
-```bash
-gcloud logging read \
-  'logName:"gen_ai." timestamp>="'"$START"'"' \
-  --project="$PROJECT_ID" \
-  --limit=8 \
-  --format='table(logName.basename(),jsonPayload.content,trace,spanId,resource.type)' \
-  --freshness=1h
-```
-
-```console
-TODO(verify): gcloud logging read as above, immediately after the Step 3 /run
-call against adk api_server --otel_to_cloud. Expect eight gen_ai.* entries
-(gen_ai.system.message, gen_ai.user.message ×N, gen_ai.choice, split across the
-two call_llm spans as in 5.2 Step 4), CONTENT column <elided> on every row
-(OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT), a single
-shared trace id across all rows split by two spanId values, and resource.type
-generic_task (OTEL_RESOURCE_ATTRIBUTES set, per 5.2's WARNING). Capture the
-real trace id, span ids, and row count here.
-```
-
-> [!IMPORTANT]
-> **What it means.** `<elided>` content on every row confirms the `NO_CONTENT`
-> export took: 5.2 turned content on with `EVENT_ONLY`, and 5.3 kept it off, the
-> production value. The trace and span ids are the join key back to Cloud Trace:
-> reading the span tree and the token metric for this run is the same path either
-> command installs, curl or UI making no difference to what `_setup_telemetry`
-> set up. Not shown here — this section stays on the logs.
+The `/run` call returns the event list over curl and prints the same five INFO
+lines in terminal 1 as 5.1. Now open **Logs Explorer**
+(`console.cloud.google.com/logs`) and query `logName:"gen_ai."`. The entries that
+appear are the same ones 5.2 produced under these three env variables: one
+`gen_ai.client.inference.operation.details` per `call_llm` span, content off
+(`NO_CONTENT`), the metadata in `labels`. The headless `api_server` and the dev
+UI export identical telemetry.
 
 Same flag, same code path, headless: `adk api_server --otel_to_cloud` puts the
 turn in Cloud Logging with nothing but curl and three exports. 5.4 takes this
@@ -743,12 +711,275 @@ account instead of your ADC login.
 
 ---
 
-*Sections 5.4 to 5.8 (Cloud Run in full, your own server, the content knobs
-as reference, other OTLP backends, and how stream 4 relates to Parts 1 to 4)
-are not yet rewritten. Until they are,
-[examples/08_otel_cloud.py](../examples/08_otel_cloud.py) shows the two calls a
-hand-written server makes to install the same exporters the CLI installs, and
-its docstring explains its modes.*
+### 5.4 The same flag on Cloud Run: `adk deploy cloud_run --otel_to_cloud`
+
+> [!NOTE]
+> **Why you are here.** 5.2 and 5.3 ran the flag on your laptop under your ADC
+> login. 5.4 ships the exact same flag to Cloud Run. Nothing about the telemetry
+> changes — it is still `_setup_telemetry` taking the `--otel_to_cloud` branch
+> (`cli/api_server.py:649-666`). What changes is who runs it (a service account,
+> not you) and where the resource attributes come from (the metadata server, not
+> your `OTEL_RESOURCE_ATTRIBUTES` export). The whole run is one script,
+> [deploy/deploy_otel_cloudrun.sh](../deploy/deploy_otel_cloudrun.sh).
+
+**How the flag reaches the container.** `adk deploy cloud_run --otel_to_cloud`
+writes the flag straight into the image's start command
+(`cli/cli_deploy.py:216`), so the generated `Dockerfile` ends with a `CMD` line
+that carries it:
+
+**Expected output** — the `CMD` the deploy generated (the script prints this via
+`grep '^CMD'`; the template is `cli/cli_deploy.py:216`, filled with
+`command=api_server`, the host option, and the `--otel_to_cloud` flag):
+
+```console
+CMD adk api_server --port=8080 --host=0.0.0.0 --otel_to_cloud "/app/agents"
+```
+
+The process inside Cloud Run therefore starts exactly the way 5.3 started on
+your laptop, and takes the same branch. No agent code, no `OTEL_*` variables in
+the deploy.
+
+**Step 1 — Deploy.** `PROJECT_ID` and `REGION` come from the environment, as
+every deploy script in this folder does.
+
+**Command:**
+
+```bash
+export PROJECT_ID="$(gcloud config get-value project)"
+export REGION=us-central1
+./deploy/deploy_otel_cloudrun.sh
+```
+
+The script runs `adk deploy cloud_run --otel_to_cloud ./demo_agent`, waits for
+the service to report `Ready`, and sends one smoke-test turn. Two things about
+`adk deploy` make the script longer than a one-liner, and both are worth knowing:
+
+| Trap | What the script does | Source |
+|---|---|---|
+| `adk deploy` exits `0` even when the deploy failed | reads Cloud Run's own `Ready` condition instead of trusting the exit code | `cli/cli_tools_click.py:2456` |
+| `adk deploy` deletes its `--temp_folder` on exit, taking the generated `Dockerfile` with it | copies the `Dockerfile` out mid-build so 5.4 can show the `CMD` line above | `cli/cli_deploy.py:946-948` |
+
+A third trap is not the script's to catch but the container's: a bare
+`google-adk` install boot-crashes the moment the flag is on, because the Cloud
+Logging exporter is imported unconditionally (`telemetry/google_cloud.py:272`).
+The agent-folder `demo_agent/requirements.txt` already pins
+`opentelemetry-exporter-gcp-logging` and `google-adk[otel-gcp]`, and **that**
+`requirements.txt` — the one inside the agent folder — is the one the build
+installs, not the folder-root file.
+
+**Step 2 — How settings reach the container, and which wins.** The deploy copies
+the whole agent folder into the image, so `demo_agent/.env` ships with it,
+including the `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` knob line. Real Cloud
+Run environment variables go **after `--`**, passed straight through to
+`gcloud run deploy`:
+
+**Command** (the relevant tail of the deploy, already in the script):
+
+```bash
+adk deploy cloud_run \
+  --otel_to_cloud \
+  ./demo_agent \
+  -- \
+  --allow-unauthenticated \
+  --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${MODEL_LOCATION}"
+```
+
+`GOOGLE_CLOUD_LOCATION` has to be a real environment variable, not just the
+`.env` copy: ADK re-applies the environment on top of `.env`, so the copied
+`.env` value loses (`cli/utils/envs.py:58-60`). The model runs in `global` while
+the service runs in `us-central1`; the `--set-env-vars` value is what keeps them
+straight.
+
+**Step 3 — Read one turn back from Cloud Trace.** Send a turn against the service
+URL the script printed, then read the trace. The v1 Cloud Trace API takes a
+plain bearer token:
+
+**Command:**
+
+```bash
+curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  "https://cloudtrace.googleapis.com/v1/projects/$PROJECT_ID/traces?orderBy=start%20desc&pageSize=3"
+```
+
+The trace tree is the same one 5.1 and 5.2 showed. The difference is on the
+spans and the resource:
+
+> [!IMPORTANT]
+> **What to note.** Two things prove the deploy did what 5.2 did, from inside
+> Cloud Run this time:
+>
+> | Reading | Value here | Why it matters |
+> |---|---|---|
+> | `call_llm` span's `gcp.vertex.agent.llm_request` | `{}` | `demo_agent/.env`'s `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` shipped in the image and took effect. The `.env` you never edited for this deploy is doing its job. |
+> | resource labels on the trace | `gcp_cloud_run` (region, service, revision) | on a laptop you set `OTEL_RESOURCE_ATTRIBUTES` by hand to dodge the metrics 400 (5.2); on Cloud Run the resource detector reads region and instance from the metadata server, so **no** `OTEL_RESOURCE_ATTRIBUTES` is needed and metrics export cleanly |
+> | `gen_ai.*` log entries | on a `generic_task` resource, job = service name | the events land under the same `gen_ai.*` log names as 5.2, so `logName:"gen_ai."` finds them; the resource type differs from the trace's |
+
+**Step 4 — Tear down.** One turn is one trace; leave the service up only as long
+as you are reading it.
+
+**Command:**
+
+```bash
+gcloud run services delete adk-logging-otel --project="$PROJECT_ID" --region="$REGION" --quiet
+```
+
+The flag that traced a turn on your laptop in 5.2 traced the same turn from
+Cloud Run with no code and no telemetry variables — the CLI installed the
+exporters inside the container exactly as it did locally. 5.5 is the one place in
+this part where the CLI is **not** starting the process, so you install them
+yourself.
+
+---
+
+### 5.5 Your own server: install the exporters yourself
+
+> [!NOTE]
+> **Why you are here.** In 5.1-5.4 the ADK CLI started the process, so it called
+> `_setup_telemetry` for you (`cli/api_server.py:1173`) and the exporters were
+> already installed by the time your first turn ran. In Part 4 you started the
+> process yourself (`06_custom_server.py`), with your own `uvicorn.run`. Nothing
+> calls `_setup_telemetry` on that path, so the spans still exist but nothing
+> exports them. This is the one situation in the whole part that needs code, and
+> the code is exactly the two calls the CLI makes.
+
+**The two calls, verbatim from the CLI.** The `--otel_to_cloud` branch is nine
+lines that reduce to two calls (`cli/api_server.py:680-718`): build the Google
+Cloud exporters, then hand them and a project-scoped resource to
+`maybe_set_otel_providers`.
+
+**Command** (the heart of [examples/08_otel_cloud.py](../examples/08_otel_cloud.py)):
+
+```python
+from google.adk.telemetry.google_cloud import get_gcp_exporters, get_gcp_resource
+from google.adk.telemetry.setup import maybe_set_otel_providers
+
+hooks = get_gcp_exporters(enable_cloud_tracing=True, enable_cloud_logging=True)
+maybe_set_otel_providers([hooks], otel_resource=get_gcp_resource(project))
+```
+
+`get_gcp_resource(project)` is not optional. The `telemetry.googleapis.com`
+endpoint routes spans by the `gcp.project_id` attribute on the resource; without
+it every batch is rejected with a 400 (the same failure mode as 5.2's metrics,
+here on the spans). This is the project-scoped-resource trap the verification
+notes record.
+
+**Where these go in a hand-written server.** In `06_custom_server.py` the two
+calls go **before** the `App` and `Runner` are built (before the `lifespan`
+constructs the Runner at `examples/06_custom_server.py:195-203`), the same point
+in the process's life at which the CLI runs them — after `.env` is loaded, before
+the first turn. That file is left as it is in Part 4; the runnable telemetry
+example is 08.
+
+**Step 1 — Run example 08, read it back in Cloud Trace.** Example 08 does exactly
+the two calls above and runs one turn against an `InMemoryRunner`. Its default
+mode is `cloud`.
+
+**Command:**
+
+```bash
+.venv/bin/python examples/08_otel_cloud.py
+```
+
+It prints where to look and runs the London turn:
+
+**Expected output:**
+
+```console
+Exporting OTel telemetry to project 'jwd-gcp-demos'.
+  Traces:  Cloud Console > Trace > Trace explorer
+  Logs:    Cloud Console > Logging  (log names 'gen_ai.*')
+Content capture mode: NO_CONTENT
+
+FINAL ANSWER: The weather in London is currently 15°C and drizzling.
+```
+
+Open Trace Explorer and the tree is the same `invocation` → `invoke_agent` →
+`call_llm` → `generate_content` / `execute_tool` shape as 5.1. It came from a
+plain Python script with no CLI and no server framework — just the two calls.
+
+> [!IMPORTANT]
+> **What to note.** Example 08 loads the **folder-root** `.env` (via
+> `_common.bootstrap`, `examples/_common.py:49-55`), not `demo_agent/.env`. So
+> the span content knob `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` is whatever the
+> root `.env` sets — if it is unset there, `llm_request` on the span will be
+> **full**, unlike the Cloud Run deploy in 5.4 which shipped `demo_agent/.env`'s
+> `false`. Add the knob to the root `.env` if you want example 08's spans empty.
+
+**A second backend, same shape (not run here).** Point at any OTLP collector
+instead of Google Cloud and only the exporter changes. Set the endpoint and any
+auth headers in the process environment, then make the **same**
+`maybe_set_otel_providers()` call with no arguments — it appends the generic OTLP
+exporters from those variables (`telemetry/setup.py:45-74`, `:124-147`):
+
+```python
+# export OTEL_EXPORTER_OTLP_ENDPOINT=https://collector.example.com
+# export OTEL_EXPORTER_OTLP_HEADERS=authorization=Bearer%20...
+from google.adk.telemetry.setup import maybe_set_otel_providers
+maybe_set_otel_providers()          # reads the OTEL_* vars from the environment
+```
+
+Same provider, different exporter, HTTP/protobuf only (ADK imports no gRPC
+exporter). 5.7 has the full env-var table for the CLI-launched form of this.
+
+---
+
+### 5.6 The content knobs, as reference
+
+> [!NOTE]
+> **Why you are here.** 5.2 demonstrated the content knobs live, one step at a
+> time. This section is the reference to point back to: which knob governs which
+> stream, the safe value, and how to turn content on deliberately when you have a
+> reviewed reason. Nothing new runs here.
+
+**Two independent knobs.** Prompt and reply text can ride on the **spans** and on
+the **log events**, and each has its own switch. They do not affect each other
+(5.2, Step 3 proved it), so a production setup can keep spans clean while still
+logging content, or the reverse.
+
+| Stream | Knob | Default | Turn content ON with | Read by |
+|---|---|---|---|---|
+| **Log events** (`gen_ai.*`) | `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `NO_CONTENT` | `EVENT_ONLY` (or `SPAN_ONLY` / `SPAN_AND_EVENT`) | `telemetry/context.py:93-105` |
+| **Span attributes** (`gcp.vertex.agent.llm_request` / `_response`) | `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` | **`true`** (content ON) | it is on by default; set `false` to turn it OFF | `telemetry/context.py:107-113` |
+
+Two things to notice in that table. The event knob defaults to **off** and you
+opt in; the span knob defaults to **on** and you opt out. And a truthy value like
+`=true` on the event knob is read as `EVENT_ONLY` for back-compat
+(`telemetry/context.py:94-101`), which is why 5.2 Step 2's `=true` worked.
+
+**Both knobs are read per turn, not at import.** Each invocation builds a
+`TelemetryConfig` that reads them (`telemetry/tracing.py:865-873`,
+`telemetry/context.py:179-180`), so a value set before the next turn takes effect
+for that turn — including one placed in `demo_agent/.env`. This is why 5.4's
+Cloud Run deploy could carry the span knob in `.env` while the endpoint variables
+(5.2) could not: the endpoint is chosen once at server construction, the content
+knobs on every turn.
+
+**Per-request scoping instead of a process-wide flip.** A multi-tenant host that
+must decide content capture per request, not per process, sets
+`RunConfig.telemetry` to a `TelemetryConfig` for the duration of one run; it
+overrides the env vars for that run and falls back to them otherwise
+(`agents/run_config.py:249-255`). This is the exception to "set it once in the
+environment."
+
+**The one place a default is chosen for you.** `adk deploy agent_engine
+--otel_to_cloud` sets `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` for you
+(`cli/cli_deploy.py:1281-1282`) — the opposite of the on-by-default above. Part 6
+covers what each Agent Runtime enablement route sets and does not set.
+
+> [!NOTE]
+> **The console exporter, as a debugging aid.** Everything above exports to Cloud.
+> To watch spans scroll past in your terminal with no cloud access at all, example
+> 08 has a second mode that installs a `ConsoleSpanExporter` instead of the Google
+> Cloud ones:
+>
+> ```bash
+> .venv/bin/python examples/08_otel_cloud.py console
+> ```
+>
+> It prints each span as a JSON blob as it closes — useful for seeing the raw span
+> shape while developing, not a path you would ship. It is the only console-exporter
+> appearance in this part on purpose: the console is a debugging aid, Cloud is the
+> destination.
 
 ---
 

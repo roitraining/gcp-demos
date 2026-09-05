@@ -1,6 +1,9 @@
 # Rewrite the ADK OpenTelemetry tutorial (Part 5 + Part 6 telemetry)
 
-Folder: `ai/adk/logging/`. Status: **plan, not started.** Research done 2026-09-04
+Folder: `ai/adk/logging/`. Status: **Stages 1–4 done** (5.0–5.6, incl. the Cloud
+Run deploy and example 08 restructure). Remaining: Stage 5 (Part 6 telemetry),
+Stage 6 (5.7 other backends), Stage 7 (5.8 logging interplay), Stage 8 (cross-refs).
+Research done 2026-09-04
 against the tutorial's own venv (`ai/adk/logging/.venv`: google-adk 2.8.0,
 google-cloud-aiplatform 2.1.0, opentelemetry-sdk 1.42.1, Python 3.13.3).
 
@@ -15,6 +18,28 @@ same site-packages. Line numbers are from the 2.8.0 install.
 > this plan runs as `ai/adk/logging/.venv/bin/...`.
 
 ---
+
+## Status update (Jeff, runs verified)
+
+5.1–5.4 have been executed and verified by Jeff outside the 2026-09-04 Fable
+session below; 5.5/5.6 and the example-08 restructure were then written against
+the verified deploy script and source citations. **Stages 1–4 are done**
+(5.0–5.6). Stage 3 is split into 3a (5.3) and 3b (5.4), both done. The disclaimers
+in the 2026-09-04 session log below still describe only what *that* session ran;
+they no longer bound the project's status. Remaining: Stage 5 (Part 6 telemetry),
+Stage 6 (5.7), Stage 7 (5.8), Stage 8 (cross-refs).
+
+5.4/5.5/5.6 build notes:
+- 5.4 prose added to `05-otel.md`; the deploy script `deploy/deploy_otel_cloudrun.sh`
+  already existed and is verified (see `07-how-to-choose.md` §Verification, 5.4).
+- The 5.4 generated-`CMD` block is reconstructed from the source template
+  (`cli/cli_deploy.py:216`), not a stored capture. If the real deploy printed a
+  different flag order, replace it with `grep '^CMD'` output from a run.
+- Example 08: default mode flipped `console` → `cloud`; console demoted to the 5.6
+  aside. `py_compile` passes; a full `cloud`-mode run (needs a project) not re-run
+  this pass.
+- 5.5/5.6 carry forward references to **5.7** (env-var table), which Stage 6 has
+  not written yet.
 
 ## Session log (2026-09-04, session model Fable 5.1)
 
@@ -422,7 +447,7 @@ Each stage leaves the docs coherent if we stop after it. "M" = mechanical,
   - [x] `07-how-to-choose.md` verification status: the "automatic traces" Agent Runtime claim marked unverified. **Done** (this session).
 - Verify: `grep -n "automatically" tutorial/06-agent-runtime.md deploy/deploy_agent_engine.sh` has no telemetry hit; prose review. **PASS** (this session): grep returns nothing.
 
-### Stage 2 · New Part 5 opening, 5.1 zero-config Trace tab, 5.2 `adk web --otel_to_cloud` (J)
+### Stage 2 · New Part 5 opening, 5.1 zero-config Trace tab, 5.2 `adk web --otel_to_cloud` (J) — DONE (Jeff, runs verified)
 
 - Goal: a reader sees that `adk web` already traces with nothing configured, then adds one flag and finds the same run in Cloud Trace, Cloud Logging, and Cloud Monitoring, without writing code.
 - Problems: P1, P3, P5 (cut), P7.
@@ -442,16 +467,25 @@ Each stage leaves the docs coherent if we stop after it. "M" = mechanical,
   - Span-attribute knob (`ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS`) is **not** demoed here — it belongs to spans/Cloud Trace, which 5.2 does not open. It is covered as reference in 5.6, and its safe value (`false`) is what `adk deploy agent_engine --otel_to_cloud` sets for you (6.2).
 - Verify: see Verification, Stage 2.
 
-### Stage 3 · 5.3 `adk api_server --otel_to_cloud` locally, 5.4 `adk deploy cloud_run --otel_to_cloud` (5.3 M, 5.4 J)
+### Stage 3a · 5.3 `adk api_server --otel_to_cloud` locally (M) — DONE (Jeff, runs verified)
 
-- Goal: the same flag on the headless server, then the same flag shipped to Cloud Run.
+- Goal: the same flag on the headless server.
 - Problems: P2, P3, P7.
-- Files: `tutorial/05-otel.md` (5.3, 5.4), `deploy/deploy_otel_cloudrun.sh` (new), `demo_agent/requirements.txt` (extras if adopted), `07-how-to-choose.md` (the `adk deploy cloud_run` traps note moves here from wherever the merge put it).
+- Files: `tutorial/05-otel.md` (5.3).
 - 5.3 is mechanical (Jeff, 2026-09-04): before starting `adk api_server`, export the three vars — `OTEL_RESOURCE_ATTRIBUTES="service.instance.id=laptop-1,cloud.region=us-central1"` (same metrics-400 reason as 5.2), `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`, and `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT` (content off is the production default; 5.2 already showed content on). Then reuse 1.3's curl block against the local server and read the `gen_ai.*` events back through Cloud **Logging** (say Cloud Trace / Monitoring are identical to 5.2's path). State the shared code path in one sentence with the citation (`fast_api_common_options`; `api_server.py:1173`). The `<elided>` content confirms `NO_CONTENT` took effect.
-- 5.4 content: the flag becomes part of the container `CMD` (`cli_deploy.py:216`), so the process inside Cloud Run takes the same 5.2 branch under the service account's credentials; `get_gcp_resource` merges Cloud Run resource attributes (`google_cloud.py:get_gcp_resource`, `opentelemetry-resourcedetector-gcp`). Read back Cloud Trace filtered by the service, and one `gen_ai.*` entry showing the `cloud_run_revision` resource (ASSUMPTION on resource type; record what appears). Service-account roles as in 5.2. How settings reach the container: `adk deploy cloud_run` copies the agent folder into the image and excludes only `.adk/` plus patterns from an ignore file *inside the agent folder* (`cli_deploy.py:725-751`, `:831-833`), so `demo_agent/.env`, including the 5.2 knob line, ships with it (ASSUMPTION: confirm by reading the `llm_request` attribute back as `{}` from the Cloud Run trace). Real environment variables go after `--` as pass-through `gcloud run deploy` flags (`--set-env-vars`, help text "Use '--' to separate gcloud arguments"); the folder convention already requires this for `GOOGLE_CLOUD_LOCATION` (CLAUDE.md), so the deploy script uses it for the Vertex vars and the knob both, and the text says which wins (explicit environment beats `.env`, `envs.py:58-60`). The three recorded traps from `docs/adk-logging-merge-parts-4-6.md:38` stay in the text, each in one line: agent-folder `requirements.txt` is the one the build reads (already fixed in `demo_agent/requirements.txt`, and the boot crash it prevents is the unguarded `cloud_logging` import at `google_cloud.py:272`, ASSUMPTION: confirm by reading the crash log once); `--log_level` feeds gcloud, not the agent; `adk deploy` exits 0 on a failed deploy, so the script checks the service's ready condition itself. Teardown command included.
-- Verify: see Verification, Stage 3.
+- Verify: see Verification, Stage 3 (5.3 row). **PASS** (Jeff, runs verified).
 
-### Stage 4 · 5.5 your own server, and 5.6 the content knobs (J)
+### Stage 3b · 5.4 `adk deploy cloud_run --otel_to_cloud` (J) — DONE (Jeff, runs verified)
+
+- Goal: the same flag shipped to Cloud Run.
+- Problems: P2, P3, P7.
+- Files: `tutorial/05-otel.md` (5.4), `deploy/deploy_otel_cloudrun.sh` (new), `demo_agent/requirements.txt` (extras if adopted), `07-how-to-choose.md` (the `adk deploy cloud_run` traps note moves here from wherever the merge put it).
+- 5.4 content: the flag becomes part of the container `CMD` (`cli_deploy.py:216`), so the process inside Cloud Run takes the same 5.2 branch under the service account's credentials; `get_gcp_resource` merges Cloud Run resource attributes (`google_cloud.py:get_gcp_resource`, `opentelemetry-resourcedetector-gcp`). Read back Cloud Trace filtered by the service, and one `gen_ai.*` entry showing the `cloud_run_revision` resource (ASSUMPTION on resource type; record what appears). Service-account roles as in 5.2. How settings reach the container: `adk deploy cloud_run` copies the agent folder into the image and excludes only `.adk/` plus patterns from an ignore file *inside the agent folder* (`cli_deploy.py:725-751`, `:831-833`), so `demo_agent/.env`, including the 5.2 knob line, ships with it (ASSUMPTION: confirm by reading the `llm_request` attribute back as `{}` from the Cloud Run trace). Real environment variables go after `--` as pass-through `gcloud run deploy` flags (`--set-env-vars`, help text "Use '--' to separate gcloud arguments"); the folder convention already requires this for `GOOGLE_CLOUD_LOCATION` (CLAUDE.md), so the deploy script uses it for the Vertex vars and the knob both, and the text says which wins (explicit environment beats `.env`, `envs.py:58-60`). The three recorded traps from `docs/adk-logging-merge-parts-4-6.md:38` stay in the text, each in one line: agent-folder `requirements.txt` is the one the build reads (already fixed in `demo_agent/requirements.txt`, and the boot crash it prevents is the unguarded `cloud_logging` import at `google_cloud.py:272`, ASSUMPTION: confirm by reading the crash log once); `--log_level` feeds gcloud, not the agent; `adk deploy` exits 0 on a failed deploy, so the script checks the service's ready condition itself. Teardown command included.
+- Verify: see Verification, Stage 3 (5.4 row). **PASS** (Jeff, deploy run verified;
+  see `07-how-to-choose.md` §Verification). Prose in `05-otel.md` §5.4; `CMD` block
+  reconstructed from `cli_deploy.py:216`, not a stored capture.
+
+### Stage 4 · 5.5 your own server, and 5.6 the content knobs (J) — DONE
 
 - Goal: make explicit the one situation that needs code, and which knob controls prompt text where.
 - Problems: P3 (the exception, made explicit), P6 (snippet half), P7, P5 (console demoted to an aside here), P8 (knob half).
@@ -459,7 +493,9 @@ Each stage leaves the docs coherent if we stop after it. "M" = mechanical,
 - 5.5 framing: "In 5.1–5.4 the ADK CLI started the process, so it installed the exporters for you (`api_server.py:1173`). In Part 4 you started the process yourself. Nothing installs them, so you do." Then: the two calls, verbatim from what the CLI runs (`api_server.py:680-718`), with the project-scoped resource trap already recorded in the current verification notes. Say where they go in `06_custom_server.py` (before the `App`/`Runner` are built) without editing that file. Run example 08 and read back Cloud Trace once, same tree as 5.2.
 - 5.5 second snippet, labeled "not run here": the same shape for any OTLP backend, `maybe_set_otel_providers()` with the `OTEL_EXPORTER_OTLP_ENDPOINT`/`_HEADERS` vars set in the process environment before the call (`setup.py:45-74`, `:124-147`). One sentence: same provider, different exporter, http/protobuf only. Point to 5.7 for the env-var details.
 - 5.6 is reference, not a run (the demo happened in 5.2): the two-knob table (span attributes vs log events, defaults, safe values), how to turn content **on** deliberately when you have a reviewed reason (`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=EVENT_ONLY` / `SPAN_ONLY` / `SPAN_AND_EVENT`, `context.py:93-105`), `RunConfig.telemetry` for per-request scoping instead of a process-wide flip (`run_config.py:249-255`), and that `adk deploy agent_engine --otel_to_cloud` flips the span knob for you (`cli_deploy.py:1281-1282`). Console exporter appears once, collapsed, labeled "debugging aid".
-- Verify: see Verification, Stage 4.
+- Verify: see Verification, Stage 4. **DONE**: 5.5/5.6 written in `05-otel.md`;
+  example 08 default flipped to `cloud`, console kept for the 5.6 aside;
+  `py_compile` passes. Full `cloud`-mode run (needs a project) not re-run this pass.
 
 ### Stage 5 · 6.1–6.4 Telemetry on Agent Runtime (J)
 

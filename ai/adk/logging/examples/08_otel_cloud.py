@@ -13,9 +13,7 @@ hood both call the same helpers used here.
 
 Two modes
 ---------
-* ``console`` (default): install a console span exporter so you can watch the
-  OTel spans locally with no cloud access. Good for understanding what ADK emits.
-* ``cloud``: install the Google Cloud exporters
+* ``cloud`` (default): install the Google Cloud exporters
   (``get_gcp_exporters(enable_cloud_tracing=True, enable_cloud_logging=True)``)
   so spans go to Cloud Trace and GenAI events go to Cloud Logging (under
   per-event ``gen_ai.*`` log names, e.g. ``gen_ai.user.message``). Requires
@@ -23,6 +21,9 @@ Two modes
 
       pip install opentelemetry-exporter-gcp-logging \\
                   opentelemetry-exporter-otlp-proto-http
+
+* ``console``: install a console span exporter so you can watch the OTel spans
+  locally with no cloud access. A debugging aid (tutorial 5.6), not a ship path.
 
 Content capture (the privacy knob)
 ----------------------------------
@@ -38,8 +39,8 @@ defaults it to ``NO_CONTENT``.
 
 Run it
 ------
-    .venv/bin/python examples/08_otel_cloud.py            # console mode
-    .venv/bin/python examples/08_otel_cloud.py cloud      # export to GCP
+    .venv/bin/python examples/08_otel_cloud.py            # export to GCP (cloud)
+    .venv/bin/python examples/08_otel_cloud.py console    # local console spans
 """
 
 from __future__ import annotations
@@ -116,5 +117,5 @@ async def main(mode: str) -> None:
 
 
 if __name__ == "__main__":
-    mode = sys.argv[1] if len(sys.argv) > 1 else "console"
+    mode = sys.argv[1] if len(sys.argv) > 1 else "cloud"
     asyncio.run(main(mode))
