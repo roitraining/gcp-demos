@@ -1,0 +1,53 @@
+Run record: Stage 1 Part 1 console captures
+Date: 2026-09-06
+Pages: 1.1 (examples/01_console_metrics.py), 1.2 (same capture), 1.3 (examples/02_two_attribute_sets.py)
+Scenario: baseline (1.1/1.2), unknown-city (1.3)
+Python: 3.13
+google-adk module path: /Users/jeff/Desktop/Dev/gcp-demos/ai/adk/logging/.venv/lib/python3.13/site-packages/google/adk/__init__.py
+Package source: PyPI wheel in ai/adk/logging/.venv (shared with logging tutorial)
+Model: gemini-3.7-flash on Vertex AI, project jwd-gcp-demos
+Dependency lock (relevant): google-adk==2.8.0 google-genai==2.21.0 opentelemetry-api==1.42.1 opentelemetry-exporter-otlp-proto-common==1.42.1 opentelemetry-exporter-otlp-proto-http==1.42.1 opentelemetry-instrumentation-google-genai==0.7b1 opentelemetry-sdk==1.42.1 
+
+1.1 result (one London turn, six names):
+  gen_ai.client.operation.duration        count=2  sum=4.43 s
+  gen_ai.client.token.usage/input         count=2  sum=714 tokens
+  gen_ai.client.token.usage/output        count=2  sum=137 tokens
+  gen_ai.execute_tool.duration            count=1  sum=0.0021 s
+  gen_ai.invoke_agent.duration            count=1  sum=4.47 s
+  gen_ai.invoke_agent.inference_calls     count=1  sum=2
+  gen_ai.invoke_agent.tool_calls          count=1  sum=1
+  distinct names: 6 (no invoke_workflow.duration for a single agent)
+  force_flush() returned True
+
+1.3 result (London then Atlantis, two attribute sets):
+  gen_ai.execute_tool.duration {tool.type=StatusAwareTool}            count=1  (clean)
+  gen_ai.execute_tool.duration {tool.type=StatusAwareTool, error.type=no_data}  count=1
+  gen_ai.invoke_agent.duration carries NO error.type (both turns answered)
+
+Source findings recorded this run:
+- error.type is NOT stamped from a plain function returning {"status":"error"};
+  it needs FunctionTool._detect_error_in_response (flows/llm_flows/functions.py:88,
+  telemetry/_instrumentation.py:525). demo_agent uses StatusAwareTool for this.
+- A raising tool DOES stamp error.type but crashes the invocation, so the hook
+  path is the one that keeps the invocation successful.
+
+1.4 result (ADK_EXPERIMENTAL_TELEMETRY=true, one London turn):
+  6 adk.experimental.invoke_agent.*_tokens names appear
+  (input, output, total, cache_read.input, reasoning.output, tool.input)
+  12 names total (6 framework + 6 experimental)
+  Without the flag: 0 experimental names. Gated at _instrumentation.py:289.
+
+1.5 result (SequentialAgent planner -> weather_agent, one London turn):
+  gen_ai.invoke_agent.duration has THREE series by gen_ai.agent.name:
+    planner          count=1 sum=3.23 s   inference_calls sum=1
+    weather_agent    count=1 sum=3.77 s   inference_calls sum=2
+    weather_workflow count=1 sum=7.00 s   inference_calls sum=0  (the container)
+  gen_ai.execute_tool.duration: one series, weather_agent/get_weather.
+  gen_ai.invoke_workflow.duration DID NOT APPEAR.
+
+Source finding (1.5): invoke_workflow.duration is recorded only by the new
+Workflow primitive's node runner (workflow/_node_runner.py -> node_tracing.py:254),
+NOT by SequentialAgent. SequentialAgent is measured as an outer agent on
+invoke_agent.duration whose duration nests its children. SequentialAgent is also
+deprecated in 2.8.0 in favor of Workflow (DeprecationWarning at construction),
+but the tutorial uses it deliberately (single, simple sub-agent topology).
