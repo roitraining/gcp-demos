@@ -3,86 +3,24 @@
 Scope: the tutorial under `ai/adk/logging/`. Applies when editing the tutorial
 docs, examples, or deploy scripts here.
 
-## Tutorial structure
+Page anatomy, nav, code-block labels, callouts, deep dives, and voice follow
+the `tutorial-style` skill in `.claude/skills/tutorial-style/`. Load it first.
+This file holds only what is specific to this tutorial.
 
-- The tutorial is `TUTORIAL.md` (index) plus **one page per numbered subtask**,
-  grouped into per-part folders under `tutorial/`:
-  - `tutorial/00-setup.md` — the one-time Setup page (page 0 in the sequence).
-  - `tutorial/part-N/index.md` — a **landing page** for each multi-subtask part:
-    its `# Part N · Title` heading, italic subtitle, the "why you are here" note,
-    and a mini-TOC linking its subtasks. Single-subtask parts (Part 2 access
-    logs, and the final page) are one page that *is* their own landing:
-    `tutorial/part-2/index.md` and `tutorial/how-to-choose.md`.
-  - `tutorial/part-N/N.M-slug.md` — one file per subtask (e.g.
-    `part-5/5.4-cloud-run.md`). H1 is `# N.M · Title`; a `*Part N · Title*`
-    subtitle line follows.
-- **Nav is hand-authored** (no build step; the markdown is read directly on
-  GitHub). Every subtask page carries an **identical top and bottom** nav block:
-  an `↑ [Part N · Title](index.md)` up-link, then a
-  `← Prev · [Tutorial index] · Next →` line. Landing pages and single-subtask
-  pages omit the up-link. The linear thread runs
-  index → 00-setup → part-1/index → 1.1 … → part-2/index → part-3/index → 3.1 …
-  → how-to-choose; a part's last subtask's **Next** points to the *next part's*
-  `index.md`.
+## Layout
+
+- `TUTORIAL.md` is the index. `tutorial/00-setup.md` is page 0.
+  `tutorial/part-N/index.md` is each multi-page part's landing page; Part 2
+  and the final page (`tutorial/how-to-choose.md`) are single pages that are
+  their own landing. Subtask pages are `tutorial/part-N/N.M-slug.md`.
+- The linear thread runs index → 00-setup → part-1/index → 1.1 … →
+  part-2/index → part-3/index → 3.1 … → how-to-choose.
 - Links to shared assets (`examples/`, `deploy/`, `otel/`, `demo_agent/`,
-  `agent_runtime_byoc/`) are `../../` from a `part-N/` subtask page, but `../`
-  from `00-setup.md` / `how-to-choose.md` (which sit at `tutorial/` root).
-- Renumbering a subtask means renaming its file **and** fixing every
-  cross-reference: the top+bottom nav of the renamed page *and its two
-  neighbors*, the parent `part-N/index.md` mini-TOC, the `TUTORIAL.md` contents
-  table, `README.md`, and inline `Part N` / `N.M` mentions elsewhere. Grep for
-  both the number and the filename before considering it done.
-- Every code and console block is captured from a **real run** against a real GCP
-  project — do not invent output. If a block can't be verified yet, say so in the
-  Verification status section of `tutorial/how-to-choose.md` rather than faking it.
-
-## Code-block labels
-
-Every runnable command block is introduced by a bold **`**Command:**`** label on
-its own line, and every result block by **`**Expected output**`** (optionally with
-a trailing `— note` or `:`). This lets a reader tell at a glance which fences to
-run versus read.
-
-- A block already led by `**👉 Do this...**` or `**Step N — ...**` keeps that
-  sentence, but drop its trailing colon and add `**Command:**` before the fence:
-
-  ```
-  **👉 Do this.** Deploy and run at INFO.
-
-  **Command:**
-
-  ```bash
-  ...
-  ```
-  ```
-
-- A block introduced by plain prose ending in a colon: change the colon to a
-  period and add `**Command:**`.
-- Do **not** label: code-shape snippets (illustrative Python classes/config),
-  pipe fragments, browser-input blocks, or a second block paired under one
-  lead-in.
-
-## Callouts after an output block
-
-Two `> [!IMPORTANT]` callout labels follow an **Expected output** block:
-
-- **`**What it means.**`** interprets the run: why the output looks the way it
-  does and what to take away.
-- **`**What you are looking at.**`** (Part 5 onward) names the fields in a
-  payload block one by one, usually as a table of `field | value | what it is`.
-  Use it when the block is a span, log entry, or metric series whose keys a
-  reader has not met before; use **What it means** for everything else.
-
-## Bash formatting in code blocks
-
-- One value per line for multi-flag commands: put each `--flag` on its own
-  continuation line (`\`), keeping the first positional arg (e.g. a `gcloud
-  logging read` query string) intact on its own line.
-- Split `export VAR=x VAR2=y` into separate `export` statements, one per line.
-- Leave alone: short single-line commands that already fit readably (e.g.
-  `gcloud run ... delete ... --quiet` teardowns), env-prefix invocations
-  (`SCRIPT=... ./deploy/...`, the vars must stay on the command line), and
-  `curl` short flags (`-s -X -H`), which already wrap with `-d` on its own line.
+  `agent_runtime_byoc/`) are `../../` from a `part-N/` page, but `../` from
+  `00-setup.md` and `how-to-choose.md`, which sit at `tutorial/` root.
+- Every code and console block is captured from a real run against a real GCP
+  project. If a block can't be verified yet, say so in the Verification status
+  section of `tutorial/how-to-choose.md` rather than faking it.
 
 ## The four-streams framing
 
@@ -103,19 +41,10 @@ with this framing and the stream numbering.
   `GOOGLE_CLOUD_LOCATION` as a real Cloud Run env var, since a copied `.env` loses
   to the environment ADK re-applies on top.
 
-## Concision and deep dives
+## Tutorial-specific conventions
 
-- A subtask page reaches its first **Command:** within a few sentences. The
-  **Why you are here** note is at most two sentences.
-- Explanation the reader does not need in order to run a step goes in a
-  **`## Deep dives`** section after the last step and before the bottom nav, one
-  `### Title` per topic, titled as the question it answers. The inline text keeps
-  one sentence plus `See [Title](#anchor).` Headings use plain text (no
-  backticks) so GitHub's auto-anchor is predictable: lowercase, punctuation
-  dropped, underscores kept, spaces to hyphens.
-- Explanation that sits next to the code or output it explains (a **What it
-  means** callout, a snippet with a paragraph) stays inline.
-- Show a prompt block once per page; later steps say "ask the London question
-  in a new session."
-- Point at an existing reference page (5.6 for content knobs, 5.7 for backends)
-  before writing a new deep dive.
+- The repeated prompt is "What's the weather in Tokyo?" in Parts 1 and 4, and
+  "What's the weather in London?" in Parts 3, 5, and 6. Later steps on a page
+  say "ask the London question in a new session."
+- Point at 5.6 for content knobs and 5.7 for other backends before writing a
+  new deep dive on either.

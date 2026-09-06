@@ -1,11 +1,12 @@
 # Rewrite the ADK OpenTelemetry tutorial (Part 5, Part 6 telemetry)
 
-Folder: `ai/adk/logging/`. Status: **all stages done** (2026-09-05).
+Folder: `ai/adk/logging/`. Status: **all stages done** (2026-09-05). Same day, 6.2/6.3 were reworked from a wrapper script to inline commands plus a canned env library, and 5.2/5.5 were corrected against live runs; see [Session log (2026-09-05)](#session-log-2026-09-05). Where a session-log entry conflicts with an older stage section, the session log wins.
 
-Two items remain, neither a blocker:
+Three items remain, none a blocker:
 
 - 5.5's Cloud Run deploy of `08_otel_server.py` (NEEDS-RUN).
-- Where native Agent Runtime OTel telemetry lands. Verified negative: no `gen_ai.*` logs or traces surfaced. Open in the How to choose page.
+- 5.5 Step 3 under the experimental convention (NEEDS-RUN; the page's `<elided>` sentence predates the opt-in).
+- Where native Agent Runtime OTel telemetry lands. Verified negative twice (2026-09-04 script deploys, 2026-09-05 inline 6.2 deploy): no `gen_ai.*` logs or traces surfaced. Open in the How to choose page.
 
 ## Reading this plan
 
@@ -21,12 +22,16 @@ Two items remain, neither a blocker:
 
 **Venv trap.** The sibling `ai/adk/.venv` holds google-adk 2.5.0 on Python 3.14 and is first on PATH in some shells. Every command here runs as `ai/adk/logging/.venv/bin/...`.
 
+**Superseded docs.** `docs/adk-otel-5.5-redesign.md` and `docs/adk-logging-merge-parts-4-6.md` were deleted 2026-09-05. What still matters from the 5.5 redesign is in its Build decisions row and Stage 4; the Parts 4–6 merge is fully reflected in the tutorial.
+
 ## Build decisions (Jeff)
 
 | Section | Decision |
 |---|---|
 | 5.4 | Inline copy-paste commands, no wrapper script. `deploy/deploy_otel_cloudrun.sh` was written, then deleted. Read-back is Logs Explorer, not Cloud Trace. Only two traps kept, in one aside: `adk deploy` exits 0 on failure, and the `[otel-gcp]` boot-crash. |
-| 5.5 | Redesigned 2026-09-05 (`docs/adk-otel-5.5-redesign.md`). A minimal OTel **server** (`08_otel_server.py`, renamed from `08_otel_cloud.py`), logging-only. Local run verified. Cloud Run deploy is inline commands + `deploy/Dockerfile.otel_server`, NEEDS-RUN. |
+| 5.5 | Redesigned 2026-09-05 (design doc folded in here, then deleted). A minimal OTel **server** (`08_otel_server.py`, renamed from `08_otel_cloud.py`), logging-only: `bootstrap()` loads the **root** `.env` (`ai/adk/logging/.env`, not `demo_agent/.env`), then `get_gcp_exporters(enable_cloud_logging=True)` + `maybe_set_otel_providers([hooks])` before the `Runner`; a bare `POST /chat`; none of 06's formatter or trace-context code (stream 4 is 08's only added concern). Teaching point: local uses `.env`, Cloud Run uses `--set-env-vars`, same knob. Local run verified. Step 3 turns content off **and** opts into the experimental convention in one root-`.env` edit; Step 4's Cloud Run deploy passes the same opt-in. Cloud Run deploy is inline commands + `deploy/Dockerfile.otel_server` (no `.env` in the image), NEEDS-RUN. |
+| 6.2 / 6.3 | Reworked 2026-09-05: no wrapper script. Each page copies a canned env file from `deploy/env/` into `demo_agent/.env`, runs `adk deploy agent_engine` inline (6.2 with `--otel_to_cloud`, 6.3 without), greps the engine id from the deploy output, reads the env list and the logs with inline SDK and `gcloud` commands, and restores `deploy/env/default.env`. Page titles unchanged. `deploy_agent_engine.sh` remains for 1.6 only. |
+| `.agent_engine_config.json` | Considered for the 6.2/6.3 A/B (base config in `.env`, knobs in two config files) and rejected: a non-empty `.env` replaces the config file's `env_vars` wholesale. See Q4. |
 | 5.6 | Console-exporter aside cut. It was a span exporter, off-topic for a logging tutorial. |
 | Other backends | Nothing runs against a non-Google backend. One snippet in 5.5, a reference section in 5.7. |
 
@@ -56,6 +61,28 @@ Covers only what that session ran. Jeff executed and verified 5.1–5.4 separate
 - **`[otel-gcp]` doubling** not tested. Dry-run install adds `opentelemetry-instrumentation-google-genai 0.7b1`, `-grpc`, `-httpx`, `opentelemetry-util-genai`, `wrapt`. NEEDS-RUN.
 
 **Cloud writes.** Two local `adk web --otel_to_cloud` runs and a few synthetic metric points. No deploys.
+
+## Session log (2026-09-05)
+
+Jeff ran every command; the session edited pages and diagnosed against the installed source. Commits `6f0061b` (fixes, inline Part 6 deploys, env library) and `a09af74` (nav flip). Overrides the older stage sections where they differ.
+
+**5.2.** The eight-entry prose was wrong. Real count for one turn, from a Logs Explorer export: two `gen_ai.system.message`, four `gen_ai.user.message`, two `gen_ai.choice`, across two `call_llm` spans. The first call logs 1 system + 1 user + 1 choice; the second replays the question, the `get_weather` call, and the tool response as three user messages, so 1 + 3 + 1. Every entry also carries `traceSampled: true`, which the Step 1 expected-output block omits. London prompt blocks added to Steps 2, 4, and 5.
+
+**5.5.** Two fixes from a live run.
+
+- The `.env` content knob "was not taking effect": `bootstrap()` loads the **root** `.env`, and `load_dotenv` never overrides a variable already in the shell. A leftover `export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT` from 5.2 was winning. Step 1 now starts with `unset` of that var. Diagnostic: `.venv/bin/python -c "from examples._common import bootstrap; bootstrap(); import os; print(os.getenv('OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT'))"`; if it disagrees with `.env`, a shell export is shadowing it. Both code paths accept `true` (ADK maps truthy to `EVENT_ONLY`, `context.py:93-104`; the `google_genai` instrumentor compares `.lower() == "true"`, `flags.py:26-33`), so the value was never the problem.
+- Step 3 is one root-`.env` edit with two assignments (`NO_CONTENT` and `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`), the `true` line commented out, followed by an explicit restart, re-curl, and re-query. Step 4's `--set-env-vars` carries the same opt-in. Not yet re-run: under the experimental convention with `NO_CONTENT` the consolidated event simply lacks content (5.2 Step 4), so Step 3's "reads `<elided>`" sentence needs confirming or rewording.
+
+**6.2 / 6.3.** Rewritten to inline commands and a canned env library: `deploy/env/default.env`, `6.2a.env` (identical to default; base config only, the flag supplies telemetry), `6.2b.env` (adds `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true`, `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false`, `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT`). No `GOOGLE_CLOUD_PROJECT` in any of them; `--project` supplies it and the CLI pops it from `.env` anyway. The repo `.gitignore`'s `env/` and `.env` rules caught the directory, so a negation for `ai/adk/logging/deploy/env/` was added. Two bugs found live:
+
+- The SDK heredocs used a quoted delimiter (`<<'PY'`) with `$GOOGLE_CLOUD_PROJECT`/`$REGION` inside, so the strings reached Python unexpanded (`certificate is not valid for '$region-aiplatform.googleapis.com'`). Fixed by passing project, region, and engine id as argv and reading `sys.argv`. 1.6's heredocs use an unquoted `<<PY` and were never affected.
+- `gcloud logging read` right after the query returned nothing; Agent Runtime logs lag ingestion. A `sleep 15` now precedes the read. An inline `#` comment in the pasted block broke zsh (`command not found: #`), so blocks carry no comments; the explanation is in the prose.
+
+6.2 re-run end to end with the inline commands. The read returned `reasoning_engine_stderr` INFO lines, framework `UserWarning`/`FutureWarning` lines (Python warnings on stderr, logged at INFO; harmless), and one `reasoning_engine_stdout` uvicorn access line. 617 entries on the engine, none `gen_ai.*`. The verified negative stands. The expected-output block keeps the three clean INFO lines; a message-first `--format` was tried and reverted. 6.3 is now self-contained (its own env-list read, query, and log read against `$ENGINE_ID_ENV`) instead of "same command as 6.2". 6.2's Deep dive explains the copy/restore, not the script. The reader restores `demo_agent/.env` with `cp deploy/env/default.env demo_agent/.env`; there is no trap.
+
+**`.agent_engine_config.json`.** Investigated as a way to hold the 6.2/6.3 knobs while `.env` keeps the base config. Rejected; the merge rule is in Q4.
+
+**Out of plan, same session.** 4.3's Cloud Run read now adds `jsonPayload.message:*` to the query: plain-format `textPayload` rows from uvicorn, ADK internals, and `agent.py` rendered as blank `MESSAGE` cells, and the old expected output showed two of them as if they had a `jsonPayload.message`. Every tutorial page's nav block now lists back before next (34 pages, 68 blocks); `ai/adk/logging/CLAUDE.md` still describes the old nav shape.
 
 ## Coverage
 
@@ -94,6 +121,7 @@ Limits of the env-var path:
 | Content knobs are separate vars: `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` (default `NO_CONTENT`), `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` (default true), `OTEL_SEMCONV_STABILITY_OPT_IN`, `ADK_TELEMETRY_SCHEMA_VERSION_OPT_IN`, `ADK_EXPERIMENTAL_TELEMETRY`. | `adk/telemetry/context.py:38-47`, `:85-118`; `_schema_version.py:40-91` |
 | No CLI means one call: `maybe_set_otel_providers()` with no args honors the same vars. | `setup.py:45-74` |
 | **`.env` cannot carry `OTEL_*` vars for `adk web`/`api_server`.** The agent's `.env` loads lazily on first agent load, after `_setup_telemetry` ran at server construction. Vars must be shell exports. | `agent_loader.py:331-332`, `api_server.py:1173`, `fast_api.py:314-318`, `envs.py:53-81` |
+| **On your own server `.env` works, but a shell export still wins.** `bootstrap()` calls `load_dotenv`, which does not override a variable already in the environment. A leftover 5.2 export silently beats the 5.5 `.env` line; 5.5 Step 1 unsets it. | `examples/_common.py:49-55`; live run 2026-09-05 |
 | **No env var selects the Google Cloud branch.** Only `--otel_to_cloud` does. `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY` locally only adds a `User-Agent` header. A hand-supplied bearer token over generic OTLP would reach Google for traces only, with a one-hour token. Not run, not a tutorial path. | `api_server.py:649-666`; `_agent_engine.py:203-205`; `google_cloud.py:_get_gcp_span_exporter` |
 
 ### Q2. What does `adk web` do with the switch and env vars?
@@ -134,6 +162,7 @@ Cloud Run via the CLI: `adk deploy cloud_run --otel_to_cloud` writes the flag in
 |---|---|---|
 | `adk deploy agent_engine --otel_to_cloud` | `…ENABLE_TELEMETRY=true` **and** `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` (unless `.env` sets it) | `cli_deploy.py:1273-1282`, `:1293-1300`, `:1305-1430` |
 | `adk deploy agent_engine`, var in the agent's `.env` | Same var only; CLI prints that `.env` set it | `cli_deploy.py:1283-1291` |
+| `--agent_engine_config_file` (`.agent_engine_config.json` with an `env_vars` object) | Only when `.env` is absent or empty. If `dotenv_values(.env)` yields anything, `agent_config['env_vars'] = env_vars` replaces the file's `env_vars` wholesale (plain assignment, no merge) and the CLI prints `Overriding env_vars in agent platform config`. So "base config in `.env`, knobs in the config file" cannot work. Not used by the tutorial. | `cli_deploy.py:1154-1159`, `:1226-1234`, `:1293-1303` |
 | `agents-cli deploy` (target `agent_runtime`, v1.1.0) | `setdefault` of the var to `true`, plus `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`. Scaffolded app calls `setup_agent_engine_telemetry()` itself and passes `otel_to_cloud=False` to ADK. | `google/agents/cli/deploy/agent_runtime.py:137-138`; scaffold `service.tf:57-64`; `app_utils/telemetry.py:28-33`, `:87-104` |
 | `vertexai` SDK `create`/`update` | Whatever you pass. Omit the var and the SDK injects `unspecified`, "in order to achieve default-on telemetry". | `vertexai/_genai/agent_engines.py:2355`, `:2398`; `_agent_engines_utils.py:2156-2185` |
 | Cloud Console toggle | Presumably the same var, server-side. ASSUMPTION; known only from deprecation text at `vertexai/adk.py:1005-1027`. | |
@@ -182,7 +211,8 @@ Not found: any ADK doc on how OTel log records relate to Python logging.
 | `README.md` | Files table rows for example 08 and `otel/` (Stage 8). |
 | `examples/08_otel_server.py` | Renamed from `08_otel_cloud.py`, rewritten as a minimal FastAPI server. Only telemetry lines: `get_gcp_exporters(enable_cloud_logging=True)` + `maybe_set_otel_providers([hooks])`. |
 | `deploy/Dockerfile.otel_server` (new) | Container for example 08, following the `deploy/Dockerfile` pattern. No `.env` baked in. |
-| `deploy/deploy_agent_engine.sh` | Comment block corrected (Stage 1); `ENABLE_VIA_ENV` branch and venv fix (Stage 5). |
+| `deploy/deploy_agent_engine.sh` | Comment block corrected (Stage 1); `ENABLE_VIA_ENV` branch and venv fix (Stage 5). Since 2026-09-05 used only by 1.6; 6.2/6.3 run inline commands. Its header still describes the 6.2/6.3 routes (stale, not edited). |
+| `deploy/env/` (new, 2026-09-05) | Canned `demo_agent/.env` contents for Part 6: `default.env` and `6.2a.env` (identical: `GOOGLE_GENAI_USE_VERTEXAI=TRUE`, `GOOGLE_CLOUD_LOCATION=global`, `LOG_LEVEL=info`), `6.2b.env` (adds the switch and both content knobs). No `GOOGLE_CLOUD_PROJECT`. Unignored via a negation in the repo `.gitignore`. |
 | `requirements.txt` | `google-adk[otel-gcp]>=2.8.0`, `opentelemetry-exporter-otlp-proto-http`, `opentelemetry-exporter-gcp-logging`. Done. |
 | `demo_agent/requirements.txt` | Container deps for `adk deploy cloud_run --otel_to_cloud`, including `[otel-gcp]`. Done. |
 | `otel/check_local.sh` (new) | The one automated check: plain `adk web`, assert span names via the debug endpoint. |
@@ -201,7 +231,7 @@ Not found: any ADK doc on how OTel log records relate to Python logging.
 | 5.2 | `adk web --otel_to_cloud` locally. Required shell exports (`OTEL_RESOURCE_ATTRIBUTES` for the metrics 400, `OTEL_SEMCONV_STABILITY_OPT_IN`), why they must be exports. One UI turn, `gen_ai.*` in Logs Explorer with `<elided>`, then the event knob turns content on. As shipped, also one Trace Explorer check: the span knob (`ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false`) empties `llm_request` while logs keep content. Two independent knobs, live. |
 | 5.3 | `adk api_server --otel_to_cloud` locally, same exports with `NO_CONTENT`, curl-driven, read through Logs Explorer. |
 | 5.4 | `adk deploy cloud_run --otel_to_cloud`, inline commands. Deploy, curl, read `gen_ai.*` in Logs Explorer, teardown. Two traps in one aside. `.env` ships in the image; `GOOGLE_CLOUD_LOCATION` repeated in `--set-env-vars` to beat the Dockerfile `ENV`. |
-| 5.5 | Your own server: `08_otel_server.py` installs the Cloud Logging exporter with two calls. Run locally, curl, read `gen_ai.*`, `.env` knob before/after (all `OTEL_*` vars work in `.env` here because the server loads it first). Deploy with `gcloud run deploy --source`. A second, non-runnable OTLP snippet. |
+| 5.5 | Your own server: `08_otel_server.py` installs the Cloud Logging exporter with two calls. Unset any shell copy of the content knob, run locally, curl, read `gen_ai.*`; root-`.env` knob before/after (all `OTEL_*` vars work in `.env` here because the server loads it first), Step 3 also opting into the experimental convention, each change followed by restart + curl + re-query. Deploy with `gcloud run deploy --source`, knob and opt-in via `--set-env-vars`. A second, non-runnable OTLP snippet. |
 | 5.6 | The two content knobs as reference: spans vs events, turning content on deliberately, `RunConfig` scoping. |
 | 5.7 | Other backends, reference only: OTLP env vars for CLI-launched servers, vendor headers, http/protobuf only, the adk.dev integrations list. Nothing run. |
 | 5.8 | Relation to Parts 1–4: one turn, four places; independent / correlated / duplicated. |
@@ -211,8 +241,8 @@ Not found: any ADK doc on how OTel log records relate to Python logging.
 | § | Content |
 |---|---|
 | 6.1 | One switch, two ways to set it. The flag also sets the span knob to false; `.env` does not. Setting neither means the platform decides; do not rely on it. One BYOC sentence. |
-| 6.2 | Deploy A, the flag. Read back the deployment env list showing the two vars the CLI added. |
-| 6.3 | Deploy B, `ENABLE_VIA_ENV=1`: `.env` carries the switch and both knobs, no flag. Read back the same env list. On this route you set the span knob yourself. |
+| 6.2 | Deploy A, the flag. `cp deploy/env/6.2a.env demo_agent/.env`, inline `adk deploy agent_engine --otel_to_cloud`, grep the engine id, read the env list (the two vars the CLI added), query, `sleep 15`, read the logs, restore `default.env`. Deep dive: why the copy and restore. |
+| 6.3 | Deploy B, `.env`: `cp deploy/env/6.2b.env demo_agent/.env`, same deploy with no flag, `$ENGINE_ID_ENV`. Same env-list read (the three `.env` lines, nothing added), query, logs, restore. On this route you set the span knob yourself. |
 | 6.4 | What the platform changes, limited to what 6.2/6.3 showed. |
 
 Diagram budget (Mermaid): 5.0 flow and 5.8 four-places picture. Nothing else.
@@ -261,11 +291,11 @@ Four inline steps: deploy `./demo_agent`, curl the service (URL via `gcloud run 
 
 Goal: make explicit the one case that needs code, and which knob controls prompt text where.
 
-5.5 (redesigned, `docs/adk-otel-5.5-redesign.md`): a stripped `06_custom_server.py` with `App` + `Runner` in a `lifespan`, `/chat`, `uvicorn.run`, plus the two telemetry calls. Logging-only, no `get_gcp_resource`. Flow: run locally and curl; knob before/after via `.env` (`=true` shows text, `NO_CONTENT` shows `<elided>`); deploy with `gcloud run deploy --source`, knob via `--set-env-vars`. Teaching point: `.env` works here because `bootstrap()` loads it before the exporters are built. Second snippet, not run: `maybe_set_otel_providers()` with `OTEL_EXPORTER_OTLP_ENDPOINT`/`_HEADERS` set (`setup.py:45-74`, `:124-147`).
+5.5 (redesigned 2026-09-05; the design notes now live in the Build decisions row): a stripped `06_custom_server.py` with `App` + `Runner` in a `lifespan`, `/chat`, `uvicorn.run`, plus the two telemetry calls. Logging-only, no `get_gcp_resource`. Flow as shipped: Step 1 unsets any shell export of the content knob (it would shadow `.env`), runs locally, curls; Step 2 reads `gen_ai.*` on `generic_task` with `job` = `OTEL_SERVICE_NAME`; Step 3 edits the **root** `.env` once (`true` commented out, `NO_CONTENT` plus the experimental opt-in), restarts, re-curls, re-queries; Step 4 deploys with `gcloud run deploy --source`, knob and opt-in via `--set-env-vars`. Teaching point: `.env` works here because `bootstrap()` loads it before the exporters are built. Second snippet, not run: `maybe_set_otel_providers()` with `OTEL_EXPORTER_OTLP_ENDPOINT`/`_HEADERS` set (`setup.py:45-74`, `:124-147`).
 
 5.6, reference only: the two-knob table (defaults, safe values), turning content on (`EVENT_ONLY`/`SPAN_ONLY`/`SPAN_AND_EVENT`, `context.py:93-105`), `RunConfig.telemetry` scoping (`run_config.py:249-255`), and that the agent_engine deploy flag flips the span knob (`cli_deploy.py:1281-1282`).
 
-Verify: local run verified live 2026-09-05 (server starts, `/chat` answers, `gen_ai.*` on `generic_task` with `job` = `OTEL_SERVICE_NAME`, knob both ways). `py_compile` passes. Cloud Run deploy NEEDS-RUN; Step 4 carries no fabricated output.
+Verify: local run verified live 2026-09-05 (server starts, `/chat` answers, `gen_ai.*` on `generic_task` with `job` = `OTEL_SERVICE_NAME`, knob both ways under the stable convention). `py_compile` passes. Step 3 under the experimental convention NEEDS-RUN (the page still says every entry "reads `<elided>`", which is stable-convention wording). Cloud Run deploy NEEDS-RUN; Step 4 carries no fabricated output.
 
 ### Stage 5 · 6.1–6.4 Agent Runtime (J; done, two live deploys)
 
@@ -279,6 +309,8 @@ As built:
 - 6.4: observed differences only, including the "did not surface" row.
 
 Cloud hygiene: both control engines and one stray deleted; Jeff's pre-existing engines untouched; `demo_agent/.env` restored by the script trap.
+
+**Reworked 2026-09-05 (overrides the above where they differ).** The script left 6.2/6.3. Each page now: copies a canned env file from `deploy/env/`, runs `adk deploy agent_engine` inline (with or without the flag), greps `reasoningEngines/[0-9]+` from the captured output, reads the env list via the SDK with project, region, and id passed as argv, sends one `stream_query`, sleeps 15 s, runs `gcloud logging read`, then `cp deploy/env/default.env demo_agent/.env`. 6.3 is self-contained. 6.2 re-run live end to end; verified negative reconfirmed (617 entries, none `gen_ai.*`). The reader restores `demo_agent/.env`; there is no trap. Details in the 2026-09-05 session log.
 
 ### Stage 6 · 5.7 other backends, reference only (J; done)
 
@@ -301,15 +333,15 @@ Verify: `grep -rn -E "05-otel|Part 5|08_otel|08_otel_cloud|deploy_otel_cloudrun|
 
 ## Verification
 
-**Common harness.** Fresh `python3.13 -m venv .venv && pip install -r requirements.txt`, `.env` from `.env.example`, `source env.sh`, Docker running. Prompt for all runs: "What's the weather in London?". Expected spans (schema v1): `invocation`, `invoke_agent weather_agent`, `call_llm` ×2, `generate_content gemini-3.7-flash` ×2, `execute_tool get_weather`. Expected events per LLM call: 1× `gen_ai.system.message`, ≥1× `gen_ai.user.message`, 1× `gen_ai.choice`. Link check: `lychee --offline 'ai/adk/logging/**/*.md'` or equivalent.
+**Common harness.** Fresh `python3.13 -m venv .venv && pip install -r requirements.txt`, `.env` from `.env.example`, `source env.sh`, Docker running. Prompt for all runs: "What's the weather in London?". Expected spans (schema v1): `invocation`, `invoke_agent weather_agent`, `call_llm` ×2, `generate_content gemini-3.7-flash` ×2, `execute_tool get_weather`. Expected events per LLM call: 1× `gen_ai.system.message`, ≥1× `gen_ai.user.message`, 1× `gen_ai.choice` (verified 2026-09-05: 1 + 1 + 1 on the first call, 1 + 3 + 1 on the second, eight total). Link check: `lychee --offline 'ai/adk/logging/**/*.md'` or equivalent.
 
 | Stage | Runs | Pass condition | Status |
 |---|---|---|---|
 | 1 | none | grep clean; claim marked unverified | Pass |
 | 2 | plain `adk web`; `--otel_to_cloud` with event knob then span knob | 5.1: seven spans in the Trace tab. 5.2: `gen_ai.*` in Logs Explorer `<elided>`, then with content; Trace Explorer shows `llm_request` full, then `{}` | Pass; `check_local.sh` covers 5.1 |
 | 3 | `api_server --otel_to_cloud` + curl; `adk deploy cloud_run` + curl + teardown | 5.3: events `<elided>`. 5.4: service Ready, `/run` answers, events on `generic_task` | Pass |
-| 4 | example 08 locally + knob; Cloud Run deploy | Local: server starts, `/chat` answers, events on `generic_task`, knob both ways. Cloud Run: Ready, `/chat` works, `<elided>` from `--set-env-vars` | Local pass; Cloud Run NEEDS-RUN; `py_compile` passes |
-| 5 | flag deploy; `ENABLE_VIA_ENV=1` deploy; one query each; delete both | Env lists read via SDK match the two routes. No `gen_ai.*` or spans surfaced. | Pass with verified negative; `bash -n` passes |
+| 4 | example 08 locally + knob; Cloud Run deploy | Local: server starts, `/chat` answers, events on `generic_task`, knob both ways. Cloud Run: Ready, `/chat` works, content absent from `--set-env-vars` | Local pass (stable convention); Step 3 experimental NEEDS-RUN; Cloud Run NEEDS-RUN; `py_compile` passes |
+| 5 | 6.2 (`6.2a.env` + flag) and 6.3 (`6.2b.env`, no flag) inline deploys; one query each; delete both | Env lists read via SDK match the two routes. No `gen_ai.*` or spans surfaced. | Pass with verified negative; 6.2 reconfirmed 2026-09-05 with the inline commands |
 | 6 | none | var table matches `setup.py:124-147`; every block labeled "not run here" | Pass; link check |
 | 7 | DEBUG + `LoggingPlugin` + OTel export, one turn | same `Invocation ID` in plugin output and spans; same prompt string in all places; events `<elided>` | Pass |
 | 8 | none | links resolve; cross-ref grep clean | Pass |
@@ -324,7 +356,7 @@ Verify: `grep -rn -E "05-otel|Part 5|08_otel|08_otel_cloud|deploy_otel_cloudrun|
 
 **Facts the runs supplied**
 
-4. **Which exporter set runs on native Agent Runtime?** Partially resolved. Both routes set the env vars correctly, but no `gen_ai.*` logs, no `adk-on-agent-engine` log, and no spans appeared over 40 minutes. Sub-questions about log name, root span, and metrics are moot until the destination is known. It may need Console-side enablement or a path the SDK deploy does not trigger. Open.
+4. **Which exporter set runs on native Agent Runtime?** Partially resolved. Both routes set the env vars correctly, but no `gen_ai.*` logs, no `adk-on-agent-engine` log, and no spans appeared over 40 minutes. Sub-questions about log name, root span, and metrics are moot until the destination is known. It may need Console-side enablement or a path the SDK deploy does not trigger. Reconfirmed 2026-09-05 on a flag-route engine deployed with the inline 6.2 commands: 617 entries, all `reasoning_engine_stdout`/`_stderr`. Open.
 5. **Does `[otel-gcp]` double `generate_content` spans?** Not verified. Without the extra, plain `adk web` produced one `generate_content` per `call_llm`. NEEDS-RUN.
 6. Resolved details:
    - **Env-list field path.** `client.agent_engines.get(name=…).api_resource.spec.deployment_spec.env`, a list of `EnvVar(name, value)`.
@@ -337,3 +369,5 @@ Verify: `grep -rn -E "05-otel|Part 5|08_otel|08_otel_cloud|deploy_otel_cloudrun|
 7. Third-party target: dropped. MLflow is the cheapest candidate if that changes.
 8. Example 08 filename: `08_otel_server.py`.
 9. Where `OTEL_*` vars live: `env.sh`. `adk web` loads `.env` after telemetry setup (`agent_loader.py:331-332`, `api_server.py:1173`). Stated in 5.7 with citation.
+10. Part 6 deploy mechanism: inline commands plus `deploy/env/{default,6.2a,6.2b}.env`, not the wrapper script and not `.agent_engine_config.json` (Q4 merge rule). Decided 2026-09-05.
+11. Which `.env` 5.5 edits: the root `ai/adk/logging/.env`. Named explicitly on the page.
