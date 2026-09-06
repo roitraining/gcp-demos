@@ -1,5 +1,5 @@
-[→ Part 3 · Plugins](../part-3/index.md)<br>
 [← 1.6 · The same agent on Agent Runtime, two ways](../part-1/1.6-agent-runtime.md)<br>
+[→ Part 3 · Plugins](../part-3/index.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
 ---
@@ -80,6 +80,6 @@ curl -s localhost:8081/
 
 ---
 
-[→ Part 3 · Plugins](../part-3/index.md)<br>
 [← 1.6 · The same agent on Agent Runtime, two ways](../part-1/1.6-agent-runtime.md)<br>
+[→ Part 3 · Plugins](../part-3/index.md)<br>
 [Tutorial index](../../TUTORIAL.md)

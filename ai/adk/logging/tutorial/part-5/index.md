@@ -1,5 +1,5 @@
-[→ 5.0 · What stream 4 is](5.0-what-stream-4-is.md)<br>
 [← 4.4 · Callback or plugin?](../part-4/4.4-callback-or-plugin.md)<br>
+[→ 5.0 · What stream 4 is](5.0-what-stream-4-is.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
 ---
@@ -31,6 +31,6 @@ go once you point them at Google Cloud.*
 
 ---
 
-[→ 5.0 · What stream 4 is](5.0-what-stream-4-is.md)<br>
 [← 4.4 · Callback or plugin?](../part-4/4.4-callback-or-plugin.md)<br>
+[→ 5.0 · What stream 4 is](5.0-what-stream-4-is.md)<br>
 [Tutorial index](../../TUTORIAL.md)

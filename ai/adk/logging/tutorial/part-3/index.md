@@ -1,5 +1,5 @@
-[→ 3.1 · LoggingPlugin: one line to wire up](3.1-loggingplugin.md)<br>
 [← Part 2 · Access logs](../part-2/index.md)<br>
+[→ 3.1 · LoggingPlugin: one line to wire up](3.1-loggingplugin.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
 ---
@@ -27,6 +27,6 @@
 
 ---
 
-[→ 3.1 · LoggingPlugin: one line to wire up](3.1-loggingplugin.md)<br>
 [← Part 2 · Access logs](../part-2/index.md)<br>
+[→ 3.1 · LoggingPlugin: one line to wire up](3.1-loggingplugin.md)<br>
 [Tutorial index](../../TUTORIAL.md)

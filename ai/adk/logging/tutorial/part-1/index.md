@@ -1,5 +1,5 @@
-[→ 1.1 · The basic test harness](1.1-test-harness.md)<br>
 [← Setup](../00-setup.md)<br>
+[→ 1.1 · The basic test harness](1.1-test-harness.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
 ---
@@ -31,6 +31,6 @@ deploy (1.4 to 1.6).
 
 ---
 
-[→ 1.1 · The basic test harness](1.1-test-harness.md)<br>
 [← Setup](../00-setup.md)<br>
+[→ 1.1 · The basic test harness](1.1-test-harness.md)<br>
 [Tutorial index](../../TUTORIAL.md)

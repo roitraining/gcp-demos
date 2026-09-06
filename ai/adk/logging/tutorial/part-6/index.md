@@ -1,5 +1,5 @@
-[→ 6.1 · One switch, two ways to set it](6.1-one-switch.md)<br>
 [← 5.8 · How this relates to Parts 1-4](../part-5/5.8-relates-to-parts-1-4.md)<br>
+[→ 6.1 · One switch, two ways to set it](6.1-one-switch.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
 ---
@@ -39,6 +39,6 @@ write it.
 
 ---
 
-[→ 6.1 · One switch, two ways to set it](6.1-one-switch.md)<br>
 [← 5.8 · How this relates to Parts 1-4](../part-5/5.8-relates-to-parts-1-4.md)<br>
+[→ 6.1 · One switch, two ways to set it](6.1-one-switch.md)<br>
 [Tutorial index](../../TUTORIAL.md)

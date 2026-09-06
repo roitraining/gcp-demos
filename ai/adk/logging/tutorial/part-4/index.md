@@ -1,5 +1,5 @@
-[→ 4.1 · The structured plugin](4.1-structured-plugin.md)<br>
 [← 3.5 · Plugin or level dial?](../part-3/3.5-plugin-or-level.md)<br>
+[→ 4.1 · The structured plugin](4.1-structured-plugin.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
 ---
@@ -27,6 +27,6 @@ shipped to Cloud Run with first-class severity and per-request trace grouping.*
 
 ---
 
-[→ 4.1 · The structured plugin](4.1-structured-plugin.md)<br>
 [← 3.5 · Plugin or level dial?](../part-3/3.5-plugin-or-level.md)<br>
+[→ 4.1 · The structured plugin](4.1-structured-plugin.md)<br>
 [Tutorial index](../../TUTORIAL.md)
