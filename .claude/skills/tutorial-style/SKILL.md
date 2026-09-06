@@ -1,155 +1,211 @@
 ---
 name: tutorial-style
-description: House style for hands-on tutorials in this repo. Page anatomy, nav, Command and Expected output labels, callouts, deep dives, voice, verification. Use when writing or editing any tutorial page, part landing page, index, or README under a tutorial folder.
+description: Write or edit tutorial pages, part landing pages, indexes, and READMEs under tutorial folders in this repo. Defines the shared teaching approach, page structure, navigation, formatting, and verification.
 ---
 
 # Tutorial house style
 
-This skill holds what every tutorial in the repo shares. A tutorial's own
-`CLAUDE.md` holds what is specific to it: its governing model, asset paths,
-deploy conventions. Templates with the nav and labels in place are in
-`references/`.
+Use this skill for conventions shared across tutorials. Keep tutorial-specific
+guidance in that tutorial's `CLAUDE.md`, including its governing model, asset
+paths, and deployment conventions. Templates in `references/` provide the
+required navigation and labels.
 
 ## Teaching approach
 
-- Build understanding from simple to sophisticated. Start with a simple,
-  obvious application, then add variations and features in bite-sized chunks.
-- Application first, with a simple explanation. Each page has the reader do
-  something and explains just enough to follow.
-- Deeper material comes after, in a Deep dives section on the page or on a
-  reference page at the end.
-- Keep code minimal. Code that is shown and run has only the elements the
-  section teaches.
-- Prefer real output. Capture it from actual runs where practical. Mark a block
-  that is illustrative or not yet captured.
+- Teach one lesson per page. Start with a simple application, then add
+  variations and features in small increments.
+- Have the reader do something early. Explain enough to complete the task;
+  put deeper material in the page's Deep dives section or a final reference
+  page.
+- Keep shown and runnable code limited to what the section teaches.
+- Capture output from actual runs where practical. Label illustrative output
+  and output that has not yet been captured.
+- Name likely misconceptions and use the output to correct them.
 
 ## Files
 
-- `README.md`: what it is, the one idea, a link to the index, a files table,
-  quick start, status.
-- `TUTORIAL.md`: the index. Purpose in two paragraphs, the governing model with
-  a diagram, a *Verified against* blockquote (versions, what ran), a
-  `Part | What it covers` table, and a link to Setup.
-- `tutorial/00-setup.md`: do-once environment, credentials, shell variables,
-  the shared example.
-- `tutorial/part-N/index.md`: landing page for a part with several pages. A
-  single-page part is its own landing.
-- `tutorial/part-N/N.M-slug.md`: one page per numbered subtask.
-- A final reference page (optional): decision table, best practices,
-  verification status, links.
-- `examples/`, `deploy/`: runnable assets, linked by relative path.
+- `README.md`: introduce the tutorial and its central idea. Include an index
+  link, files table, quick start, and status.
+- `TUTORIAL.md`: give the purpose in two paragraphs, explain the governing
+  model with a diagram, and include a *Verified against* blockquote naming
+  versions and what ran. Follow with a `Part | What it covers` table and
+  a Setup link.
+- `tutorial/00-setup.md`: cover one-time environment setup, credentials,
+  shell variables, and the shared example.
+- `tutorial/part-N/index.md`: introduce a part with several pages.
+  A single-page part serves as its own landing page.
+- `tutorial/part-N/N.M-slug.md`: cover one numbered subtask.
+- Optional final reference page: collect decisions, best practices,
+  verification status, and links.
+- `examples/` and `deploy/`: hold runnable assets. Link to them with relative
+  paths.
 
-Nav is hand-authored markdown. The pages are read on GitHub with no build step.
+Pages render directly on GitHub. Navigation is hand-authored Markdown;
+there is no build step.
 
-## Nav
+## Navigation
 
-Every page has the same nav block at the top and the bottom, one link per line
-joined with `<br>`, in this order: `← Prev`, `→ Next`, `↑ Part N · Title`
-(subtask pages only), `Tutorial index`. A `---` rule separates it from the
-body. The first page has no Prev and the last has no Next. A part's last page
-points Next at the next part's `index.md`.
+Repeat the same navigation block at the top and bottom of every page.
+Separate it from the body with `---`. Put one link per line, joined with
+`<br>`, in this order:
 
-To renumber a page: rename the file, then fix the nav on the page and both
-neighbors, the part TOC, the index table, the README, and inline `N.M`
-mentions. Grep for the number and the filename before you stop.
+1. `← Prev`
+2. `→ Next`
+3. `↑ Part N · Title` (subtask pages only)
+4. `Tutorial index`
 
-## Subtask page
+Omit Prev on the first page and Next on the last. From a part's last page,
+link Next to the next part's `index.md`.
 
-Copy `references/subtask-page.md`. Top to bottom:
+When renumbering a page, rename the file and update:
 
-1. Nav, rule.
-2. `# N.M · Title`, then `*Part N · Title*`.
-3. `> [!NOTE]` with **Why you are here.** Two sentences at most: what this page
-   does and what changed since the last one.
-4. One to three sentences of context. The first **Command:** comes within a
-   few sentences of the H1.
-5. Steps. Each is `**Step N — Verb phrase.**` (or `**👉 Do this.**` on a
-   one-action page), then `**Command:**`, a `bash` fence,
-   `**Expected output**`, a `console` fence, and a `> [!IMPORTANT]` callout.
-6. A tear-down step if the page created cloud resources.
-7. One sentence handing off to the next page.
+- its navigation and both neighbors' navigation;
+- the part TOC, tutorial index table, and README;
+- inline `N.M` references.
+
+Search for the old number and filename to catch remaining references.
+
+## Subtask pages
+
+Copy [references/subtask-page.md](references/subtask-page.md).
+Use this order:
+
+1. Navigation and rule.
+2. `# N.M · Title`, followed by `*Part N · Title*`.
+3. A `> [!NOTE]` callout labeled **Why you are here.** In at most two
+   sentences, explain what the page does and what changed since the
+   previous page.
+4. One to three sentences of context. Reach the first **Command:** within
+   a few sentences of the H1.
+5. Steps using the structure below.
+6. A teardown step if the page created cloud resources.
+7. One sentence introducing the next page.
 8. `## Deep dives`, if needed.
-9. Rule, nav.
+9. Rule and navigation.
 
-Rules for the slots:
+Keep the page between 200 and 750 words, including deep dives.
+Captured output does not count.
 
-- **Command:** precedes every runnable fence. Not for illustrative code, pipe
-  fragments, browser input, or a second fence under one lead-in.
-- **Expected output** precedes every result fence. A short note may follow it
-  after a dash or colon.
-- The callout after output is **What it means.** (observation, then
-  consequence, two to four sentences). When the payload's keys are new to the
-  reader, use **What you are looking at.** with a `field | value | what it is`
-  table instead. Two findings on one output: **What it means, finding one: …**
-- Show a prompt or request body once per page. Later steps refer to it by name.
-- Explanation stays inline only when it sits beside the code or output it
-  explains. Anything else the reader does not need for the step moves to a
-  deep dive, leaving one sentence and `See [Title](#anchor).`
-- Deep dive headings are `###`, phrased as the question they answer, in plain
-  text so GitHub's anchor is predictable: lowercase, punctuation dropped,
-  spaces to hyphens, underscores kept.
-- Link an existing reference page before writing a new deep dive.
-- Budget: 200 to 750 words including deep dives. Captured output does not
-  count.
+### Steps and output
 
-## Landing page
+Each step contains:
 
-Copy `references/landing-page.md`: nav without the up-link, `# Part N · Title`,
-an italic one-sentence subtitle, the **Why you are here** note, at most one
-paragraph, then `## In this part` with a `Section | What it covers` table, then
-nav. About 200 words.
+1. `**Step N — Verb phrase.**`, or `**👉 Do this.**` for a one-action page.
+2. `**Command:**` and a `bash` fence.
+3. `**Expected output**` and a `console` fence.
+4. A `> [!IMPORTANT]` callout interpreting the output.
 
-## Reference page
+Apply these label rules:
 
-Optional, at the end of a part or of the tutorial. A comparison table, a
-diagram, when to use which, concrete cases. No steps. May run long.
+- **Command:** precedes every runnable fence, except a second fence under
+  the same lead-in. Omit it for illustrative code, pipe fragments, and
+  browser input.
+- **Expected output** precedes every result fence. An optional short note
+  follows a dash or colon.
+- **What it means.** introduces an observation and its consequence in two
+  to four sentences.
+- When payload keys are new to the reader, use **What you are looking at.**
+  with a `field | value | what it is` table instead.
+- For two findings from one output, distinguish them with labels such as
+  **What it means, finding one: …**
 
-## Markdown devices
+Show a prompt or request body once per page. Refer to it by name afterward.
 
-- `> [!NOTE]` orients: Why you are here, or an artifact of how output was read.
-  `> [!IMPORTANT]` interprets output. `> [!TIP]` is a side path, rare.
-  `> [!WARNING]` is one sentence, rare; a longer warning becomes a deep dive.
-- Callout labels are bold sentences ending in a period.
-- One mermaid `flowchart` per mental model, followed by an italic one-line
-  caption. Roughly one page in four has one.
-- Tables for TOCs, comparisons, field-by-field reads, decisions, and
-  verification status. Not for anything that reads fine as two sentences.
-- Fences: `bash` for commands, `console` for captured output, `python` for
-  illustrative code, plain for query strings.
-- Illustrative code links the source file and shows only the relevant class or
-  function.
-- Bold for UI the reader clicks or reads, and for labels. Inline code for what
-  the reader types, plus flags, paths, env vars, and logger names. Neither for
-  emphasis.
-- Bash in fences: one `--flag` per continuation line, one `export` per line.
-  Leave short one-liners, env-prefix invocations, and `curl` short flags alone.
+### Explanations and deep dives
 
-## Voice
+Keep inline explanations beside the code or output they explain. Move
+material unnecessary for the step to a deep dive, leaving a one-sentence
+summary and `See [Title](#anchor).`
 
-- Second person, present tense, imperative steps.
-- Name the reader's likely misconception, then correct it with the output.
-- One lesson per page. Hand off by number: "Part 2 is about that."
-- One term per concept, reused verbatim.
-- Cite a source location as `path/file.py:line` when a behavior is not visible
-  in the output.
-- The global writing rules apply. Use `/nbj-write-clearly` to draft and audit.
-  The `**Step N — …**` label is the only em dash.
+Link to an existing reference page before adding a new deep dive.
 
-## Verification
+Use plain-text `###` headings phrased as questions. Keep GitHub anchors
+predictable: lowercase letters, punctuation removed, spaces replaced with
+hyphens, and underscores retained.
 
-- The reference page keeps a short record: what ran, when, what it showed, and
-  a **Not verified** table of what has not.
-- A gotcha goes in a deep dive on the page that hits it.
+Put each gotcha in a deep dive on the page where the reader encounters it.
+
+## Landing pages
+
+Copy [references/landing-page.md](references/landing-page.md).
+Use this order:
+
+1. Navigation without the up-link, then a rule.
+2. `# Part N · Title`.
+3. An italic, one-sentence subtitle.
+4. The **Why you are here.** note.
+5. At most one paragraph of context.
+6. `## In this part` with a `Section | What it covers` table.
+7. Rule and navigation.
+
+Aim for about 200 words.
+
+## Reference pages
+
+Place an optional reference page at the end of a part or tutorial.
+Use comparison tables, diagrams, selection guidance, and concrete cases.
+Do not include steps. Reference pages may exceed the subtask word budget.
+
+## Markdown and formatting
+
+### Callouts
+
+- `> [!NOTE]`: orient the reader or explain an artifact of how output
+  was read.
+- `> [!IMPORTANT]`: interpret output.
+- `> [!TIP]`: offer an optional side path. Use sparingly.
+- `> [!WARNING]`: give a one-sentence warning. Use sparingly; move longer
+  explanations to a deep dive.
+
+Use bold sentences ending in periods for callout labels, except the
+multiple-finding labels specified above.
+
+### Diagrams and tables
+
+Use one Mermaid `flowchart` per mental model, followed by an italic,
+one-line caption. Aim for a diagram on roughly one page in four.
+
+Use tables for TOCs, comparisons, field-by-field explanations, decisions,
+and verification status. Use prose when two sentences suffice.
+
+### Code and emphasis
+
+- Use `bash` fences for commands, `console` for captured output, `python`
+  for illustrative code, and untagged fences for query strings.
+- For illustrative code, link to the source file and show only the relevant
+  class or function.
+- Use bold for UI elements the reader clicks or reads, and for labels.
+- Use inline code for typed input, flags, paths, environment variables,
+  and logger names.
+- Use neither bold nor inline code for emphasis.
+- In Bash fences, put each `--flag` on its own continuation line and each
+  `export` on its own line. Preserve short one-liners, environment-prefixed
+  invocations, and `curl` short flags.
+
+## Voice and evidence
+
+- Use second person, present tense, and imperative steps.
+- Use one term consistently for each concept.
+- Refer to the next part by number: “Part 2 is about that.”
+- When output does not show a behavior, cite its source as
+  `path/file.py:line`.
+- Follow the global writing rules. Use `/nbj-write-clearly` to draft
+  and audit.
+- Reserve em dashes for `**Step N — …**` labels.
+
+On the reference page, record what ran, when it ran, and what it showed.
+List remaining gaps in a **Not verified** table.
 
 ## Working method
 
-- Plan in `docs/<tutorial>-<topic>.md` with a stage checklist. Update it as
-  stages land.
-- Before a structural change, write the options with pros and cons and one
-  recommendation.
-- Rewrite two exemplar pages to a new pattern, review, then roll out.
-- Set a rough word budget per page before a concision pass.
-- Before committing: every `#anchor` resolves on its page, every relative link
-  resolves, no captured block was dropped, no filler words.
-- When a pattern stabilizes, record it in the same commit: here if shared, in
-  the tutorial's `CLAUDE.md` if specific.
+- Plan in `docs/<tutorial>-<topic>.md`. Maintain a checklist of stages and
+  update it as each stage is completed.
+- Before a structural change, document the options, their pros and cons,
+  and one recommendation.
+- For a new pattern, rewrite and review two exemplar pages before applying
+  it throughout.
+- Before a concision pass, set a rough word budget for each page.
+- Before committing, check that every local `#anchor` and relative link
+  resolves, all captured output remains, and filler is removed.
+- When a pattern stabilizes, document it in the same commit: here for shared
+  conventions, or in the tutorial's `CLAUDE.md` for tutorial-specific ones.
