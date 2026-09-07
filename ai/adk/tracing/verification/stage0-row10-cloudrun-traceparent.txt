@@ -1,0 +1,44 @@
+=== Stage 0 row 10 — Cloud Run traceparent probe — 2026-09-07 ===
+Project jwd-dev-2, region us-central1. Throwaway FastAPI header-echo service,
+source-deployed to Cloud Run, curled plain and with client trace headers, then
+torn down. Image:
+  us-central1-docker.pkg.dev/jwd-dev-2/cloud-run-source-deploy/row10-probe@sha256:17c7859d7911f00afcf3b4a53750c05e0f4ff93c0dc4fa8f54bc4fbddacf8627
+
+QUESTION: Does Cloud Run send traceparent (W3C) as well as X-Cloud-Trace-Context?
+
+--- Plain external HTTPS request (no client trace headers), two runs ---
+Run 1 (sampled):
+  x-cloud-trace-context: 3a970086277b3f729c46a32d72abed3f/18126632490605754970;o=1
+  traceparent:           00-3a970086277b3f729c46a32d72abed3f-fb8ebc36109c3a5a-01
+Run 2 (unsampled):
+  x-cloud-trace-context: e459e5531a7f8ab1d029c145ee2d7959/7882764098181605172
+  traceparent:           00-e459e5531a7f8ab1d029c145ee2d7959-6d65342ec0512734-00
+Both also carried x-forwarded-proto: https, x-forwarded-for, forwarded. No
+tracestate on plain requests.
+
+VERDICT: Cloud Run sends BOTH headers. Same 32-hex trace id in each; sampling
+agrees between them (o=1 <-> flags 01; no o= <-> flags 00). The two headers'
+span-id fields differ within a request (GCP decimal vs W3C hex) but name the same
+trace.
+
+--- Client-supplied traceparent ---
+PRESERVED, not overwritten. Sending
+  traceparent: 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01
+reached the container as
+  00-0af7651916cd43dd8448eb211c80319c-f541d7234eef1f9b-01
+(trace id + flags kept; only the parent span id rewritten to Cloud Run's ingress
+span). A client tracestate passed through unchanged; x-cloud-trace-context was
+regenerated to match the client's trace id. Cloud Run adopts the inbound W3C
+context rather than starting a fresh trace.
+
+TUTORIAL IMPLICATION (refines Q4 / decision 3): because Cloud Run always presents
+a W3C traceparent and honors an inbound one, the W3C TraceContextTextMapPropagator
+alone suffices for the external-HTTPS path. The composite (W3C + GCP
+CloudTraceFormatPropagator) is only needed to interoperate with GCP-only callers
+that emit X-Cloud-Trace-Context WITHOUT traceparent. 3.4 can still teach the
+composite (it costs one line and the unsampled-parent deep dive uses the header),
+but should note W3C-alone is enough for Cloud Run.
+
+Teardown: Cloud Run service deleted and confirmed gone. The source-deploy left an
+auto-created cloud-run-source-deploy Artifact Registry repo + Cloud Build history
+in jwd-dev-2 (not deleted; may hold other artifacts).

@@ -1,0 +1,7 @@
+.venv/
+.env
+env.sh
+__pycache__/
+*.pyc
+out/
+.adk/

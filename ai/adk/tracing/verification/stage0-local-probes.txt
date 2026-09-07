@@ -1,0 +1,68 @@
+=== Stage 0 local probes — 2026-09-07T03:44Z ===
+google-adk 2.8.0, Python 3.13.3, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos
+module path: ai/adk/tracing/.venv/lib/python3.13/site-packages/google/adk
+Runs: examples/01_console_spans.py and throwaway probe scripts (deleted after).
+Cloud probes (row 10 Cloud Run traceparent on jwd-dev-2, row 12 Trace API v1 on
+jwd-dev-1) recorded separately.
+
+--- ROW 2: force_flush() is enough for 01_console_spans.py ---
+PASS. One London turn, SimpleSpanProcessor(ConsoleSpanExporter) + flush_spans()
+(force_flush on the tracer provider) -> all 7 spans written, clean parent chain.
+
+--- TREE SHAPE (corrects the plan's Q1 table and governing-model diagram) ---
+The London baseline tree on 2.8.0:
+  invocation
+  └─ invoke_agent weather_agent
+     ├─ call_llm            (1st)
+     │  ├─ generate_content gemini-3.7-flash
+     │  └─ execute_tool get_weather      <-- parent is call_llm, NOT invoke_agent
+     └─ call_llm            (2nd)
+        └─ generate_content gemini-3.7-flash
+FINDING: execute_tool's parent is the first call_llm (the LLM turn that emitted
+the function call), not invoke_agent. The plan's Q1 table (line 33/34) and the
+mermaid model both draw execute_tool under invoke_agent. Correct both. Seven
+spans per single-tool turn, one trace_id shared by all.
+
+--- ROW 5: three-way error taxonomy on execute_tool (Atlantis turn) ---
+plain (no gate):          execute_tool UNSET, error.type=none, no events;
+                          invoke_agent UNSET, invocation UNSET; model answers "no data".
+TUTORIAL_CLASSIFY_ERRORS: execute_tool ERROR, error.type=lookup_failed, no events;
+                          invoke_agent UNSET, invocation UNSET; same answer.
+TUTORIAL_RAISE_ON_UNKNOWN:execute_tool ERROR, error.type=LookupError,
+                          TWO 'exception' events on the tool span (LookupError +
+                          a DynamicNodeFailError wrapper ADK's flow raises);
+                          invoke_agent ERROR (1 exception event),
+                          invocation ERROR (1 exception event); request FAILS, no answer.
+Throwaway plain FunctionTool returning {"error": "x"}:
+                          execute_tool ERROR, error.type=TOOL_ERROR (for free).
+CONFIRMS the plan's correction: base FunctionTool._detect_error_in_response
+returns TOOL_ERROR for an {"error": ...} dict (not None). The demo's
+{"status": "error", ...} shape gets nothing without the StatusAwareTool hook.
+NUANCE beyond the plan: the raised case shows TWO exception events on the tool
+span and a DynamicNodeFailError at the top of the raise, not "one, with the
+traceback." 1.4's deep dive should say two events.
+
+--- ROW 11: unsampled propagated parent drops ADK spans; always_on restores ---
+Hand-built REMOTE parent SpanContext, trace_flags=00 (unsampled), attached as
+current context, one London turn inside it:
+  default sampler (ParentBased(ALWAYS_ON)):  spans recorded = 0
+  OTEL_TRACES_SAMPLER=always_on:             spans recorded = 7
+PASS, exactly as predicted. This is 3.4's gotcha; reproduces locally with no cloud.
+
+--- ROW 3: OTel LoggingHandler record emitted inside a tool carries trace+spanId ---
+Way-A bridge (LoggingHandler on root logger) + a CloudLoggingExporter wrapper that
+captures the LogEntry it builds. Atlantis turn; get_weather logs a WARNING from
+inside the tool body (inside execute_tool):
+  execute_tool get_weather span_id=825c91d18c541549 trace_id=0fe746eaff7c122bab336a36086afa96
+  captured WARNING "weather lookup failed for 'Atlantis': no data"
+    span_id=825c91d18c541549  trace_id=0fe...  severity=WARN  -> MATCHES execute_tool
+PASS. The record's trace_id/span_id equal the execute_tool span's; CloudLoggingExporter
+reads them off the record (cloud_logging/__init__.py:364-367) and writes trace/spanId.
+This is the whole Part 3 correlation mechanism, confirmed in-process.
+
+--- ROW 19 (local half): the resource with vs. without get_gcp_resource ---
+  WITH get_gcp_resource("jwd-gcp-demos"):  resource carries gcp.project_id=jwd-gcp-demos
+  WITHOUT (OTELResourceDetector only):     gcp.project_id = None
+CONFIRMS: a programmatic server that omits otel_resource ships spans with no
+gcp.project_id. Whether the Telemetry API ACCEPTS such a batch is the cloud half,
+folded into Stage 2 (2.3) read-back.

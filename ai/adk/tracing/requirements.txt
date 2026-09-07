@@ -1,0 +1,11 @@
+google-adk[otel-gcp]>=2.8.0
+# adk web --otel_to_cloud and get_gcp_exporters ship all three signals; the
+# otel-gcp extra pulls only the instrumentation, not these Cloud exporters.
+opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-gcp-logging
+# Part 3: inbound W3C/GCP trace-context propagation and the server span.
+opentelemetry-instrumentation-fastapi
+opentelemetry-propagator-gcp
+# adk deploy agent_engine (2.4) packages and pushes from your machine, so the
+# Agent Engine SDK must be installed locally.
+google-cloud-aiplatform[agent-engines]
