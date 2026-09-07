@@ -1,0 +1,21 @@
+=== Stage 2.1 verification run — 2026-09-07T02:45:36Z ===
+google-adk 2.8.0, Python 3.13, Gemini 3.7 Flash / Vertex, project jwd-gcp-demos
+adk web --otel_to_cloud, load/turns.sh baseline (20 + 4 + 2 dry-run turns)
+
+--- turns.sh baseline 20: all HTTP 200 ---
+200 count: 20
+
+--- token count by type (corrected quoted-dotted-label form) ---
+  {'gen_ai.token.type': 'input'} = 8
+  {'gen_ai.token.type': 'output'} = 8
+
+--- scope split (KEY FINDING: two scopes by family) ---
+client token metric:
+   {'otel_scope_name': 'opentelemetry.instrumentation.google_genai'}
+ADK invoke_agent metric:
+   {'otel_scope_name': 'gcp.vertex.agent'}
+
+--- le bucket label present on histograms (histogram_quantile works) ---
+  le buckets: 14
+
+DEP FINDING: adk web --otel_to_cloud needs opentelemetry-exporter-gcp-{logging,monitoring,trace}; the otel-gcp extra pulls only instrumentation. Added to requirements.txt.

@@ -1,5 +1,10 @@
 google-adk[otel-gcp]>=2.8.0
 opentelemetry-exporter-otlp-proto-http
+# adk web --otel_to_cloud sets up all three signals (trace, metrics, logs); the
+# otel-gcp extra pulls only the instrumentation, not these Cloud exporters.
+opentelemetry-exporter-gcp-logging
+opentelemetry-exporter-gcp-monitoring
+opentelemetry-exporter-gcp-trace
 google-cloud-bigquery
 google-cloud-bigquery-storage
 google-cloud-storage

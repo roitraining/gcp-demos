@@ -35,13 +35,17 @@ sum(rate({"gen_ai.client.token.usage_sum", "gen_ai.token.type"="output"}[5m]))
   /
 sum(rate({"gen_ai.client.token.usage_count", "gen_ai.token.type"="output"}[5m]))
 
-# --- Deep dive: pin the reads to ADK's own meter ---------------------------
-# Stage 0 found no scope doubling on this project (one scope, gcp.vertex.agent),
-# but the client metrics carry an otel_scope_name label and a second scope would
-# double the sums. Filtering on the scope is defensive hygiene: if a second
-# scope ever appears, this is the correct total and the unfiltered query is the
-# doubled one.
+# --- Deep dive: which scope emits which metric -----------------------------
+# The metrics arrive under TWO instrumentation scopes, split by family, not one
+# (verified live, 2026-09-06):
+#   gen_ai.client.*  (token.usage, operation.duration)  ->
+#       otel_scope_name="opentelemetry.instrumentation.google_genai"
+#   gen_ai.invoke_agent.*, gen_ai.execute_tool.*  (ADK's own meter)  ->
+#       otel_scope_name="gcp.vertex.agent"
+# So a scope filter must match the metric's own scope. Filtering the client
+# token metric to gcp.vertex.agent returns ZERO series — a common mistake. Group
+# by the scope to see the split; do not assume one scope owns everything.
 
-sum by ("gen_ai.token.type") (
-  rate({"gen_ai.client.token.usage_sum", otel_scope_name="gcp.vertex.agent"}[5m])
-) * 60
+sum by (otel_scope_name) (
+  rate({"gen_ai.client.token.usage_count"}[5m])
+)
