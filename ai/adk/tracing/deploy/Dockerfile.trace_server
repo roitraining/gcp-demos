@@ -1,0 +1,34 @@
+# Container for the minimal tracing server (examples/02_trace_server.py),
+# used by 2.3 (Cloud Run) and 3.4 (propagation). The server installs the Cloud
+# trace and logging exporters itself and passes get_gcp_resource(project) as the
+# OTel resource, so the span tree leaves the process for Cloud Trace. On Cloud
+# Run, the resource detector supplies cloud.* labels, so none are set here.
+#
+# requirements.txt already pins google-adk[otel-gcp] plus the OTLP and GCP
+# logging exporters, so the exporter deps are in the image (a Cloud Run revision
+# that lacks them crashes on boot).
+
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install dependencies first for better layer caching.
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the agent, the shared helpers, and the server.
+COPY demo_agent/ ./demo_agent/
+COPY examples/_common.py ./examples/
+COPY examples/02_trace_server.py ./examples/
+COPY examples/03_correlated_server.py ./examples/
+COPY examples/04_propagated_server.py ./examples/
+
+# Cloud Run sets PORT; the server reads it and binds 0.0.0.0.
+ENV PORT=8080
+EXPOSE 8080
+
+# No .env in the image: set GOOGLE_CLOUD_PROJECT / GOOGLE_CLOUD_LOCATION /
+# GOOGLE_GENAI_USE_VERTEXAI via --set-env-vars at deploy time. SERVER selects
+# which server module runs (02 for 2.3, 04 for 3.4); default is 02.
+ENV SERVER=examples/02_trace_server.py
+CMD ["sh", "-c", "python $SERVER"]

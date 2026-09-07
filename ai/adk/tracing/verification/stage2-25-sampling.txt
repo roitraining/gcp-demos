@@ -1,0 +1,12 @@
+=== Stage 2.5 — sampling — 2026-09-07 ===
+google-adk 2.8.0, Python 3.13.3, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos
+20 London turns through a console exporter (deterministic count), under two samplers.
+
+  OTEL_TRACES_SAMPLER=default (parentbased_always_on): kept 20/20 traces (140 spans)
+  OTEL_TRACES_SAMPLER=parentbased_traceidratio, ARG=0.5: kept 9/20 traces (63 spans)
+
+9/20 is within tolerance of half; the trace-id ratio sampler drops whole traces
+(63 = 7 spans x 9 kept), not individual spans. The standard OTEL_TRACES_SAMPLER /
+OTEL_TRACES_SAMPLER_ARG env vars work unchanged because ADK installs no Sampler
+of its own (SDK default ParentBased(ALWAYS_ON) applies). The ParentBased half is
+the trap page 3.4 covers: an unsampled propagated parent drops the whole trace.

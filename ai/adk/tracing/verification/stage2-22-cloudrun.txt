@@ -1,0 +1,59 @@
+=== Stage 2.2 verification run — 2026-09-07 ===
+google-adk 2.8.0, Python 3.13, Gemini 3.7 Flash / Vertex, project jwd-dev-3, region us-central1.
+Own-server path (examples/02_trace_server.py) via deploy/Dockerfile.trace_server,
+source-deployed with `gcloud run deploy` (the adk-deploy path and this Dockerfile
+path are interchangeable for 2.2; the Dockerfile server returns the trace id in
+its /chat response, which is why it was chosen).
+
+GOAL: prove tracing to Cloud Trace needs NO extra work once the exporters are in
+the image, and record the KEY 3.4 fact: the Cloud Run request-log trace id
+DIFFERS from the ADK spans' trace id (ADK does not read the inbound trace header).
+
+--- Deploy ---
+service:  adk-trace-22 (revision adk-trace-22-00001-nj7, Ready=True, 100% traffic)
+url:      https://adk-trace-22-165394978445.us-central1.run.app
+image:    us-central1-docker.pkg.dev/jwd-dev-3/cloud-run-source-deploy/adk-trace-22@sha256:0dc41ba2bc39af91e66b21c4c23669a2231da5324e54843a6d0e4a8fef4ca04f
+env:      GOOGLE_CLOUD_PROJECT=jwd-dev-3, GOOGLE_CLOUD_LOCATION=global,
+          GOOGLE_GENAI_USE_VERTEXAI=TRUE, OTEL_SERVICE_NAME=adk-trace-cloudrun
+No boot crash. requirements.txt (pinning google-adk[otel-gcp] + the OTLP and
+gcp-logging exporters) was in the build context, so the exporter deps were in the
+image — the known missing-module boot crash did NOT occur.
+
+--- Baseline turn (load scenario: baseline, one London turn) ---
+POST /chat {"text":"What's the weather in London?"}
+response: {"response":"The weather in London is currently 15°C and drizzling.",
+           "trace_id":"0000cb104b9c2e8d4039729a40d46eb0"}
+ADK spans' trace id = 0000cb104b9c2e8d4039729a40d46eb0
+
+--- Trace read-back (trace/get_trace.sh, Cloud Trace v1; ~110s ingestion delay) ---
+trace 0000cb104b9c2e8d4039729a40d46eb0  (7 spans)
+invocation
+  invoke_agent weather_agent
+    call_llm
+      generate_content gemini-3.7-flash
+      execute_tool get_weather
+    call_llm
+      generate_content gemini-3.7-flash
+Seven spans, five names, execute_tool UNDER call_llm — the expected baseline tree.
+
+--- Service label (from span labels, v1 API) ---
+service.name = adk-trace-cloudrun   (from OTEL_SERVICE_NAME; the Trace Explorer service)
+Cloud Run's resource detector added, with zero extra config:
+  cloud.platform = gcp_cloud_run    cloud.provider = gcp
+  cloud.region   = us-central1      cloud.account.id = jwd-dev-3
+  gcp.project_id present; faas.name / faas.version / faas.instance present.
+
+=== KEY 2.2 FACT (feeds 3.4): TWO trace ids per request, and they DIFFER ===
+Same /chat POST (matched by requestUrl .../chat in the run.googleapis.com request log):
+  ADK spans' trace id           (from /chat body + Trace v1) = 0000cb104b9c2e8d4039729a40d46eb0
+  Cloud Run request-log `trace` (run.googleapis.com/requests) = 18cb1a68232775b83979db6b5bf7fcca
+        (full field: projects/jwd-dev-3/traces/18cb1a68232775b83979db6b5bf7fcca)
+DIFFER? YES. The Cloud Run ingress log carries Cloud Run's OWN trace id; ADK
+starts a fresh trace inside the process because it does not read the inbound
+X-Cloud-Trace-Context / traceparent header. Two trace ids name the one HTTP
+request — the pair page 3.4 later merges via propagation.
+
+--- Teardown ---
+gcloud run services delete adk-trace-22 (us-central1, jwd-dev-3) — deleted, confirmed gone.
+Auto-created Artifact Registry repo cloud-run-source-deploy left in place (may hold other artifacts).
+Root ./Dockerfile scratch copy removed. Nothing committed.

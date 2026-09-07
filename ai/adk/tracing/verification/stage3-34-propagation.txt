@@ -1,0 +1,33 @@
+=== Stage 3.4 — propagation, one trace per request — 2026-09-07 ===
+google-adk 2.8.0, Python 3.13.3, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos
+examples/04_propagated_server.py (03 + FastAPIInstrumentor.instrument_app +
+composite propagator [W3C + GCP] + OTEL_TRACES_SAMPLER=always_on).
+
+--- tagged-request: returned trace id == inbound header trace id ---
+POST /chat with header
+  traceparent: 00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01
+returned trace_id = 0af7651916cd43dd8448eb211c80319c  -> MATCH.
+
+--- the trace tree (8+ spans; ADK root is a CHILD of the request) ---
+Parent chain from Trace v1:
+  POST /chat              parent -> (external 13235353014750950193 = b7ad6b7169203331,
+                                     the inbound header's span)
+  POST /chat http receive parent -> POST /chat
+  invocation              parent -> POST /chat        <== ADK root now a child of the request
+    invoke_agent          parent -> invocation
+      call_llm -> [generate_content, execute_tool get_weather]
+      call_llm -> generate_content
+  POST /chat http send    parent -> POST /chat
+So one HTTP request is one trace: the FastAPI server span + the full ADK tree,
+all under the inbound trace id. This merges the two-trace-ids split from 2.2.
+
+--- unsampled-parent: always_on keeps the tree ---
+POST /chat with header traceparent flags 00 (unsampled):
+  00-11111111111111111111111111111111-2222222222222222-00
+returned trace_id = 11111111111111111111111111111111 (== header), spans recorded.
+With always_on the unsampled parent no longer drops the tree. (Stage 0 already
+showed the DEFAULT sampler records 0 spans under such a parent; always_on -> 7.)
+
+RENDERER NOTE: trace/get_trace.sh prints `invocation` as a second root because its
+root-detection is naive when a span (POST /chat) has several children; the actual
+parentSpanId chain (above) is correct. Cosmetic only.

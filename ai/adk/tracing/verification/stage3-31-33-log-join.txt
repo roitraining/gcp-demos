@@ -1,0 +1,27 @@
+=== Stage 3.1 + 3.3 — the log join, live — 2026-09-07 ===
+google-adk 2.8.0, Python 3.13.3, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos
+examples/03_correlated_server.py, one classified-error (Atlantis) turn.
+Trace ae6b5c659c9cc62c3b664ad5d464b234. gcloud logging read on the trace: 13 entries.
+
+--- 3.1 THE FREE JOIN: gen_ai.* events under their spans ---
+gen_ai.choice, gen_ai.user.message, gen_ai.system.message carry spanId and land
+under the model spans. CORRECTION to the plan's Q3/3.1 note: on 2.8.0 these events
+sit under the **generate_content** span, NOT call_llm. The two spanIds carrying
+them (27e2f78b3037b5c0, e3cb82d9631d6075) both resolve to
+'generate_content gemini-3.7-flash'. (generate_content is a child of call_llm, so
+they are still "in the call_llm subtree", but the direct parent is generate_content.)
+By logName: gen_ai.choice x2, gen_ai.user.message x4, gen_ai.system.message x2.
+
+--- 3.3 FRAMEWORK + YOUR LOGS under their spans (way-A bridge) ---
+The bridged records land under logName 'adk-tracing' (GOOGLE_CLOUD_DEFAULT_LOG_NAME):
+  5 'adk-tracing' entries. 4 INFO (google_adk framework lines) carry the model
+  spanIds; 1 WARNING (the tool's, "weather lookup failed for 'Atlantis'") carries
+  the execute_tool span id 9d20dbf0a73c5cf5. So framework and your logs both join.
+
+--- log names visibly distinct (open question 3 resolved) ---
+Setting GOOGLE_CLOUD_DEFAULT_LOG_NAME=adk-tracing puts the bridged records under
+'adk-tracing', separate from the gen_ai.* event log names. Recommendation adopted.
+
+NEGATIVE CONTROL (3.3 #1): 03 logs "trace server starting up (no span here)" at
+startup, outside any span. It carries NO trace field and appears under no span --
+confirmed by construction (logged before any request/span exists).
