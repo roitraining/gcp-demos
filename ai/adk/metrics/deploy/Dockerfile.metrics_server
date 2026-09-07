@@ -1,0 +1,26 @@
+# Container for the minimal metrics server (examples/03_metrics_server.py),
+# tutorial 2.3. The server installs the Cloud metric exporter itself and sets
+# gcp.project_id on the OTel resource, so gen_ai.* histograms leave the process
+# for Cloud Monitoring. On Cloud Run, service.instance.id and cloud.region come
+# from the resource detector, so no OTEL_RESOURCE_ATTRIBUTES is set here.
+
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install dependencies first for better layer caching.
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the agent, the shared helpers, and the server.
+COPY demo_agent/ ./demo_agent/
+COPY examples/_common.py ./examples/
+COPY examples/03_metrics_server.py ./examples/
+
+# Cloud Run sets PORT; the server reads it and binds 0.0.0.0.
+ENV PORT=8080
+EXPOSE 8080
+
+# No .env in the image: on Cloud Run set GOOGLE_CLOUD_PROJECT / GOOGLE_CLOUD_LOCATION,
+# GOOGLE_GENAI_USE_VERTEXAI via --set-env-vars at deploy time (tutorial 2.3).
+CMD ["python", "examples/03_metrics_server.py"]

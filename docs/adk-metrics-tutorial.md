@@ -295,40 +295,42 @@ Verify (met): all three scripts record **six** metric names (single agent; seven
 - **Full JSON dumps go to a file.** `install_console_reader` writes `out/metrics.json` (default arg) instead of the console, since a full dump is unreadable in a terminal. Pages 1.1, 1.4, 1.5 tell the reader to open it (`code out/metrics.json`). `out/` is gitignored.
 - **tutorial-style skill updated.** Env vars go on their own `export` line before the command, not as an inline `VAR=value command` prefix; the old "preserve environment-prefixed invocations" exception was removed. 1.4 was brought into compliance (and given the same file-output guidance).
 
-### Stage 2 · Part 2 collect (J; cloud writes)
+### Stage 2 · Part 2 collect (J; cloud writes) — DRAFTED 2026-09-06, captures pending
 
-- [ ] `load/turns.sh` with the scenario names (`baseline`, `unknown-city`, `slow-tool`, `multi-city`, `growing-context`, `concurrent`); 2.1 local `--otel_to_cloud` with read-back and the export-outage deep dive; 2.2 descriptor page.
-- [ ] 2.3 Cloud Run deploy, read-back, teardown.
-- [ ] `03_metrics_server.py`; 2.4 local run with the export-interval deep dive.
-- [ ] 2.5 Agent Runtime: deploy with `--otel_to_cloud`, fire turns, query Cloud Monitoring; report series or a documented negative; teardown.
-- [ ] 2.6 reference page per decision 2.
+- [x] `load/turns.sh` with the scenario names (`baseline`, `unknown-city`, `slow-tool`, `multi-city`, `growing-context`, `concurrent`) — drives the CLI server `/run` + `/sessions` API; base URL from `HOST` env var. 2.1–2.6 pages drafted.
+- [x] `examples/03_metrics_server.py` (exposes `/chat`, sets `gcp.project_id` on the resource); 2.4 uses a curl loop against it, not `turns.sh`.
+- [x] Pages 2.1–2.6 written with `NEEDS-RUN` markers on every cloud read-back; `deploy/` Dockerfile + env files for 2.3/2.5.
+- [ ] **Cloud captures (this stage's real work):** 2.1 local `--otel_to_cloud` + read-back + export-outage; 2.2 descriptor list; 2.3 Cloud Run deploy/read-back/teardown; 2.4 own-server run; 2.5 Agent Runtime (report series or documented negative); teardowns.
 
-Verify: each page's read-back block is a real capture; series counts reconcile with the number of turns `turns.sh` reported answered.
+Verify: each page's read-back block replaces its `NEEDS-RUN` with a real capture; series counts reconcile with turns answered.
 
-### Stage 3 · Part 3 consume (J; cloud writes)
+### Stage 3 · Part 3 consume (J; cloud writes) — DRAFTED 2026-09-06, captures pending
 
-- [ ] `queries/*.promql` (including `outcome.promql`), `dashboard.json`, `alert-policy.json`.
-- [ ] `demo_agent/outcome.py` behind `TUTORIAL_OUTCOME_METRIC`.
-- [ ] 3.1–3.4 with read-back captures, the concurrency deep dive on 3.1, the scope deep dive on 3.4; 3.5 dashboard create and teardown; 3.6 alert: create, fire with `turns.sh unknown-city`, capture the incident, teardown; 3.7 counter read-back beside 3.3's ratios.
+- [x] `queries/*.promql` (`latency`, `volume`, `errors`, `tokens`, `outcome`), `dashboard.json`, `alert-policy.json`. All dotted names use `_sum`/`_count`/`_bucket` in the UTF-8 brace form; percentiles via `histogram_quantile` over `_bucket`.
+- [x] `demo_agent/outcome.py` behind `TUTORIAL_OUTCOME_METRIC`; wired to `root_agent.after_tool_callback` (returns `[]` when the flag is unset — Part 1's six-name output confirmed unchanged).
+- [x] Pages 3.1–3.7 drafted with `NEEDS-RUN` on every read-back; concurrency deep dive on 3.1, scope deep dive on 3.4.
+- [ ] **Cloud captures:** 3.1–3.4 read-backs; 3.5 dashboard create + teardown; 3.6 alert create, fire, capture incident, teardown; 3.7 counter read-back beside 3.3's ratios.
+- [ ] **Verify against a live run:** the `le` bucket label name (breaks every percentile if wrong); the counter's PromQL suffix (`_total` assumed); dashboard/alert JSON schema field names against `gcloud`.
 
-Verify: every query file is pasted verbatim on exactly one page; dashboard and policy deleted after capture; Part 1 scripts still print exactly seven names with the flag unset.
+Verify: every query file is pasted verbatim on exactly one page; dashboard and policy deleted after capture; Part 1 scripts still emit exactly six names with the flag unset.
 
-### Stage 4 · Part 4 BigQuery (J; cloud writes)
+### Stage 4 · Part 4 BigQuery (J; cloud writes) — DRAFTED 2026-09-06, captures pending
 
-- [ ] `bq mk` dataset; `04_bq_plugin.py`; 4.1–4.3 with `bq query` captures.
-- [ ] 4.4 SDK (`render`, evaluator, CLI); 4.5 Looker Studio template; 4.6 comparison page.
-- [ ] Dataset teardown step on 4.1 or the reference page.
+- [x] `04_bq_plugin.py` (server + `BigQueryAgentAnalyticsPlugin`, dataset id from `BQ_ANALYTICS_DATASET_ID`); `google-cloud-storage` added to `requirements.txt` (the plugin needs it and the extras did not pull it).
+- [x] Pages 4.1–4.6 drafted with `NEEDS-RUN` on every `bq query`/SDK result; SQL and column names written out as deterministic text.
+- [ ] **Cloud captures:** `bq mk` dataset; 4.1–4.3 `bq query`; 4.4 SDK (`render`, evaluator, CLI); dataset teardown on 4.6.
+- [ ] **Verify against a live run:** the `content` JSON accessor path (4.3); the `bq-agent-sdk` CLI subcommand names (4.4); the `v_*` view set the plugin creates (4.1).
 
 Verify: 4.2's per-run token total equals the Part 3 histogram `sum` for the same run window (state the tolerance).
 
-### Stage 5 · Reference page, cross-links, link check (M)
+### Stage 5 · Reference page, cross-links, link check (M) — DRAFTED 2026-09-06
 
-- [ ] `how-to-choose.md` with the signal catalog and verification status.
-- [ ] Nav blocks, part TOCs, index table, README files table; `scenarios.md` linked from the index and each part landing page.
-- [ ] `lychee --offline 'ai/adk/metrics/**/*.md'` or equivalent; grep for NEEDS-RUN and "illustrative" labels.
-- [ ] The Not verified table below reconciled with the reference page's verification status; the run log complete.
+- [x] `how-to-choose.md` with the signal catalog, decision table, and verification status.
+- [x] Nav blocks, part TOCs, index table (TUTORIAL.md), README files table wired; nav chain resolves Setup → … → how-to-choose.
+- [x] Link/anchor check passes (33 files, 0 broken relative links); all subtask pages within the 200–750 budget.
+- [ ] Final pass AFTER cloud captures land: reconcile the Not-verified table and run log; confirm no `NEEDS-RUN` marker remains.
 
-Verify: link check passes; every console block is either captured or labeled.
+Verify: link check passes (done); every console block is either captured or labeled `NEEDS-RUN` (done — 50 labeled, to be replaced by captures).
 
 ## Verification
 

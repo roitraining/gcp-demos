@@ -101,12 +101,18 @@ class StatusAwareTool(FunctionTool):
 .venv/bin/python examples/01_console_metrics.py
 ```
 
-**Expected output:** the agent's answer prints first, then one block of JSON
-holding all six metrics. Cut here to the first metric:
+**Expected output:** the agent's answer prints to the console, and the metrics
+JSON is written to `out/metrics.json` (a full dump is too long to read in a
+terminal). Open it in your editor:
 
 ```console
 AGENT: The weather in London is currently 15°C and drizzling.
+(metrics written to out/metrics.json)
+```
 
+The file holds all six metric names. Cut here to the first metric:
+
+```json
 {
     "resource_metrics": [
         {
@@ -132,11 +138,10 @@ AGENT: The weather in London is currently 15°C and drizzling.
 }
 ```
 
-The full block holds all six metric names. If you see the answer and the JSON,
-your model and environment are set. A `403 PERMISSION_DENIED` on `your_project`
-instead means a shell variable is overriding `.env`; run
-`unset GOOGLE_CLOUD_PROJECT` and try again, or fix `env.sh`.
-[Part 1](part-1/index.md) walks through what these fields mean.
+If you see the answer and the file, your model and environment are set. A
+`403 PERMISSION_DENIED` on `your_project` instead means a shell variable is
+overriding `.env`; run `unset GOOGLE_CLOUD_PROJECT` and try again, or fix
+`env.sh`. [Part 1](part-1/index.md) walks through what these fields mean.
 
 ---
 

@@ -1,0 +1,23 @@
+{
+  "//": "Cloud Monitoring alert policy for the ADK metrics tutorial, page 3.6.",
+  "//create": "gcloud alpha monitoring policies create --policy-from-file=queries/alert-policy.json",
+  "//delete": "gcloud alpha monitoring policies delete <POLICY_NAME>   (teardown after the incident is captured)",
+  "//fires": "Tool error ratio (execute_tool datapoints carrying error.type over all) above 0.20 for 5 minutes. Trigger it with load/turns.sh unknown-city at ~50% Atlantis.",
+  "//schema": "ASSUMPTION TO VERIFY: a PromQL condition uses conditionPrometheusQueryLanguage with a 'query' whose own comparison (> 0.2) is the threshold, plus 'duration' (the for-clause) and 'evaluationInterval'. There is no thresholdValue/comparison here — that pair belongs to conditionThreshold, a different condition type. Confirm the field names against a real 'gcloud alpha monitoring policies create' before trusting.",
+  "displayName": "ADK tool error ratio > 20% (tutorial 3.6)",
+  "documentation": {
+    "content": "The execute_tool.duration error ratio has been above 20% for 5 minutes. A dependency the agent calls is failing; the invocation may still be reporting success (invoke_agent error ratio stays 0), so users are getting turns that complete without an answer. See tutorial page 3.3 for the tool-vs-invocation split and 3.7 for the task-outcome counter.",
+    "mimeType": "text/markdown"
+  },
+  "combiner": "OR",
+  "conditions": [
+    {
+      "displayName": "tool error ratio > 0.20 for 5m",
+      "conditionPrometheusQueryLanguage": {
+        "query": "sum(rate({\"gen_ai.execute_tool.duration_count\", \"error.type\"=~\".+\"}[5m])) / sum(rate({\"gen_ai.execute_tool.duration_count\"}[5m])) > 0.2",
+        "duration": "300s",
+        "evaluationInterval": "60s"
+      }
+    }
+  ]
+}

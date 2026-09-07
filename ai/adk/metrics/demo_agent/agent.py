@@ -23,6 +23,8 @@ from typing import Any, Optional
 from google.adk.agents import Agent
 from google.adk.tools.function_tool import FunctionTool
 
+from .outcome import outcome_callbacks
+
 # A hardcoded lookup so the agent runs without any external dependency.
 _CITY_WEATHER = {
     "san francisco": "18C and foggy",
@@ -116,4 +118,7 @@ root_agent = Agent(
         " say you do not have data for that city."
     ),
     tools=[StatusAwareTool(get_weather), StatusAwareTool(get_forecast)],
+    # The one custom instrument (page 3.7). Empty unless TUTORIAL_OUTCOME_METRIC
+    # is set, so Parts 1-2 emit only the six framework metrics.
+    after_tool_callback=outcome_callbacks(),
 )

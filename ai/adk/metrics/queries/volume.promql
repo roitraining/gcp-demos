@@ -1,0 +1,40 @@
+# volume.promql — used by tutorial page 3.2 "Volume and shape"
+# Scenario: multi-city.
+# Question: is repeated work driving latency and consumption?
+#
+# The _count series of a histogram is a cumulative counter of recorded
+# datapoints. rate() over it gives events per second; multiply by 60 for a
+# per-minute rate. sum ÷ count gives the mean work per turn.
+#
+# POST each block to:
+#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+# with body  query=<urlencoded>  and an ADC bearer token.
+
+# --- Turns per minute ------------------------------------------------------
+# invoke_agent.duration records once per invocation, so its _count is the turn
+# counter. This is the denominator for every per-turn rate below.
+
+sum(rate({"gen_ai.invoke_agent.duration_count"}[5m])) * 60
+
+# --- Inference calls per turn ----------------------------------------------
+# inference_calls sum ÷ invoke_agent count = model calls per turn. A plain
+# London turn is 2 (call, tool, call); a three-city turn does more.
+
+sum(rate({"gen_ai.invoke_agent.inference_calls_sum"}[5m]))
+  /
+sum(rate({"gen_ai.invoke_agent.inference_calls_count"}[5m]))
+
+# --- Tool calls per turn ---------------------------------------------------
+# tool_calls sum ÷ count = tool invocations per turn. The multi-city turns
+# push this above 1.
+
+sum(rate({"gen_ai.invoke_agent.tool_calls_sum"}[5m]))
+  /
+sum(rate({"gen_ai.invoke_agent.tool_calls_count"}[5m]))
+
+# --- The two populations, as a bucket distribution -------------------------
+# tool_calls_bucket by "le" shows the mix directly: a spike at le="1" for the
+# single-city turns and a second spike at le="3" for the three-city ones.
+# Instant read (no rate) of the cumulative bucket counts.
+
+sum by (le) ({"gen_ai.invoke_agent.tool_calls_bucket"})

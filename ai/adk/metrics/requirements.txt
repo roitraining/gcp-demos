@@ -2,4 +2,5 @@ google-adk[otel-gcp]>=2.8.0
 opentelemetry-exporter-otlp-proto-http
 google-cloud-bigquery
 google-cloud-bigquery-storage
+google-cloud-storage
 bigquery-agent-analytics

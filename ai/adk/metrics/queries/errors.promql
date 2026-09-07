@@ -1,0 +1,39 @@
+# errors.promql — used by tutorial page 3.3 "Errors"
+# Scenario: unknown-city.
+# Question: did a dependency failure become a user-visible failure?
+#
+# error.type is a metric attribute stamped only on failed datapoints. The ratio
+# is (datapoints carrying error.type) / (all datapoints). The tool ratio reads
+# about the Atlantis share; the invocation ratio reads 0, because the tool fails
+# but the invocation still succeeds. No native metric can say whether the user
+# got weather — that gap is what page 3.7's custom counter fills.
+#
+# POST each block to:
+#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+# with body  query=<urlencoded>  and an ADC bearer token.
+
+# --- Tool error ratio ------------------------------------------------------
+# Failed tool calls (error.type present) over all tool calls. The demo stamps
+# error.type="lookup_failed" via StatusAwareTool on an unknown city.
+
+sum(rate({"gen_ai.execute_tool.duration_count", "error.type"=~".+"}[5m]))
+  /
+sum(rate({"gen_ai.execute_tool.duration_count"}[5m]))
+
+# Same ratio broken out by tool, so get_weather and get_forecast are separate.
+
+sum by ("gen_ai.tool.name") (
+  rate({"gen_ai.execute_tool.duration_count", "error.type"=~".+"}[5m])
+)
+  /
+sum by ("gen_ai.tool.name") (
+  rate({"gen_ai.execute_tool.duration_count"}[5m])
+)
+
+# --- Invocation error ratio ------------------------------------------------
+# Failed invocations over all invocations. Reads 0 for unknown-city: the tool
+# failed, the invocation did not.
+
+sum(rate({"gen_ai.invoke_agent.duration_count", "error.type"=~".+"}[5m]))
+  /
+sum(rate({"gen_ai.invoke_agent.duration_count"}[5m]))
