@@ -1,0 +1,18 @@
+=== Stage 2.3 verification — 2026-09-07T02:57:29Z ===
+adk deploy cloud_run --otel_to_cloud, service adk-metrics-otel, region us-central1
+URL: https://adk-metrics-otel-aoudn5d3hq-uc.a.run.app (revision 00002)
+
+FINDING (deploy blocker): the first deploy FAILED — 'container failed to start on PORT=8000',
+  Cloud Run logs: ModuleNotFoundError: No module named 'opentelemetry.exporter'.
+  ADK's generated Dockerfile installs only base google-adk, not the GCP exporters --otel_to_cloud
+  needs at startup. FIX: add demo_agent/requirements.txt listing google-adk[otel-gcp] + the three
+  opentelemetry-exporter-gcp-* packages; adk deploy installs the agent-dir requirements.txt into
+  the container. Redeploy (revision 00002) started cleanly.
+
+turns.sh baseline 20 via HOST=<cloud run url>: 20/20 http=200
+
+read back count by (location) — detector supplied it, no OTEL_RESOURCE_ATTRIBUTES set on deploy:
+  location= us-central1 -> 2
+series job/instance split (laptop vs cloud run):
+  job= adk-metrics loc= us-central1 inst= laptop-1
+  job= adk-metrics-otel loc= us-central1 inst= 00a41e8c1d9a788405ebe13a
