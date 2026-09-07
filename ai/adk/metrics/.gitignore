@@ -4,3 +4,4 @@ env.sh
 __pycache__/
 *.pyc
 verification/*.jsonl
+out/

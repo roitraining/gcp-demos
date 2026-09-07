@@ -101,7 +101,7 @@ class StatusAwareTool(FunctionTool):
 
     def _detect_error_in_response(self, response: Any) -> Optional[str]:
         if isinstance(response, dict) and response.get("status") == "error":
-            return "no_data"
+            return "lookup_failed"
         return None
 
 

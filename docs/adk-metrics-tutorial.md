@@ -46,7 +46,7 @@ Facts worth teaching:
 
 - **The two stable-semconv metrics** are `gen_ai.client.token.usage` and `gen_ai.client.operation.duration` (OTel GenAI semconv; the openobserve and opentelemetry.io posts cover only these two). The agent- and tool-level ones follow ADK's reading of unmerged drafts. The `adk.experimental.*` names say so in the name.
 - **Token usage is two datapoints per model call**, split by `gen_ai.token.type`. Input sums prompt and server-side tool tokens; output sums candidates and thoughts. Cached tokens are inside input, not separate (`_metrics.py:459-466`, `_token_usage.py:47-70`). Streaming takes the last chunk's usage, not a sum (`:451-455`).
-- **`error.type` on tool duration is NOT free (Stage 1, corrected).** A plain function returning `{"status": "error"}` does not stamp `error.type`. ADK reads the response only through `FunctionTool._detect_error_in_response`, which the base class leaves returning `None` (`flows/llm_flows/functions.py:88,695`; `_instrumentation.py:525`). The demo agent wraps its tools in a `StatusAwareTool(FunctionTool)` that overrides the hook to map a failure status to `error.type="no_data"`. A raising tool also stamps `error.type` (the exception class name) but crashes the invocation, so the hook is the path that keeps the invocation successful while the tool series splits. This is 1.3's lesson, verified 2026-09-06.
+- **`error.type` on tool duration is NOT free (Stage 1, corrected).** A plain function returning `{"status": "error"}` does not stamp `error.type`. ADK reads the response only through `FunctionTool._detect_error_in_response`, which the base class leaves returning `None` (`flows/llm_flows/functions.py:88,695`; `_instrumentation.py:525`). The demo agent wraps its tools in a `StatusAwareTool(FunctionTool)` that overrides the hook to map a failure status to `error.type="lookup_failed"` (renamed from `no_data`, which read as "no metric data"; `lookup_failed` names the failure category so a future `timeout` sits beside it). A raising tool also stamps `error.type` (the exception class name) but crashes the invocation, so the hook is the path that keeps the invocation successful while the tool series splits. This is 1.3's lesson, verified 2026-09-06.
 - **Cardinality is bounded by design.** Skill exit codes collapse to a boolean (`:585-590`). No session, user, or invocation id is ever a metric attribute. That is the reason Part 4 exists.
 - **Semconv opt-in does not rename metrics.** `_metrics.py` never reads `OTEL_SEMCONV_STABILITY_OPT_IN`; it governs spans and events only.
 
@@ -147,7 +147,7 @@ Misconceptions to name and correct with output:
 
 | Misconception | Corrected on |
 |---|---|
-| "Metrics print somewhere by default." | 1.1: nothing until a reader is installed; the console reader shows the first datapoint. |
+| "Metrics print somewhere by default." | 1.1: nothing until a reader is installed; the reader writes the first datapoint to `out/metrics.json`. |
 | "A token metric is a counter I can sum." | 1.2: it is a histogram; `sum` is the tokens, `count` is the calls, buckets give the distribution. |
 | "I can find one user's slow request in metrics." | 1.3 and 4.6: attributes are bounded; ids live in rows. |
 | "It exported; I just cannot find it." | 2.1: the 400 from a missing resource. 2.2: the `/histogram` suffix. 2.4: the 5 s interval. |
@@ -167,8 +167,8 @@ Misconceptions to name and correct with output:
 | `tutorial/part-1..4/` | Pages below |
 | `tutorial/how-to-choose.md` | Signal catalog, decision table, verification status, references |
 | `demo_agent/` | The logging tutorial's weather agent, copied (not shared) and given a second tool. `get_weather(city)` stays instant with the success/error branch; `get_forecast(city, days)` sleeps 0.3–1.5 s and returns more text. Two tools of different latency is the whole reason the tool and token distributions have shape. Decision 1: chosen for simple-but-realistic; a single agent, no workflow. `outcome.py` holds the one custom instrument (3.7): an `after_tool_callback` recording `tutorial.weather.requests{outcome}` from the tool's returned status, attached only when `TUTORIAL_OUTCOME_METRIC=1` is set, so every earlier page still shows exactly seven names. |
-| `examples/01_console_metrics.py` | Script runner with a console metric reader and a `force_flush()`; the first datapoint |
-| `examples/02_two_attribute_sets.py` | Same, one good city and one unknown city; `error.type` appears |
+| `examples/01_console_metrics.py` | Script runner with a metric reader and a `force_flush()`; the first datapoint. The reader writes JSON to `out/metrics.json` (default in `install_console_reader`), which the page opens in an editor |
+| `examples/02_two_attribute_sets.py` | Same agent, one good city and one unknown city; uses the in-memory reader + `summarize_series` to print one compact line per series; `error.type=lookup_failed` appears |
 | `examples/03_metrics_server.py` | Minimal server, `get_gcp_exporters(enable_cloud_metrics=True)`; the logging 5.5 shape with one flag flipped |
 | `examples/04_bq_plugin.py` | The 03 server plus `BigQueryAgentAnalyticsPlugin` |
 | `queries/` | PromQL and SQL files the pages paste, one per recipe, `outcome.promql` among them; `dashboard.json`, `alert-policy.json` |
@@ -191,7 +191,7 @@ Budgets: 200–750 words per subtask page, about 200 per landing page, one Merma
 
 **Scenario matrix (`tutorial/scenarios.md`)**
 
-Part 1 runs a scenario as a one- or two-turn script; Part 2 onward runs it as `load/turns.sh <scenario> [N]`. Scenario names are a fixed set. Nothing per run (session id, timestamp, run id) ever becomes a metric attribute. There is no raising-tool scenario: the demo tool returns a failure status and never raises, and its `StatusAwareTool` wrapper maps that status to `error.type="no_data"` through the `_detect_error_in_response` hook (Stage 1 finding). A raising tool would stamp `error.type` too but would crash the invocation, which is the opposite of what `unknown-city` teaches.
+Part 1 runs a scenario as a one- or two-turn script; Part 2 onward runs it as `load/turns.sh <scenario> [N]`. Scenario names are a fixed set. Nothing per run (session id, timestamp, run id) ever becomes a metric attribute. There is no raising-tool scenario: the demo tool returns a failure status and never raises, and its `StatusAwareTool` wrapper maps that status to `error.type="lookup_failed"` through the `_detect_error_in_response` hook (Stage 1 finding). A raising tool would stamp `error.type` too but would crash the invocation, which is the opposite of what `unknown-city` teaches.
 
 | Scenario | Controlled change | Observation to capture | Operational question |
 |---|---|---|---|
@@ -209,9 +209,9 @@ Part 1 runs a scenario as a one- or two-turn script; Part 2 onward runs it as `l
 | § | Scenario | Question | Content | Verify |
 |---|---|---|---|---|
 | index | — | What does ADK measure, and when? | The three moments, seven names, and "nothing prints" | words |
-| 1.1 Your first datapoint | `baseline` | Is the agent recording anything, and where does it go? | `01_console_metrics.py`: `maybe_set_otel_providers([OTelHooks(metric_readers=[PeriodicExportingMetricReader(ConsoleMetricExporter(), 1000)])])`, one London turn, `force_flush()`. Output: the seven histograms. **What you are looking at**: `count`, `sum`, `bucket_counts`, `explicit_bounds`, `attributes`. Deep dive: why the script needs `force_flush()` (`shutdown_on_exit=False`). | console shows 7 names, token usage twice |
+| 1.1 Your first datapoint | `baseline` | Is the agent recording anything, and where does it go? | `01_console_metrics.py`: `maybe_set_otel_providers([OTelHooks(metric_readers=[PeriodicExportingMetricReader(ConsoleMetricExporter(), 1000)])])`, one London turn, `force_flush()`. The reader writes the JSON to `out/metrics.json` (too long for a terminal); the page tells the reader to open it (`code out/metrics.json` in VS Code). **What you are looking at**: `count`, `sum`, `bucket_counts`, `explicit_bounds`, `attributes`. Deep dive: why the script needs `force_flush()` (`shutdown_on_exit=False`). | `out/metrics.json` holds 6 names, token usage twice |
 | 1.2 Reading a histogram | `baseline` (the 1.1 capture) | What did one successful turn cost in time, calls, and tokens? | Same output, two findings: `token.usage` `sum` is the tokens and `count` the calls; `inference_calls` records 2 for one turn (call, tool, call). Table: metric → question it answers. | matches 1.1 capture |
-| 1.3 Attributes and cardinality | `unknown-city` | Which tool is failing, and can the metric say for whom? | `02_two_attribute_sets.py`: London then Atlantis. `execute_tool.duration` now has two series, one with `error.type`. Deep dive: why no session id is an attribute; what a cardinality explosion costs. | two attribute sets in output |
+| 1.3 Attributes and cardinality | `unknown-city` | Why does a split matter, and why can't a session id be an attribute? | `02_two_attribute_sets.py`: London then Atlantis, using the in-memory reader plus `summarize_series` (`_common.py`) to print one compact line per series instead of full JSON. `execute_tool.duration` has two series, one with `error.type=lookup_failed`. Page teaches the chain: split → countable failures by reason → cardinality → why session/user/invocation ids are barred. Illustrative side-by-side dashboard panels (labeled) plus one cardinality diagram. Deep dives: the raw datapoint (swap to the console reader); why the failing tool needs the hook. | two series on `execute_tool.duration`, second carries `error.type` |
 | 1.4 The experimental family | `baseline`, with `ADK_EXPERIMENTAL_TELEMETRY=true` | How many tokens did the whole turn use, not just each model call? | The `adk.experimental.*` names; per-invocation token totals; stability warning. Short page. | names appear, or the page states what 2.8.0 emits (Q3 open) |
 | 1.5 Workflow-grain metrics (reference) | `workflow` | Which numbers belong to the workflow and which to the agent inside it? | The one page with a second sub-agent. A tiny `SequentialAgent` (planner → weather) so `gen_ai.invoke_workflow.duration` and, under opt-in, `adk.experimental.invoke_workflow.*` fire. Shows the family once, explains `gen_ai.workflow.name` and the root-agent attribute, and returns to the single agent for the rest. Reference page, may exceed the word budget. | workflow series appear on the console reader |
 
@@ -285,7 +285,15 @@ Findings written into Research findings and the Stage 0 findings block above. Tw
 - [x] Pages 1.0–1.5 with captured console output; placeholder landing pages for Parts 2–4 so nav resolves.
 - [x] 1.1 and 1.3 drafted as the exemplars; 1.2, 1.4, 1.5 follow the pattern.
 
-Verify (met): all three scripts print **six** metric names (single agent; seven needs a `Workflow`, not `SequentialAgent`); 1.3 shows two attribute sets on `execute_tool.duration` via `StatusAwareTool`; word budgets met (subtask pages 299–491 words); every page names its scenario and question; link/anchor check passes (0 problems).
+Verify (met): all three scripts record **six** metric names (single agent; seven needs a `Workflow`, not `SequentialAgent`); 1.3 shows two attribute sets on `execute_tool.duration` via `StatusAwareTool`; word budgets met (subtask pages 299–491 words); every page names its scenario and question; link/anchor check passes (0 problems).
+
+**Stage 1 refinements (2026-09-06, interactive).** After the first draft, five changes:
+
+- **`error.type` value renamed** `no_data` → `lookup_failed` in `demo_agent/agent.py` and everywhere it appears (00-setup, 1.3, CLAUDE.md, verification). `no_data` read as "no metric data"; `lookup_failed` names the failure category, so a later `timeout` reads as a sibling.
+- **1.3 rebuilt around cardinality.** The page had buried its point under the `error.type` mechanism. It now teaches split → countable failures → cardinality → the session-id rule, with the `StatusAwareTool` hook demoted to a deep dive. Added a labeled two-panel dashboard illustration and one cardinality diagram; dropped the abstract split diagram to stay in budget and to one Mermaid diagram.
+- **`02` output is now readable.** Switched from the console JSON dump to the in-memory reader plus `summarize_series` (`_common.py`), which prints one line per series (attributes + count). ~450 lines of JSON → 3 lines.
+- **Full JSON dumps go to a file.** `install_console_reader` writes `out/metrics.json` (default arg) instead of the console, since a full dump is unreadable in a terminal. Pages 1.1, 1.4, 1.5 tell the reader to open it (`code out/metrics.json`). `out/` is gitignored.
+- **tutorial-style skill updated.** Env vars go on their own `export` line before the command, not as an inline `VAR=value command` prefix; the old "preserve environment-prefixed invocations" exception was removed. 1.4 was brought into compliance (and given the same file-output guidance).
 
 ### Stage 2 · Part 2 collect (J; cloud writes)
 
@@ -342,7 +350,7 @@ Common harness: fresh `python3.13 -m venv .venv`, `pip install -r requirements.t
 | # | Item | Evidence | Gate |
 |---|---|---|---|
 | 1 | Six `gen_ai.*` names on the console reader for a single agent (seventh, `invoke_workflow.duration`, needs 1.5); units and attributes per Q1 | **verified** (Stage 1, 2026-09-06) | resolved |
-| 2 | `error.type` on `execute_tool.duration` needs a `_detect_error_in_response` hook, not just a failure status; demo uses `StatusAwareTool` | **verified** (Stage 1: two sets, one `error.type=no_data`, invocation clean) | resolved |
+| 2 | `error.type` on `execute_tool.duration` needs a `_detect_error_in_response` hook, not just a failure status; demo uses `StatusAwareTool` | **verified** (Stage 1: two sets, one `error.type=lookup_failed`, invocation clean) | resolved |
 | 3 | `force_flush()` is enough for the scripts under `shutdown_on_exit=False` | **verified** (Stage 0, returns True and drains) | resolved |
 | 4 | PromQL form for dotted histogram names: suffixed `_sum`/`_count`/`_bucket` in the brace form, not native | **verified** (Stage 0 read-back) | resolved |
 | 5 | A second `gen_ai.client.*` scope from `[otel-gcp]`, doubling token sums | **verified negative** (Stage 0: one scope, single counts) | resolved |
@@ -371,7 +379,8 @@ Common harness: fresh `python3.13 -m venv .venv`, `pip install -r requirements.t
 |---|---|---|---|---|
 | stage0-console | 2026-09-06 | Stage 0 (Q2/Q3/Q4) | `baseline` ×1, plus `EXP=1` repeat | google-adk 2.8.0, `ai/adk/logging/.venv`, Python 3.13, Gemini 3.7 Flash on Vertex. Six names, 0/6 experimental by flag, force_flush True. Raw dumps in scratchpad `stage0_dump_exp{0,1}.jsonl`. |
 | stage0-cloud | 2026-09-06 | Stage 0 (Q1/Q2) | 5 turns: London×3, Tokyo, Atlantis | Same env; `get_gcp_exporters(enable_cloud_metrics=True)` into `jwd-gcp-demos`; `OTEL_RESOURCE_ATTRIBUTES` incl. `gcp.project_id`. Read back via PromQL: `_sum`/`_count`/`_bucket` suffixed, one scope, counts reconcile (5 inv, 5 tool, 10 model, 20 token pts). |
-| stage1-console | 2026-09-06 | 1.1–1.5 | `baseline`, `unknown-city`, `workflow` | `verification/stage1-console-runs.txt`. Six names; token twice; `inference_calls` sum=2/turn; 1.3 two tool sets incl. `error.type=no_data` with a clean invocation; 1.4 six experimental names with the flag; 1.5 three agent-name series, no workflow metric. |
+| stage1-console | 2026-09-06 | 1.1–1.5 | `baseline`, `unknown-city`, `workflow` | `verification/stage1-console-runs.txt`. Six names; token twice; `inference_calls` sum=2/turn; 1.3 two tool sets incl. `error.type=lookup_failed` with a clean invocation; 1.4 six experimental names with the flag; 1.5 three agent-name series, no workflow metric. |
+| stage1-13 | 2026-09-06 | 1.3 | `unknown-city` | `verification/stage1-13-attributes-cardinality.txt`. `02` via in-memory reader + `summarize_series`; two `execute_tool.duration` series, second `error.type=lookup_failed`; `invoke_agent.duration` single series (invocation succeeded). |
 
 ## Open questions
 

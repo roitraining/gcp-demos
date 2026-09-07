@@ -24,19 +24,33 @@ Start with **[TUTORIAL.md](TUTORIAL.md)**.
 | [tutorial/scenarios.md](tutorial/scenarios.md) | The controlled experiments every page runs. The spine of the tutorial. |
 | [demo_agent/agent.py](demo_agent/agent.py) | The shared agent: `get_weather` (instant, with an error branch) and `get_forecast` (slow), wrapped in a `StatusAwareTool`. |
 | [examples/01_console_metrics.py](examples/01_console_metrics.py) | One turn, a console metric reader, a flush: your first datapoint (1.1). |
+| [examples/03_histogram_shape.py](examples/03_histogram_shape.py) | Ten turns, then draw a token histogram from its own buckets (1.2). |
 | [examples/02_two_attribute_sets.py](examples/02_two_attribute_sets.py) | London then Atlantis; one metric splits into two attribute sets (1.3). |
 | [examples/05_workflow_metrics.py](examples/05_workflow_metrics.py) | A two-agent `SequentialAgent`; agent-grain metrics split by name (1.5). |
-| [examples/_common.py](examples/_common.py) | Shared bootstrap, the console-reader helper, and the run loop. |
+| [examples/_common.py](examples/_common.py) | Shared bootstrap, reader helpers, histogram rendering, and the run loop. |
 
 ## Quick start
+
+Create the environment and install dependencies:
 
 ```bash
 cd ai/adk/metrics
 python3.13 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-cp .env.example .env          # then set your project / model config
-cp env.sh.example env.sh      # shell vars for the cloud parts; set PROJECT_ID, then `source env.sh`
-.venv/bin/python examples/01_console_metrics.py   # start here, then read the tutorial
+```
+
+Copy the templates, then edit `.env` for your project and model config and
+`env.sh` to set `PROJECT_ID` (the shell variables the cloud parts read):
+
+```bash
+cp .env.example .env
+cp env.sh.example env.sh
+```
+
+Run the first example, then read the tutorial:
+
+```bash
+.venv/bin/python examples/01_console_metrics.py
 ```
 
 ## Status

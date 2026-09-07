@@ -23,8 +23,8 @@ scenario from [scenarios.md](../scenarios.md), and reads the result.
 
 | Section | Scenario | Question it answers |
 |---|---|---|
-| [1.1 · Your first datapoint](1.1-your-first-datapoint.md) | `baseline` | Is the agent recording anything, and where does it go? |
-| [1.2 · Reading a histogram](1.2-reading-a-histogram.md) | `baseline` | What did one successful turn cost in time, calls, and tokens? |
+| [1.1 · Your first datapoint](1.1-your-first-datapoint.md) | `baseline` | Is the agent recording anything, and what did one turn cost? |
+| [1.2 · Reading a histogram](1.2-reading-a-histogram.md) | `baseline` | Why record durations and tokens as histograms, not totals? |
 | [1.3 · Attributes and cardinality](1.3-attributes-and-cardinality.md) | `unknown-city` | Which tool is failing, and can the metric say for whom? |
 | [1.4 · The experimental family](1.4-the-experimental-family.md) | `baseline` | How many tokens did the whole turn use, not just each model call? |
 | [1.5 · Workflow-grain metrics](1.5-workflow-grain-metrics.md) | `workflow` | Which numbers belong to the workflow and which to the agent inside it? |

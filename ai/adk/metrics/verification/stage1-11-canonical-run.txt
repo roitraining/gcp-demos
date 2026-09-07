@@ -1,0 +1,430 @@
+
+AGENT: The weather in London is currently 15°C and drizzling. 
+
+{
+    "resource_metrics": [
+        {
+            "resource": {
+                "attributes": {},
+                "schema_url": ""
+            },
+            "scope_metrics": [
+                {
+                    "scope": {
+                        "name": "gcp.vertex.agent",
+                        "version": "2.8.0",
+                        "schema_url": "",
+                        "attributes": null
+                    },
+                    "metrics": [
+                        {
+                            "name": "gen_ai.execute_tool.duration",
+                            "description": "Duration of tool executions.",
+                            "unit": "s",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "gen_ai.agent.name": "weather_agent",
+                                            "gen_ai.tool.name": "get_weather",
+                                            "gen_ai.tool.type": "StatusAwareTool"
+                                        },
+                                        "start_time_unix_nano": 1788730731651368000,
+                                        "time_unix_nano": 1788730732736708000,
+                                        "count": 1,
+                                        "sum": 0.0020302089396864176,
+                                        "bucket_counts": [
+                                            1,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ],
+                                        "explicit_bounds": [
+                                            0.01,
+                                            0.02,
+                                            0.04,
+                                            0.08,
+                                            0.16,
+                                            0.32,
+                                            0.64,
+                                            1.28,
+                                            2.56,
+                                            5.12,
+                                            10.24,
+                                            20.48,
+                                            40.96,
+                                            81.92
+                                        ],
+                                        "min": 0.0020302089396864176,
+                                        "max": 0.0020302089396864176,
+                                        "exemplars": []
+                                    }
+                                ],
+                                "aggregation_temporality": 2
+                            }
+                        },
+                        {
+                            "name": "gen_ai.client.operation.duration",
+                            "description": "GenAI operation duration.",
+                            "unit": "s",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "gen_ai.agent.name": "weather_agent",
+                                            "gen_ai.operation.name": "generate_content",
+                                            "gen_ai.provider.name": "vertex_ai",
+                                            "gen_ai.request.model": "gemini-3.7-flash",
+                                            "gen_ai.response.model": "gemini-3.7-flash"
+                                        },
+                                        "start_time_unix_nano": 1788730731651841000,
+                                        "time_unix_nano": 1788730732736708000,
+                                        "count": 2,
+                                        "sum": 3.2246157920453697,
+                                        "bucket_counts": [
+                                            0,
+                                            2,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ],
+                                        "explicit_bounds": [
+                                            0.0,
+                                            5.0,
+                                            10.0,
+                                            25.0,
+                                            50.0,
+                                            75.0,
+                                            100.0,
+                                            250.0,
+                                            500.0,
+                                            750.0,
+                                            1000.0,
+                                            2500.0,
+                                            5000.0,
+                                            7500.0,
+                                            10000.0
+                                        ],
+                                        "min": 1.0818616671022028,
+                                        "max": 2.142754124943167,
+                                        "exemplars": []
+                                    }
+                                ],
+                                "aggregation_temporality": 2
+                            }
+                        },
+                        {
+                            "name": "gen_ai.client.token.usage",
+                            "description": "Number of input and output tokens used.",
+                            "unit": "{token}",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "gen_ai.agent.name": "weather_agent",
+                                            "gen_ai.operation.name": "generate_content",
+                                            "gen_ai.provider.name": "vertex_ai",
+                                            "gen_ai.request.model": "gemini-3.7-flash",
+                                            "gen_ai.response.model": "gemini-3.7-flash",
+                                            "gen_ai.token.type": "input"
+                                        },
+                                        "start_time_unix_nano": 1788730731651900000,
+                                        "time_unix_nano": 1788730732736708000,
+                                        "count": 2,
+                                        "sum": 713,
+                                        "bucket_counts": [
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            2,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ],
+                                        "explicit_bounds": [
+                                            0.0,
+                                            5.0,
+                                            10.0,
+                                            25.0,
+                                            50.0,
+                                            75.0,
+                                            100.0,
+                                            250.0,
+                                            500.0,
+                                            750.0,
+                                            1000.0,
+                                            2500.0,
+                                            5000.0,
+                                            7500.0,
+                                            10000.0
+                                        ],
+                                        "min": 323,
+                                        "max": 390,
+                                        "exemplars": []
+                                    },
+                                    {
+                                        "attributes": {
+                                            "gen_ai.agent.name": "weather_agent",
+                                            "gen_ai.operation.name": "generate_content",
+                                            "gen_ai.provider.name": "vertex_ai",
+                                            "gen_ai.request.model": "gemini-3.7-flash",
+                                            "gen_ai.response.model": "gemini-3.7-flash",
+                                            "gen_ai.token.type": "output"
+                                        },
+                                        "start_time_unix_nano": 1788730731651920000,
+                                        "time_unix_nano": 1788730732736708000,
+                                        "count": 2,
+                                        "sum": 94,
+                                        "bucket_counts": [
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            1,
+                                            1,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ],
+                                        "explicit_bounds": [
+                                            0.0,
+                                            5.0,
+                                            10.0,
+                                            25.0,
+                                            50.0,
+                                            75.0,
+                                            100.0,
+                                            250.0,
+                                            500.0,
+                                            750.0,
+                                            1000.0,
+                                            2500.0,
+                                            5000.0,
+                                            7500.0,
+                                            10000.0
+                                        ],
+                                        "min": 43,
+                                        "max": 51,
+                                        "exemplars": []
+                                    }
+                                ],
+                                "aggregation_temporality": 2
+                            }
+                        },
+                        {
+                            "name": "gen_ai.invoke_agent.duration",
+                            "description": "Duration of agent invocations.",
+                            "unit": "s",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "gen_ai.agent.name": "weather_agent"
+                                        },
+                                        "start_time_unix_nano": 1788730732735905000,
+                                        "time_unix_nano": 1788730732736708000,
+                                        "count": 1,
+                                        "sum": 3.2585265419911593,
+                                        "bucket_counts": [
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            1,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ],
+                                        "explicit_bounds": [
+                                            0.1,
+                                            0.2,
+                                            0.4,
+                                            0.8,
+                                            1.6,
+                                            3.2,
+                                            6.4,
+                                            12.8,
+                                            25.6,
+                                            51.2,
+                                            102.4,
+                                            204.8,
+                                            409.6
+                                        ],
+                                        "min": 3.2585265419911593,
+                                        "max": 3.2585265419911593,
+                                        "exemplars": []
+                                    }
+                                ],
+                                "aggregation_temporality": 2
+                            }
+                        },
+                        {
+                            "name": "gen_ai.invoke_agent.inference_calls",
+                            "description": "Number of inference (model) calls per agent invocation.",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "gen_ai.agent.name": "weather_agent"
+                                        },
+                                        "start_time_unix_nano": 1788730732735948000,
+                                        "time_unix_nano": 1788730732736708000,
+                                        "count": 1,
+                                        "sum": 2,
+                                        "bucket_counts": [
+                                            0,
+                                            0,
+                                            1,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ],
+                                        "explicit_bounds": [
+                                            0,
+                                            1,
+                                            2,
+                                            3,
+                                            4,
+                                            5,
+                                            6,
+                                            8,
+                                            12,
+                                            16,
+                                            24,
+                                            32,
+                                            64,
+                                            128,
+                                            256,
+                                            512
+                                        ],
+                                        "min": 2,
+                                        "max": 2,
+                                        "exemplars": []
+                                    }
+                                ],
+                                "aggregation_temporality": 2
+                            }
+                        },
+                        {
+                            "name": "gen_ai.invoke_agent.tool_calls",
+                            "description": "Number of tool calls per agent invocation.",
+                            "unit": "1",
+                            "data": {
+                                "data_points": [
+                                    {
+                                        "attributes": {
+                                            "gen_ai.agent.name": "weather_agent"
+                                        },
+                                        "start_time_unix_nano": 1788730732735981000,
+                                        "time_unix_nano": 1788730732736708000,
+                                        "count": 1,
+                                        "sum": 1,
+                                        "bucket_counts": [
+                                            0,
+                                            1,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ],
+                                        "explicit_bounds": [
+                                            0,
+                                            1,
+                                            2,
+                                            3,
+                                            4,
+                                            5,
+                                            6,
+                                            8,
+                                            12,
+                                            16,
+                                            24,
+                                            32,
+                                            64,
+                                            128,
+                                            256,
+                                            512
+                                        ],
+                                        "min": 1,
+                                        "max": 1,
+                                        "exemplars": []
+                                    }
+                                ],
+                                "aggregation_temporality": 2
+                            }
+                        }
+                    ],
+                    "schema_url": ""
+                }
+            ],
+            "schema_url": ""
+        }
+    ]
+}

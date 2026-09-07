@@ -1,8 +1,9 @@
 """Your first datapoint (tutorial 1.1).
 
-Install a console metric reader, ask one weather question, and flush. The reader
-prints every histogram ADK recorded during the turn. Nothing prints without a
-reader; this script is the smallest thing that makes ADK's metrics visible.
+Install a metric reader, ask one weather question, and flush. The reader writes
+every histogram ADK recorded during the turn to out/metrics.json. Nothing is
+recorded without a reader; this script is the smallest thing that makes ADK's
+metrics visible.
 
 Run it:
 

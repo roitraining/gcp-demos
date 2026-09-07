@@ -43,7 +43,7 @@ dive may run one more.
 - **`error.type` is not free.** A plain function returning `{"status": "error"}`
   does not stamp it. The demo wraps tools in `StatusAwareTool(FunctionTool)`,
   which overrides `_detect_error_in_response` to map a failure status to
-  `error.type="no_data"`. A raising tool stamps it too but crashes the
+  `error.type="lookup_failed"`. A raising tool stamps it too but crashes the
   invocation.
 - **Script export needs a flush.** ADK installs the `MeterProvider` with
   `shutdown_on_exit=False`, so example scripts call
@@ -65,6 +65,10 @@ dive may run one more.
 - Every console block on a page is captured from a real run against
   `jwd-gcp-demos`. Token counts vary run to run (a real model), so quote them as
   representative, not exact. Save the run record under `verification/`.
+- `install_console_reader()` writes its JSON to a file (default `out/metrics.json`)
+  rather than the console, since a full dump is too long to read in a terminal;
+  pages tell the reader to open it (`code out/metrics.json` in VS Code). The
+  `out/` folder is gitignored.
 
 ## Tutorial-specific conventions
 

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import asyncio
 
-from _common import ask, bootstrap, flush_metrics, install_console_reader
+from _common import ask, bootstrap, install_inmemory_reader, summarize_series
 
 bootstrap()
 
@@ -23,13 +23,13 @@ from demo_agent.agent import root_agent  # noqa: E402
 
 
 async def main() -> None:
-    install_console_reader()
+    reader = install_inmemory_reader()
     runner = InMemoryRunner(agent=root_agent, app_name="metrics_1_3")
     for city in ("London", "Atlantis"):
         answer = await ask(runner, f"What's the weather in {city}?")
         print(f"\nAGENT ({city}):", answer)
     print()
-    flush_metrics()
+    print(summarize_series(reader.get_metrics_data(), "gen_ai.execute_tool.duration"))
 
 
 if __name__ == "__main__":

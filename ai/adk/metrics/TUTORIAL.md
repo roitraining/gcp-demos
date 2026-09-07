@@ -47,16 +47,12 @@ flowchart LR
 ## Contents
 
 Read them in order (each page has a **Next →** link), or jump to the one you
-need. Start with **Setup**, then read **Scenarios**, the spine of the tutorial.
-
-**[0. Setup](tutorial/00-setup.md)**: do this once. Environment, model, shell
-variables, and the APIs the later parts need.
-
-**[Scenarios](tutorial/scenarios.md)**: the controlled experiments each page
-runs, and the one agent behind them.
+need. Start with Setup, then Scenarios, the spine of the tutorial.
 
 | Part | What it covers |
 |---|---|
+| [0. Setup](tutorial/00-setup.md) | Do this once: environment, model, shell variables, and the APIs the later parts need. |
+| [Scenarios](tutorial/scenarios.md) | The controlled experiments each page runs, and the one agent behind them. |
 | [1. What a metric is](tutorial/part-1/index.md) | The three moments, the six names a single agent emits, one datapoint's fields, attributes and cardinality, the experimental family, and workflow-grain metrics (1.1–1.5). Local, no cloud. |
 | 2. Collect | Ship metrics to Cloud Monitoring: `adk web --otel_to_cloud`, what arrives, Cloud Run, your own server, Agent Runtime, and other backends. *Planned.* |
 | 3. Consume: signals from histograms | Latency, volume, errors, tokens, a dashboard, an alert, and one application-outcome metric. *Planned.* |

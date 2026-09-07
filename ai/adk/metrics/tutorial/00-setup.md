@@ -19,26 +19,40 @@ python3.13 -m venv .venv
 
 ## Point the agent at a model
 
-Copy `.env.example` to `.env`. On GCP the simplest path is Vertex AI with your
-existing `gcloud` credentials:
+Copy the example file:
 
 ```bash
 cp .env.example .env
-# edit .env to contain:
-#   GOOGLE_GENAI_USE_VERTEXAI=TRUE
-#   GOOGLE_CLOUD_PROJECT=your_project_id
-#   GOOGLE_CLOUD_LOCATION=global
-gcloud auth application-default login   # if you have not already
+```
+
+Open `.env` in your editor and set the values. On GCP the simplest path is
+Vertex AI with your existing `gcloud` credentials:
+
+```
+GOOGLE_GENAI_USE_VERTEXAI=TRUE
+GOOGLE_CLOUD_PROJECT=your-project-id
+GOOGLE_CLOUD_LOCATION=global
+```
+
+If you have not authenticated before, log in once:
+
+```bash
+gcloud auth application-default login
 ```
 
 ## Set your shell variables
 
 The cloud parts read your project and region, and the metrics resource labels,
-from shell variables. Set them once in a file you `source`.
+from shell variables. Copy the template:
 
 ```bash
 cp env.sh.example env.sh
-# edit env.sh: set PROJECT_ID to your real project
+```
+
+Open `env.sh` in your editor and set `PROJECT_ID` to your real project id, then
+source it:
+
+```bash
 source env.sh
 ```
 
@@ -77,7 +91,7 @@ can show a failing tool split its metric.
 class StatusAwareTool(FunctionTool):
     def _detect_error_in_response(self, response):
         if isinstance(response, dict) and response.get("status") == "error":
-            return "no_data"
+            return "lookup_failed"
         return None
 ```
 
@@ -87,10 +101,42 @@ class StatusAwareTool(FunctionTool):
 .venv/bin/python examples/01_console_metrics.py
 ```
 
-**Expected output:** the agent's answer, then six metric names. If you see the
-histograms, your model and environment are set. [Scenarios](scenarios.md)
-explains the controlled experiments the pages run; [Part 1](part-1/index.md)
-starts reading them.
+**Expected output:** the agent's answer prints first, then one block of JSON
+holding all six metrics. Cut here to the first metric:
+
+```console
+AGENT: The weather in London is currently 15°C and drizzling.
+
+{
+    "resource_metrics": [
+        {
+            "resource": { "attributes": { "service.name": "adk-metrics" } },
+            "scope_metrics": [
+                {
+                    "scope": { "name": "gcp.vertex.agent", "version": "2.8.0" },
+                    "metrics": [
+                        {
+                            "name": "gen_ai.execute_tool.duration",
+                            "unit": "s",
+                            "data": { "data_points": [ {
+                                "attributes": { "gen_ai.agent.name": "weather_agent" },
+                                "count": 1,
+                                "sum": 0.002
+                            } ] }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+```
+
+The full block holds all six metric names. If you see the answer and the JSON,
+your model and environment are set. A `403 PERMISSION_DENIED` on `your_project`
+instead means a shell variable is overriding `.env`; run
+`unset GOOGLE_CLOUD_PROJECT` and try again, or fix `env.sh`.
+[Part 1](part-1/index.md) walks through what these fields mean.
 
 ---
 
