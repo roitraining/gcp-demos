@@ -17,10 +17,15 @@ Run it:
 from __future__ import annotations
 
 import asyncio
+import warnings
 
 from _common import ask, bootstrap, flush_metrics, install_console_reader
 
 bootstrap()
+
+# This example stays on SequentialAgent on purpose (see the module docstring),
+# so silence the deprecation notice its construction prints.
+warnings.filterwarnings("ignore", message=r".*SequentialAgent is deprecated.*")
 
 from google.adk.agents import Agent, SequentialAgent  # noqa: E402
 from google.adk.runners import InMemoryRunner  # noqa: E402

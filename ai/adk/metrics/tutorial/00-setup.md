@@ -101,16 +101,20 @@ class StatusAwareTool(FunctionTool):
 .venv/bin/python examples/01_console_metrics.py
 ```
 
-**Expected output:** the agent's answer prints to the console, and the metrics
-JSON is written to `out/metrics.json` (a full dump is too long to read in a
-terminal). Open it in your editor:
+The agent's answer prints to the console, and the script writes the metrics JSON
+to `out/metrics.json`. Open it in your editor to read it; the dump is too long for
+the terminal. In VS Code:
+
+```bash
+code out/metrics.json
+```
+
+**Expected output:** the answer prints, then the file holds all six metric names.
+Here is the first metric:
 
 ```console
 AGENT: The weather in London is currently 15°C and drizzling.
-(metrics written to out/metrics.json)
 ```
-
-The file holds all six metric names. Cut here to the first metric:
 
 ```json
 {
@@ -137,6 +141,10 @@ The file holds all six metric names. Cut here to the first metric:
     ]
 }
 ```
+
+> [!TIP]
+> Leave `out/metrics.json` open in your editor. Later steps rewrite this same
+> file each run, so the pane refreshes with the new results in place.
 
 If you see the answer and the file, your model and environment are set. A
 `403 PERMISSION_DENIED` on `your_project` instead means a shell variable is

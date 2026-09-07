@@ -26,6 +26,9 @@
 #   HOST        server base URL         (default http://localhost:8000)
 #   APP_NAME    agent folder / app name (default demo_agent)
 #   USER_ID     user id for sessions    (default load-user)
+#   EXPORT_WAIT seconds to wait after the last turn so the reader's next
+#               export interval (5s) carries the final batch to the backend
+#               before you read it back (default 10; set 0 to skip)
 #
 # The server is `adk web`, `adk api_server`, or `adk deploy cloud_run` output;
 # start it first (see the page you came from). `adk web` defaults to port 8000,
@@ -38,6 +41,7 @@ N="${2:-10}"
 HOST="${HOST:-http://localhost:8000}"
 APP_NAME="${APP_NAME:-demo_agent}"
 USER_ID="${USER_ID:-load-user}"
+EXPORT_WAIT="${EXPORT_WAIT:-10}"
 
 # --- one turn -------------------------------------------------------------
 # Create a fresh session (or reuse a given id), send one message, print the
@@ -138,3 +142,11 @@ case "$SCENARIO" in
     exit 2
     ;;
 esac
+
+# The reader exports on a 5s interval, so the last turn's batch has not left the
+# process yet. Wait past one more interval before telling the reader to go read.
+if (( EXPORT_WAIT > 0 )); then
+  printf 'waiting %ss for the final export interval...\n' "$EXPORT_WAIT" >&2
+  sleep "$EXPORT_WAIT"
+fi
+echo "good to go — the series are in Cloud Monitoring" >&2

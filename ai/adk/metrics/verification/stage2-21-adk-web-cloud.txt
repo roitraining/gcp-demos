@@ -33,3 +33,49 @@ result:
   {"gen_ai.token.type":"input"}  = 44
   {"gen_ai.token.type":"output"} = 44
   (44 counts/type ÷ 20 turns = 2.2 model calls/turn; total 88 matches the collapsed sum above)
+
+=== Three-ways read-back — 2026-09-06T20:15Z (2.1 Step 3, same series) ===
+Same baseline-20 series, read three ways. count drifted 44->40 as older
+points aged out of the instant-query window; still symmetric by construction.
+
+--- Door 2: PromQL curl (/v1/.../prometheus/api/v1/query) ---
+sum  by ("gen_ai.token.type") ({"gen_ai.client.token.usage_sum"}):
+  input = 14541   output = 608      # tokens; input >> output (~24x)
+sum  by ("gen_ai.token.type") ({"gen_ai.client.token.usage_count"}):
+  input = 40      output = 40       # model calls that recorded a datapoint
+
+--- Door 1: Monitoring API timeSeries.list (/v3/.../timeSeries) ---
+filter: metric.type="prometheus.googleapis.com/gen_ai.client.token.usage/histogram"
+aggregation: alignmentPeriod=1200s, perSeriesAligner=ALIGN_DELTA
+Returns two DISTRIBUTION series (metricKind DELTA), full detail PromQL hides:
+  input:  count=40  mean=363.525  -> 40*363.525 = 14541  (matches PromQL sum)
+  output: count=40  mean=15.2     -> 40*15.2    = 608    (matches PromQL sum)
+  explicitBuckets bounds [0,5,10,25,50,75,100,250,500,750,1000,2500,5000,7500,10000]
+  input bucketCounts: all 40 in the 250-500 bucket (index 8)
+  resource: prometheus_target { job=adk-metrics, instance=laptop-1,
+            location=us-central1, project_id=jwd-gcp-demos }
+            -- the labels OTEL_RESOURCE_ATTRIBUTES supplied, proven present.
+  scope labels: otel_scope_name=opentelemetry.instrumentation.google_genai
+
+--- Door 3: Metrics Explorer Console ---
+Described, not captured (per plan row 4): open Metrics Explorer, select
+prometheus/gen_ai.client.token.usage, group by gen_ai.token.type.
+
+Cross-check: API mean*count == PromQL sum for both series. Three doors, one truth.
+
+=== Export-outage deep dive — 2026-09-06T20:21Z ===
+adk web --otel_to_cloud with OTEL_RESOURCE_ATTRIBUTES UNSET, load/turns.sh baseline 5.
+
+--- turns: every one answered ---
+baseline turn 1..5  http=200  (3.39-4.14s)
+
+--- server log: one 400 per export interval, ~5s apart, for as long as it runs ---
+20:21:22 ERROR __init__.py:294 Failed to export metrics batch code: 400, reason: Bad Request
+20:21:27 ERROR ...  (same)
+20:21:32 ...  every ~5s: :37 :42 :47 :53 :58 22:03 :08 :13 :18 :23 :28 :33 :38 ...
+(15+ consecutive failures captured; batches keep failing every interval.)
+
+FINDING: healthy agent (5x 200) + zero exported points, simultaneously true.
+The 400 is the prometheus_target rejection from the missing instance/location
+(the OTEL_RESOURCE_ATTRIBUTES the good run supplied, per Door 2 above). Fixing it
+= restart WITH the labels, which discards the in-process totals accumulated so far.

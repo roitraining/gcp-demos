@@ -24,6 +24,19 @@ def bootstrap() -> None:
     """Put the folder root on the path and load .env (idempotent)."""
     if str(_ROOT) not in sys.path:
         sys.path.insert(0, str(_ROOT))
+
+    # ADK's JSON_SCHEMA_FOR_FUNC_DECL is on by default and warns once per run.
+    # It is not a metrics concern, so keep it out of the tutorial's output.
+    import warnings
+
+    warnings.filterwarnings("ignore", message=r".*JSON_SCHEMA_FOR_FUNC_DECL.*")
+
+    # genai's AFC advisory fires on ADK's own generate_content path; not ours.
+    # It is a logging.warning (not a warnings.warn), so quiet that logger.
+    import logging
+
+    logging.getLogger("google_genai.models").setLevel(logging.ERROR)
+
     from dotenv import load_dotenv
 
     load_dotenv(_ROOT / ".env")

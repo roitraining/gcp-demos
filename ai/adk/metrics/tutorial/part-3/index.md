@@ -1,5 +1,5 @@
 [← 2.6 · Other backends](../part-2/2.6-other-backends.md)<br>
-[→ 3.1 · Latency, three ways](3.1-latency-three-ways.md)<br>
+[→ 3.1 · Latency, three grains](3.1-latency-three-grains.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
 ---
@@ -26,7 +26,7 @@ the result back from the cloud.
 
 | Section | Scenario | Question it answers |
 |---|---|---|
-| [3.1 · Latency, three ways](3.1-latency-three-ways.md) | `slow-tool` | Is the dependency responsible for the slowdown? |
+| [3.1 · Latency, three grains](3.1-latency-three-grains.md) | `slow-tool` | Is the dependency responsible for the slowdown? |
 | [3.2 · Volume and shape](3.2-volume-and-shape.md) | `multi-city` | Is repeated work driving latency and consumption? |
 | [3.3 · Errors](3.3-errors.md) | `unknown-city` | Did a dependency failure become a user-visible failure? |
 | [3.4 · Tokens and cost](3.4-tokens-and-cost.md) | `growing-context` | Does accumulated context explain token growth? |
@@ -37,5 +37,5 @@ the result back from the cloud.
 ---
 
 [← 2.6 · Other backends](../part-2/2.6-other-backends.md)<br>
-[→ 3.1 · Latency, three ways](3.1-latency-three-ways.md)<br>
+[→ 3.1 · Latency, three grains](3.1-latency-three-grains.md)<br>
 [Tutorial index](../../TUTORIAL.md)

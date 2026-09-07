@@ -35,7 +35,7 @@ backends.
 | Section | Scenario | Question it answers |
 |---|---|---|
 | [2.1 · `adk web --otel_to_cloud`](2.1-adk-web-otel-to-cloud.md) | `baseline`; `export-outage` | Did the metrics land? |
-| [2.2 · What arrived](2.2-what-arrived.md) | `baseline` | Which of the six made it, and what are they called here? |
+| [2.2 · The metric catalog](2.2-the-metric-catalog.md) | `baseline` | Which of the six made it, and what are they called here? |
 | [2.3 · `adk api_server` and Cloud Run](2.3-api-server-and-cloud-run.md) | `baseline` | Do deployed instances identify themselves without my help? |
 | [2.4 · Your own server](2.4-your-own-server.md) | `baseline` | Does my own server export the same series? |
 | [2.5 · Agent Runtime](2.5-agent-runtime.md) | `baseline` | Does a request-driven runtime export at all? |

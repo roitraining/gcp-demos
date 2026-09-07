@@ -16,6 +16,7 @@ Run it:
 from __future__ import annotations
 
 import asyncio
+import sys
 
 from _common import (
     ask,
@@ -38,8 +39,10 @@ METRIC = "gen_ai.client.token.usage"
 async def main() -> None:
     reader = install_inmemory_reader()
     runner = InMemoryRunner(agent=root_agent, app_name="metrics_1_2")
-    for _ in range(TURNS):
+    for turn in range(1, TURNS + 1):
+        print(f"\rasking turn {turn}/{TURNS}...", end="", file=sys.stderr, flush=True)
         await ask(runner, "What's the weather in London?")
+    print("\r" + " " * 24 + "\r", end="", file=sys.stderr, flush=True)
 
     point = find_datapoint(
         reader.get_metrics_data(), METRIC, attr={"gen_ai.token.type": "output"}
