@@ -111,6 +111,27 @@ Apply these label rules:
 
 Show a prompt or request body once per page. Refer to it by name afterward.
 
+### Console directions
+
+When a step directs the reader through a browser console, do not write the
+clicks as a paragraph. Give short declarative steps, one action per bullet,
+with the UI element in bold. Keep any framing sentence before the list.
+
+Not this:
+
+> In the Cloud console open **Monitoring → Metrics Explorer**, click the
+> **`<> PromQL`** toggle on the query row, and set the time range to
+> **5 minutes**. Paste each query below in turn and click **Run query**.
+
+This:
+
+```markdown
+- Open **Monitoring → Metrics Explorer**.
+- Click the **`<> PromQL`** toggle on the query row.
+- Set the time range to **5 minutes**.
+- Paste each query below and click **Run query**.
+```
+
 ### Explanations and deep dives
 
 Keep inline explanations beside the code or output they explain. Move

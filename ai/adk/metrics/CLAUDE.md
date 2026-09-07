@@ -72,6 +72,8 @@ dive may run one more.
 
 ## Tutorial-specific conventions
 
+- Console directions are bulleted, one action per bullet, never a paragraph
+  (see the skill's "Console directions"; page 2.3 Step 3 is the exemplar).
 - The repeated prompt is "What's the weather in London?" for single turns;
   `load/turns.sh <scenario> [N]` for volume.
 - The custom task-outcome counter (page 3.7) is gated behind
