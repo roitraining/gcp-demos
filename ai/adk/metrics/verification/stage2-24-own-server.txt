@@ -1,0 +1,10 @@
+=== Stage 2.4 verification — 2026-09-07T02:50:35Z ===
+examples/03_metrics_server.py (own server, get_gcp_exporters + gcp.project_id resource)
+20-turn curl loop against /chat on :8080, read back by job.
+
+server confirmed exporter install: 'Exporting gen_ai.* metrics to Cloud Monitoring in project jwd-gcp-demos every 5 s.'
+
+read back count by (job) on invoke_agent.duration_count:
+  job= adk-metrics
+
+FINDING: job label = OTEL_SERVICE_NAME (env.sh sets adk-metrics), not the server's setdefault(adk-metrics-server). Env wins over setdefault, correctly. Own-server metrics carry scope gcp.vertex.agent for ADK's meter, same as adk web.
