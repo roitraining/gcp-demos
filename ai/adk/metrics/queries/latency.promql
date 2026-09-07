@@ -1,4 +1,4 @@
-# latency.promql — used by tutorial page 3.1 "Latency, three ways"
+# latency.promql — used by tutorial page 3.1 "Latency, three grains"
 # Scenario: slow-tool (deep dive: concurrent).
 # Question: is the dependency responsible for the slowdown?
 #
