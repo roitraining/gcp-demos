@@ -19,3 +19,17 @@ ADK invoke_agent metric:
   le buckets: 14
 
 DEP FINDING: adk web --otel_to_cloud needs opentelemetry-exporter-gcp-{logging,monitoring,trace}; the otel-gcp extra pulls only instrumentation. Added to requirements.txt.
+
+=== Page-capture run — 2026-09-06T20:06Z (numbers shown on 2.1) ===
+adk web --otel_to_cloud ./, load/turns.sh baseline 20, all HTTP 200 (3.15–5.21s).
+
+--- Step 3, WRONG label form (underscores) — the bug the page had ---
+query: sum by (gen_ai_token_type) ({"gen_ai.client.token.usage_count"})
+result: [{"metric":{},"value":[...,"88"]}]   # one collapsed series, empty label set
+
+--- Step 3, corrected quoted-dotted form (now on the page) ---
+query: sum by ("gen_ai.token.type") ({"gen_ai.client.token.usage_count"})
+result:
+  {"gen_ai.token.type":"input"}  = 44
+  {"gen_ai.token.type":"output"} = 44
+  (44 counts/type ÷ 20 turns = 2.2 model calls/turn; total 88 matches the collapsed sum above)

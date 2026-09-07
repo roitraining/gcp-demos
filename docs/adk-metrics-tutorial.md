@@ -300,9 +300,10 @@ Verify (met): all three scripts record **six** metric names (single agent; seven
 - [x] `load/turns.sh` with the scenario names (`baseline`, `unknown-city`, `slow-tool`, `multi-city`, `growing-context`, `concurrent`) — drives the CLI server `/run` + `/sessions` API; base URL from `HOST` env var. 2.1–2.6 pages drafted.
 - [x] `examples/03_metrics_server.py` (exposes `/chat`, sets `gcp.project_id` on the resource); 2.4 uses a curl loop against it, not `turns.sh`.
 - [x] Pages 2.1–2.6 written with `NEEDS-RUN` markers on every cloud read-back; `deploy/` Dockerfile + env files for 2.3/2.5.
-- [ ] **Cloud captures (this stage's real work):** 2.1 local `--otel_to_cloud` + read-back + export-outage; 2.2 descriptor list; 2.3 Cloud Run deploy/read-back/teardown; 2.4 own-server run; 2.5 Agent Runtime (report series or documented negative); teardowns.
+- [x] **Cloud captures — DONE 2026-09-07.** 2.1 export + read-back (input=output=44) + export-outage (400/batch, turns answered); 2.2 descriptor list (7, one persisted from a workflow run); 2.3 Cloud Run deploy/read-back/teardown; 2.4 own-server (job=adk-metrics); 2.5 Agent Runtime — **positive**, metrics export with the reasoning-engine id as `job`; all resources torn down.
+- Findings this stage (fixes applied): (1) `adk web/deploy --otel_to_cloud` needs `opentelemetry-exporter-gcp-{logging,monitoring,trace}` — added to requirements. (2) Cloud Run / Agent Engine deploys need those exporters in the agent-dir `requirements.txt` or the container crashes on boot. (3) `adk deploy agent_engine` needs `google-cloud-aiplatform[agent-engines]` installed locally. (4) Two scopes split by family (see Q2). (5) PromQL dotted labels must be quoted in `sum by (...)`. Verification records `verification/stage2-2{1,1-outage,2,3,4,5}*.txt`.
 
-Verify: each page's read-back block replaces its `NEEDS-RUN` with a real capture; series counts reconcile with turns answered.
+Verify (met): every read-back replaced its `NEEDS-RUN` with a real capture; series counts reconcile with turns answered.
 
 ### Stage 3 · Part 3 consume (J; cloud writes) — DRAFTED 2026-09-06, captures pending
 
@@ -362,9 +363,9 @@ Common harness: fresh `python3.13 -m venv .venv`, `pip install -r requirements.t
 | 7b | Raw script export needs `gcp.project_id` in `OTEL_RESOURCE_ATTRIBUTES`; `adk web` injects it | **verified** (Stage 0: 400 without, 200 with) | resolved; 2.4 recipe carries it |
 | 8 | `prometheus_target` 400 without `OTEL_RESOURCE_ATTRIBUTES` on a laptop | verified (logging 5.2, 2026-09-04) | Stage 2 recaptures as the 2.1 deep dive |
 | 9 | 5 s export interval under `--otel_to_cloud` and `get_gcp_exporters` | source inspection | Stage 2 (2.4) |
-| 10 | Export outage: turns answered, batches rejected, no points; restart discards the process totals | proposed | Stage 2 (2.1 deep dive) |
-| 11 | Cloud Run resource labels (`cloud.region`, instance) from the detector, no `OTEL_RESOURCE_ATTRIBUTES` | doc inspection | Stage 2 (2.3) |
-| 12 | Agent Runtime metrics through `_RequestDrivenMetricReader` | source inspection; logging negative for logs and traces | Stage 2 (2.5, open question 5) |
+| 10 | Export outage: turns answered, batches rejected, no points; restart discards the process totals | **verified** (Stage 2: 5/5 answered, 400 per 5 s batch) | resolved |
+| 11 | Cloud Run resource labels (`location`, instance) from the detector, no `OTEL_RESOURCE_ATTRIBUTES` | **verified** (Stage 2: location=us-central1, detector instance id) | resolved; needs agent-dir requirements.txt with the GCP exporters |
+| 12 | Agent Runtime metrics through `_RequestDrivenMetricReader` | **verified positive** (Stage 2: series with reasoning-engine id as job) | resolved; open question 5 answered YES |
 | 13 | Session reuse through the `adk web` run API for `growing-context` | proposed | Stage 2 (`turns.sh`) |
 | 14 | Workflow series for a `SequentialAgent` on the console reader | source inspection | Stage 1 (1.5) |
 | 15 | Overlapping turns do not cross timers: per-tool and per-turn percentiles match the sequential run | proposed | Stage 3 (3.1 deep dive) |
