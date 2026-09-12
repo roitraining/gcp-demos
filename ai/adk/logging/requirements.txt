@@ -1,11 +1,14 @@
 # Verified against google-adk 2.8.0 on Python 3.13.
-google-adk>=2.8.0
+# The [otel-gcp] extra adds the GenAI SDK instrumentor that `--otel_to_cloud`
+# looks for at startup (Part 5.2); without it ADK logs a WARNING and emits the
+# generate_content spans itself. Verified 2026-09-04: it does not duplicate them.
+google-adk[otel-gcp]>=2.8.0
 fastapi>=0.115
 uvicorn>=0.34
 python-dotenv>=1.0
 httpx>=0.27
 
-# Only needed for example 08 in "cloud" mode (OTel export to Cloud Trace and
-# Cloud Logging). Console mode needs neither. Verified with the versions below.
+# Needed for OTel export to Google Cloud (`--otel_to_cloud` in Part 5, and
+# example 08 in "cloud" mode). Verified with the versions below.
 opentelemetry-exporter-otlp-proto-http>=1.27
 opentelemetry-exporter-gcp-logging>=1.9

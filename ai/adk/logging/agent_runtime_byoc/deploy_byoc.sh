@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Tutorial 1.7: build the minimal custom container and deploy it to Agent
+# Tutorial 1.6 (BYOC): build the minimal custom container and deploy it to Agent
 # Runtime (bring-your-own-container). Unlike deploy_agent_engine.sh (which
 # deploys the AGENT object via `adk deploy`), this ships OUR own FastAPI server
 # (main.py) as a container. There is no gcloud CLI for Agent Runtime, so the
@@ -89,3 +89,8 @@ prefix + the container's own /api route), then read the logs:
 Tear down (ENGINE_ID = last segment of the resource name):
   python -c "import vertexai; vertexai.Client(project='$PROJECT_ID', location='$LOCATION').agent_engines.delete(name='$RESOURCE', force=True)"
 EOF
+
+# Machine-readable marker with a unique prefix, so a caller can capture the bare
+# engine id regardless of the build noise above with:
+#   export ENGINE_BYOC=$(./deploy_byoc.sh | sed -n 's/^ENGINE_ID=//p')
+printf 'ENGINE_ID=%s\n' "${RESOURCE##*/}"

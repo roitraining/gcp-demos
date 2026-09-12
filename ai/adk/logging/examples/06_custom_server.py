@@ -1,10 +1,11 @@
-"""Example 06: a streamlined custom ADK server, where you own the logging.
+"""Example 06: a custom ADK server, Cloud Run-ready, where you own the logging.
 
 Use case
 --------
 You are not using ``adk web`` or ``adk api_server`` or ``get_fast_api_app``.
 You want a small hand-written FastAPI service around an ADK Runner, following
-ADK 2.x best practices, and you want full control of the logging configuration.
+ADK 2.x best practices, and you want full control of the logging configuration,
+so the exact server you run on your laptop is the one you ship to Cloud Run.
 
 ADK 2.x best practices shown here
 ---------------------------------
@@ -20,22 +21,33 @@ Logging control shown here
 --------------------------
 * A ``dictConfig`` is the clean way to configure everything in one place:
   the root handler, your own ``agent.telemetry`` logger (JSON), and the
-  ``google_adk`` group.
+  ``google_adk`` group. Every stream lands on the same Cloud Run-ready JSON
+  formatter, so each line becomes a structured Cloud Logging entry.
+* ``CloudRunJsonFormatter`` writes the two special fields Cloud Logging reads:
+  ``severity`` (so the level is what you logged, not a guess Cloud Run makes
+  from the stream) and ``logging.googleapis.com/trace`` (so every line of one
+  request groups together in the Logs Explorer).
+* A ``contextvars.ContextVar`` holds the current request's trace id. The
+  formatter reads it for *every* record emitted while the request is handled,
+  including the deep ``google_adk`` framework logs you never touch.
 * A ``TruncateFilter`` caps the noisy model request/response lines so a busy
   server stays readable. This is the "tame framework noise" technique.
-* Note ``get_fast_api_app`` has no ``log_level`` argument either, so in any
-  custom server the logging config is yours to set up. Do it explicitly.
 
 Run it
 ------
-    .venv/bin/python examples/06_custom_server.py
-    # in another terminal:
-    curl -s -X POST localhost:8080/chat -H 'content-type: application/json' \
+    GOOGLE_CLOUD_PROJECT=your-project .venv/bin/python examples/06_custom_server.py
+    # in another terminal, passing the trace header the way Cloud Run would:
+    curl -s -X POST localhost:8080/chat \
+         -H 'content-type: application/json' \
+         -H 'X-Cloud-Trace-Context: 105445aa7843bc8bf206b12000100000/1;o=1' \
          -d '{"message": "weather in Tokyo?"}'
+    # every JSON log line for that request carries the same trace value.
 """
 
 from __future__ import annotations
 
+import contextvars
+import json
 import logging
 import logging.config
 import os
@@ -45,7 +57,7 @@ from _common import bootstrap
 
 bootstrap()
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
@@ -60,9 +72,63 @@ from demo_agent.agent import root_agent
 # per-request telemetry. (Both files live in examples/, already on sys.path.)
 from importlib import import_module
 
-_structured = import_module("05_structured_plugin")
-StructuredTelemetryPlugin = _structured.StructuredTelemetryPlugin
-JsonFormatter = _structured.JsonFormatter
+StructuredTelemetryPlugin = import_module("05_structured_plugin").StructuredTelemetryPlugin
+
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "")
+
+# A context variable holds the current request's trace id so every log record
+# emitted while handling that request can pick it up, no matter how deep in the
+# call stack (including inside the ADK plugin callbacks and the google_adk
+# framework loggers).
+current_trace: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "current_trace", default=None
+)
+
+
+class CloudRunJsonFormatter(logging.Formatter):
+    """Format records as the JSON structure Cloud Logging understands.
+
+    ``severity`` drives the Cloud Logging level; ``logging.googleapis.com/trace``
+    ties the line to the request trace so all logs for one request group
+    together. Any ``extra={...}`` fields ride along as top-level keys.
+    """
+
+    _RESERVED = set(logging.makeLogRecord({}).__dict__) | {"message", "asctime"}
+
+    def format(self, record: logging.LogRecord) -> str:
+        entry = {
+            "severity": record.levelname,  # DEBUG/INFO/WARNING/ERROR -> Cloud Logging severity
+            "message": record.getMessage(),
+            "logging.googleapis.com/sourceLocation": {
+                "file": record.filename,
+                "line": record.lineno,
+                "function": record.funcName,
+            },
+        }
+        trace_id = current_trace.get()
+        if trace_id and PROJECT_ID:
+            entry["logging.googleapis.com/trace"] = (
+                f"projects/{PROJECT_ID}/traces/{trace_id}"
+            )
+        for key, value in record.__dict__.items():
+            if key not in self._RESERVED:
+                entry[key] = value
+        return json.dumps(entry, default=str)
+
+
+def parse_trace_id(request: Request) -> str | None:
+    """Extract the trace id from Cloud Run's headers."""
+    # Cloud Run / GCLB: "TRACE_ID/SPAN_ID;o=TRACE_TRUE"
+    cloud_header = request.headers.get("X-Cloud-Trace-Context")
+    if cloud_header:
+        return cloud_header.split("/")[0]
+    # W3C traceparent: "version-traceid-spanid-flags"
+    traceparent = request.headers.get("traceparent")
+    if traceparent:
+        parts = traceparent.split("-")
+        if len(parts) >= 2:
+            return parts[1]
+    return None
 
 
 class TruncateFilter(logging.Filter):
@@ -81,22 +147,22 @@ class TruncateFilter(logging.Filter):
 
 
 def configure_logging() -> None:
-    """One place that configures every logger this process cares about."""
+    """One place that configures every logger this process cares about.
+
+    Every handler uses the Cloud Run JSON formatter, so whether the line comes
+    from your code, the plugin, or google_adk, it lands as a structured entry
+    with the severity you set and the request's trace id attached.
+    """
     logging.config.dictConfig(
         {
             "version": 1,
             "disable_existing_loggers": False,
             "filters": {"truncate": {"()": TruncateFilter, "max_length": 200}},
-            "formatters": {
-                "plain": {
-                    "format": "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
-                },
-                "json": {"()": JsonFormatter},
-            },
+            "formatters": {"json": {"()": CloudRunJsonFormatter}},
             "handlers": {
                 "console": {
                     "class": "logging.StreamHandler",
-                    "formatter": "plain",
+                    "formatter": "json",
                     "filters": ["truncate"],
                 },
                 "telemetry": {
@@ -107,7 +173,7 @@ def configure_logging() -> None:
             "loggers": {
                 # The ADK framework group. INFO here; flip to DEBUG to see prompts.
                 "google_adk": {"level": "INFO", "handlers": ["console"], "propagate": False},
-                # Your structured telemetry logger, on the JSON handler.
+                # Your structured telemetry logger, on its own handler.
                 "agent.telemetry": {
                     "level": "INFO",
                     "handlers": ["telemetry"],
@@ -144,7 +210,7 @@ async def lifespan(app: FastAPI):
         logger.info("runner closed")
 
 
-app = FastAPI(title="Streamlined ADK server", lifespan=lifespan)
+app = FastAPI(title="Cloud Run-ready ADK server", lifespan=lifespan)
 
 
 class ChatRequest(BaseModel):
@@ -153,19 +219,27 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/chat")
-async def chat(req: ChatRequest) -> JSONResponse:
-    runner: Runner = app.state.runner
-    session = await runner.session_service.create_session(
-        app_name=runner.app_name, user_id=req.user_id
-    )
-    message = types.Content(role="user", parts=[types.Part(text=req.message)])
-    final = ""
-    async for event in runner.run_async(
-        user_id=req.user_id, session_id=session.id, new_message=message
-    ):
-        if event.is_final_response() and event.content:
-            final = event.content.parts[0].text
-    return JSONResponse({"response": final})
+async def chat(req: ChatRequest, request: Request) -> JSONResponse:
+    # Set the trace id for this request; every record emitted below (yours, the
+    # plugin's, and google_adk's) picks it up in the formatter.
+    token = current_trace.set(parse_trace_id(request))
+    try:
+        runner: Runner = app.state.runner
+        logger.info("chat_request_received", extra={"user_id": req.user_id})
+        session = await runner.session_service.create_session(
+            app_name=runner.app_name, user_id=req.user_id
+        )
+        message = types.Content(role="user", parts=[types.Part(text=req.message)])
+        final = ""
+        async for event in runner.run_async(
+            user_id=req.user_id, session_id=session.id, new_message=message
+        ):
+            if event.is_final_response() and event.content:
+                final = event.content.parts[0].text
+        logger.info("chat_request_completed", extra={"user_id": req.user_id})
+        return JSONResponse({"response": final})
+    finally:
+        current_trace.reset(token)
 
 
 if __name__ == "__main__":

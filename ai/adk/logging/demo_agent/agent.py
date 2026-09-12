@@ -21,10 +21,11 @@ logger = logging.getLogger(__name__)
 
 # Tutorial 1.6 (Agent Runtime): on a native agent deploy there is no server
 # script of ours to set the log level, so the agent module reads it from the
-# LOG_LEVEL env var. This runs ONLY when LOG_LEVEL is set, so the local examples
-# (01-08), which configure their own logging, are unaffected. basicConfig is a
-# no-op if the runtime already installed a root handler, so we also setLevel
-# explicitly, which applies either way.
+# LOG_LEVEL env var. This runs ONLY when LOG_LEVEL is set; the deploy script
+# writes it into .env temporarily and restores the original after, so local
+# runs (adk web, examples 01-08) are unaffected. basicConfig is a no-op if
+# the runtime already installed a root handler, so we also setLevel explicitly,
+# which applies either way.
 if os.getenv("LOG_LEVEL"):
     _level = getattr(logging, os.environ["LOG_LEVEL"].upper(), logging.INFO)
     logging.basicConfig(level=_level, format="%(levelname)s - %(name)s - %(message)s")

@@ -1,0 +1,25 @@
+# Container for the minimal OTel server (examples/08_otel_server.py), tutorial 5.5.
+# The server installs the Cloud Logging exporter itself, so gen_ai.* events leave
+# the process. Cloud Run ingests them via the exporter's authenticated client.
+
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install dependencies first for better layer caching.
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the agent, the shared helpers, and the server.
+COPY demo_agent/ ./demo_agent/
+COPY examples/_common.py ./examples/
+COPY examples/08_otel_server.py ./examples/
+
+# Cloud Run sets PORT; the server reads it. Bind to 0.0.0.0 (the server does).
+ENV PORT=8080
+EXPOSE 8080
+
+# No .env in the image: on Cloud Run, set GOOGLE_CLOUD_PROJECT / GOOGLE_CLOUD_LOCATION,
+# GOOGLE_GENAI_USE_VERTEXAI, and the content knob via --set-env-vars at deploy
+# time (tutorial 5.5, Step 4).
+CMD ["python", "examples/08_otel_server.py"]

@@ -19,16 +19,16 @@ Start with **[TUTORIAL.md](TUTORIAL.md)**.
 
 | Path | What it is |
 |---|---|
-| [TUTORIAL.md](TUTORIAL.md) | The tutorial. Read this. |
+| [TUTORIAL.md](TUTORIAL.md) | The tutorial index: intro, the four-streams idea, and the table of contents. Start here. |
+| [tutorial/](tutorial/) | The tutorial itself: a Setup page, then one short page per numbered subtask, grouped into `part-N/` folders (log levels, plugins, Cloud Run, and so on). |
 | [demo_agent/agent.py](demo_agent/agent.py) | The tiny shared agent (a weather tool that logs). |
 | [examples/01_log_levels.py](examples/01_log_levels.py) | Run one prompt at DEBUG/INFO/WARNING/ERROR and compare. |
 | [examples/02_tame_uvicorn.py](examples/02_tame_uvicorn.py) | Configure uvicorn logging; drop health-check access spam. |
 | [examples/03_logging_plugin.py](examples/03_logging_plugin.py) | Built-in `LoggingPlugin` for live terminal narration. |
 | [examples/04_debug_plugin.py](examples/04_debug_plugin.py) | `DebugLoggingPlugin`: full invocation capture to YAML. |
 | [examples/05_structured_plugin.py](examples/05_structured_plugin.py) | Custom `BasePlugin` emitting real JSON `logging` records. |
-| [examples/06_custom_server.py](examples/06_custom_server.py) | Streamlined ADK 2.x server; you own the `dictConfig`. |
-| [examples/07_cloudrun_json.py](examples/07_cloudrun_json.py) | Cloud Run JSON logs with trace correlation. |
-| [examples/08_otel_cloud.py](examples/08_otel_cloud.py) | OTel GenAI telemetry to Cloud Trace + Cloud Logging. |
+| [examples/06_custom_server.py](examples/06_custom_server.py) | Cloud Run-ready ADK 2.x server; you own the `dictConfig`, with explicit `severity` and per-request trace correlation. |
+| [examples/08_otel_server.py](examples/08_otel_server.py) | Minimal ADK server that installs the OTel exporter and sends `gen_ai.*` events to Cloud Logging. |
 | [deploy/](deploy/) | Dockerfile and deploy scripts for Cloud Run and Agent Engine. |
 
 ## Quick start
@@ -38,6 +38,7 @@ cd ai/adk/logging
 python3.13 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp .env.example .env          # then set your project / model config
+cp env.sh.example env.sh      # shell vars for the cloud parts; set PROJECT_ID, then `source env.sh`
 .venv/bin/python examples/01_log_levels.py debug   # start here, then read the tutorial
 ```
 
@@ -46,4 +47,5 @@ cp .env.example .env          # then set your project / model config
 The Python examples (02 to 08) are verified end to end against a real GCP
 project. The `deploy/` scripts are syntax-checked with flags matching
 `adk 2.8.0`, but the deploys themselves are left for you to run. See the
-Verification status section in [TUTORIAL.md](TUTORIAL.md) for the precise split.
+Verification status section in
+[How to choose & reference](tutorial/how-to-choose.md) for the precise split.

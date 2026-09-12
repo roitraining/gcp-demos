@@ -8,7 +8,7 @@ Every example starts with::
 ``bootstrap()`` puts the folder root on ``sys.path`` (so ``demo_agent`` imports)
 and loads ``.env``. ``ask()`` runs one turn against a Runner and returns the
 final text, so the examples do not each re-implement the run loop.
-``JsonFormatter`` is the minimal JSON line formatter examples 05 and 07 both
+``JsonFormatter`` is the minimal JSON line formatter examples 05 and 06 both
 build on, kept here so there's one place that defines "what counts as an
 extra field" instead of two copies drifting apart.
 """
@@ -26,7 +26,7 @@ _ROOT = Path(__file__).resolve().parent.parent
 
 
 class JsonFormatter(logging.Formatter):
-    """Minimal JSON line formatter. Example 07 extends this for Cloud Run."""
+    """Minimal JSON line formatter. Example 06 extends this for Cloud Run."""
 
     # Attributes present on every LogRecord; anything else was passed via extra.
     _RESERVED = set(logging.makeLogRecord({}).__dict__) | {"message", "asctime"}

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
-# Deploy the custom server to Cloud Run and show how to read its logs.
-# This is an OPTIONAL step. Every example runs locally without it.
+# Part 4: deploy the custom server (examples/06_custom_server.py) to Cloud Run
+# as a SERVICE, so the structured JSON logging you ran locally lands in Cloud
+# Logging with correct severity and per-request trace grouping. OPTIONAL step.
 #
 # Usage:
 #   export PROJECT_ID=your-project
@@ -13,87 +14,41 @@ set -euo pipefail
 PROJECT_ID="${PROJECT_ID:?set PROJECT_ID}"
 REGION="${REGION:-us-central1}"
 SERVICE="${SERVICE:-adk-logging-demo}"
-
-# --- Option A: let ADK generate and deploy the container (simplest) ----------
-# ADK builds an api_server container for the agent and deploys it. Cloud Run
-# ingests stdout into Cloud Logging automatically. Traps covered in the tutorial:
-#   * --log_level here feeds gcloud's own --verbosity, NOT the deployed app; the
-#     generated container runs at INFO regardless, so set app log level in code.
-#   * use --otel_to_cloud (not the deprecated --trace_to_cloud) to export telemetry.
-#   * the container's deps come from demo_agent/requirements.txt, NOT the
-#     requirements.txt at the project root. Since --otel_to_cloud makes ADK
-#     import the OTel exporters at startup, they must be listed in that file or
-#     the container crashes on boot with ModuleNotFoundError.
-#   * MODEL_LOCATION is separate from REGION: the model lives in `global` while
-#     the service runs in us-central1. Get this wrong and the deploy succeeds,
-#     then every /run returns 500 with a 404 for the model.
-#   * an agent-local .env is NOT enough. ADK does copy and load it, but it then
-#     re-applies any variable already in the environment on top (envs.py), and
-#     Cloud Run already provides GOOGLE_CLOUD_LOCATION. The .env value loses.
-#     Real Cloud Run env vars are what win, and `adk deploy cloud_run` has no
-#     flag for them, so they are set in a second step below.
+# The model lives in `global` while the service runs in us-central1. Get this
+# wrong and the deploy succeeds, then every /chat returns 500 with a 404 for the
+# model. This is set as a real Cloud Run env var below so it beats any default.
 MODEL_LOCATION="${MODEL_LOCATION:-global}"
 
-adk deploy cloud_run \
+# Run from the folder root so the build context has demo_agent/ and examples/.
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+# `gcloud run deploy --source` auto-detects ./Dockerfile at the build root.
+cp deploy/Dockerfile ./Dockerfile
+trap 'rm -f "$ROOT/Dockerfile"' EXIT
+
+echo "Deploying Cloud Run service '$SERVICE'..."
+gcloud run deploy "$SERVICE" \
   --project="$PROJECT_ID" --region="$REGION" \
-  --service_name="$SERVICE" \
-  --otel_to_cloud \
-  ./demo_agent
-
-# Vertex config, applied as real Cloud Run env vars so they beat both the
-# container defaults and anything in a copied .env.
-gcloud run services update "$SERVICE" \
-  --project="$PROJECT_ID" --region="$REGION" --quiet \
-  --update-env-vars="GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${MODEL_LOCATION}"
-
-# --- Option B: deploy the hand-written server (examples/07) from source -------
-# `gcloud run deploy --source` auto-detects a Dockerfile at the build root, so
-# copy deploy/Dockerfile to the project root first (or run from a dir that has
-# it as ./Dockerfile). This gives you the JSON-with-trace formatter from 07.
-#
-#   cp deploy/Dockerfile ./Dockerfile
-#   gcloud run deploy "$SERVICE" \
-#     --project="$PROJECT_ID" --region="$REGION" \
-#     --source=. --allow-unauthenticated \
-#     --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=global"
-
-# `adk deploy` catches gcloud's failure and returns 0 anyway, so `set -e` will
-# not stop us here. A failed deploy also leaves the service record behind, so
-# "does the service exist" is not a real check; ask whether it is actually
-# serving traffic.
-READY=$(gcloud run services describe "$SERVICE" \
-          --project="$PROJECT_ID" --region="$REGION" \
-          --format='value(status.conditions.filter("type=Ready").extract(status))' 2>/dev/null || true)
-if [[ "$READY" != *True* ]]; then
-  echo
-  echo "Deploy FAILED: service '$SERVICE' is not ready (Ready=${READY:-missing})." >&2
-  echo "Check the build log first (pip install failures show up there):" >&2
-  echo "  gcloud builds list --project=$PROJECT_ID --region=$REGION --limit=1" >&2
-  echo "Then container startup errors:" >&2
-  gcloud logging read \
-    "resource.type=\"cloud_run_revision\" resource.labels.service_name=\"$SERVICE\" severity=ERROR" \
-    --project="$PROJECT_ID" --limit=1 --format='value(textPayload)' --freshness=10m >&2
-  exit 1
-fi
+  --source=. \
+  --allow-unauthenticated \
+  --set-env-vars="GOOGLE_GENAI_USE_VERTEXAI=TRUE,GOOGLE_CLOUD_PROJECT=${PROJECT_ID},GOOGLE_CLOUD_LOCATION=${MODEL_LOCATION}"
 
 # A ready service can still 500 on every turn (wrong model region, missing
 # permissions). Run one real turn before declaring victory.
 URL=$(gcloud run services describe "$SERVICE" \
         --project="$PROJECT_ID" --region="$REGION" --format='value(status.url)')
-TOKEN=$(gcloud auth print-identity-token)
-SID="smoke-$$"
-curl -fsS -X POST "$URL/apps/demo_agent/users/u1/sessions/$SID" \
-     -H "authorization: Bearer $TOKEN" -H 'content-type: application/json' \
-     -d '{}' >/dev/null
-CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL/run" \
-        -H "authorization: Bearer $TOKEN" -H 'content-type: application/json' \
-        -d "{\"app_name\":\"demo_agent\",\"user_id\":\"u1\",\"session_id\":\"$SID\",
-             \"new_message\":{\"role\":\"user\",\"parts\":[{\"text\":\"What's the weather in Tokyo?\"}]}}")
+
+echo
+echo "Smoke-testing $URL/chat ..."
+CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL/chat" \
+        -H 'content-type: application/json' \
+        -d '{"message":"What'\''s the weather in Tokyo?"}')
 if [[ "$CODE" != "200" ]]; then
-  echo "Smoke test FAILED: POST /run returned $CODE. Recent error:" >&2
+  echo "Smoke test FAILED: POST /chat returned $CODE. Recent error:" >&2
   gcloud logging read \
     "resource.type=\"cloud_run_revision\" resource.labels.service_name=\"$SERVICE\" severity>=ERROR" \
-    --project="$PROJECT_ID" --limit=1 --format='value(textPayload)' --freshness=5m >&2 | tail -3
+    --project="$PROJECT_ID" --limit=3 --format='value(jsonPayload.message,textPayload)' --freshness=5m >&2
   exit 1
 fi
 
@@ -101,14 +56,29 @@ echo
 echo "Deployed and smoke-tested ($URL). Read structured logs (each line is one JSON entry):"
 echo
 cat <<EOF
+  # Send a turn, passing the trace header the way Cloud Run does for you:
+  curl -s -X POST "$URL/chat" -H 'content-type: application/json' \\
+       -H 'X-Cloud-Trace-Context: 105445aa7843bc8bf206b12000100000/1;o=1' \\
+       -d '{"message":"What'\''s the weather in Tokyo?"}'
+
   # Tail recent logs for the service:
   gcloud run services logs read "$SERVICE" --project="$PROJECT_ID" --region="$REGION" --limit=50
 
-  # Or query in Cloud Logging by severity and trace:
+  # Severity is now a field you set, not a guess: every line reads its real level.
   gcloud logging read \\
     'resource.type="cloud_run_revision" resource.labels.service_name="$SERVICE" severity>=INFO' \\
-    --project="$PROJECT_ID" --limit=20 --format=json
+    --project="$PROJECT_ID" --limit=20 \\
+    --format='table(severity, jsonPayload.message)' --freshness=10m
+
+  # Your plugin's fields are queryable columns, not text you have to parse:
+  gcloud logging read \\
+    'resource.type="cloud_run_revision" jsonPayload.event="tool_end"' \\
+    --project="$PROJECT_ID" --limit=5 \\
+    --format='table(jsonPayload.tool, jsonPayload.latency_ms, jsonPayload.status)' --freshness=10m
 
   # Because every line carries logging.googleapis.com/trace, opening one request
   # in the Logs Explorer and clicking its trace shows all logs for that request.
+
+Tear down:
+  gcloud run services delete "$SERVICE" --project="$PROJECT_ID" --region="$REGION" --quiet
 EOF
