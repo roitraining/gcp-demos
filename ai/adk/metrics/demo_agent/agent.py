@@ -21,6 +21,7 @@ import time
 from typing import Any, Optional
 
 from google.adk.agents import Agent
+from google.adk.models import Gemini
 from google.adk.tools.function_tool import FunctionTool
 
 from .outcome import outcome_callbacks
@@ -109,7 +110,12 @@ class StatusAwareTool(FunctionTool):
 
 root_agent = Agent(
     name="weather_agent",
-    model="gemini-3.7-flash",
+    # Pin the model client to the global endpoint. gemini-3.7-flash is served
+    # only on `global`, but Agent Engine must deploy to a region (us-central1),
+    # and GOOGLE_CLOUD_LOCATION sets both the runtime region and the model
+    # endpoint. client_kwargs overrides just the model client's location, so the
+    # regional deploy still reaches the global-only model (see 2.5).
+    model=Gemini(model="gemini-3.7-flash", client_kwargs={"location": "global"}),
     description="Answers weather and forecast questions for a few known cities.",
     instruction=(
         "You are a concise weather assistant. For a current-weather question,"

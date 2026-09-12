@@ -1,16 +1,54 @@
-=== Stage 2.5 verification — 2026-09-07T03:04:47Z ===
-adk deploy agent_engine --otel_to_cloud; reasoningEngine 3223862100883406848 (us-central1)
+=== Stage 2.5 verification — 2026-09-06 (re-run, google-adk 2.8.0) ===
+adk deploy agent_engine --otel_to_cloud; reasoningEngine 976002936872108032 (us-central1)
 
-FINDING 1 (local tooling): adk deploy agent_engine needs google-cloud-aiplatform[agent-engines]
-  installed locally (packaging/push), separate from the container deps. First attempt failed with
-  'No module named vertexai' before any cloud resource was created.
+MECHANISM (google-adk 2.8.0 source, confirmed):
+  On Agent Engine (GOOGLE_CLOUD_AGENT_ENGINE_ID set) the metric reader is
+  _RequestDrivenMetricReader, not PeriodicExportingMetricReader.
+  - telemetry/google_cloud.py:244-261 _get_gcp_metrics_exporter picks the
+    request-driven reader on Agent Engine, else a 5 s periodic reader.
+  - telemetry/_agent_engine_metric_exporter.py:192 class _RequestDrivenMetricReader.
+    Collects are driven from the request lifecycle: note_request_start,
+    note_request_end (baseline flush after the response is sent), and
+    note_generate_content_start (a mid-request catch-up when a long request runs
+    >1.5x the period overdue).
+  - Why: docstring at google_cloud.py:249-251 — "background export is starved by
+    the request-billed runtime." A 5 s daemon thread would be frozen between
+    requests on Agent Engine and never flush.
 
-Invoked 10x via agent_engines SDK stream_query: 7/10 answered (3 transient FailedPrecondition on cold start).
+FINDING 1 (local tooling): adk deploy agent_engine needs google-cloud-aiplatform
+  [agent-engines] installed locally (packaging/push), separate from the container
+  deps. Missing it fails with 'No module named vertexai' before any resource is
+  created.
 
-FINDING 2 (the 2.5 answer): Agent Runtime metrics DO export — POSITIVE, unlike the logging
-  tutorial's negative for logs/traces. A new series appeared:
-  job= adk-metrics loc= us-central1 inst= laptop-1
-  job= 3223862100883406848 loc= us-central1 inst= 8f0494286f1241df961bac72
+FINDING 2 (model endpoint vs deploy region): gemini-3.7-flash is served ONLY on
+  the global endpoint. GOOGLE_CLOUD_LOCATION sets BOTH the Agent Engine deploy
+  region (must be a region, e.g. us-central1) AND the model endpoint, so a
+  regional deploy 404s at the model call:
+    global:     OK
+    us-central1: 404 NOT_FOUND publisher model
+  FIX (no subclass needed): pass client_kwargs to the Gemini model so only the
+  model's google.genai.Client points at global, leaving the deploy regional:
+    model=Gemini(model="gemini-3.7-flash", client_kwargs={"location": "global"})
+  client_kwargs is a first-class Gemini field (models/google_llm.py:133) merged
+  into Client(**kwargs) at google_llm.py:415-419. The docstring's subclass +
+  api_client override (google_llm.py:104-118) also works but replaces http_options
+  and tracking headers, so client_kwargs is the cleaner path. Before the fix all
+  10 turns errored at the model 404 (invoke_agent/operation still counted; tool
+  and token series empty because no tool ran and no tokens were produced).
 
-  The reasoning-engine id becomes the job label; instance is a runtime-supplied id. The request-driven
-  _RequestDrivenMetricReader collects on the request lifecycle and the points reach Cloud Monitoring.
+Invoked 10x via agent_engines SDK stream_query on the fixed engine: 10/10 answered,
+10 tool calls seen (get_weather fired every turn).
+
+FINDING 3 (the 2.5 answer): Agent Runtime metrics DO export — POSITIVE. All four
+  read-back series carry the reasoning-engine id as job and a runtime instance:
+    gen_ai.invoke_agent.duration_count        job=976002936872108032  = 9
+    gen_ai.client.operation.duration_count    job=976002936872108032  = 18
+    gen_ai.client.token.usage_sum             job=976002936872108032  = 6495 / 275 (in/out)
+    gen_ai.execute_tool.duration_count        job=976002936872108032  = 9
+  The request-driven _RequestDrivenMetricReader collects on the request lifecycle
+  and the points reach Cloud Monitoring, unlike the logging tutorial's negative
+  for logs/traces on the same runtime.
+
+NAMING NOTE: the tool metric is gen_ai.execute_tool.duration (…_count in PromQL),
+  not gen_ai.tool.execution.duration. A first read-back queried the wrong name and
+  saw nothing.
