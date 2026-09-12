@@ -1,0 +1,44 @@
+# outcome.promql — used by tutorial page 3.7 "Task outcome"
+# Scenario: unknown-city, with TUTORIAL_OUTCOME_METRIC=1.
+# Question: did execution complete without accomplishing the task?
+#
+# The custom instrument is a Counter, tutorial.weather.requests, recorded in an
+# after_tool_callback with one attribute, outcome (answered | unavailable),
+# taken from the tool's returned status. A Counter surfaces in Cloud Monitoring
+# as a monotonic series with a _total suffix, so PromQL addresses it as
+# {"tutorial.weather.requests_total"} in the UTF-8 brace form.
+#
+# ASSUMPTION TO VERIFY on the first live run: the exact suffix. The plan expects
+# _total (counter -> _total, the standard Prometheus convention). If the OTLP
+# ingestion instead exposes it without a suffix or as _counter, swap the name
+# below. Confirm against metricDescriptors.list for
+# prometheus.googleapis.com/tutorial.weather.requests before trusting these.
+#
+# POST each block to:
+#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+# with body  query=<urlencoded>  and an ADC bearer token.
+
+# --- Requests per minute, by outcome ---------------------------------------
+# Two lines: answered and unavailable. The unavailable share should match the
+# Atlantis mix and 3.3's tool error ratio.
+
+sum by (outcome) (
+  rate({"tutorial.weather.requests_total"}[5m])
+) * 60
+
+# --- Unavailable share -----------------------------------------------------
+# The fraction of tool-answered turns that got no weather. Reads about 0.5 for a
+# 50% Atlantis mix, beside 3.3's invocation-error ratio of 0.
+
+sum(rate({"tutorial.weather.requests_total", outcome="unavailable"}[5m]))
+  /
+sum(rate({"tutorial.weather.requests_total"}[5m]))
+
+# --- Counter total vs invocation count -------------------------------------
+# A turn whose model never called the tool records nothing on this counter, so
+# its total can be lower than the invoke_agent turn count. Missing is not zero:
+# compare the two before reading the outcome as complete.
+
+sum(rate({"tutorial.weather.requests_total"}[5m]))
+  /
+sum(rate({"gen_ai.invoke_agent.duration_count"}[5m]))

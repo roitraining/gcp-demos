@@ -1,0 +1,60 @@
+=== Stage 1 Part 1 captures — 2026-09-07 ===
+google-adk 2.8.0, Python 3.13.3, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos
+examples/01_console_spans.py (SimpleSpanProcessor(ConsoleSpanExporter) -> out/spans.json)
+Token/duration numbers vary run to run (a real model); quote as representative.
+
+--- 1.1 / 1.2 baseline tree (London) — SEVEN spans ---
+  invocation                              (root, status UNSET)
+  └─ invoke_agent weather_agent
+     ├─ call_llm            (1st)
+     │  ├─ generate_content gemini-3.7-flash
+     │  └─ execute_tool get_weather       <-- parent is call_llm
+     └─ call_llm            (2nd)
+        └─ generate_content gemini-3.7-flash
+All share one trace_id. Five DISTINCT names, seven instances.
+
+--- 1.1 dev-UI capture (adk web, /dev/apps/demo_agent/debug/trace/session/{id}) ---
+Ran adk web on port 8931, drove one London turn and one forecast turn over
+POST /run, read each session's tree from the debug endpoint. Both trees identical
+in shape to the console exporter (7 spans, execute_tool under call_llm).
+The debug endpoint returns span_id/trace_id as INTEGERS and times in nanoseconds.
+Forecast turn durations (ns -> s):
+  execute_tool get_forecast  0.407s
+  call_llm                   2.531s
+  call_llm                   2.161s
+  invoke_agent weather_agent 4.693s
+The tool owns a real chunk of invoke_agent on the forecast turn; on the baseline
+turn execute_tool get_weather is ~1-2 ms. Model spans (call_llm) dominate baseline.
+
+--- 1.2 one execute_tool span, full field set (content on) ---
+name: execute_tool get_weather
+context.trace_id / context.span_id / trace_state
+kind: SpanKind.INTERNAL
+parent_id: <the call_llm span>
+start_time / end_time (~1.7 ms tool)
+status.status_code: UNSET
+attributes: gen_ai.operation.name=execute_tool, gen_ai.tool.name=get_weather,
+  gen_ai.tool.type=FunctionTool, gen_ai.tool.call.id, gen_ai.agent.name,
+  gcp.vertex.agent.tool_call_args={"city":"London"},
+  gcp.vertex.agent.tool_response={"status":"ok","report":"..."},
+  gcp.vertex.agent.event_id, gcp.vertex.agent.llm_request={} , llm_response={}
+events: []   links: []   resource.attributes: {} (empty on the console exporter;
+  the resource is on the provider, not stamped per span in this local path)
+
+--- 1.3 content knob on call_llm ---
+default (on):  gcp.vertex.agent.llm_request = full JSON (~1955 chars, the prompt +
+               system_instruction + tools); gen_ai.system=gcp.vertex.agent,
+               gen_ai.request.model=gemini-3.7-flash
+ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false: llm_request={}, llm_response={},
+               tool_call_args={}. The gen_ai.* semconv attrs stay.
+
+--- 1.4 error taxonomy (Atlantis) — see stage0-local-probes.txt ---
+plain UNSET/none; classified ERROR/lookup_failed; raised ERROR/LookupError with
+TWO exception events on the tool span, both parents ERROR, request fails.
+
+--- 1.6 custom span (forecast + TUTORIAL_CUSTOM_SPAN=1) ---
+  fetch_forecast (forecast.days=3, 0.695s) -> execute_tool get_forecast (0.700s)
+    -> call_llm -> invoke_agent (5.152s total)
+The custom child owns essentially all of the tool span's duration; the gap inside
+execute_tool now has a name. Durations representative: call_llm 3.2s + 1.9s,
+tool 0.7s.

@@ -1,0 +1,14 @@
+=== Stage 2.2 verification — 2026-09-07T02:47:35Z ===
+metricDescriptors.list, filter prometheus.googleapis.com/gen_ai — 7 descriptors:
+  prometheus.googleapis.com/gen_ai.client.operation.duration/histogram | CUMULATIVE DISTRIBUTION
+  prometheus.googleapis.com/gen_ai.client.token.usage/histogram | CUMULATIVE DISTRIBUTION
+  prometheus.googleapis.com/gen_ai.execute_tool.duration/histogram | CUMULATIVE DISTRIBUTION
+  prometheus.googleapis.com/gen_ai.invoke_agent.duration/histogram | CUMULATIVE DISTRIBUTION
+  prometheus.googleapis.com/gen_ai.invoke_agent.inference_calls/histogram | CUMULATIVE DISTRIBUTION
+  prometheus.googleapis.com/gen_ai.invoke_agent.tool_calls/histogram | CUMULATIVE DISTRIBUTION
+  prometheus.googleapis.com/gen_ai.invoke_workflow.duration/histogram | CUMULATIVE DISTRIBUTION
+
+Note: 7 not 6 — invoke_workflow.duration persists from earlier workflow (1.5) runs; a single-agent run writes 6 of these. Descriptors persist once created.
+
+token.usage series labels (from live PromQL series):
+   ['__name__', 'gen_ai.operation.name', 'gen_ai.request.model', 'gen_ai.system', 'gen_ai.token.type', 'instance', 'job', 'location', 'otel_scope_gcp.client.name', 'otel_scope_gcp.client.repo', 'otel_scope_gcp.client.version', 'otel_scope_name', 'otel_scope_pypi.package.name', 'otel_scope_version', 'project_id']

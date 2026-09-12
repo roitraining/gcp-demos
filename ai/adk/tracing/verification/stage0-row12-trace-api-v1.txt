@@ -1,0 +1,47 @@
+=== Stage 0 row 12 — Trace API v1 read-back of OTLP spans — 2026-09-07 ===
+Project jwd-dev-1. Throwaway script exported one London turn via
+get_gcp_exporters(enable_cloud_tracing=True, enable_cloud_logging=True) to
+telemetry.googleapis.com, then read back via the Cloud Trace v1 API. Torn down.
+
+QUESTION: Can the v1 Trace API read spans ingested through telemetry.googleapis.com?
+
+VERDICT: YES. get_trace.sh can use the v1 API; no gcloud-logging fallback needed
+for the span side. 4.4 stays a real read-back page, not a reference page.
+
+Trace id: 3cb16d3d3919767108636fff6e5abda6
+
+--- v1 single-trace GET /v1/projects/jwd-dev-1/traces/<id> ---
+Returned all 7 spans, full parent chain. Per-span fields: spanId, parentSpanId
+(absent on root), name, startTime, endTime, labels. No `kind`.
+  invocation                              (root)
+  └─ invoke_agent weather_agent
+     ├─ call_llm
+     │  ├─ generate_content gemini-3.7-flash
+     │  └─ execute_tool get_weather        <-- under call_llm (matches Stage 0 local)
+     └─ call_llm
+        └─ generate_content gemini-3.7-flash
+labels carry service.name, gcp.project_id, and gen_ai.* attributes
+(gen_ai.agent.name, gen_ai.operation.name, gen_ai.conversation.id).
+
+GOTCHA for the capture script: v1 returns spanId as a DECIMAL uint64 string
+(e.g. 11966234156999572724), NOT the hex the console exporter shows. get_trace.sh's
+tree renderer must key on the decimal id, or convert.
+
+--- v1 list /v1/traces?startTime=...&filter=root:invocation ---
+Found the trace (returns projectId+traceId stubs; add view=COMPLETE for full spans).
+
+--- ingestion delay ---
+GET 404'd for ~75s, full trace by ~100s. Allow 90-120s between force_flush and the
+v1 read. The 404 body was "_Trace bucket not found in project jwd-dev-1" (a
+transient indexing artifact), not "trace not found" -- the capture script should
+retry on 404 rather than treat it as fatal.
+
+--- gcloud logging control ---
+gen_ai.* events (gen_ai.choice, gen_ai.user.message, gen_ai.system.message)
+present under trace="projects/jwd-dev-1/traces/<id>". Required enable_cloud_logging=True.
+
+--- ROW 19 cloud half (observed incidentally) ---
+This run passed otel_resource with gcp.project_id and the trace was readable, as
+expected. The "without gcp.project_id" acceptance test remains for Stage 2 (2.3).
+
+Auth: ADC/owner worked first try for both v1 API and gcloud logging.

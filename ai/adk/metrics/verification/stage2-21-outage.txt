@@ -1,0 +1,10 @@
+=== Stage 2.1 export-outage deep dive — 2026-09-07T03:08:02Z ===
+adk web --otel_to_cloud started WITHOUT OTEL_RESOURCE_ATTRIBUTES; load/turns.sh baseline 5
+All 5 turns answered HTTP 200; every ~5s export batch rejected:
+2026-09-06 20:07:28,964 - ERROR - __init__.py:294 - Failed to export metrics batch code: 400, reason: Bad Request
+2026-09-06 20:07:34,038 - ERROR - __init__.py:294 - Failed to export metrics batch code: 400, reason: Bad Request
+2026-09-06 20:07:39,118 - ERROR - __init__.py:294 - Failed to export metrics batch code: 400, reason: Bad Request
+2026-09-06 20:07:44,219 - ERROR - __init__.py:294 - Failed to export metrics batch code: 400, reason: Bad Request
+2026-09-06 20:07:49,285 - ERROR - __init__.py:294 - Failed to export metrics batch code: 400, reason: Bad Request
+The agent is healthy; the metrics pipeline is not. Restart with the resource attrs fixes it,
+discarding the process's accumulated totals (cumulative histograms reset).

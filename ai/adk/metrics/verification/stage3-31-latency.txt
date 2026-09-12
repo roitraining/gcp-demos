@@ -1,0 +1,6 @@
+=== Stage 3.1 verification — 2026-09-07T03:20:01Z ===
+scenario slow-tool 30 via adk web --otel_to_cloud; PromQL percentiles, histogram_quantile over _bucket with le
+tool p95 by tool: get_forecast=2.163s  get_weather=0.010s
+invoke_agent p95: weather_agent=7.84s
+model p95: gemini-3.7-flash=4.828s
+LESSON CONFIRMED: the slow tool (get_forecast) drives invoke_agent p95 up while model p95 stays lower -> the dependency, not the model, owns the slowdown.

@@ -1,0 +1,16 @@
+=== Stage 2.5 verification — 2026-09-07T03:04:47Z ===
+adk deploy agent_engine --otel_to_cloud; reasoningEngine 3223862100883406848 (us-central1)
+
+FINDING 1 (local tooling): adk deploy agent_engine needs google-cloud-aiplatform[agent-engines]
+  installed locally (packaging/push), separate from the container deps. First attempt failed with
+  'No module named vertexai' before any cloud resource was created.
+
+Invoked 10x via agent_engines SDK stream_query: 7/10 answered (3 transient FailedPrecondition on cold start).
+
+FINDING 2 (the 2.5 answer): Agent Runtime metrics DO export — POSITIVE, unlike the logging
+  tutorial's negative for logs/traces. A new series appeared:
+  job= adk-metrics loc= us-central1 inst= laptop-1
+  job= 3223862100883406848 loc= us-central1 inst= 8f0494286f1241df961bac72
+
+  The reasoning-engine id becomes the job label; instance is a runtime-supplied id. The request-driven
+  _RequestDrivenMetricReader collects on the request lifecycle and the points reach Cloud Monitoring.

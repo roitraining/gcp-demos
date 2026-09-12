@@ -111,6 +111,27 @@ Apply these label rules:
 
 Show a prompt or request body once per page. Refer to it by name afterward.
 
+### Console directions
+
+When a step directs the reader through a browser console, do not write the
+clicks as a paragraph. Give short declarative steps, one action per bullet,
+with the UI element in bold. Keep any framing sentence before the list.
+
+Not this:
+
+> In the Cloud console open **Monitoring → Metrics Explorer**, click the
+> **`<> PromQL`** toggle on the query row, and set the time range to
+> **5 minutes**. Paste each query below in turn and click **Run query**.
+
+This:
+
+```markdown
+- Open **Monitoring → Metrics Explorer**.
+- Click the **`<> PromQL`** toggle on the query row.
+- Set the time range to **5 minutes**.
+- Paste each query below and click **Run query**.
+```
+
 ### Explanations and deep dives
 
 Keep inline explanations beside the code or output they explain. Move
@@ -179,8 +200,26 @@ and verification status. Use prose when two sentences suffice.
   and logger names.
 - Use neither bold nor inline code for emphasis.
 - In Bash fences, put each `--flag` on its own continuation line and each
-  `export` on its own line. Preserve short one-liners, environment-prefixed
-  invocations, and `curl` short flags.
+  `export` on its own line. Preserve short one-liners and `curl` short flags.
+- Set an environment variable on its own `export` line before the command, not
+  as an inline `VAR=value command` prefix. The reader sees the variable as a
+  named setting they can read, change, or unset, and it does not scroll off the
+  end of a long command. Write two lines:
+
+  ```bash
+  export ADK_EXPERIMENTAL_TELEMETRY=true
+  .venv/bin/python examples/01_console_metrics.py
+  ```
+
+  not `ADK_EXPERIMENTAL_TELEMETRY=true .venv/bin/python …`. When a variable
+  should apply to one command only, say so in the prose and add the matching
+  `unset` after, rather than relying on the inline prefix to scope it.
+- Do not put comments (`#`) inside a `bash` fence. A reader who copies the whole
+  fence pastes the comment as a command. Put any direction, such as which values
+  to edit or when a step is optional, in the prose before the fence. Split one
+  fence into two around the prose if a mid-sequence instruction is needed. This
+  applies only to runnable `bash` fences; comments in `python` code and
+  docstrings are fine.
 
 ## Voice and evidence
 

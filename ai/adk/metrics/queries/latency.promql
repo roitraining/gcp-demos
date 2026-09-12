@@ -1,0 +1,61 @@
+# latency.promql — used by tutorial page 3.1 "Latency, three ways"
+# Scenario: slow-tool (deep dive: concurrent).
+# Question: is the dependency responsible for the slowdown?
+#
+# Percentiles come from histogram_quantile over the classic _bucket series.
+# Cloud Monitoring exposes ADK's dotted histograms as suffixed Prometheus
+# series inside the UTF-8 brace form, so every reference is {"<name>_bucket"}
+# with the "le" label, never the native {"<name>"} form (which returns zero
+# series on this project — Stage 0).
+#
+# POST each block on its own to:
+#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+# with body  query=<urlencoded>  and an ADC bearer token.
+
+# --- Agent invocation latency, p50 and p95 over the last 5 minutes ---------
+
+# p50 of the whole turn (invoke_agent.duration), one line per agent.
+histogram_quantile(
+  0.50,
+  sum by (le, "gen_ai.agent.name") (
+    rate({"gen_ai.invoke_agent.duration_bucket"}[5m])
+  )
+)
+
+# p95 of the whole turn.
+histogram_quantile(
+  0.95,
+  sum by (le, "gen_ai.agent.name") (
+    rate({"gen_ai.invoke_agent.duration_bucket"}[5m])
+  )
+)
+
+# --- Model call latency, p50 and p95 by model ------------------------------
+# client.operation.duration is the model round trip alone. If invoke_agent p95
+# rises while this stays flat, the slowdown is not the model.
+
+histogram_quantile(
+  0.50,
+  sum by (le, "gen_ai.request.model") (
+    rate({"gen_ai.client.operation.duration_bucket"}[5m])
+  )
+)
+
+histogram_quantile(
+  0.95,
+  sum by (le, "gen_ai.request.model") (
+    rate({"gen_ai.client.operation.duration_bucket"}[5m])
+  )
+)
+
+# --- Tool latency, p95 by tool ---------------------------------------------
+# Two tools of different latency: get_weather is instant, get_forecast sleeps
+# 0.3-1.5 s, so the two names sit in different buckets. This is where the
+# slow-tool slowdown shows up.
+
+histogram_quantile(
+  0.95,
+  sum by (le, "gen_ai.tool.name") (
+    rate({"gen_ai.execute_tool.duration_bucket"}[5m])
+  )
+)

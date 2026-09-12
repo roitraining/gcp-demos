@@ -149,3 +149,5 @@ snippets.txt
 *.tfstate.*
 .terraform/
 *.tfvars
+# ADK local session state
+.adk/

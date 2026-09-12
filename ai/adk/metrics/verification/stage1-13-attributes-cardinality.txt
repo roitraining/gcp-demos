@@ -1,0 +1,10 @@
+/Users/jeff/Desktop/Dev/gcp-demos/ai/adk/metrics/.venv/lib/python3.13/site-packages/google/adk/models/llm_request.py:298: UserWarning: [EXPERIMENTAL] feature FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.
+  declaration = tool._get_declaration()
+
+AGENT (London): The current weather in London is 15°C with drizzle.
+
+AGENT (Atlantis): I do not have weather data for Atlantis.
+
+gen_ai.execute_tool.duration
+  {gen_ai.agent.name=weather_agent, gen_ai.tool.name=get_weather, gen_ai.tool.type=StatusAwareTool}  count=1
+  {gen_ai.agent.name=weather_agent, gen_ai.tool.name=get_weather, gen_ai.tool.type=StatusAwareTool, error.type=lookup_failed}  count=1

@@ -1,0 +1,51 @@
+# tokens.promql — used by tutorial page 3.4 "Tokens and cost"
+# Scenario: growing-context (deep dive: the otel_scope_name filter).
+# Question: does accumulated context explain token growth?
+#
+# token.usage records twice per model call, split by gen_ai.token.type
+# (input / output). sum is the tokens; count is the model calls. The average
+# (sum ÷ count) hides a climb across a session, so page 3.4 reads input-per-call
+# over time, not just the average.
+#
+# POST each block to:
+#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+# with body  query=<urlencoded>  and an ADC bearer token.
+
+# --- Tokens per minute, by type --------------------------------------------
+# Two lines, input and output. Input climbs across a growing-context session;
+# output stays roughly flat.
+
+sum by ("gen_ai.token.type") (
+  rate({"gen_ai.client.token.usage_sum"}[5m])
+) * 60
+
+# --- Input tokens per model call -------------------------------------------
+# sum ÷ count for the input series only. This is the number that rises across
+# the session as context accumulates; the deep dive on 3.4 reads it over time.
+
+sum(rate({"gen_ai.client.token.usage_sum", "gen_ai.token.type"="input"}[5m]))
+  /
+sum(rate({"gen_ai.client.token.usage_count", "gen_ai.token.type"="input"}[5m]))
+
+# --- Output tokens per model call ------------------------------------------
+# The flat counterpart. If this were rising too, the growth would not be
+# context alone.
+
+sum(rate({"gen_ai.client.token.usage_sum", "gen_ai.token.type"="output"}[5m]))
+  /
+sum(rate({"gen_ai.client.token.usage_count", "gen_ai.token.type"="output"}[5m]))
+
+# --- Deep dive: which scope emits which metric -----------------------------
+# The metrics arrive under TWO instrumentation scopes, split by family, not one
+# (verified live, 2026-09-06):
+#   gen_ai.client.*  (token.usage, operation.duration)  ->
+#       otel_scope_name="opentelemetry.instrumentation.google_genai"
+#   gen_ai.invoke_agent.*, gen_ai.execute_tool.*  (ADK's own meter)  ->
+#       otel_scope_name="gcp.vertex.agent"
+# So a scope filter must match the metric's own scope. Filtering the client
+# token metric to gcp.vertex.agent returns ZERO series — a common mistake. Group
+# by the scope to see the split; do not assume one scope owns everything.
+
+sum by (otel_scope_name) (
+  rate({"gen_ai.client.token.usage_count"}[5m])
+)
