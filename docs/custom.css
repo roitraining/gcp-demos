@@ -1,7 +1,7 @@
 /*
  * Modern restyle layered over codelab-elements.css.
  *
- * Load AFTER https://storage.googleapis.com/claat-public/codelab-elements.css.
+ * Load AFTER codelab-elements.css (vendored in docs/; see bigquery.html).
  * Nothing here changes markup or element behavior; it only restyles.
  *
  * Most base rules in codelab-elements.css are scoped under
