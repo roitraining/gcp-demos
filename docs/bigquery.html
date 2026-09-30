@@ -10,7 +10,11 @@
   left-hand nav card and the page title. Styling is in custom.css.
 
   The codelab-elements assets loaded below still provide the step navigation
-  and progress behavior, so they are kept.
+  and progress behavior, so they are kept. They are vendored into docs/
+  because Google's hosted copies (storage.googleapis.com/claat-public) went
+  403 in Sept 2026. Sources: codelab-elements@1.0.1 (.js, .css),
+  @webcomponents/webcomponentsjs@2.8.0 (custom-elements-es5-adapter.js, which
+  the ES5 bundle needs), and code-prettify@0.1.0 (prettify.js), all from npm.
 
   NOTE: despite the codelab machinery, these steps are NOT a sequential
   tutorial. Each step is a standalone activity illustrating one concept, with
@@ -30,7 +34,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,400italic,500,700|Roboto+Mono:400,500&display=swap">
   <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <link rel="stylesheet" href="codelab-elements.css">
   <link rel="stylesheet" href="custom.css">
   <style>
     .success {
@@ -1410,10 +1414,9 @@ FROM class.daily_usage</code></pre>
     
   </google-codelab>
 
-  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
-  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
-  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
-  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="custom-elements-es5-adapter.js"></script>
+  <script src="prettify.js"></script>
+  <script src="codelab-elements.js"></script>
   <script src="//support.google.com/inapp/api.js"></script>
   <script src="din-nav.js"></script>
 
