@@ -1,0 +1,88 @@
+=== Stage 4.3 — the failed step, live — 2026-10-02 ===
+google-adk 2.8.0 (.venv), Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos.
+examples/03_correlated_server.py, PORT=8093 (isolated from parallel runs; the
+page uses the default 8080), TUTORIAL_CLASSIFY_ERRORS=1, env.sh sourced
+(OTEL_SERVICE_NAME=adk-tracing, GOOGLE_CLOUD_DEFAULT_LOG_NAME=adk-tracing).
+
+FIX APPLIED: load/turns.sh had no classified-error scenario (the plan's
+`turns.sh classified-error 1` exited "unknown scenario"). Added a case: every turn
+asks for Atlantis; the CLASSIFY gate stays server-side.
+
+--- Turn ---
+HOST=http://localhost:8093 ENDPOINT=chat ./load/turns.sh classified-error 1
+  classified-error turn   1  5.97s  trace=92972bbfa279dff73a557b8aa0c6a036
+
+--- Tree (trace/get_trace.sh) ---
+trace 92972bbfa279dff73a557b8aa0c6a036  (7 spans)
+invocation                               5.378s
+  invoke_agent weather_agent               5.371s
+    call_llm                                 2.847s
+      generate_content gemini-3.7-flash        2.844s
+      execute_tool get_weather                 0.001s
+    call_llm                                 2.494s
+      generate_content gemini-3.7-flash        2.492s
+
+--- Span ids and error labels (raw v1, decimal -> hex) ---
+invocation                    13181154795132962306  b6ecde730d564602  no error.type
+invoke_agent weather_agent     2271127545221718760  1f84aa782c8ba2e8  no error.type
+call_llm #1                   13500402557182475247  bb5b1098f9a2fbef  no error.type
+generate_content #1           13765839451056085394  bf0a160bd3419992
+execute_tool get_weather      14806836061408373596  cd7c72f2a7b0ab5c  error.type=lookup_failed
+                              gen_ai.tool.type=StatusAwareTool
+                              tool_response={"status": "error", "error_message": "No weather data for 'Atlantis'."}
+call_llm #2                   17966845979676153129  f9570f39e0c09529  no error.type
+                              llm_response text: "I do not have weather data for Atlantis."
+generate_content #2            5796792009928444934  5072579ecc9b8c06
+NOTE: v1 exposes no span status field or label. error.type is the only error
+handle in the v1 read-back; ERROR status itself is a console-only view here.
+
+--- v1 list filter on the error label ---
+GET v1/projects/jwd-gcp-demos/traces?filter=error.type:lookup_failed
+  -> 1 trace: 92972bbfa279dff73a557b8aa0c6a036
+(also with startTime=now-60m: same single trace, contrast trace absent)
+filter=status:error -> 0 traces (no such v1 field; not a status filter)
+
+--- The WARNING under the span ---
+gcloud logging read 'trace="projects/jwd-gcp-demos/traces/92972bbfa279dff73a557b8aa0c6a036" AND spanId="cd7c72f2a7b0ab5c" AND severity=WARNING'
+  logName: projects/jwd-gcp-demos/logs/adk-tracing
+  severity: WARNING
+  spanId: cd7c72f2a7b0ab5c   (= decimal 14806836061408373596 = execute_tool get_weather)
+  textPayload: "weather lookup failed for 'Atlantis': no data"
+  traceSampled: true
+Same message and span name as 3.2 (trace ae6b5c65..., spanId 9d20dbf0a73c5cf5).
+
+--- gen_ai.choice events ---
+spanId 5072579ecc9b8c06 (generate_content #2, after the tool)  content: <elided>
+spanId bf0a160bd3419992 (generate_content #1, the function call) content: <elided>
+OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT unset -> events ARE emitted,
+content "<elided>". The "no data" words are on call_llm #2's llm_response attribute.
+CORRECTION for 1.3's knob table: "content log events are not emitted" is wrong on
+2.8.0; they are emitted with content elided.
+
+--- Contrast: returned-error, no CLASSIFY gate (server restarted) ---
+./load/turns.sh returned-error 2
+  returned-error  turn   1  8.37s  trace=84f11cc496910727bf8022e6c63e6688   (London)
+  returned-error  turn   2  6.22s  trace=a3439fbb1924aeeabff90640a5e6d9b8   (Atlantis)
+a3439fbb...: all 7 spans error.type=None; execute_tool tool_response has
+  {"status": "error", ...}. WARNING present (spanId 0418c339c78d6970).
+Not returned by filter=error.type:lookup_failed.
+
+--- Regression record ---
+verification/classified-error-92972bbfa279dff73a557b8aa0c6a036.txt written.
+Its filter (with --freshness=30d) returned exactly 1 entry, the WARNING above.
+
+--- Not verified (UI only) ---
+Trace Explorer Span status filter value label, bar color (red) of the error span,
+Attributes tab showing error.type, Logs & Events listing the WARNING. Described from
+docs.cloud.google.com/trace/docs/finding-traces and /viewing-details.
+
+--- Gotchas ---
+trace/list_traces.sh is broken: `curl ... | python3 - <<'PY'` makes the heredoc
+python's stdin, so json.load(sys.stdin) gets nothing (JSONDecodeError). Queried v1
+with curl directly.
+v1 read quota ("Read requests (free) per minute") hit repeatedly during parallel
+Stage 4 work; retry after a minute.
+
+VERDICT: error span found by the v1 error.type filter (status filter is console
+only); the WARNING sits under execute_tool get_weather, same message and span name
+as 3.2; the record file exists and its filter returns that entry. Server stopped.

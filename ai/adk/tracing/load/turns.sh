@@ -13,6 +13,8 @@
 #   baseline         One London turn per fresh session.
 #   slow-tool        Half the turns ask for a 3-day forecast (get_forecast sleeps).
 #   returned-error   Half ask for Atlantis (an error status, no raise).
+#   classified-error Every turn asks for Atlantis. Run the server with
+#                    TUTORIAL_CLASSIFY_ERRORS=1 so the tool span goes red.
 #   multi-turn       All N turns reuse ONE session (a whole conversation).
 #   concurrent       slow-tool and baseline turns fired in parallel, each its own
 #                    session, to check logs stay attached to the right request.
@@ -95,6 +97,9 @@ case "$SCENARIO" in
       if (( i % 2 == 0 )); then turn "$i" "$Q_ATLANTIS"; else turn "$i" "$Q_LONDON"; fi
     done
     ;;
+  classified-error)
+    for i in $(seq 1 "$N"); do turn "$i" "$Q_ATLANTIS"; done
+    ;;
   multi-turn)
     # One shared session across all N turns (the /run path only; /chat is stateless here).
     session_id=$(curl -s -X POST \
@@ -111,7 +116,7 @@ case "$SCENARIO" in
     ;;
   *)
     echo "unknown scenario: ${SCENARIO}" >&2
-    echo "one of: baseline slow-tool returned-error multi-turn concurrent" >&2
+    echo "one of: baseline slow-tool returned-error classified-error multi-turn concurrent" >&2
     exit 2
     ;;
 esac

@@ -1,0 +1,30 @@
+=== Reproduction: classified-error (Atlantis) — recorded 2026-10-02 ===
+google-adk 2.8.0, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos.
+Server: examples/03_correlated_server.py with TUTORIAL_CLASSIFY_ERRORS=1.
+
+Turn:
+  export HOST=http://localhost:8093
+  export ENDPOINT=chat
+  ./load/turns.sh classified-error 1
+  -> classified-error turn   1  5.97s  trace=92972bbfa279dff73a557b8aa0c6a036
+
+Trace id: 92972bbfa279dff73a557b8aa0c6a036
+
+Expected span status:
+  execute_tool get_weather   ERROR, error.type=lookup_failed, no exception event
+                             spanId cd7c72f2a7b0ab5c (v1 decimal 14806836061408373596)
+  call_llm, invoke_agent weather_agent, invocation   not ERROR (no error.type)
+  user answer: "I do not have weather data for Atlantis."
+
+Filter that returns the WARNING:
+  gcloud logging read 'trace="projects/jwd-gcp-demos/traces/92972bbfa279dff73a557b8aa0c6a036" AND spanId="cd7c72f2a7b0ab5c" AND severity=WARNING' --freshness=30d
+
+Expected entry (exactly one):
+  severity: WARNING
+  spanId: cd7c72f2a7b0ab5c
+  textPayload: "weather lookup failed for 'Atlantis': no data"
+
+Check after a change to get_weather: rerun the turn, then compare the new trace
+against this file. Same status and error.type on execute_tool, same WARNING under
+it. Both the trace and this log entry age out after 30 days (Cloud Trace and the
+_Default log bucket retention); the turn line and expectations do not.

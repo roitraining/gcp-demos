@@ -1,0 +1,97 @@
+=== Stage 4.2 — one user's request: session and turn, live — 2026-10-02 ===
+google-adk 2.8.0, Python 3.13.3, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos
+Two servers, both on PORT 8092, run one after the other:
+  (a) adk web --otel_to_cloud --port 8092 .   (multi-turn needs /run + sessions)
+  (b) examples/03_correlated_server.py         (/chat returns the trace id)
+OTEL_SERVICE_NAME=adk-tracing.
+
+--- PLAN CORRECTION: multi-turn cannot run against 03 ---
+load/turns.sh multi-turn uses the /run path (adk web) to create one session and
+reuse it. 03 has only /chat, which creates a fresh session per request:
+  multi-turn      turn   1  http=404  0.01s  session=
+  multi-turn      turn   2  http=404  0.01s  session=
+So the five-turn conversation runs on adk web --otel_to_cloud; the "id the server
+returned" half runs on 03 with ENDPOINT=chat.
+
+--- (a) multi-turn, five turns, one session (adk web) ---
+multi-turn      turn   1  http=200  5.69s  session=84b1d220-ef3a-4ad2-9cf0-a260e56ab34f
+multi-turn      turn   2  http=200  5.17s  session=84b1d220-ef3a-4ad2-9cf0-a260e56ab34f
+multi-turn      turn   3  http=200  5.81s  session=84b1d220-ef3a-4ad2-9cf0-a260e56ab34f
+multi-turn      turn   4  http=200  4.92s  session=84b1d220-ef3a-4ad2-9cf0-a260e56ab34f
+multi-turn      turn   5  http=200  5.72s  session=84b1d220-ef3a-4ad2-9cf0-a260e56ab34f
+
+--- ROW 17: VERIFIED via the v1 API label filter ---
+GET v1/projects/jwd-gcp-demos/traces?filter=gen_ai.conversation.id:84b1d220-ef3a-4ad2-9cf0-a260e56ab34f
+(no startTime needed; also works with a leading '+'):
+      "traceId": "3197d337d895d5c2e9bec80888b01327"
+      "traceId": "54b58646bb1b174b759829688268218e"
+      "traceId": "ae9e769d9a666cd774c858d4471c3d6e"
+      "traceId": "b27dd13b8d601abf6ec89fd2bf262c14"
+      "traceId": "e1612d7caee028fa7e1d96930de00e84"
+Exactly five. Negative control: filter gen_ai.conversation.id:00000000-0000-0000-0000-000000000000
+returns 0 traces. The list comes back ordered by trace id, not by time.
+The console's Add attribute filter is the same key/value; NOT clicked (UI-only).
+
+Per trace (view=COMPLETE), sorted by root start:
+  start                        trace                             spans  call_llm input_tokens
+  2026-10-02T17:19:13.460074Z  ae9e769d9a666cd774c858d4471c3d6e  7      362, 430
+  2026-10-02T17:19:19.122111Z  54b58646bb1b174b759829688268218e  7      497, 553
+  2026-10-02T17:19:24.291241Z  3197d337d895d5c2e9bec80888b01327  7      581, 638
+  2026-10-02T17:19:30.115313Z  b27dd13b8d601abf6ec89fd2bf262c14  7      673, 729
+  2026-10-02T17:19:35.048071Z  e1612d7caee028fa7e1d96930de00e84  7      760, 814
+Input tokens climb every turn (the session history is resent), as scenarios.md says.
+Spans carrying gen_ai.conversation.id: invoke_agent weather_agent AND both
+generate_content gemini-3.7-flash spans (the genai instrumentation also stamps it).
+call_llm carries the same value as gcp.vertex.agent.session_id instead.
+
+Turn 5 tree (trace/get_trace.sh e1612d7caee028fa7e1d96930de00e84):
+trace e1612d7caee028fa7e1d96930de00e84  (7 spans)
+invocation                               5.703s
+  invoke_agent weather_agent               5.700s
+    call_llm                                 2.708s
+      generate_content gemini-3.7-flash        2.683s
+      execute_tool get_weather                 0.001s
+    call_llm                                 2.989s
+      generate_content gemini-3.7-flash        2.987s
+
+Turn 5 ids:
+  invoke_agent  gen_ai.conversation.id          = 84b1d220-ef3a-4ad2-9cf0-a260e56ab34f
+  call_llm      gcp.vertex.agent.session_id     = 84b1d220-ef3a-4ad2-9cf0-a260e56ab34f
+  call_llm      gcp.vertex.agent.invocation_id  = e-d576b7ac-a843-45cd-b6f3-1fb83ff277a7
+  call_llm      gcp.vertex.agent.llm_request    = {"model": "gemini-3.7-flash", "config": {...  (full prompt)
+  execute_tool  gcp.vertex.agent.tool_call_args = {"city": "London"}
+  execute_tool  gcp.vertex.agent.llm_request    = {}   (always {} on the tool span, content on or off)
+
+--- (b) the trace id the server returned (03, ENDPOINT=chat) ---
+baseline        turn   1  6.21s  trace=c08c0533c67260b367d03af4ce8a5cb3
+get_trace.sh c08c0533c67260b367d03af4ce8a5cb3: 7 spans, same shape. Its
+gen_ai.conversation.id = 19b31bc8-ae4d-4907-b414-37fa7b1957b8 (a fresh session,
+since /chat creates one per request).
+
+--- content-off contrast (03, ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false) ---
+baseline        turn   1  5.65s  trace=d6bb0f3641be911bbd812cba28d8b961
+  call_llm      gcp.vertex.agent.llm_request    = {}
+  call_llm      gcp.vertex.agent.llm_response   = {}
+  execute_tool  gcp.vertex.agent.tool_call_args = {}
+  gen_ai.conversation.id and session_id still present: the keys survive, content does not.
+
+gen_ai.* log events for both 03 turns (gcloud logging read trace=... logName:"gen_ai"):
+every gen_ai.user.message / system.message / choice reads content=<elided> in BOTH
+runs, because OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT is unset. So in this
+setup the only prompt text Cloud Trace holds is the gcp.vertex.agent.* span attributes.
+
+--- Inputs/Outputs tab: NOT VERIFIED (UI-only) ---
+Google's doc (finding-traces#generative-events) says the tab shows events and
+attributes that follow the OTel GenAI conventions (keys beginning gen_ai). ADK
+2.8.0 puts the prompt in gcp.vertex.agent.llm_request, not a gen_ai.* content
+attribute, and the gen_ai.* log events are elided here. Whether the tab renders
+anything for these spans, and whether it empties under content-off, needs a click.
+
+--- Tooling notes ---
+trace/list_traces.sh is broken: `curl ... | python3 - <<'PY'` gives python the
+heredoc as stdin, so json.load(sys.stdin) reads the script's own EOF and raises
+JSONDecodeError for every call. The page uses a direct curl to the v1 list instead.
+Parallel agents on the same project hit the v1 "Read requests (free) per minute"
+quota (429 RESOURCE_EXHAUSTED); a 429 makes `grep traceId` print nothing. Retry.
+
+Servers stopped after the run (pkill adk web, pkill 03_correlated_server.py).

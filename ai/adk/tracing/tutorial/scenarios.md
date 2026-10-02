@@ -23,7 +23,7 @@ against a running server.
 | Scenario | Controlled change | Observation to capture | Operational question |
 |---|---|---|---|
 | `baseline` | One London turn per fresh session | Five span names in one tree; two `call_llm`, one `execute_tool`, tool ~1 ms | What does one turn look like as a tree? |
-| `slow-tool` | Forecast turns, so `get_forecast` sleeps 0.3–1.5 s | `execute_tool get_forecast` owns most of `invoke_agent`; model spans unchanged | Is the dependency responsible for the slowdown? |
+| `slow-tool` | Forecast turns, so `get_forecast` sleeps 0.3–1.5 s | `execute_tool get_forecast` adds about 1 s per turn, nearly all of the gap to a London turn; model spans unchanged and still the larger share | Is the dependency responsible for the slowdown? |
 | `custom-span` | `slow-tool` with `TUTORIAL_CUSTOM_SPAN=1` | a `fetch_forecast` child under `execute_tool`; the gap inside the tool span now has a name | Where inside my tool did the time go? |
 | `returned-error` | Atlantis; plain `FunctionTool`, `get_weather` returns a failure status and logs a WARNING | `execute_tool get_weather` UNSET, no `error.type`, no exception event; `invoke_agent` OK; the model says there is no data. The WARNING is the only failure evidence, outside the trace until 3.2 | Did execution finish without satisfying the request? |
 | `classified-error` | Same turn with `TUTORIAL_CLASSIFY_ERRORS=1`: `StatusAwareTool` maps the status to `lookup_failed` | `execute_tool` ERROR, `error.type=lookup_failed`, no exception event; parents OK; same answer; the WARNING sits under the red span once 3.2 is done | Which step failed, and what did it say? |
