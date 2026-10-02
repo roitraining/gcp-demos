@@ -16,7 +16,8 @@
 The mechanism is one field. A log entry that carries a `trace` and a `spanId`
 matching a stored span shows up under that span in the Trace Explorer. ADK's own
 `gen_ai.*` events carry it for free; your logs, the framework's logs, and the
-request log do not, until you stamp them.
+request log do not, until you stamp them. Each page runs one scenario from
+[scenarios.md](../scenarios.md).
 
 ```mermaid
 flowchart LR

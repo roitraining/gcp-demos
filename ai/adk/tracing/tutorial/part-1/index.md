@@ -1,4 +1,4 @@
-[← 0 · Setup](../00-setup.md)<br>
+[← Scenarios](../scenarios.md)<br>
 [→ 1.1 · The tree you already have](1.1-the-tree-you-already-have.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
@@ -32,6 +32,6 @@ every span is dropped. Each page here runs one scenario from
 
 ---
 
-[← 0 · Setup](../00-setup.md)<br>
+[← Scenarios](../scenarios.md)<br>
 [→ 1.1 · The tree you already have](1.1-the-tree-you-already-have.md)<br>
 [Tutorial index](../../TUTORIAL.md)

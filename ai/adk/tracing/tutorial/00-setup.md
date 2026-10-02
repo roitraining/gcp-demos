@@ -76,7 +76,7 @@ side of a trace, which [Part 3](part-3/index.md) correlates.
 
 You also need the roles that let you write and read telemetry. To write spans,
 `roles/telemetry.writer` (or `roles/telemetry.tracesWriter` for traces alone).
-To read, `roles/cloudtrace.user` and `roles/logging.viewer` — and the second is
+To read, `roles/cloudtrace.user` and `roles/logging.viewer`. The second is
 what makes the **Logs & Events** tab fill in Part 3. As project owner you already
 have these.
 

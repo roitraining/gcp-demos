@@ -16,8 +16,9 @@
 The tree from Part 1 does not change. What changes is where it goes: a
 `BatchSpanProcessor` ships each batch over OTLP to `telemetry.googleapis.com`,
 and the Trace Explorer draws it. Each page here turns on export by a different
-route — the built-in flag, Cloud Run, your own server, Agent Runtime — and reads
-the tree back with the same `trace/get_trace.sh` script.
+route (the built-in flag, Cloud Run, your own server, Agent Runtime), runs one
+scenario from [scenarios.md](../scenarios.md), and reads the tree back with the
+same `trace/get_trace.sh` script.
 
 ```mermaid
 flowchart LR

@@ -36,11 +36,12 @@ flowchart LR
 *The join is one field. Spans arrive over OTLP; logs arrive through Cloud
 Logging; the Trace Explorer matches them on trace id and span id.*
 
-> Verified against **google-adk 2.8.0** on Python 3.13, serving Gemini 3.7 Flash
-> through Vertex AI, project `jwd-gcp-demos`. Part 1 is captured from real local
-> runs (2026-09-07). Parts 2 to 4 are drafted; their cloud read-back blocks are
-> captured against live Cloud Trace and Cloud Logging as each stage runs. See the
-> tutorial plan for status.
+> Verified against **google-adk 2.8.0** (pinned) on Python 3.13, serving Gemini
+> 3.7 Flash through Vertex AI, project `jwd-gcp-demos`. Part 1 is captured from
+> real local runs (2026-09-07). Parts 2 to 4 are captured against live Cloud
+> Trace and Cloud Logging (2026-09-07 to 2026-10-02); Part 4's console clicks are
+> written as instructions and not yet observed. The
+> [reference page](tutorial/how-to-choose.md) lists what is verified.
 
 ## Contents
 
@@ -52,9 +53,9 @@ need. Start with Setup, then Scenarios, the spine of the tutorial.
 | [0. Setup](tutorial/00-setup.md) | Do this once: environment, model, shell variables, and the APIs the later parts need. |
 | [Scenarios](tutorial/scenarios.md) | The controlled experiments each page runs, and the one agent behind them. |
 | [1. What a trace is](tutorial/part-1/index.md) | The span tree, the raw span, the content on it, an error turn three ways, a trace per turn, and your own span inside a tool (1.1–1.6). Local, no cloud. |
-| [2. Collect](tutorial/part-2/index.md) | Ship the tree to Cloud Trace: `adk web --otel_to_cloud`, Cloud Run, your own server, Agent Runtime, sampling, and other backends (2.1–2.6). *Cloud captures in progress.* |
-| [3. Correlate](tutorial/part-3/index.md) | Get every log line inside its span: the free join, the missing tool line, framework and server logs, one trace per request, and three ways to stamp (3.1–3.5). *Cloud captures in progress.* |
-| [4. Consume](tutorial/part-4/index.md) | Answer the on-call questions: the slow step, one user's request, the failed step, read-back without the console, and how traces, logs, and metrics compare (4.1–4.6). *Cloud captures in progress.* |
+| [2. Collect](tutorial/part-2/index.md) | Ship the tree to Cloud Trace: `adk web --otel_to_cloud`, Cloud Run, your own server, Agent Runtime, sampling, and other backends (2.1–2.6). |
+| [3. Correlate](tutorial/part-3/index.md) | Get every log line inside its span: the free join, the missing tool line, framework and server logs, one trace per request, and three ways to stamp (3.1–3.5). |
+| [4. Consume](tutorial/part-4/index.md) | Answer the on-call questions: the slow step, one user's request, the failed step, read-back without the console, how traces, logs, metrics, and rows compare, and cost, retention, and content policy (4.1–4.6). |
 | [How to choose & reference](tutorial/how-to-choose.md) | The span and attribute catalog, correlation decision table, verification status, and references. |
 
 Ready? **[Start with Setup →](tutorial/00-setup.md)**

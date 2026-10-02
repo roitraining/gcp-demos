@@ -1,6 +1,6 @@
 # Plan: ADK agent tracing tutorial
 
-Folder: `ai/adk/tracing/` (new). Status: **Stages 0–3 done** (2026-09-07): Parts 1–3 written and verified live, captures in `ai/adk/tracing/verification/stage{0,1,2,3}-*.txt`. **Stage 4 done (2026-10-02)** pending Jeff's console checks; **Stage 5 not started.** The optional Cloud Run `request_log` run passed on 2.8.0 (2026-10-02) and found that the unpinned `>=2.8.0` now resolves to 2.11.0, which breaks the log-side join (open question 8). Corrections applied along the way: `execute_tool` parents `call_llm` (not `invoke_agent`); the baseline tree is seven spans; the raised tool span carries two exception events; the W3C propagator alone suffices on Cloud Run; Agent Runtime's root is `invoke_workflow` but `call_llm` is still present on 2.8.0; `gen_ai.*` events attach to `generate_content`, not `call_llm`. Next: Stage 5 (reference page, page 1.3 fix, cross-links, link check). Sibling of `ai/adk/logging/` and `ai/adk/metrics/`, same house style (`tutorial-style` skill), same project (`jwd-gcp-demos`), same model (Gemini 3.7 Flash via Vertex AI).
+Folder: `ai/adk/tracing/` (new). Status: **Stages 0–3 done** (2026-09-07): Parts 1–3 written and verified live, captures in `ai/adk/tracing/verification/stage{0,1,2,3}-*.txt`. **Stage 4 done (2026-10-02)** pending Jeff's console checks; **Stage 5 in progress.** The optional Cloud Run `request_log` run passed on 2.8.0 (2026-10-02) and found that the unpinned `>=2.8.0` now resolves to 2.11.0, which breaks the log-side join (open question 8). Corrections applied along the way: `execute_tool` parents `call_llm` (not `invoke_agent`); the baseline tree is seven spans; the raised tool span carries two exception events; the W3C propagator alone suffices on Cloud Run; Agent Runtime's root is `invoke_workflow` but `call_llm` is still present on 2.8.0; `gen_ai.*` events attach to `generate_content`, not `call_llm`. Next: Stage 5 (reference page, page 1.3 fix, cross-links, link check). Sibling of `ai/adk/logging/` and `ai/adk/metrics/`, same house style (`tutorial-style` skill), same project (`jwd-gcp-demos`), same model (Gemini 3.7 Flash via Vertex AI).
 
 Goal: a new developer runs a small agent, sees the span tree ADK already builds for every turn, ships it to Cloud Trace, gets every log line of a request to show up inside the right span in the Trace Explorer, and then uses traces to answer the questions an on-call engineer asks: which step was slow, which step failed, what did this user's request do. Generate → collect → correlate → consume, in that order.
 
@@ -382,10 +382,10 @@ Verify: 4.3's captured entry is the same WARNING 3.2 captured, under the same sp
 
 ### Stage 5 · Reference page, cross-links, link check (M)
 
-- [ ] `how-to-choose.md` with the catalog and verification status; the catalog includes the four tool-failure shapes (open question 7).
+- [x] `how-to-choose.md` with the catalog and verification status; the catalog includes the four tool-failure shapes (open question 7).
 - [ ] Nav blocks, part TOCs, index table, README files table; `scenarios.md` linked from the index and each landing page.
 - [ ] `lychee --offline 'ai/adk/tracing/**/*.md'` or equivalent; grep for NEEDS-RUN and "illustrative".
-- [ ] The Not verified table below reconciled with the reference page; the run log complete.
+- [x] The Not verified table below reconciled with the reference page; the run log complete. (2026-10-02: rows 1, 4, 6, 7, 8, 16 promoted; 13, 14, 20, 22 narrowed; rows 23 and 24 added.)
 
 Verify: link check passes; every console block is either captured or labeled.
 
@@ -411,40 +411,59 @@ A reproducible negative on Agent Runtime (2.4, decision 4) closes that page; it 
 | 2 | `adk web --otel_to_cloud`; Cloud Run; `02`; Agent Runtime; sampled load | read-back per route; two ids per Cloud Run request recorded; outage turn absent then restored turn present; sampling count within tolerance | **done** (2026-09-07; `verification/stage2-*.txt`; Agent Runtime POSITIVE) |
 | 3 | `02`, `03`, `04` locally; one Cloud Run deploy | entries under the right spans; the viewer gate captured; controls tabled, none under a span; unsampled parent reproduced and fixed; `request_log` joins | **done** (2026-09-07; `verification/stage3-*.txt`; WARNING under `execute_tool` verified live; propagation + always_on verified; `request_log` live join verified on Cloud Run 2026-10-02, 2.8.0 only) |
 | 4 | load run; filters; scripts | slowest tree captured; error span with its log; regression record saved and its filter checked | **done** (2026-10-02; `verification/stage4-*.txt`; 4.1 Verify corrected, see Stage 4; console clicks pending Jeff) |
-| 5 | none | links resolve; labels present; tables reconciled | not started |
+| 5 | none | links resolve; labels present; tables reconciled | in progress (2026-10-02: reference page and tables done; nav and link check pending) |
 
 **Not verified.** Evidence levels: source inspection, doc inspection, proposed, verified.
 
 | # | Item | Evidence | Gate |
 |---|---|---|---|
-| 1 | Five span names and parent chain on the dev UI and console exporter | verified (logging 5.1) for the tree; source inspection for the console form | Stage 1 (1.1, 1.2) |
+| 1 | Five span names and parent chain on the dev UI and console exporter | **verified** (Stage 0 and 1: seven spans, five names, `execute_tool` under `call_llm`, on the console exporter and the dev UI debug endpoint; `stage0-local-probes.txt`, `stage1-console-spans.txt`) | Stage 1 (1.1, 1.2) ✓ |
 | 2 | `force_flush()` on the tracer provider is enough for `01` | **verified** (Stage 0, 7 spans) | Stage 0 ✓ |
 | 3 | OTel `LoggingHandler` records carry `trace` and `spanId` through `CloudLoggingExporter` | **verified** in-process (Stage 0: record ids match the `execute_tool` span); the live UI half is row 20 | Stage 0 ✓ |
-| 4 | `gcp.vertex.agent.llm_request` holds the prompt by default and reads `{}` under the knob | source inspection; logging's own Not verified table lists the Trace Explorer half | Stage 1 (1.3) |
+| 4 | `gcp.vertex.agent.llm_request` holds the prompt by default and reads `{}` under the knob | **verified** (Stage 1: ~1,955 chars, then `{}` for `llm_request`, `llm_response`, `tool_call_args`; Stage 4.2: same `{}` through the v1 read-back). `tool_response` under the knob is source only; the **Inputs/Outputs** tab is not observed | Stage 1 (1.3) ✓, 4.2 ✓ (API) |
 | 5 | Three-way taxonomy on `execute_tool`: `returned-error` UNSET with no `error.type`; `classified-error` ERROR with `error.type=lookup_failed`, parents OK; `raised-error` ERROR with an exception event (**two** on 2.8.0: `LookupError` + a `DynamicNodeFailError` wrapper), parents ERROR, request fails; a plain `{"error": ...}` dict gets `TOOL_ERROR` with no wrapper | **verified** (Stage 0, all four cases) | Stage 0 ✓, recaptured 1.4 |
-| 6 | Custom span from inside a tool is a child of `execute_tool` | source inspection | Stage 1 (1.6) |
-| 7 | `--otel_to_cloud` spans visible in Trace Explorer with `OTEL_SERVICE_NAME` as the service | verified (logging 5.2) for arrival; proposed for the service column | Stage 2 (2.1) |
-| 8 | Cloud Run: request log trace id differs from the spans' trace id | source inspection (no inbound propagation) | Stage 2 (2.2) |
+| 6 | Custom span from inside a tool is a child of `execute_tool` | **verified** (Stage 1: `fetch_forecast` 0.695 s under `execute_tool get_forecast` 0.700 s; Stage 4.1: present in the v1 read-back with `forecast.days=3`) | Stage 1 (1.6) ✓ |
+| 7 | `--otel_to_cloud` spans visible in Trace Explorer with `OTEL_SERVICE_NAME` as the service | **verified** via v1 (Stage 2.1: seven spans read back, `service.name=adk-tracing` label; 2.2: `service.name=adk-trace-cloudrun`); the console **Service/workload** column not observed | Stage 2 (2.1) ✓ (API) |
+| 8 | Cloud Run: request log trace id differs from the spans' trace id | **verified** (Stage 2.2, `jwd-dev-3`: spans `0000cb10…`, request log `18cb1a68…`) | Stage 2 (2.2) ✓ |
 | 9 | Agent Runtime: schema v2 tree in the Agent Platform Traces tab or Trace Explorer | **verified POSITIVE** (Stage 2.4, `jwd-dev-4`: 6 traces in Cloud Trace, root `invoke_workflow weather_agent`, `call_llm` still present; the console Traces tab is Cloud Trace filtered by `service.name=<engine id>`) | Stage 2 (2.4) ✓ |
 | 10 | Cloud Run sends `traceparent` in addition to `X-Cloud-Trace-Context` | **verified** (Stage 0: both, same trace id; inbound `traceparent` preserved; W3C alone suffices for the external path) | Stage 0 ✓ |
 | 11 | Unsampled propagated parent drops ADK spans; `always_on` restores them | **verified** (Stage 0: 0 vs 7 local; Stage 3.4: 04 server, `00`-flag header, zero then full) | Stage 0 ✓, 3.4 ✓ |
 | 12 | Trace API v1 reads OTLP-ingested spans | **verified** (Stage 0: 7 spans, full chain; `spanId` is decimal uint64; ~90–120 s ingest delay, 404 = "bucket not found", retry) | Stage 0 ✓ |
-| 13 | `gen_ai.*` events appear in **Logs & Events** under the model span | **verified** (Stage 3.1: entries carry the `generate_content` span id — a child of `call_llm`, correcting "under `call_llm`") | Stage 3 (3.1) ✓ |
-| 14 | `google_adk` INFO lines land under the model span; `uvicorn.access` gets no trace | **verified** (Stage 3.3: framework INFO carry model span ids; access log has no `spanId`) | Stage 3 (3.3) ✓ |
+| 13 | `gen_ai.*` events appear in **Logs & Events** under the model span | **verified** on the data (Stage 3.1: entries carry the `generate_content` span id — a child of `call_llm`, correcting "under `call_llm`"); the tab itself not observed (row 23) | Stage 3 (3.1) ✓ |
+| 14 | `google_adk` INFO lines land under the model span; `uvicorn.access` gets no trace | **verified** for the INFO lines (Stage 3.3: framework INFO carry `generate_content` span ids); the access-log half is source only, no record reads it back | Stage 3 (3.3) ~ |
 | 15 | With `FastAPIInstrumentor`, the header id equals the returned id equals the span trace id; `request_log` nests under **Correlate by** | **verified** for the id chain (Stage 3.4: header id == returned id, `invocation` child of `POST /chat`); **verified** on Cloud Run for the `request_log` join (2026-10-02, 2.8.0: all four ids equal; the **Correlate by** click itself not done; 2.11.0 breaks the log-side match, open question 8) | Stage 3 (3.4) ✓ |
-| 16 | `parentbased_traceidratio` at 0.5 keeps about half of 20 turns | doc inspection | Stage 2 (2.5) |
+| 16 | `parentbased_traceidratio` at 0.5 keeps about half of 20 turns | **verified** (Stage 2.5, local console exporter: 9/20 traces, 63 = 7 × 9 spans; default kept 20/20) | Stage 2 (2.5) ✓ |
 | 17 | Attribute filter on `gen_ai.conversation.id` lists the five `multi-turn` traces | **verified via v1 API** (2026-10-02: `gen_ai.conversation.id:<session>` returns exactly five; a made-up id returns zero); the console filter not clicked | Stage 4 (4.2) ✓ (API) |
 | 18 | The BigQuery plugin's `enable_otel_correlation` stamps the same trace id the spans carry | source inspection | none; cross-reference only, the metrics tutorial owns the run |
 | 19 | `02` with `otel_resource=get_gcp_resource(project_id)` lands a readable trace; without it the Telemetry API rejects the batch | **verified** (Stage 0 local: resource carries/omits `gcp.project_id`; Stage 2.3: without it → **400 Bad Request**, trace 404 in Cloud Trace) | Stage 0 ✓, 2.3 ✓ |
-| 20 | The bridged tool WARNING shows in **Logs & Events** for the selected `execute_tool` span | **verified** (Stage 3.2: WARNING `spanId` == the red `execute_tool` span, decimal↔hex checked) | Stage 3 (3.2) ✓ |
+| 20 | The bridged tool WARNING shows in **Logs & Events** for the selected `execute_tool` span | **verified** on the data (Stage 3.2 and 4.3: WARNING `spanId` == the `execute_tool` span, decimal↔hex checked); the tab itself not observed (row 23) | Stage 3 (3.2) ✓ |
 | 21 | `export-outage`: the turn answers, the export failure is logged, the turn is absent from the read-back; with no span processor the returned trace id is all zeros | **verified** (Stage 2.3: turn answers, `Connection refused` logged; all-zeros with no processor) | Stage 2 (2.3) ✓ |
-| 22 | 3.3's four negative controls each fail to appear under a selected span; `concurrent` lines never cross requests | control 1 (startup line, no `trace`) verified live; controls 2–4 tabled from the client extraction rule (a live `concurrent` capture is optional Stage 5) | Stage 3 (3.3) ~ |
+| 22 | 3.3's four negative controls each fail to appear under a selected span; `concurrent` lines never cross requests | control 1 (startup line, no `trace`) holds by construction (`stage3-31-33-log-join.txt`: logged before any span exists; not read back); controls 2–4 tabled from the client extraction rule, not run | Stage 3 (3.3) ~ |
+| 23 | Viewer gate steps 3–4 in the console: the WARNING in **Logs & Events** for the selected span; **View logs** opens the prefilled query and links back | not observed; no run opened the console. Steps 1–2 (the data) verified in `stage3-32-viewer-gate.txt` and `stage4-43-failed-step.txt` | Stage 4 console checks (Jeff) |
+| 24 | 1.5's local `multi-turn` block (five trace ids, one conversation id) | no run record; the cloud equivalent is verified (row 17, `stage4-42-one-users-request.txt`) | Stage 5: capture or relabel |
 
 **Run log.** One row per `verification/<run-id>.txt`, filled as stages run.
 
 | Run | Date | Pages | Scenario | Notes |
 |---|---|---|---|---|
-| — | — | — | — | none yet |
+| `stage0-local-probes` | 2026-09-07 | 1.2, 1.4, 3.2, 3.4 | `baseline`, the three error shapes, `unsampled-parent` | rows 2, 3, 5, 11, 19 (local); `execute_tool` under `call_llm` correction |
+| `stage0-row10-cloudrun-traceparent` | 2026-09-07 | 3.4 | header echo | `jwd-dev-2`; Cloud Run sends both headers, keeps an inbound `traceparent`; torn down |
+| `stage0-row12-trace-api-v1` | 2026-09-07 | 4.4, all cloud captures | `baseline` | `jwd-dev-1`; v1 reads OTLP spans; decimal `spanId`; ~100 s ingest delay; torn down |
+| `stage1-console-spans` | 2026-09-07 | 1.1–1.4, 1.6 | `baseline`, `slow-tool`, `content-off`, `custom-span` | console exporter and dev UI debug endpoint; no 1.5 capture (row 24) |
+| `stage2-21-adk-web-otel` | 2026-09-07 | 2.1 | `slow-tool` | `adk web --otel_to_cloud`; trace `8e95a681…` |
+| `stage2-22-cloudrun` | 2026-09-07 | 2.2 | `baseline` | `jwd-dev-3`, `02` via Dockerfile; two trace ids per request; torn down |
+| `stage2-23-own-server` | 2026-09-07 | 2.3 | `baseline`, `export-outage` | recorded and exported rungs; row 19 cloud half (400); visible rung not run |
+| `stage2-24-agent-runtime` | 2026-09-07 | 2.4 | `baseline` | `jwd-dev-4`; schema v2 root, `call_llm` present; deploy rewrote the extra to `[a2a]`; model 404 in region; torn down |
+| `stage2-25-sampling` | 2026-09-07 | 2.5 | `baseline` × 20 | local console exporter, not Cloud Trace; 9/20 at 0.5 |
+| `stage3-31-33-log-join` | 2026-09-07 | 3.1, 3.3 | `classified-error` | trace `ae6b5c65…`, 13 entries; events under `generate_content`; open question 3 resolved |
+| `stage3-32-viewer-gate` | 2026-09-07 | 3.2 | `classified-error` | WARNING `spanId` == `execute_tool`; console steps not observed (row 23) |
+| `stage3-34-propagation` | 2026-09-07 | 3.4 | `tagged-request`, `unsampled-parent` | `04` locally; header id == returned id |
+| `stage3-34-request-log-cloudrun` | 2026-10-02 | 3.4 | `tagged-request` (Cloud Run's header) | `jwd-dev-5`; 2.11.0 run A fails the log join, 2.8.0 run B passes; **Correlate by** not clicked; torn down |
+| `stage4-41-slow-step` | 2026-10-02 | 4.1 | `baseline` × 5, `slow-tool` × 20 | first run discarded (server stopped mid-run); model spans outrank the tool; UI not observed |
+| `stage4-42-one-users-request` | 2026-10-02 | 4.2 | `multi-turn`, `baseline`, `content-off` | `multi-turn` needs `adk web`; row 17 via API; UI not observed |
+| `stage4-43-failed-step` | 2026-10-02 | 4.3 | `classified-error`, `returned-error` | `error.type` filter, no v1 status field; `gen_ai.choice` `<elided>`; UI not observed |
+| `classified-error-92972bbf…` | 2026-10-02 | 4.3 | `classified-error` | the regression record; its filter returns one WARNING |
+| `stage4-44-read-back` | 2026-10-02 | 4.4 | `baseline` | ingest ~20 s; `list_traces.sh` fixed and rerun the same day |
 
 ## Open questions
 
