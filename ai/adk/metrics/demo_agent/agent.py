@@ -51,9 +51,10 @@ def get_weather(city: str) -> dict:
             "report": f"The weather in {city} is {_CITY_WEATHER[key]}.",
         }
     # A failure status, not an exception. On its own this does NOT stamp
-    # error.type: ADK only reads the response for an error when the tool defines
-    # a _detect_error_in_response hook (see StatusAwareTool below). The
-    # invocation itself still succeeds either way.
+    # error.type: ADK only reads the response through the
+    # _detect_error_in_response hook, whose FunctionTool default flags only an
+    # "error" key (see StatusAwareTool below). The invocation itself still
+    # succeeds either way.
     return {
         "status": "error",
         "error_message": f"No weather data for {city!r}.",
@@ -95,10 +96,11 @@ class StatusAwareTool(FunctionTool):
 
     A plain function tool never stamps ``error.type`` on the tool-duration
     metric for a returned failure status; ADK only reads the response through
-    the optional ``_detect_error_in_response`` hook, which ``FunctionTool``
-    leaves returning ``None``. Overriding it maps a ``{"status": "error"}``
-    result to an ``error.type`` value, so the unknown-city turn produces a
-    second attribute set while the invocation still succeeds. Tutorial 1.3
+    the ``_detect_error_in_response`` hook, and ``FunctionTool``'s default
+    returns ``"TOOL_ERROR"`` only for a dict with a truthy ``"error"`` key.
+    Overriding it maps a ``{"status": "error"}`` result to an ``error.type``
+    value, so the unknown-city turn produces a second attribute set while the
+    invocation still succeeds. Tutorial 1.3
     teaches exactly this.
     """
 
