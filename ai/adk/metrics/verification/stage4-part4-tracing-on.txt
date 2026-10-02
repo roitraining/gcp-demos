@@ -1,0 +1,182 @@
+=== Stage 4 · Part 4 (4.1-4.6) with span export on, 2026-10-02T17:58:25Z to 18:18:30Z ===
+project jwd-gcp-demos; google-adk 2.8.0 (+ [bigquery-analytics] extra, pyarrow); bigquery-agent-analytics 0.5.2;
+Python 3.13; model gemini-3.7-flash on Vertex; bq CLI 2.1.39. Venv: ai/adk/metrics/.venv.
+Server: examples/04_bq_plugin.py with get_gcp_exporters(enable_cloud_metrics=True, enable_cloud_tracing=True)
+and the two routes load/turns.sh calls. Run on PORT=8101 (HOST=http://localhost:8101) to avoid a port clash;
+pages show the default 8080. env.sh: OTEL_SERVICE_NAME=adk-metrics,
+OTEL_RESOURCE_ATTRIBUTES=service.instance.id=laptop-1,cloud.region=us-central1. enable_otel_correlation left False.
+
+--- Fixes found by running the pages ---
+- requirements.txt: plugin import failed, "The 'pyarrow' package is required ... pip install google-adk[bigquery-analytics]".
+  Fixed: google-adk[otel-gcp,bigquery-analytics]==2.8.0.
+- 04 exposed only /chat; turns.sh calls POST /apps/{app}/users/{user}/sessions then POST /run, and growing-context
+  needs a reused session. Fixed: 04 serves those two routes (no /chat).
+- 4.1 count query: alias `rows` is reserved -> "Syntax error: Unexpected keyword ROWS at [1:32]". Fixed: alias `events`.
+- 4.1: views are all created with the table (25 views, incl. HITL/A2A never fired), not per event type seen
+  (bigquery_agent_analytics_plugin.py:4906, :5094-5103).
+- 4.3 prompt query: JSON path '$.text' -> NULL. content is {"text_summary": "..."}. Fixed: '$.text_summary', filtered to
+  the costliest one-turn session.
+- 4.4 Step 2 as written (BQ_TRACE_ID=<invocation id>):
+    ValueError: No events found for trace_id=e-f18e9299-b53c-40f9-b881-5899de3284f5
+  get_trace() filters WHERE trace_id = @trace_id (bigquery_agent_analytics/client.py:159, :913-948). Fixed: query the
+  Atlantis row's trace_id first.
+- 4.4 Step 3 as written: "No such option: --project (Possible options: --project-id)". Fixed: --project-id/--dataset-id,
+  --evaluator error_rate --format text.
+- 4.6 bq rm without -f prompts; added -f and a bq ls check.
+
+--- 4.1 bq mk ---
+Dataset 'jwd-gcp-demos:agent_analytics' successfully created.
+
+--- 4.1 turns.sh baseline 10 ---
+baseline        turn   1  http=200  29.66s
+baseline        turn   2  http=200  6.41s
+baseline        turn   3  http=200  4.25s
+baseline        turn   4  http=200  6.66s
+baseline        turn   5  http=200  4.80s
+baseline        turn   6  http=200  6.35s
+baseline        turn   7  http=200  5.92s
+baseline        turn   8  http=200  5.57s
+baseline        turn   9  http=200  6.41s
+baseline        turn  10  http=200  5.93s
+waiting 10s for the final export interval...
+good to go — the series are in Cloud Monitoring
+
+--- 4.1 bq ls: agent_events TABLE (adk_schema_version:2, DAY on timestamp, clustered event_type, agent, user_id) + 25 v_* views ---
+--- 4.1 count by event_type (120 rows, 12 per turn) ---
+LLM_REQUEST 20 | LLM_RESPONSE 20 | USER_MESSAGE_RECEIVED 10 | INVOCATION_STARTING 10 | AGENT_STARTING 10 |
+TOOL_STARTING 10 | TOOL_COMPLETED 10 | AGENT_RESPONSE 10 | AGENT_COMPLETED 10 | INVOCATION_COMPLETED 10
+trace_id per invocation is a 32-hex OTel id shared by all 12 rows, e.g. e-812b4c6a... -> fe052d519cb3847d23a81665e0010407
+(Cloud Trace v1 GET -> 200).
+
+--- 4.2 turns.sh growing-context 10 ---
+growing-context turn   1  http=200  7.83s
+growing-context turn   2  http=200  4.93s
+growing-context turn   3  http=200  6.29s
+growing-context turn   4  http=200  4.10s
+growing-context turn   5  http=200  3.42s
+growing-context turn   6  http=200  3.11s
+growing-context turn   7  http=200  5.33s
+growing-context turn   8  http=200  5.39s
+growing-context turn   9  http=200  4.62s
+growing-context turn  10  http=200  5.31s
+waiting 10s for the final export interval...
+good to go — the series are in Cloud Monitoring
+
+--- 4.2 Step 1: 40 v_llm_response rows; session f6ac01cb... prompt tokens 323 -> 1165 across 20 calls,
+completion 15-16; usage_cached_tokens and context_cache_hit_rate NULL on every row (no cache hit this run).
+--- 4.2 Step 2 rows: input_tokens 22874, output_tokens 616, thinking_tokens 1162 (total 24652 = p + c + th)
+Metric side, same process, PromQL max_over_time/increase on {"gen_ai.client.token.usage_sum"} by gen_ai.token.type:
+  input 22874, output 1778 (job=adk-metrics, instance=laptop-1)
+VERDICT: input matches exactly; metric output = completion + thinking (616 + 1162 = 1778). Row 19 verified with that caveat.
+
+--- 4.3 turns.sh multi-city 20 ---
+multi-city      turn   1  http=200  5.40s
+multi-city      turn   2  http=200  207.52s
+multi-city      turn   3  http=200  28.02s
+multi-city      turn   4  http=200  11.69s
+multi-city      turn   5  http=200  6.38s
+multi-city      turn   6  http=200  4.11s
+multi-city      turn   7  http=200  27.09s
+multi-city      turn   8  http=200  14.95s
+multi-city      turn   9  http=200  13.74s
+multi-city      turn  10  http=200  52.06s
+multi-city      turn  11  http=200  24.97s
+multi-city      turn  12  http=200  4.65s
+multi-city      turn  13  http=200  39.21s
+multi-city      turn  14  http=200  4.78s
+multi-city      turn  15  http=200  6.39s
+multi-city      turn  16  http=200  9.53s
+multi-city      turn  17  http=200  4.76s
+multi-city      turn  18  http=200  5.57s
+multi-city      turn  19  http=200  3.88s
+multi-city      turn  20  http=200  5.31s
+waiting 10s for the final export interval...
+good to go — the series are in Cloud Monitoring
+
+[exited with code 0]
+
+--- 4.3 Step 1 top 5 by total_tokens ---
+f6ac01cb... (4.2 session) 20 calls 16350 | aba54705... 2 calls 969 | aa77f9be... 956 | eefcef71... 954 | bcf8b583... 920
+All five three-city sessions rank 2-6 (969, 956, 954, 920, 911), above every London-only session (889 and below);
+each three-city session has 3 TOOL_STARTING rows.
+--- 4.3 Step 2 (TOP_SESSION=aba54705-777c-4815-b20b-8526c95e9489) ---
+e-e1969fca-1209-439b-bec9-f3dbf02377de | 45c1abe0134ba37b66a4e1e582bc10a5 | What's the weather in London, Tokyo, and New York?
+(Cloud Trace v1 GET of 45c1abe0... -> 200)
+
+--- 4.4 turns.sh unknown-city 10 ---
+unknown-city    turn   1  http=200  3.83s
+unknown-city    turn   2  http=200  6.72s
+unknown-city    turn   3  http=200  5.71s
+unknown-city    turn   4  http=200  5.63s
+unknown-city    turn   5  http=200  3.90s
+unknown-city    turn   6  http=200  4.99s
+unknown-city    turn   7  http=200  5.08s
+unknown-city    turn   8  http=200  4.54s
+unknown-city    turn   9  http=200  4.86s
+unknown-city    turn  10  http=200  4.00s
+waiting 10s for the final export interval...
+good to go — the series are in Cloud Monitoring
+
+--- 4.4 Step 1: Requirement already satisfied: bigquery-agent-analytics ... (0.5.2)
+(page shows the path as ./.venv/...; requirements.txt already installs it, unpinned; PyPI latest is 0.5.4)
+--- 4.4 Step 2 Atlantis pick ---
++----------------------------------------+----------------------------------+---------------------------------+
+|             invocation_id              |             trace_id             |             prompt              |
++----------------------------------------+----------------------------------+---------------------------------+
+| e-f18e9299-b53c-40f9-b881-5899de3284f5 | f25d94385fbf22c5727af0037098e8a4 | What's the weather in Atlantis? |
++----------------------------------------+----------------------------------+---------------------------------+
+--- 4.4 Step 2 render (trace_id f25d94385fbf22c5727af0037098e8a4; Cloud Trace v1 GET -> 200) ---
+Trace: f25d94385fbf22c5727af0037098e8a4 | Session: 01c782ac-572e-4801-af88-da117db6b6a5 | 3345ms
+================================================================================================
+└─ [✓] USER_MESSAGE_RECEIVED [weather_agent] - What's the weather in Atlantis?
+└─ [✓] INVOCATION_STARTING [weather_agent]
+└─ [✓] AGENT_RESPONSE [weather_agent] - I do not have weather data for Atlantis.
+└─ [✓] INVOCATION_COMPLETED [weather_agent] (3344ms)
+   ├─ [✓] AGENT_STARTING [weather_agent] - You are a concise weather assistant. For a current-weather question, call get_weather. For a multi-day forecast, call...
+   └─ [✓] AGENT_COMPLETED [weather_agent] (3342ms)
+      ├─ [✓] LLM_REQUEST [weather_agent] (gemini-3.7-flash) - What's the weather in Atlantis?
+      ├─ [✓] LLM_RESPONSE [weather_agent] (1535ms) - call: get_weather
+      ├─ [✓] TOOL_STARTING [weather_agent] (get_weather)
+      ├─ [✓] TOOL_COMPLETED [weather_agent] (get_weather) (1ms)
+      ├─ [✓] LLM_REQUEST [weather_agent] (gemini-3.7-flash) - What's the weather in Atlantis?
+      └─ [✓] LLM_RESPONSE [weather_agent] (1789ms) - I do not have weather data for Atlantis.
+TOOL_COMPLETED content: {"result":{"error_message":"No weather data for 'Atlantis'.","status":"error"},"tool":"get_weather"}
+v_tool_error rows: 0.
+--- 4.4 Step 3: bq-agent-sdk evaluate --evaluator error_rate --format text ---
+Evaluation Report: error_rate_evaluator
+  Dataset: jwd-gcp-demos.agent_analytics.agent_events WHERE TRUE
+  Sessions: 41
+  Passed: 41 (100%)
+  Failed: 0
+  Aggregate Scores:
+    error_rate: 1.000
+(JSON format: observed 0.0 on all 41 sessions.) tool_errors = COUNTIF(event_type = 'TOOL_ERROR')
+(system_evaluator.py:643); the plugin writes TOOL_ERROR only when a tool raises.
+VERDICT: the page's "tool error rate near 0.5" claim was wrong; rows and metrics define failure differently.
+Default latency evaluator for reference: 41 sessions, 32 passed (78%), latency 0.780.
+CLI subcommands confirmed: evaluate, get-trace, list-traces (and others incl. views, categorical-views that write).
+
+--- 4.5 Looker Studio: browser step, not run. ---
+
+--- 4.6 Step 1: slowest turn via INVOCATION_COMPLETED latency_ms.total_ms ---
++--------------------------------------+----------------------------------+----------+
+|              session_id              |             trace_id             | total_ms |
++--------------------------------------+----------------------------------+----------+
+| 5f711dc2-fc7d-48ea-8ed7-37f5878e6809 | 7bcb5b0e61cd13bbb9e214e5aa866e8e |   206287 |
+| b832b292-09c8-4eeb-9132-39731b63bdb2 | 79a94bce93acaea0240ea106bc23c53e |    51446 |
+| 78117f05-e057-48c9-b762-2ee87d370f3d | ccf81f123d0d6097864b94c93362798c |    38205 |
++--------------------------------------+----------------------------------+----------+
+GET https://cloudtrace.googleapis.com/v1/projects/jwd-gcp-demos/traces/7bcb5b0e61cd13bbb9e214e5aa866e8e (ADC token) -> 200, first try (about 4 min after the turn ended)
+  207.50s  invocation
+  206.29s  invoke_agent weather_agent
+  204.11s  call_llm
+  204.10s  generate_content gemini-3.7-flash
+    0.01s  execute_tool get_weather
+    2.17s  call_llm
+    2.16s  generate_content gemini-3.7-flash
+Span labels carry service.name=adk-metrics, service.instance.id=laptop-1, gcp.project_id=jwd-gcp-demos.
+JOIN DEMONSTRATED: row (session 5f711dc2..., multi-city turn 2, London prompt, 206287 ms) -> trace_id -> Cloud Trace
+trace with 7 spans; the first generate_content took 204.10 s, get_weather 0.01 s.
+
+--- 4.6 Step 2 teardown (18:18:30Z): server stopped with SIGINT; bq rm -f --recursive --dataset -> no output, exit 0;
+bq ls -> "BigQuery error in ls operation: Not found: Dataset jwd-gcp-demos:agent_analytics". Nothing left running.

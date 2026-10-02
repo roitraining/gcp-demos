@@ -1,4 +1,4 @@
-google-adk[otel-gcp]==2.8.0
+google-adk[otel-gcp,bigquery-analytics]==2.8.0
 opentelemetry-exporter-otlp-proto-http
 # adk web --otel_to_cloud sets up all three signals (trace, metrics, logs); the
 # otel-gcp extra pulls only the instrumentation, not these Cloud exporters.
@@ -11,7 +11,7 @@ google-cloud-aiplatform[agent-engines]
 google-cloud-bigquery
 google-cloud-bigquery-storage
 google-cloud-storage
-bigquery-agent-analytics
+bigquery-agent-analytics==0.5.2
 # examples/plot_tokens.py (2.1) renders the token series as a PNG so a reader can
 # set the API's chart beside the Console's.
 matplotlib

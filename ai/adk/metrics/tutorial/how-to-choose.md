@@ -51,8 +51,10 @@ breaks on latency-to-visibility and cost.
 | Metrics somewhere other than Google | OTLP backend | Env-var route, http/protobuf only (Part 2) |
 
 The stores meet at Cloud Trace, not at each other: a metric carries no id, so the
-only join is a row's `trace_id` to its span, enabled with
-`enable_otel_correlation=True` ([4.6](part-4/4.6-metrics-or-rows.md)).
+only join is a row's `trace_id` to its trace. That needs span export in the agent
+process, which `04_bq_plugin.py` turns on; `enable_otel_correlation=True` adds the
+span ids under `attributes.otel` for a span-level join
+([4.6](part-4/4.6-metrics-or-rows.md)).
 
 ## 2.8.0 versus head
 
@@ -65,10 +67,10 @@ of it differs in two ways that do not change any metric name or the pages:
 
 ## Verification status
 
-Parts 1 (local metrics) is verified against a real run. Parts 2 through 4 are
-drafted from source and docs; every cloud-output block on those pages is marked
-`NEEDS-RUN` until its stage runs. The authoritative status board is the plan at
-`docs/adk-metrics-tutorial.md`.
+Every output block is a capture from a real run unless it is marked
+`NEEDS-RUN`. As of 2026-10-02 those markers remain on 3.2, 3.3, 3.5, and 3.6;
+Part 4 was re-run live with tracing on, except the Looker Studio page (4.5). The
+authoritative status board is the plan at `docs/adk-metrics-tutorial.md`.
 
 ### Verified
 
@@ -81,6 +83,10 @@ drafted from source and docs; every cloud-output block on those pages is marked
 | No second `gen_ai.client.*` scope; token sums are not doubled | Stage 0: one scope, single counts |
 | `adk.experimental.*` is gated on `ADK_EXPERIMENTAL_TELEMETRY` | Stage 0 |
 | Raw script export needs `gcp.project_id` in `OTEL_RESOURCE_ATTRIBUTES` | Stage 0: 400 without, 200 with |
+| Plugin creates `agent_events` and all 25 `v_*` views on first write | Stage 4, 2026-10-02 |
+| Row token sums match the histogram: input exactly, output as completion plus thinking | Stage 4: 22,874 input both sides; 1,778 = 616 + 1,162 |
+| SDK 0.5.2 `get_trace()` takes a `trace_id`; `error_rate` counts only raised tool errors | Stage 4: render captured; 0 errors on `unknown-city` |
+| A row's `trace_id` opens its trace in Cloud Trace when the process exports spans | Stage 4: 206 s turn read back, 204 s in one model call |
 
 ### Not verified
 
@@ -92,9 +98,6 @@ drafted from source and docs; every cloud-output block on those pages is marked
 | Overlapping turns do not cross timers | Part 3 (3.1 deep dive) |
 | `tutorial.weather.requests` reaches Cloud Monitoring as `/counter` | Part 3 (3.7) |
 | PromQL alert policy opens an incident | Part 3 (3.6) |
-| Plugin creates `agent_events` and the `v_*` views with the cited columns | Part 4 (4.1) |
-| Per-run token total from `v_llm_response` equals the Part 3 histogram sum | Part 4 (4.2) |
-| SDK 0.5.2 render, evaluator, and CLI against the table | Part 4 (4.4) |
 | Looker Studio template opens on `agent_events` | Part 4 (4.5) |
 
 ## References
