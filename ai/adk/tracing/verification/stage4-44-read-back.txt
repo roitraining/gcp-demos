@@ -90,3 +90,17 @@ trace/docs/migrate-to-otlp-endpoints: recommends the Telemetry (OTLP) API for
 stackdriver/estimating-bills: billed metric is trace spans ingested.
 
 Server stopped (background task ended; port 8094 free).
+
+--- 2026-10-02 17:34Z: trace/list_traces.sh fixed in the repo ---
+Fix: the curl response goes to python on stdin and the script is passed with
+-c (a heredoc would replace stdin; an argv string can exceed ARG_MAX on a full
+COMPLETE page). Also: now(timezone.utc) for utcnow(); quoted span-name example
+in the header; retry up to 6x at 10 s on RESOURCE_EXHAUSTED (read quota).
+Re-run of the page's Step 3 filter with the committed script (window 600 min):
+  list_traces.sh 'gen_ai.conversation.id:42e24c76-65f3-43ce-93bc-4f5c500d95f1' 600
+  (1 traces)
+  41e103ad363024ebd258ef42ce05f762  7 spans
+Matches the page's expected output. Also checked:
+  'span:"execute_tool get_forecast"' 240 -> 18 traces; unquoted -> 0 traces;
+  'error.type:lookup_failed' 240 -> 1 trace (92972bbf..., 4.3's).
+The page's HTML note about the patched copy is removed.
