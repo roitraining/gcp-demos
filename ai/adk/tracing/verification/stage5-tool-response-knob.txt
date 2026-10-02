@@ -1,0 +1,140 @@
+=== Stage 5 — tool_response under the span content knob — 2026-10-02 ===
+google-adk 2.8.0 (.venv/lib/python3.13/site-packages/google/adk), Python 3.13.3,
+Gemini 3.7 Flash / Vertex AI (llm_response model_version=gemini-3.7-flash),
+project jwd-gcp-demos. examples/01_console_spans.py, default London prompt,
+SimpleSpanProcessor(ConsoleSpanExporter) -> out/spans.json. env.sh sourced;
+no OTEL_*/ADK_*/TUTORIAL_* variables set besides OTEL_SERVICE_NAME=adk-tracing.
+Closes the plan's open item "1.3 and 4.6 say tool_response reads {} with the
+span knob off; never captured" (previously source only, tracing.py:334-341).
+
+--- Commands ---
+source env.sh
+unset ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS
+.venv/bin/python examples/01_console_spans.py          (run A: knob unset)
+export ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false
+.venv/bin/python examples/01_console_spans.py          (run B: knob false)
+
+Both runs: 7 spans, same tree as Stage 1.
+
+--- Run A: knob unset (default on) — execute_tool get_weather ---
+trace 144aea8106fbdfcfb109958941d9c981  span 994fc740fc9659da  parent b472730863199ff6 (call_llm)
+  gcp.vertex.agent.tool_call_args = '{"city": "London"}'
+  gcp.vertex.agent.tool_response  = '{"status": "ok", "report": "The weather in London is 15C and drizzling."}'
+  gcp.vertex.agent.llm_request    = '{}'   (always {} on a tool span)
+  gcp.vertex.agent.llm_response   = '{}'   (always {} on a tool span)
+  gcp.vertex.agent.event_id, gen_ai.agent.name=weather_agent,
+  gen_ai.operation.name=execute_tool, gen_ai.tool.call.id=call_51326,
+  gen_ai.tool.description=<docstring>, gen_ai.tool.name=get_weather,
+  gen_ai.tool.type=FunctionTool
+call_llm #1 llm_request 1955 chars; call_llm #2 llm_request 2758 chars.
+
+--- Run B: ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false — execute_tool get_weather ---
+trace 939deeed22b865751a7233c983d15903  span e0f6941e1f9d3deb  parent d221da39fd7272b4 (call_llm)
+  gcp.vertex.agent.tool_call_args = '{}'
+  gcp.vertex.agent.tool_response  = '{}'
+  gcp.vertex.agent.llm_request    = '{}'
+  gcp.vertex.agent.llm_response   = '{}'
+  gen_ai.* attributes unchanged (tool.name, tool.type, tool.call.id=call_51843,
+  tool.description, agent.name, operation.name); event_id present.
+call_llm #1 and #2: llm_request='{}', llm_response='{}'.
+
+--- Result ---
+CONFIRMED: with the span knob false, tool_response reads "{}" exactly like
+tool_call_args. The pages' claim (1.3, 4.6, how-to-choose) holds; how-to-choose's
+"by source only" qualifier and its Not verified row are dropped.
+Note: gen_ai.tool.description (the tool's docstring) is NOT governed by the knob.
+
+--- pip freeze ---
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.3
+aiosignal==1.4.0
+aiosqlite==0.22.1
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.15.1
+asgiref==3.12.1
+attrs==26.1.0
+Authlib==1.8.0
+certifi==2026.7.22
+cffi==2.1.1
+charset-normalizer==3.5.1
+click==8.5.0
+cloudpickle==3.1.2
+cryptography==50.0.1
+distro==1.9.0
+docstring_parser==0.18.0
+fastapi==0.141.1
+frozenlist==1.8.0
+google-adk==2.8.0
+google-api-core==2.34.0
+google-auth==2.57.1
+google-cloud-aiplatform==2.1.0
+google-cloud-appengine-logging==1.10.0
+google-cloud-audit-log==0.6.2
+google-cloud-bigquery==3.45.0
+google-cloud-core==2.7.0
+google-cloud-logging==3.16.3
+google-cloud-resource-manager==1.18.0
+google-cloud-storage==3.13.1
+google-crc32c==1.8.0
+google-genai==2.22.0
+google-resumable-media==2.10.2
+googleapis-common-protos==1.75.3
+graphviz==0.21
+grpc-google-iam-v1==0.14.5
+grpcio==1.83.1
+grpcio-status==1.83.1
+h11==0.16.0
+httpcore==1.0.9
+httpx==0.28.1
+idna==3.19
+joserfc==1.7.5
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+multidict==6.7.1
+opentelemetry-api==1.42.1
+opentelemetry-exporter-gcp-logging==1.15.0a0
+opentelemetry-exporter-otlp-proto-common==1.42.1
+opentelemetry-exporter-otlp-proto-http==1.42.1
+opentelemetry-instrumentation==0.63b1
+opentelemetry-instrumentation-asgi==0.63b1
+opentelemetry-instrumentation-fastapi==0.63b1
+opentelemetry-instrumentation-google-genai==0.7b1
+opentelemetry-instrumentation-grpc==0.63b1
+opentelemetry-instrumentation-httpx==0.63b1
+opentelemetry-propagator-gcp==1.15.0
+opentelemetry-proto==1.42.1
+opentelemetry-resourcedetector-gcp==1.14.0
+opentelemetry-sdk==1.42.1
+opentelemetry-semantic-conventions==0.63b1
+opentelemetry-util-genai==0.3b0
+opentelemetry-util-http==0.63b1
+packaging==26.3
+propcache==0.5.2
+proto-plus==1.28.4
+protobuf==6.33.6
+pyasn1==0.6.4
+pyasn1_modules==0.4.2
+pycparser==3.0
+pydantic==2.13.5
+pydantic_core==2.46.5
+python-dateutil==2.9.0.post0
+python-dotenv==1.2.3
+python-multipart==0.0.32
+PyYAML==6.0.3
+referencing==0.37.0
+requests==2.34.2
+rpds-py==2026.6.3
+six==1.17.0
+sniffio==1.3.1
+starlette==1.6.0
+tenacity==9.1.4
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+tzlocal==5.4.4
+urllib3==2.7.0
+uvicorn==0.52.4
+watchdog==6.0.0
+websockets==15.0.1
+wrapt==2.4.0
+yarl==1.24.5

@@ -30,7 +30,7 @@ The tree for one turn of the weather agent, as captured in logging 5.1:
 | `invoke_agent {name}` | `_instrumentation.py:476`, from `agents/base_agent.py:318` | `invocation` | `gen_ai.operation.name`, `gen_ai.agent.name`, `gen_ai.agent.description`, `gen_ai.conversation.id` (the session id; `tracing.py:195-229`) |
 | `call_llm` | `flows/llm_flows/base_llm_flow.py:1732` | `invoke_agent` | `gen_ai.system="gcp.vertex.agent"` (a literal), `gen_ai.request.model`, `gen_ai.usage.*` tokens, `gen_ai.response.finish_reasons`, `gcp.vertex.agent.{invocation_id,session_id,event_id,llm_request,llm_response}` (`tracing.py:591-690`) |
 | `generate_content {model}` | `tracing.py:1067` (stable) or `:1121` (experimental) | `call_llm` | `gen_ai.operation.name`, `gen_ai.request.model`; `gen_ai.system` only under the stable convention. Emitted by the `[otel-gcp]` instrumentor when installed, else by ADK (`:993-1041`; logging 5.2 verified no duplicate) |
-| `execute_tool {name}` | `_instrumentation.py:509`, from `functions.py:709` | `call_llm` (**Stage 0 correction**, see below) | `gen_ai.tool.name`, `gen_ai.tool.type` (`FunctionTool`), `gen_ai.tool.call_id`, `gen_ai.agent.name`; on a raise, or when the tool's `_detect_error_in_response` hook classifies the response, `error.type` and `Status(ERROR, type)`, never the message (`tracing.py:232-341`; conditional, see below); `gcp.vertex.agent.{event_id,tool_call_args,tool_response}` |
+| `execute_tool {name}` | `_instrumentation.py:509`, from `functions.py:709` | `call_llm` (**Stage 0 correction**, see below) | `gen_ai.tool.name`, `gen_ai.tool.type` (`FunctionTool`), `gen_ai.tool.call.id`, `gen_ai.agent.name`; on a raise, or when the tool's `_detect_error_in_response` hook classifies the response, `error.type` and `Status(ERROR, type)`, never the message (`tracing.py:232-341`; conditional, see below); `gcp.vertex.agent.{event_id,tool_call_args,tool_response}` |
 | `execute_tool (merged)` | `functions.py:526`, `:774` | `invoke_agent` | Parallel tool calls only; exists so the dev UI's event lookup resolves |
 
 Two more families the tutorial mentions once: `invoke_workflow` and `invoke_node` (schema v2, `node_tracing.py:235`, `:147`), and the plugin-created spans from `auto_tracing_helpers.py:501-544`. No skill spans: skill data lands as attributes on `execute_tool`.
@@ -387,6 +387,21 @@ Verify: 4.3's captured entry is the same WARNING 3.2 captured, under the same sp
 - [ ] `lychee --offline 'ai/adk/tracing/**/*.md'` or equivalent; grep for NEEDS-RUN and "illustrative".
 - [x] The Not verified table below reconciled with the reference page; the run log complete. (2026-10-02: rows 1, 4, 6, 7, 8, 16 promoted; 13, 14, 20, 22 narrowed; rows 23 and 24 added.)
 
+**Contradictions found by the reconciliation (2026-10-02):**
+
+- [ ] **Viewer gate's console half never run** (`stage3-32-viewer-gate.txt` has only `gcloud`/v1 data). Blocks publishing per the gate rule. Jeff: Logs & Events tab and **View logs** on that trace.
+- [x] 4.6 content table says the log knob off means "no content log events"; they are emitted with `<elided>` (same fix 1.3 got).
+- [x] 4.6 says `FastAPIInstrumentor` adds three spans per request; the 3.4 Cloud Run record shows four (`POST /chat`, `http receive`, two `http send`).
+- [x] 3.1's IMPORTANT callout says select `call_llm` for the events; they carry the `generate_content` span id.
+- [x] 3.1 and 3.3 show trace `ae6b5c65…`, a `classified-error` Atlantis turn on `03`, but describe a London turn on `02` (3.1) and a `slow-tool` turn (3.3); 3.1 shows all three events on one span, the record has `gen_ai.choice` on two. Re-capture or re-describe.
+- [x] 3.2's "before" step (`02`, empty Logs & Events) has no run record.
+- [x] 1.3 and 4.6 say `tool_response` reads `{}` with the span knob off; never captured. **Captured 2026-10-02** (`stage5-tool-response-knob.txt`): it does; claim stands.
+- [x] 1.5's console block has no run record and no command.
+- [x] Plan Q1 spelled `gen_ai.tool.call_id`; the Stage 1 record shows `gen_ai.tool.call.id`.
+- [x] 2.3 Step 1 uses an inline `HOST=... ENDPOINT=chat` prefix, which the style guide disallows.
+- [x] 4.2 Step 1 relied on `turns.sh` defaults while 4.1 leaves `HOST`/`ENDPOINT` exported for `03`; 4.2 now exports `HOST=http://localhost:8000` and `ENDPOINT=run` itself.
+- [x] 1.5, 3.1, 3.2 (before), 3.3 re-captured live 2026-10-02 (`stage5-15/31/32/33-*.txt`); each block now matches its described run. 3.1 points at `generate_content`. Knock-on: `uvicorn.access` is absent from Cloud Logging (not present without a `spanId`); 3.3, 3.4, row 14 and the reference page updated.
+
 Verify: link check passes; every console block is either captured or labeled.
 
 ## Verification
@@ -430,7 +445,7 @@ A reproducible negative on Agent Runtime (2.4, decision 4) closes that page; it 
 | 11 | Unsampled propagated parent drops ADK spans; `always_on` restores them | **verified** (Stage 0: 0 vs 7 local; Stage 3.4: 04 server, `00`-flag header, zero then full) | Stage 0 ✓, 3.4 ✓ |
 | 12 | Trace API v1 reads OTLP-ingested spans | **verified** (Stage 0: 7 spans, full chain; `spanId` is decimal uint64; ~90–120 s ingest delay, 404 = "bucket not found", retry) | Stage 0 ✓ |
 | 13 | `gen_ai.*` events appear in **Logs & Events** under the model span | **verified** on the data (Stage 3.1: entries carry the `generate_content` span id — a child of `call_llm`, correcting "under `call_llm`"); the tab itself not observed (row 23) | Stage 3 (3.1) ✓ |
-| 14 | `google_adk` INFO lines land under the model span; `uvicorn.access` gets no trace | **verified** for the INFO lines (Stage 3.3: framework INFO carry `generate_content` span ids); the access-log half is source only, no record reads it back | Stage 3 (3.3) ~ |
+| 14 | `google_adk` INFO lines land under the model span; `uvicorn.access` gets no trace | **verified** for the INFO lines (Stage 3.3: framework INFO carry `generate_content` span ids); **verified** for the access log (2026-10-02, `stage5-33-framework-logs.txt`): `uvicorn.access` never reaches Cloud Logging, because uvicorn sets it to not propagate and the root-logger bridge never sees it | Stage 3 (3.3) ✓ |
 | 15 | With `FastAPIInstrumentor`, the header id equals the returned id equals the span trace id; `request_log` nests under **Correlate by** | **verified** for the id chain (Stage 3.4: header id == returned id, `invocation` child of `POST /chat`); **verified** on Cloud Run for the `request_log` join (2026-10-02, 2.8.0: all four ids equal; the **Correlate by** click itself not done; 2.11.0 breaks the log-side match, open question 8) | Stage 3 (3.4) ✓ |
 | 16 | `parentbased_traceidratio` at 0.5 keeps about half of 20 turns | **verified** (Stage 2.5, local console exporter: 9/20 traces, 63 = 7 × 9 spans; default kept 20/20) | Stage 2 (2.5) ✓ |
 | 17 | Attribute filter on `gen_ai.conversation.id` lists the five `multi-turn` traces | **verified via v1 API** (2026-10-02: `gen_ai.conversation.id:<session>` returns exactly five; a made-up id returns zero); the console filter not clicked | Stage 4 (4.2) ✓ (API) |

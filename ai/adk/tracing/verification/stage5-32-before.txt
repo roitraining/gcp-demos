@@ -1,0 +1,50 @@
+=== Stage 5: 3.2 "before" step (02 server, no bridge, classified-error) — 2026-10-02 ===
+google-adk 2.8.0 (ai/adk/tracing/.venv), Python 3.13.3, Gemini 3.7 Flash / Vertex AI,
+project jwd-gcp-demos. Versions as in stage5-31-free-join.txt.
+env.sh sourced. Server: examples/02_trace_server.py, TUTORIAL_CLASSIFY_ERRORS=1,
+PORT=8098. Trace Explorer UI NOT clicked: the Logs & Events tab was not observed,
+so this record makes no claim about it. The "after" step (03 + bridge) is
+stage3-32-viewer-gate.txt (trace ae6b5c65...), unchanged.
+
+--- the turn ---
+$ export HOST=http://localhost:8098 ; export ENDPOINT=chat ; ./load/turns.sh classified-error 1
+classified-error turn   1  7.23s  trace=ee002a29867d64eca15b81a164b486e5
+
+--- the 02 server's terminal (stderr) during the turn ---
+weather lookup failed for 'Atlantis': no data
+INFO:     127.0.0.1:50972 - "POST /chat HTTP/1.1" 200 OK
+(The WARNING printed by Python's last-resort handler: bare message, no level,
+no logger name, no trace or span id. 02 adds no handler to the root logger.)
+
+--- every log entry on the trace ---
+$ gcloud logging read 'trace="projects/'"$PROJECT_ID"'/traces/ee002a29867d64eca15b81a164b486e5"' \
+    --format='value(logName.basename(),severity,spanId)'
+gen_ai.choice		0e92f6927749dde0
+gen_ai.user.message		0e92f6927749dde0
+gen_ai.user.message		0e92f6927749dde0
+gen_ai.user.message		0e92f6927749dde0
+gen_ai.system.message		0e92f6927749dde0
+gen_ai.choice		1e07b60fb9da832e
+gen_ai.user.message		1e07b60fb9da832e
+gen_ai.system.message		1e07b60fb9da832e
+8 gen_ai.* entries, none with a severity. No WARNING.
+
+$ gcloud logging read 'trace="projects/'"$PROJECT_ID"'/traces/ee002a29867d64eca15b81a164b486e5" AND severity=WARNING'
+(no output, exit 0)
+
+$ gcloud logging read 'timestamp>="2026-10-02T17:40:00Z" AND textPayload:"weather lookup failed"'
+(no output: the WARNING never reached Cloud Logging at all, with or without a trace)
+
+--- span ids (Trace v1, hex) ---
+a36a61bda1a7ef63  invocation
+675ce3b2311253a6    invoke_agent weather_agent
+4d0fd78c88a921a9      call_llm
+1e07b60fb9da832e        generate_content gemini-3.7-flash
+dccdf3cc0069b7f5        execute_tool get_weather   label error.type=lookup_failed
+9778a3b10adc37c2      call_llm
+0e92f6927749dde0        generate_content gemini-3.7-flash
+No log entry carries dccdf3cc0069b7f5.
+
+VERDICT: on 02 the tool span is classified (error.type=lookup_failed) but the tool's
+WARNING exists only on the server's stderr, with no trace or span id. No entry in
+Cloud Logging names the execute_tool span.

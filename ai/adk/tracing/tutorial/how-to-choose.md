@@ -87,7 +87,7 @@ span stored in the same project ([3.1](part-3/3.1-the-free-join.md)).
 
 | Knob | Governs | Default | Off means |
 |---|---|---|---|
-| `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` | `gcp.vertex.agent.*` payload attributes | on | `llm_request`, `llm_response`, `tool_call_args` read `"{}"`; `tool_response` the same by source only |
+| `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` | `gcp.vertex.agent.*` payload attributes | on | `llm_request`, `llm_response`, `tool_call_args`, `tool_response` read `"{}"` |
 | `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | content of the `gen_ai.*` log events | `NO_CONTENT` | events still emitted, content `<elided>` |
 
 - `adk deploy agent_engine --otel_to_cloud` sets the span knob to `false`; `adk deploy cloud_run` does not (`cli_deploy.py:1273-1282`).
@@ -135,17 +135,17 @@ column names them.
 | Page | Date | Record | What it showed | Console steps not observed |
 |---|---|---|---|---|
 | 1.1, 1.2 | 2026-09-07 | `stage0-local-probes.txt`, `stage1-console-spans.txt` | seven spans, `execute_tool` under `call_llm`, `force_flush()` sufficient | none |
-| 1.3 | 2026-09-07 | `stage1-console-spans.txt` | `llm_request` ~1,955 chars, then `{}` | none |
+| 1.3 | 2026-09-07, 2026-10-02 | `stage1-console-spans.txt`, `stage5-tool-response-knob.txt` | `llm_request` ~1,955 chars, then `{}` | none |
 | 1.4 | 2026-09-07 | `stage0-local-probes.txt` | the four failure shapes | none |
-| 1.5 | none | none | the cloud equivalent ran in 4.2 | none |
+| 1.5 | 2026-10-02 | `stage5-15-trace-per-turn.txt` | five turns, five trace ids, one `gen_ai.conversation.id` | none |
 | 1.6 | 2026-09-07 | `stage1-console-spans.txt` | `fetch_forecast` 0.695 s of the tool's 0.700 s | none |
 | 2.1 | 2026-09-07 | `stage2-21-adk-web-otel.txt` | same tree via v1; `service.name=adk-tracing` | **Details** waterfall |
 | 2.2 | 2026-09-07 | `stage2-22-cloudrun.txt` | Cloud Run tree; request log id differs from span id | **Service/workload** column |
 | 2.3 | 2026-09-07 | `stage2-23-own-server.txt` | recorded (all zeros) and exported (closed port, 400 without resource) rungs | visible rung |
 | 2.4 | 2026-09-07 | `stage2-24-agent-runtime.txt` | `invoke_workflow` root, `call_llm` present | Agent Platform **Traces** tab (same traces by `service.name` filter) |
 | 2.5 | 2026-09-07 | `stage2-25-sampling.txt` | 9 of 20 kept at 0.5, local console exporter | none |
-| 3.1, 3.3 | 2026-09-07 | `stage3-31-33-log-join.txt` | events under `generate_content`; framework INFO and tool WARNING under their spans | **Logs & Events**, **View logs** |
-| 3.2 | 2026-09-07 | `stage3-32-viewer-gate.txt` | WARNING `spanId` equals the `execute_tool` span | **Logs & Events** before and after |
+| 3.1, 3.3 | 2026-09-07, 2026-10-02 | `stage3-31-33-log-join.txt`, `stage5-31-free-join.txt`, `stage5-33-framework-logs.txt` | events under the two `generate_content` spans; framework INFO and the tool's INFO under their spans; `uvicorn.access` absent from Cloud Logging | **Logs & Events**, **View logs** |
+| 3.2 | 2026-09-07, 2026-10-02 | `stage3-32-viewer-gate.txt`, `stage5-32-before.txt` | before: no WARNING in Cloud Logging; after: WARNING `spanId` equals the `execute_tool` span | **Logs & Events** before and after |
 | 3.4 | 2026-09-07, 2026-10-02 | `stage3-34-propagation.txt`, `stage3-34-request-log-cloudrun.txt` | header id = returned id; `always_on` keeps an unsampled parent; Cloud Run request log joins | **Correlate by** `request_log` |
 | 4.1 | 2026-10-02 | `stage4-41-slow-step.txt` | per-name percentiles; model spans rank above the tool | heatmap, **Grouped** tab, waterfall |
 | 4.2 | 2026-10-02 | `stage4-42-one-users-request.txt` | five traces for one conversation id; content-off `{}` | attribute filter, **Search for trace**, **Find in Trace**, **Inputs/Outputs** |
@@ -162,9 +162,7 @@ Two cloud probes settled design questions before any page was written:
 | Item | Status |
 |---|---|
 | Every console step in the right-hand column above | written from Google's docs |
-| 3.3 negative controls 2 to 4, and a live `concurrent` run | reasoned from the client's extraction rule; control 1 holds by construction |
-| `uvicorn.access` carries no trace | source only (runs outside any span); no record reads it back |
-| `tool_response` reads `{}` with the span knob off | source only |
+| 3.3 negative controls 2 to 4, and a live `concurrent` run | reasoned from the client's extraction rule; control 1 confirmed live (`stage5-33-framework-logs.txt`) |
 | A plain `{"error": ...}` tool's user answer and parent status | not captured |
 | Ways B and C ([3.5](part-3/3.5-three-ways-to-stamp.md)) and OTLP backends ([2.6](part-2/2.6-other-backends.md)) | not run |
 | The BigQuery plugin's `trace_id` columns ([4.5](part-4/4.5-traces-logs-metrics-rows.md)) | source only |
