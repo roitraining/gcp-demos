@@ -2,7 +2,7 @@
 # The [otel-gcp] extra adds the GenAI SDK instrumentor that `--otel_to_cloud`
 # looks for at startup (Part 5.2); without it ADK logs a WARNING and emits the
 # generate_content spans itself. Verified 2026-09-04: it does not duplicate them.
-google-adk[otel-gcp]>=2.8.0
+google-adk[otel-gcp]==2.8.0
 fastapi>=0.115
 uvicorn>=0.34
 python-dotenv>=1.0
