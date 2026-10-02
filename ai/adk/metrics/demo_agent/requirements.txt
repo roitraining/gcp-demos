@@ -2,7 +2,7 @@
 # --otel_to_cloud sets up all three GCP signals at startup, so the container
 # needs the Cloud exporters, not just google-adk. Without these the revision
 # crashes on boot with ModuleNotFoundError: opentelemetry.exporter.
-google-adk[otel-gcp]>=2.8.0
+google-adk[otel-gcp]==2.8.0
 opentelemetry-exporter-otlp-proto-http
 opentelemetry-exporter-gcp-logging
 opentelemetry-exporter-gcp-monitoring
