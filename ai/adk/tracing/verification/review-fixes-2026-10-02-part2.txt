@@ -1,0 +1,57 @@
+=== Part 2 recapture after the 2026-10-02 review ===
+google-adk 2.8.0, Python 3.13, Gemini 3.7 Flash / Vertex. Scratch runs on
+jwd-dev-3; page captures on jwd-gcp-demos, us-central1. OTEL_* shell vars unset.
+
+--- 02 server trace-id capture (code change) ---
+_TraceIdCapture is now a SpanProcessor whose on_end maps gen_ai.conversation.id
+(the session id) to the trace id; /chat pops its own session. Old version set a
+ContextVar from the exporter thread and sometimes returned an empty id.
+jwd-dev-3: slow-tool 6 + concurrent 6 + baseline 10 = 22/22 turns printed an id.
+
+--- 2.2 Cloud Run (jwd-gcp-demos) ---
+cp deploy/Dockerfile.trace_server Dockerfile; gcloud run deploy adk-trace --source .
+  --no-allow-unauthenticated --set-env-vars GOOGLE_GENAI_USE_VERTEXAI=TRUE,
+  GOOGLE_CLOUD_PROJECT=jwd-gcp-demos,GOOGLE_CLOUD_LOCATION=global,OTEL_SERVICE_NAME=adk-tracing
+Service [adk-trace] revision [adk-trace-00001-7b9] ... serving 100 percent of traffic.
+curl /chat with identity token:
+{"response":"The weather in London is currently 15°C and drizzling.","trace_id":"dfe665b9bb7bfd8842f8d7c0b2a59ca4"}
+trace dfe665b9bb7bfd8842f8d7c0b2a59ca4  (7 spans)
+invocation                               5.558s
+  invoke_agent weather_agent               5.324s
+    call_llm                                 2.252s
+      generate_content gemini-3.7-flash        2.249s
+      execute_tool get_weather                 0.002s
+    call_llm                                 2.982s
+      generate_content gemini-3.7-flash        2.980s
+Request log trace: projects/jwd-gcp-demos/traces/977d9a9cebfd411d0e436abdbdb8d394 (differs)
+Root span labels (jwd-dev-3 run): cloud.platform=gcp_cloud_run, cloud.region,
+cloud.account.id, gcp.project_id, faas.name/version/instance, service.name=adk-tracing.
+Teardown: service, image cloud-run-source-deploy/adk-trace, gs://run-sources-*/services/adk-trace/ deleted.
+
+--- 2.3 export-outage (jwd-dev-3) ---
+TUTORIAL_TRACE_ENDPOINT=http://127.0.0.1:4318/v1/traces: turns took 12.40 s and
+10.52 s; log "Transient error ... Connection refused ... encountered while
+exporting span batch, retrying" then "Failed to export span batch due to
+timeout, max retries or shutdown." Trace b95c6002b760f32dc2d74eb54cb5c11e still
+read back with 7 spans.
+
+--- 2.4 Agent Runtime (jwd-gcp-demos) ---
+demo_agent/.env = GOOGLE_CLOUD_LOCATION=global; adk deploy agent_engine --otel_to_cloud demo_agent
+Deployed to Agent Platform: projects/376236993953/locations/us-central1/reasoningEngines/4456927008038846464
+async_stream_query: AGENT: The current weather in London is 15°C with drizzle.
+list_traces.sh service.name:4456927008038846464 -> c786594017662aff55302df141130b23  7 spans
+trace c786594017662aff55302df141130b23  (7 spans)
+invoke_workflow weather_agent            4.224s
+  invoke_agent weather_agent               4.009s
+    call_llm                                 2.193s
+      generate_content gemini-3.7-flash        1.859s
+      execute_tool get_weather                 0.003s
+    call_llm                                 1.708s
+      generate_content gemini-3.7-flash        1.509s
+jwd-dev-3 run: call_llm gcp.vertex.agent.llm_request = "{}" (content off).
+Teardown by full resource name: "Agent Engine deleted." Only this engine touched.
+
+--- 2.5 sampling (jwd-gcp-demos) ---
+OTEL_TRACES_SAMPLER=parentbased_traceidratio, ARG=0.5, turns.sh baseline 20:
+11 of 20 returned a trace id (9 printed trace=—). All 11 listed in Cloud Trace
+with 7 spans each. jwd-dev-3 run: also 11/20.
