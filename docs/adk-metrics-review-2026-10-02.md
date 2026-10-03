@@ -34,10 +34,10 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 ### Top 10 findings
 
 1. **wrong.** `load/turns.sh` cannot send turns to the server in `examples/04_bq_plugin.py`. Every turn gets an HTTP 404 on pages 4.1 to 4.4, yet the script still ends by printing "good to go". *Status: fixed on main (the server has the session and `/run` routes); still real: `turns.sh` prints "good to go" after failed turns.*
-2. **wrong.** Cloud Monitoring rejects `queries/dashboard.json` and `queries/alert-policy.json`, because both files use `//` as a JSON key to hold comments. This breaks pages 3.5 and 3.6. *Status: still real.*
+2. **wrong.** Cloud Monitoring rejects `queries/dashboard.json` and `queries/alert-policy.json`, because both files use `//` as a JSON key to hold comments. This breaks pages 3.5 and 3.6. *Status: done.*
 3. **wrong.** The counter query on page 3.7 adds a `_total` suffix to the metric name. The Telemetry API never adds that suffix, so the query returns nothing. *Status: fixed on main.*
-4. **wrong.** Part 3 hardcodes `export PROJECT=jwd-gcp-demos` in 10 places, so a reader's own project is ignored. *Status: still real.*
-5. **wrong.** On page 3.1, the 95th-percentile model-call latency carries no information. The model-call histogram (`gen_ai.client.operation.duration`) uses OpenTelemetry's default bucket boundaries of 0, 5, 10, 25 seconds and up. With every call under 5 seconds, all calls land in the first bucket, and the "95th percentile" is just a point interpolated inside that 0 to 5 second range. "The model holds at 4.83 s" therefore says only "every call took under 5 seconds". *Status: still real.*
+4. **wrong.** Part 3 hardcodes `export PROJECT=jwd-gcp-demos` in 10 places, so a reader's own project is ignored. *Status: done.*
+5. **wrong.** On page 3.1, the 95th-percentile model-call latency carries no information. The model-call histogram (`gen_ai.client.operation.duration`) uses OpenTelemetry's default bucket boundaries of 0, 5, 10, 25 seconds and up. With every call under 5 seconds, all calls land in the first bucket, and the "95th percentile" is just a point interpolated inside that 0 to 5 second range. "The model holds at 4.83 s" therefore says only "every call took under 5 seconds". *Status: done.*
 6. **wrong.** Several SQL queries and SDK calls in Part 4 fail: *Status: fixed on main.*
    - page 4.1 uses `rows` as a column alias, which is a reserved word in BigQuery;
    - page 4.3 reads `$.text` from the JSON, but the field is `$.text_summary`;
@@ -46,7 +46,7 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 7. **wrong.** On page 4.4, when a tool returns `{"status": "error"}` without raising an exception, the BigQuery plugin records the call as successful. The SDK's error rate therefore reads 0, not the 0.5 the page promises. For the same reason, the `v_tool_error` view on page 4.2 stays empty. *Status: still real: page 4.4 now explains it, but the 4.2 deep dive still says `v_tool_error` gets rows.*
 8. **misleading.** Pages 1.1, 1.4, 2.2 and how-to-choose each say something different about the seventh metric, `gen_ai.invoke_workflow.duration`. In fact it appears only when an app uses ADK's newer `Workflow` primitive. *Status: still real.*
 9. **misleading.** On page 2.5, Agent Runtime exports metrics at most once every 5 seconds, so the points from the last turn are lost when the run ends. The rerun exported 9 of 10 turns. The page says points leave as each turn completes. *Status: still real.*
-10. **wrong.** Two Part 3 queries cannot show what their pages claim. Page 3.2 reads histogram buckets that count everything since the server started, not just the current scenario. Page 3.4 asks the reader to watch a value change across the run but uses an instant query, which returns a single number. *Status: still real.*
+10. **wrong.** Two Part 3 queries cannot show what their pages claim. Page 3.2 reads histogram buckets that count everything since the server started, not just the current scenario. Page 3.4 asks the reader to watch a value change across the run but uses an instant query, which returns a single number. *Status: done.*
 
 ---
 
@@ -452,8 +452,8 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 7, and every Part 3 nav line and subtitle | "Consume — signals from histograms" | House style uses em dashes only in step labels. Part 2's nav already writes this title with a colon. | "Consume: signals from histograms" | still real |
-| 11–23 | The "Why you are here" note runs three sentences, followed by a 100-word paragraph | House style keeps the note to two sentences and the landing page short. | Cut to two sentences and one short paragraph. | still real |
+| 7, and every Part 3 nav line and subtitle | "Consume — signals from histograms" | House style uses em dashes only in step labels. Part 2's nav already writes this title with a colon. | "Consume: signals from histograms" | done |
+| 11–23 | The "Why you are here" note runs three sentences, followed by a 100-word paragraph | House style keeps the note to two sentences and the landing page short. | Cut to two sentences and one short paragraph. | done |
 
 ### Findings that apply to every Part 3 page
 
@@ -461,19 +461,19 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Where | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 3.1 line 86; 3.2 line 46; 3.3 line 50; 3.4 line 49; 3.5 lines 44 and 76; 3.6 lines 30, 63 and 88; 3.7 line 72 | `export PROJECT=jwd-gcp-demos` | Every query runs against the author's project, not the reader's. The reader either gets a permission error or reads someone else's data. | `export PROJECT=$PROJECT_ID`, after `source env.sh` | still real |
+| 3.1 line 86; 3.2 line 46; 3.3 line 50; 3.4 line 49; 3.5 lines 44 and 76; 3.6 lines 30, 63 and 88; 3.7 line 72 | `export PROJECT=jwd-gcp-demos` | Every query runs against the author's project, not the reader's. The reader either gets a permission error or reads someone else's data. | `export PROJECT=$PROJECT_ID`, after `source env.sh` | done: pages use `$PROJECT_ID` from `source env.sh` (no separate `PROJECT`) |
 
 **Style**
 
 | Where | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 3.2, 3.3, 3.4, 3.7 | Each query appears twice: once in its own code block, once inside `export QUERY=` | Showing the same text twice makes the reader compare them for differences. | Show each query once, inside the export. | still real |
+| 3.2, 3.3, 3.4, 3.7 | Each query appears twice: once in its own code block, once inside `export QUERY=` | Showing the same text twice makes the reader compare them for differences. | Show each query once, inside the export. | done |
 
 **Unclear**
 
 | Where | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 3.2 to 3.7 | The pages never say the server started on page 3.1 must still be running | A reader who stopped it gets no new data and no explanation. | Add "Keep the page 3.1 server running." On page 3.7, where the server restarts: "Stop it with Ctrl+C, then:" | still real |
+| 3.2 to 3.7 | The pages never say the server started on page 3.1 must still be running | A reader who stopped it gets no new data and no explanation. | Add "Keep the page 3.1 server running." On page 3.7, where the server restarts: "Stop it with Ctrl+C, then:" | done: each page says to keep the 3.1 server running and to wait 5 minutes after the last load; 3.7 says to stop and restart it |
 
 ### tutorial/part-3/3.1-latency-three-grains.md
 
@@ -481,23 +481,23 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 112–118, 139–143 | "the model holds at 4.83 s" | See top finding 5. The model-call histogram uses the default bucket boundaries of 0, 5, 10, 25 seconds and up (visible in `out/metrics.json`; the OpenTelemetry semantic-conventions code sets no custom boundaries). When every call is under 5 seconds, the 95th percentile is just a point interpolated inside the first bucket, about 4.75, and means only "every call took under 5 seconds". The rerun gave exactly 4.75. | Drop the model-call 95th percentile. Or configure finer buckets for the model-call histogram with an OpenTelemetry view, and show that. | still real |
-| 53–61 | `slow-tool turn 1 http=200 0.51s` … `turn 2 2.18s` | Presented as captured output, but real turns take 3 to 6 seconds. | Replace with lines captured from a real run. | still real |
-| 155–167 | The deep dive's output `get_forecast p95 2.09s` | No command on the page prints this line. The rerun's 95th-percentile turn latency under concurrent load was 11.86 seconds, not the page's "about 7.7". | Show the three curl commands and the output they really produce. | still real |
-| 179–180 | `</content>` and `</invoke>` at the end of the file | Leftover tool-call markup from drafting, rendered as text. | Delete both lines. | still real |
+| 112–118, 139–143 | "the model holds at 4.83 s" | See top finding 5. The model-call histogram uses the default bucket boundaries of 0, 5, 10, 25 seconds and up (visible in `out/metrics.json`; the OpenTelemetry semantic-conventions code sets no custom boundaries). When every call is under 5 seconds, the 95th percentile is just a point interpolated inside the first bucket, about 4.75, and means only "every call took under 5 seconds". The rerun gave exactly 4.75. | Drop the model-call 95th percentile. Or configure finer buckets for the model-call histogram with an OpenTelemetry view, and show that. | done: the model grain reads the mean (`_sum` over `_count`); a deep dive shows why its p95 reads exactly 5 |
+| 53–61 | `slow-tool turn 1 http=200 0.51s` … `turn 2 2.18s` | Presented as captured output, but real turns take 3 to 6 seconds. | Replace with lines captured from a real run. | done |
+| 155–167 | The deep dive's output `get_forecast p95 2.09s` | No command on the page prints this line. The rerun's 95th-percentile turn latency under concurrent load was 11.86 seconds, not the page's "about 7.7". | Show the three curl commands and the output they really produce. | done: deep dive shows the commands and real output; ten turns, because 20 parallel turns hit "database is locked" in `adk web`'s SQLite session store |
+| 179–180 | `</content>` and `</invoke>` at the end of the file | Leftover tool-call markup from drafting, rendered as text. | Delete both lines. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 139–143 | "The turn slows while the model stays flat and one tool owns the rise" | "Slows" and "stays flat" need a comparison, but the page takes one reading with no baseline. The rerun gave turn 6.19 seconds, model 4.75 seconds and tool 2.24 seconds, so the model, not the tool, takes most of the time. | Run the `baseline` scenario first, then `slow-tool`, and compare the two. | still real |
+| 139–143 | "The turn slows while the model stays flat and one tool owns the rise" | "Slows" and "stays flat" need a comparison, but the page takes one reading with no baseline. The rerun gave turn 6.19 seconds, model 4.75 seconds and tool 2.24 seconds, so the model, not the tool, takes most of the time. | Run the `baseline` scenario first, then `slow-tool`, and compare the two. | done: the claim now states what one reading shows (the model owns most of each turn); no baseline run added |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 133 | A `get_forecast` 95th percentile of `2.163` seconds, when the tool sleeps only 0.3 to 1.5 seconds | The reader can't see how the value exceeds the longest sleep. It's interpolated inside the 1.28 to 2.56 second bucket. | Explain that the percentile is interpolated within a bucket, so it can exceed any real value. | still real |
-| 12–15, 64–81 | The "Why you are here" note names no scenario; Step 3 has no Command label or expected output; "ADC bearer token" | The page doesn't say which scenario it runs. Step 3 leaves the reader unsure what to run and what to expect. "ADC" is never defined. | Name the `slow-tool` scenario in the note, add the labels to Step 3, and spell out Application Default Credentials (ADC) on first use. | still real: Step 3 is now a browser step; the note and "ADC" remain |
+| 133 | A `get_forecast` 95th percentile of `2.163` seconds, when the tool sleeps only 0.3 to 1.5 seconds | The reader can't see how the value exceeds the longest sleep. It's interpolated inside the 1.28 to 2.56 second bucket. | Explain that the percentile is interpolated within a bucket, so it can exceed any real value. | done |
+| 12–15, 64–81 | The "Why you are here" note names no scenario; Step 3 has no Command label or expected output; "ADC bearer token" | The page doesn't say which scenario it runs. Step 3 leaves the reader unsure what to run and what to expect. "ADC" is never defined. | Name the `slow-tool` scenario in the note, add the labels to Step 3, and spell out Application Default Credentials (ADC) on first use. | done |
 
 ### tutorial/part-3/3.2-volume-and-shape.md
 
@@ -505,14 +505,14 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 60–80 | `sum by (le) ({"gen_ai.invoke_agent.tool_calls_bucket"})`, which the page says shows "a spike near le=1 … and a second near le=3" | Histogram buckets in PromQL are cumulative: each bucket counts every turn at or below its boundary, since the server started. The query can't show two separate spikes. The rerun returned 5 turns at or below 0 tool calls, 80 at or below 1, and 90 at or below 3. | Use `sum by (le) (increase({…_bucket}[15m]))`, and subtract each bucket from the next to get the count in each range. | still real |
-| 38–58 | "Divide the sum … by their count", but the command shown computes only turns per minute | The page describes a calculation it doesn't perform. | Add the two mean-per-turn queries from `queries/volume.promql`. | still real |
+| 60–80 | `sum by (le) ({"gen_ai.invoke_agent.tool_calls_bucket"})`, which the page says shows "a spike near le=1 … and a second near le=3" | Histogram buckets in PromQL are cumulative: each bucket counts every turn at or below its boundary, since the server started. The query can't show two separate spikes. The rerun returned 5 turns at or below 0 tool calls, 80 at or below 1, and 90 at or below 3. | Use `sum by (le) (increase({…_bucket}[15m]))`, and subtract each bucket from the next to get the count in each range. | done |
+| 38–58 | "Divide the sum … by their count", but the command shown computes only turns per minute | The page describes a calculation it doesn't perform. | Add the two mean-per-turn queries from `queries/volume.promql`. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 17–19, 83–87 | "those turns make more model and tool calls"; "mean above the baseline 2 and 1"; "Repeated work, not a slow dependency, is driving the cost" | The rerun gave 1.91 model calls per turn (below the baseline of 2) and 1.23 tool calls. Three-city turns add tool calls, not model calls, and 5 of 90 turns didn't call the tool at all. | Claim only that tool calls per turn rise. | still real |
+| 17–19, 83–87 | "those turns make more model and tool calls"; "mean above the baseline 2 and 1"; "Repeated work, not a slow dependency, is driving the cost" | The rerun gave 1.91 model calls per turn (below the baseline of 2) and 1.23 tool calls. Three-city turns add tool calls, not model calls, and 5 of 90 turns didn't call the tool at all. | Claim only that tool calls per turn rise. | done |
 
 ### tutorial/part-3/3.3-errors.md
 
@@ -520,13 +520,13 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 70–84 | The invocation error ratio "reads 0" | With no errors, the numerator has no series, so the query returns no data (`"result":[]`), not 0. | Use `(sum(rate({…, "error.type"=~".+"}[5m])) or vector(0)) / sum(rate({…}[5m]))`, which returns 0. Or say "returns no data, which here means zero". | still real |
+| 70–84 | The invocation error ratio "reads 0" | With no errors, the numerator has no series, so the query returns no data (`"result":[]`), not 0. | Use `(sum(rate({…, "error.type"=~".+"}[5m])) or vector(0)) / sum(rate({…}[5m]))`, which returns 0. Or say "returns no data, which here means zero". | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 19 | "(1.3)" | A bare page number, not a link. | Link to page 1.3, and cite `demo_agent/agent.py:100-103`. | still real |
+| 19 | "(1.3)" | A bare page number, not a link. | Link to page 1.3, and cite `demo_agent/agent.py:100-103`. | done |
 
 The tool error ratio matched the page: the rerun gave exactly 0.5.
 
@@ -536,13 +536,13 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 63–80 | "stepped across the run to see input per call rise", run against `/api/v1/query` | `/api/v1/query` is an instant query and returns one number (the rerun got 1513), so the reader can't see anything rise. A range query can. In the rerun, `query_range` with a 15-second step showed input tokens per call rising from 357 to 1570 while output stayed flat at 14 to 16. | Give the `/api/v1/query_range` command with a 15-second step, and show that output. | still real |
+| 63–80 | "stepped across the run to see input per call rise", run against `/api/v1/query` | `/api/v1/query` is an instant query and returns one number (the rerun got 1513), so the reader can't see anything rise. A range query can. In the rerun, `query_range` with a 15-second step showed input tokens per call rising from 357 to 1570 while output stayed flat at 14 to 16. | Give the `/api/v1/query_range` command with a 15-second step, and show that output. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 95–126 | The deep dive about instrumentation scope says the client metrics come from the genai scope | That's only true for a Gemini agent with the genai instrumentation active (`adk/telemetry/tracing.py:993-1001`). The deep dive also shows a `count by` value of 2 without saying it counts series, not calls. | Add "for a Gemini agent with the genai instrumentation active", and explain that the 2 is the number of series. | still real |
+| 95–126 | The deep dive about instrumentation scope says the client metrics come from the genai scope | That's only true for a Gemini agent with the genai instrumentation active (`adk/telemetry/tracing.py:993-1001`). The deep dive also shows a `count by` value of 2 without saying it counts series, not calls. | Add "for a Gemini agent with the genai instrumentation active", and explain that the 2 is the number of series. | done |
 
 ### tutorial/part-3/3.5-a-dashboard.md and queries/dashboard.json
 
@@ -550,23 +550,23 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| Step 2 | `gcloud monitoring dashboards create --config-from-file=queries/dashboard.json` | Fails with `Unknown name "//"`: the JSON uses `//` as a key to hold comments, and the API rejects unknown keys. | Remove the five `//` keys from the JSON. | still real |
-| `dashboard.json` line 72 | `otel_scope_name=\"gcp.vertex.agent\"` on the tokens-per-minute widget | Token metrics carry the genai scope, not `gcp.vertex.agent`, so this widget shows nothing. It was the only empty query of the nine. | Remove the scope filter. | still real |
-| 17–19, 58–59, 67 | "four widgets"; "the same six histograms" | The JSON has 8 widgets, which read 4 histograms. | "eight widgets reading four histograms" | still real |
-| 53 | `Created [projects/jwd-gcp-demos/dashboards/...]` | gcloud prints only the bare id, for example `Created [28196eb4-…]`. | Show the real line. | still real |
-| 77 | `export DASHBOARD_ID=NEEDS-RUN` | A placeholder the reader can't fill in; the cleanup command fails. | Capture the id in Step 2 by adding `--format='value(name)'` to the create command. | still real |
+| Step 2 | `gcloud monitoring dashboards create --config-from-file=queries/dashboard.json` | Fails with `Unknown name "//"`: the JSON uses `//` as a key to hold comments, and the API rejects unknown keys. | Remove the five `//` keys from the JSON. | done |
+| `dashboard.json` line 72 | `otel_scope_name=\"gcp.vertex.agent\"` on the tokens-per-minute widget | Token metrics carry the genai scope, not `gcp.vertex.agent`, so this widget shows nothing. It was the only empty query of the nine. | Remove the scope filter. | done |
+| 17–19, 58–59, 67 | "four widgets"; "the same six histograms" | The JSON has 8 widgets, which read 4 histograms. | "eight widgets reading four histograms" | done |
+| 53 | `Created [projects/jwd-gcp-demos/dashboards/...]` | gcloud prints only the bare id, for example `Created [28196eb4-…]`. | Show the real line. | done |
+| 77 | `export DASHBOARD_ID=NEEDS-RUN` | A placeholder the reader can't fill in; the cleanup command fails. | Capture the id in Step 2 by adding `--format='value(name)'` to the create command. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 21, 62–64 | Scenario `baseline`; "Confirm every widget renders data" | The `baseline` scenario produces no errors, so the error-ratio widget has no data. The reader will think it's broken. | Run `unknown-city` instead, or say the error-ratio widget stays empty under `baseline`. | still real |
+| 21, 62–64 | Scenario `baseline`; "Confirm every widget renders data" | The `baseline` scenario produces no errors, so the error-ratio widget has no data. The reader will think it's broken. | Run `unknown-city` instead, or say the error-ratio widget stays empty under `baseline`. | done: kept `baseline`; Step 3 says the error widget reads 0 here and stays empty on a fresh server |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 20, 62–68 | "mirrors a well-known ADK dashboard"; Step 3 written as a paragraph, with a console code block standing in for a browser view | The reader can't tell which dashboard is meant. A code block can't show what a browser page looks like. | Name and link the dashboard, or cut the sentence. Use bullets for Step 3, and describe in words what the reader should see. | still real |
+| 20, 62–68 | "mirrors a well-known ADK dashboard"; Step 3 written as a paragraph, with a console code block standing in for a browser view | The reader can't tell which dashboard is meant. A code block can't show what a browser page looks like. | Name and link the dashboard, or cut the sentence. Use bullets for Step 3, and describe in words what the reader should see. | done |
 
 ### tutorial/part-3/3.6-an-alert.md and queries/alert-policy.json
 
@@ -574,16 +574,16 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| Step 1 | `gcloud alpha monitoring policies create --policy-from-file=queries/alert-policy.json` | Fails on the `//` comment keys, as in page 3.5. With them removed, the generally available `gcloud monitoring policies create` works, so `alpha` isn't needed. | Remove the `//` keys, and drop `alpha`. | still real |
-| 57–73 | "Read the open incidents" using `policies list` | `policies list` lists alert policies, not incidents. | Use `GET /v3/projects/$PROJECT/alerts?filter=state="OPEN"` (the rerun returned an incident with value 0.493), or the console path **Monitoring → Alerting → Incidents**. | still real |
-| 89 | `export POLICY_ID=NEEDS-RUN` | A placeholder the reader can't fill in; the cleanup command fails. | Capture the id when the policy is created. | still real |
+| Step 1 | `gcloud alpha monitoring policies create --policy-from-file=queries/alert-policy.json` | Fails on the `//` comment keys, as in page 3.5. With them removed, the generally available `gcloud monitoring policies create` works, so `alpha` isn't needed. | Remove the `//` keys, and drop `alpha`. | done |
+| 57–73 | "Read the open incidents" using `policies list` | `policies list` lists alert policies, not incidents. | Use `GET /v3/projects/$PROJECT/alerts?filter=state="OPEN"` (the rerun returned an incident with value 0.493), or the console path **Monitoring → Alerting → Incidents**. | done |
+| 89 | `export POLICY_ID=NEEDS-RUN` | A placeholder the reader can't fill in; the cleanup command fails. | Capture the id when the policy is created. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 42–48 | `load/turns.sh unknown-city 120`, with no timing | The load took 8.5 minutes. The incident opened about 10 minutes after the policy was created, 2 minutes after the load ended. A reader who checks early sees nothing and assumes failure. | Tell the reader how long to wait. | still real |
-| 13–15, 76–80 | "pages when it breaches"; "every user got an answer" | The policy has no notification channel, so it only opens an incident; it pages nobody. The Atlantis users got no weather (pages 3.3 and 3.7 say so). | Remove "pages", and replace the second claim with: "It fires on any failing dependency, including turns the agent recovers from." | still real |
+| 42–48 | `load/turns.sh unknown-city 120`, with no timing | The load took 8.5 minutes. The incident opened about 10 minutes after the policy was created, 2 minutes after the load ended. A reader who checks early sees nothing and assumes failure. | Tell the reader how long to wait. | done |
+| 13–15, 76–80 | "pages when it breaches"; "every user got an answer" | The policy has no notification channel, so it only opens an incident; it pages nobody. The Atlantis users got no weather (pages 3.3 and 3.7 say so). | Remove "pages", and replace the second claim with: "It fires on any failing dependency, including turns the agent recovers from." | done |
 
 ### tutorial/part-3/3.7-task-outcome.md and queries/outcome.promql
 
@@ -597,20 +597,20 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 94–98 | A warning hidden in a NOTE callout; "Missing is not zero" | A trap belongs in a deep dive with a question heading. "Missing is not zero" is a slogan that only makes sense once you know the point. | Move it to a deep dive with a question heading, spell out what "missing" means, and run the coverage query (the rerun gave 1). | still real |
+| 94–98 | A warning hidden in a NOTE callout; "Missing is not zero" | A trap belongs in a deep dive with a question heading. "Missing is not zero" is a slogan that only makes sense once you know the point. | Move it to a deep dive with a question heading, spell out what "missing" means, and run the coverage query (the rerun gave 1). | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 18–24, 87–92 | The counter "closes the gap"; "This is the counter to alert on" | The counter reads the tool's `status` field, so under `unknown-city` it equals page 3.3's tool error ratio, and the page shows nothing new. It also counts per tool call, not per task (`outcome.py:64-67`). | Choose a scenario where the counter and the tool error ratio give different answers. Otherwise, describe the counter as an approximation of task outcome. | still real |
+| 18–24, 87–92 | The counter "closes the gap"; "This is the counter to alert on" | The counter reads the tool's `status` field, so under `unknown-city` it equals page 3.3's tool error ratio, and the page shows nothing new. It also counts per tool call, not per task (`outcome.py:64-67`). | Choose a scenario where the counter and the tool error ratio give different answers. Otherwise, describe the counter as an approximation of task outcome. | done: described as an approximation of task outcome; scenario unchanged |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 40–44 | `adk web --otel_to_cloud` with no `source env.sh` and no step to stop the earlier server | The reader may lack variables, or hit a port conflict with page 3.1's server. | Add `source env.sh` and a stop step, and `unset TUTORIAL_OUTCOME_METRIC` at the end so later pages see six metrics again. | still real |
-| 31–34 | The gate `os.getenv("TUTORIAL_OUTCOME_METRIC")` | Any non-empty value turns the metric on, including `0`, which a reader would expect to turn it off. | Say "any non-empty value turns it on", or change the code to compare against `"1"`. | still real |
+| 40–44 | `adk web --otel_to_cloud` with no `source env.sh` and no step to stop the earlier server | The reader may lack variables, or hit a port conflict with page 3.1's server. | Add `source env.sh` and a stop step, and `unset TUTORIAL_OUTCOME_METRIC` at the end so later pages see six metrics again. | done |
+| 31–34 | The gate `os.getenv("TUTORIAL_OUTCOME_METRIC")` | Any non-empty value turns the metric on, including `0`, which a reader would expect to turn it off. | Say "any non-empty value turns it on", or change the code to compare against `"1"`. | done |
 
 ### tutorial/part-4/index.md
 
@@ -863,9 +863,9 @@ No demo was skipped for cost. All runs together were estimated to cost under $3.
 | 2 | Whether Part 1 needs Google Cloud. Some pages say "no Google Cloud account", while Setup requires Vertex AI and credentials. | README, TUTORIAL, part-1/index, Setup | still real |
 | 3 | The same datapoint is shown with 1 attribute on one page and 3 on another. The real datapoint has 6. | Setup, 1.1 | still real |
 | 4 | Healthy tool latency: 0.002 seconds in page 1.1's capture, but 0.02 to 0.64 seconds in page 1.3's invented panels. | 1.1, 1.3 | still real |
-| 5 | The instrumentation scope label. Page 2.2 says every descriptor has `gcp.vertex.agent`; page 3.4 says the client metrics have the genai scope; page 3.5's dashboard filters on `gcp.vertex.agent`. | 2.2, 3.4, 3.5 | still real |
-| 6 | The project variable. Setup and Part 2 use `PROJECT_ID`; Part 3 hardcodes `PROJECT=jwd-gcp-demos`. | Part 2, Part 3 | still real |
-| 7 | What happened to Atlantis users. Pages 3.3 and 3.7 say they got no weather; page 3.6 says "every user got an answer". | 3.3, 3.6, 3.7 | still real |
+| 5 | The instrumentation scope label. Page 2.2 says every descriptor has `gcp.vertex.agent`; page 3.4 says the client metrics have the genai scope; page 3.5's dashboard filters on `gcp.vertex.agent`. | 2.2, 3.4, 3.5 | done |
+| 6 | The project variable. Setup and Part 2 use `PROJECT_ID`; Part 3 hardcodes `PROJECT=jwd-gcp-demos`. | Part 2, Part 3 | done |
+| 7 | What happened to Atlantis users. Pages 3.3 and 3.7 say they got no weather; page 3.6 says "every user got an answer". | 3.3, 3.6, 3.7 | done |
 | 8 | How soon BigQuery rows appear: "about a second" on page 4.1, "about a minute" on page 4.6. | 4.1, 4.6 | fixed on main |
 | 9 | Whether metrics link to Cloud Trace. Page 4.6's text says metrics carry no trace id; its diagram and how-to-choose draw a link. | 4.6, how-to-choose | fixed on main |
 | 10 | What `out/metrics.json` holds. In Part 1 it is the metric reader's output; page 2.1 overwrites it with a PromQL response. | Part 1, 2.1 | still real |

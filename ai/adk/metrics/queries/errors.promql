@@ -9,7 +9,7 @@
 # got weather — that gap is what page 3.7's custom counter fills.
 #
 # POST each block to:
-#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+#   monitoring.googleapis.com/v1/projects/$PROJECT_ID/location/global/prometheus/api/v1/query
 # with body  query=<urlencoded>  and an ADC bearer token.
 
 # --- Tool error ratio ------------------------------------------------------
@@ -32,8 +32,9 @@ sum by ("gen_ai.tool.name") (
 
 # --- Invocation error ratio ------------------------------------------------
 # Failed invocations over all invocations. Reads 0 for unknown-city: the tool
-# failed, the invocation did not.
+# failed, the invocation did not. With no failed invocation the numerator has
+# no series, so "or vector(0)" turns "no data" into 0.
 
-sum(rate({"gen_ai.invoke_agent.duration_count", "error.type"=~".+"}[5m]))
+(sum(rate({"gen_ai.invoke_agent.duration_count", "error.type"=~".+"}[5m])) or vector(0))
   /
 sum(rate({"gen_ai.invoke_agent.duration_count"}[5m]))

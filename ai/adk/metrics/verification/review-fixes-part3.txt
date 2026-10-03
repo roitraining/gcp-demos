@@ -1,0 +1,33 @@
+Review fixes, Part 3 reruns. 2026-10-02, google-adk 2.8.0, project jwd-gcp-demos.
+Server: .venv/bin/adk web --port 8300 --otel_to_cloud ./ with env.sh sourced (job adk-metrics,
+instance laptop-1); HOST=http://localhost:8300 (port moved off 8000 to avoid other sessions).
+Each scenario started at least 5 min after the previous load, so the [5m] windows hold one scenario.
+Before each read: count by (job) (increase(invoke_agent count[5m]) > 0).
+
+3.1 slow-tool 30: all 200, turns 3.0-8.1 s.
+  turn p95 11.2 (bucket 6.4-12.8, interpolated; slowest turn 8.11 s)
+  model mean (sum/count) 2.234 s; model p95 reads exactly 5 (57 of 60 genai-scope calls <= 5 s,
+    default bounds 0,5,10,25,...), so the page reads the mean instead
+  tool p95 get_forecast 2.32 (bucket 1.28-2.56; sleep max 1.5 s), get_weather 0.01
+  Contamination: one turn (2 model calls) from another session's Agent Runtime engine
+  (job 4456927008038846464) fell in the window; it does not change the reading materially.
+3.1 deep dive concurrent 20: 7 of 20 turns HTTP 500, "sqlite3.OperationalError: database is
+  locked" from adk web's local session store. turns.sh now reports failed turns.
+  concurrent 6: 6 x 200. concurrent 10 (page): 10 x 200; turn p95 12.36, model mean 2.73,
+  get_forecast p95 2.48, get_weather 0.01. One foreign invocation (instance laptop-1, no job
+  label, another local session) fell in the window.
+3.2 multi-city 40: 8 turns/min, 2 model calls/turn, 1.5 tool calls/turn;
+  increase(tool_calls_bucket[5m]) le=1: 30, le=2: 30, le=3: 40.
+3.3 unknown-city 40: tool error ratio 0.5; invocation ratio "result":[] without or vector(0),
+  0 with it.
+3.4 growing-context 20: 8831 input vs 120.6 output tokens/min; query_range (START=END-300,
+  step 15, [1m]) input per call 476 -> 1496, output flat ~15; scope counts genai 2, ADK 1.
+3.5 baseline 30: dashboard created (value(name) prints projects/<number>/dashboards/<id>);
+  all eight widget queries return data via the API (tool error ratio 0 because 3.3's
+  error series still exists on this server). Dashboard deleted.
+3.6 policy created with the GA `gcloud monitoring policies create` after removing the "//" keys
+  (name projects/jwd-gcp-demos/alertPolicies/9451112055554235715). unknown-city 120: all 200,
+  ~8 min. Incident opened 7.8 min after policy creation (openTime 2026-10-03T03:24:48Z),
+  value 0.498, read with GET /v3/projects/jwd-gcp-demos/alerts?filter=state="OPEN". Policy deleted.
+3.7 server restarted with TUTORIAL_OUTCOME_METRIC=1; unknown-city 40: all 200. unavailable share 0.5,
+  tool error ratio 0.5, invocation ratio 0 (with or vector(0)), coverage 1. Server stopped after.

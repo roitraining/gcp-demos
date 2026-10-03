@@ -4,23 +4,19 @@
 
 ---
 
-# Part 3 · Consume — signals from histograms
+# Part 3 · Consume: signals from histograms
 
 *Turn the series in Cloud Monitoring into answers, dashboards, and an alert.*
 
 > [!NOTE]
-> **Why you are here.** The metrics are landing in Cloud Monitoring (Part 2).
-> Now you read them. An operator asks four questions of a running agent, and this
-> part answers each from the six histograms, then meets the one question no
-> framework metric can answer.
+> **Why you are here.** The metrics are landing in Cloud Monitoring (Part 2), and
+> now you read them: four operational questions from the six histograms, then one
+> no framework metric can answer.
 
-The four questions, how slow, how many, how often failing, and how much, each map
-to a signal you read off the histograms with PromQL: percentiles, rates, an
-`error.type` ratio, and the token `sum`. Then 3.5 puts them on a dashboard and 3.6
-turns one into an alert. The fifth question, did the task actually get done, is
-the one no framework metric can answer; 3.7 adds the single custom instrument that
-can. Every page runs one scenario from [scenarios.md](../scenarios.md) and reads
-the result back from the cloud.
+How slow, how many, how often failing, and how much each map to a PromQL signal;
+3.5 puts them on a dashboard and 3.6 turns one into an alert. 3.7 adds a custom
+counter for whether the task got done. Every page runs one scenario from
+[scenarios.md](../scenarios.md) against the server you start on 3.1.
 
 ## In this part
 

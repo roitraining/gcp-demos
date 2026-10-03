@@ -1,9 +1,4 @@
 {
-  "//": "Cloud Monitoring dashboard for the ADK metrics tutorial, page 3.5.",
-  "//create": "gcloud monitoring dashboards create --config-from-file=queries/dashboard.json",
-  "//delete": "gcloud monitoring dashboards delete <DASHBOARD_ID>   (teardown after capture)",
-  "//panels": "Mirrors the SigNoz google-adk panel list, built from ADK's own metrics: p95 latency, request duration, tokens over time, token split, error rate, model/agent distribution, requests over time.",
-  "//schema": "ASSUMPTION TO VERIFY: field names for a PromQL widget. This uses xyChart.dataSets[].timeSeriesQuery.prometheusQuery (a raw PromQL string) and scorecard.timeSeriesQuery.prometheusQuery. Confirm against a real 'gcloud monitoring dashboards create' before trusting; the API also accepts timeSeriesQueryLanguage (MQL) in the same slot, which is NOT what these strings are.",
   "displayName": "ADK agent metrics (tutorial 3.5)",
   "mosaicLayout": {
     "columns": 12,
@@ -69,7 +64,7 @@
                 "plotType": "STACKED_AREA",
                 "legendTemplate": "${'gen_ai.token.type'}",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "sum by (\"gen_ai.token.type\") (rate({\"gen_ai.client.token.usage_sum\", otel_scope_name=\"gcp.vertex.agent\"}[5m])) * 60"
+                  "prometheusQuery": "sum by (\"gen_ai.token.type\") (rate({\"gen_ai.client.token.usage_sum\"}[5m])) * 60"
                 }
               }
             ],

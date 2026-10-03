@@ -9,7 +9,7 @@
 # series on this project — Stage 0).
 #
 # POST each block on its own to:
-#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+#   monitoring.googleapis.com/v1/projects/$PROJECT_ID/location/global/prometheus/api/v1/query
 # with body  query=<urlencoded>  and an ADC bearer token.
 
 # --- Agent invocation latency, p50 and p95 over the last 5 minutes ---------
@@ -30,22 +30,17 @@ histogram_quantile(
   )
 )
 
-# --- Model call latency, p50 and p95 by model ------------------------------
-# client.operation.duration is the model round trip alone. If invoke_agent p95
-# rises while this stays flat, the slowdown is not the model.
+# --- Model call latency, mean by model -------------------------------------
+# client.operation.duration is the model round trip alone. Under adk web it
+# comes from the genai instrumentation with OpenTelemetry's default bounds
+# (0, 5, 10, 25, ...), so a p95 only says "under 5 s". Read the mean instead.
 
-histogram_quantile(
-  0.50,
-  sum by (le, "gen_ai.request.model") (
-    rate({"gen_ai.client.operation.duration_bucket"}[5m])
-  )
+sum by ("gen_ai.request.model") (
+  rate({"gen_ai.client.operation.duration_sum"}[5m])
 )
-
-histogram_quantile(
-  0.95,
-  sum by (le, "gen_ai.request.model") (
-    rate({"gen_ai.client.operation.duration_bucket"}[5m])
-  )
+  /
+sum by ("gen_ai.request.model") (
+  rate({"gen_ai.client.operation.duration_count"}[5m])
 )
 
 # --- Tool latency, p95 by tool ---------------------------------------------

@@ -8,7 +8,7 @@
 # over time, not just the average.
 #
 # POST each block to:
-#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+#   monitoring.googleapis.com/v1/projects/$PROJECT_ID/location/global/prometheus/api/v1/query
 # with body  query=<urlencoded>  and an ADC bearer token.
 
 # --- Tokens per minute, by type --------------------------------------------
@@ -34,6 +34,15 @@ sum(rate({"gen_ai.client.token.usage_count", "gen_ai.token.type"="input"}[5m]))
 sum(rate({"gen_ai.client.token.usage_sum", "gen_ai.token.type"="output"}[5m]))
   /
 sum(rate({"gen_ai.client.token.usage_count", "gen_ai.token.type"="output"}[5m]))
+
+# --- Tokens per call by type, stepped over time ---------------------------
+# Page 3.4 Step 3. Send this to the query_range endpoint (start, end, step=15)
+# with a short [1m] window: an instant query returns one averaged number, a
+# range query shows input per call climbing while output stays flat.
+
+sum by ("gen_ai.token.type") (rate({"gen_ai.client.token.usage_sum"}[1m]))
+  /
+sum by ("gen_ai.token.type") (rate({"gen_ai.client.token.usage_count"}[1m]))
 
 # --- Deep dive: which scope emits which metric -----------------------------
 # The metrics arrive under TWO instrumentation scopes, split by family, not one

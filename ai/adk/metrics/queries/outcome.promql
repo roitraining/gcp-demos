@@ -15,7 +15,7 @@
 # the unsuffixed one returns data.
 #
 # POST each block to:
-#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+#   monitoring.googleapis.com/v1/projects/$PROJECT_ID/location/global/prometheus/api/v1/query
 # with body  query=<urlencoded>  and an ADC bearer token.
 
 # --- Requests per minute, by outcome ---------------------------------------

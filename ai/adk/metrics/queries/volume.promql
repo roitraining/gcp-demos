@@ -7,7 +7,7 @@
 # per-minute rate. sum ÷ count gives the mean work per turn.
 #
 # POST each block to:
-#   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
+#   monitoring.googleapis.com/v1/projects/$PROJECT_ID/location/global/prometheus/api/v1/query
 # with body  query=<urlencoded>  and an ADC bearer token.
 
 # --- Turns per minute ------------------------------------------------------
@@ -33,8 +33,8 @@ sum(rate({"gen_ai.invoke_agent.tool_calls_sum"}[5m]))
 sum(rate({"gen_ai.invoke_agent.tool_calls_count"}[5m]))
 
 # --- The two populations, as a bucket distribution -------------------------
-# tool_calls_bucket by "le" shows the mix directly: a spike at le="1" for the
-# single-city turns and a second spike at le="3" for the three-city ones.
-# Instant read (no rate) of the cumulative bucket counts.
+# Buckets are cumulative (each counts every turn at or below its le) and count
+# since the server started, so take increase() over the run's window and
+# subtract each bucket from the next to get the turns in each range.
 
-sum by (le) ({"gen_ai.invoke_agent.tool_calls_bucket"})
+sum by (le) (increase({"gen_ai.invoke_agent.tool_calls_bucket"}[5m]))

@@ -43,6 +43,12 @@ APP_NAME="${APP_NAME:-demo_agent}"
 USER_ID="${USER_ID:-load-user}"
 EXPORT_WAIT="${EXPORT_WAIT:-10}"
 
+# One line per failed turn, so the end of the run can refuse to say "good to go"
+# when turns failed (a file, not a variable, because concurrent turns run in
+# background subshells).
+FAILED_TURNS=$(mktemp)
+trap 'rm -f "$FAILED_TURNS"' EXIT
+
 # --- one turn -------------------------------------------------------------
 # Create a fresh session (or reuse a given id), send one message, print the
 # result line. Args: <turn index> <prompt> [session_id].
@@ -66,14 +72,13 @@ send_turn() {
   body=$(printf '{"app_name":"%s","user_id":"%s","session_id":"%s","new_message":{"role":"user","parts":[{"text":"%s"}]}}' \
     "$APP_NAME" "$USER_ID" "$session_id" "$esc_prompt")
 
-  local start end elapsed code
-  start=$(date +%s.%N)
-  code=$(curl -s -o /dev/null -w '%{http_code}' -X POST "${HOST}/run" \
-    -H 'content-type: application/json' -d "$body")
-  end=$(date +%s.%N)
-  elapsed=$(awk "BEGIN{printf \"%.2f\", ${end}-${start}}")
+  # curl times the request itself; `date +%N` is not portable to older macOS.
+  local code elapsed
+  read -r code elapsed < <(curl -s -o /dev/null -w '%{http_code} %{time_total}\n' \
+    -X POST "${HOST}/run" -H 'content-type: application/json' -d "$body")
 
-  printf '%-15s turn %3d  http=%s  %ss\n' "$SCENARIO" "$idx" "$code" "$elapsed"
+  printf '%-15s turn %3d  http=%s  %.2fs\n' "$SCENARIO" "$idx" "$code" "$elapsed"
+  [[ "$code" == 200 ]] || echo "$idx" >> "$FAILED_TURNS"
 }
 
 # Prompts reused below.
@@ -142,6 +147,12 @@ case "$SCENARIO" in
     exit 2
     ;;
 esac
+
+failed=$(wc -l < "$FAILED_TURNS" | tr -d ' ')
+if (( failed > 0 )); then
+  echo "${failed} of ${N} turns failed; check HOST and the server log before reading back" >&2
+  exit 1
+fi
 
 # The reader exports on a 5s interval, so the last turn's batch has not left the
 # process yet. Wait past one more interval before telling the reader to go read.
