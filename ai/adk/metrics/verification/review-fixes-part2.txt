@@ -1,0 +1,30 @@
+Review fixes, Part 2 reruns. 2026-10-02, google-adk 2.8.0.
+
+2.3 (scratch, jwd-dev-2): adk deploy cloud_run as on the page, turns.sh baseline 20 (20 x 200),
+work-profile PromQL read through the API: turns/min 4, model calls/min 8, tool calls/min 4
+(the page's block is now labeled illustrative with these values).
+Teardown verified: services delete, artifacts docker images delete .../cloud-run-source-deploy/adk-metrics-otel
+--delete-tags, storage rm --recursive gs://run-sources-<project>-<region>/services/adk-metrics-otel.
+Afterward: 0 adk-metrics-otel images, no archive objects, service gone.
+
+2.2 (jwd-gcp-demos and jwd-dev-2): metricDescriptors.list returns seven gen_ai descriptors on both,
+including gen_ai.invoke_workflow.duration from other apps. GET .../prometheus/api/v1/series works
+(returned two series for gen_ai.invoke_agent.duration_count), so the "no /series endpoint" claim was dropped.
+
+2.1 (jwd-gcp-demos): Option B query_range with END/START arithmetic (no BSD-only date flag)
+writes out/tokens.json; examples/plot_tokens.py reads it and writes out/tokens.png.
+Export-outage deep dive: adk web (port 8300) with env.sh, baseline 20 (all 200); restart with
+OTEL_RESOURCE_ATTRIBUTES unset, baseline 5 (all 200, turns.sh still prints "good to go");
+server log: "Failed to export metrics batch code: 400" every 5 s;
+sum({"gen_ai.invoke_agent.duration_count", job="adk-metrics"}) = 20 afterward.
+
+2.4 (jwd-gcp-demos): OTEL_SERVICE_NAME=adk-metrics-server, server on PORT=8181 (8080 avoided
+for other sessions), the page's curl -w loop: 20 x 200. Work profile via API: turns/min 4,
+model calls/min 8, tool calls/min 4. Client token series carry otel_scope_name=gcp.vertex.agent
+(no genai instrumentation). job="adk-metrics-server", instance laptop-1, separate from adk web.
+
+2.5 (jwd-gcp-demos): adk deploy agent_engine created reasoningEngines/6828072211849412608;
+ae_turns.py 10 of 10 answered; gen_ai.invoke_agent count for that job reached 10 (all ten
+exported this time; the review's rerun saw 9). request_count first returned data about 4 min
+after the turns; sum_over_time over 30m = 20 (response_code 200; labels include
+reasoning_engine_id, response_code, response_code_class). ae_delete.py deleted the engine.
