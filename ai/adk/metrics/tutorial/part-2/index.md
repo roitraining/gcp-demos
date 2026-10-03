@@ -1,4 +1,4 @@
-[← 1.5 · Workflow-grain metrics](../part-1/1.5-workflow-grain-metrics.md)<br>
+[← 1.5 · Outer and inner agents](../part-1/1.5-workflow-grain-metrics.md)<br>
 [→ 2.1 · adk web --otel_to_cloud](2.1-adk-web-otel-to-cloud.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
@@ -9,13 +9,14 @@
 *Ship the same six metrics off the laptop and into Cloud Monitoring, one route at a time.*
 
 > [!NOTE]
-> **Why you are here.** Part 1 read the datapoints in your own process. To alert
-> on them, chart them, or share them, they have to leave the process and land in
-> a backend. This part sends them to Cloud Monitoring and confirms they arrived.
+> **Why you are here.** Part 1 read the datapoints in your own process; to alert
+> on them or chart them, they have to land in a backend. This part sends them to
+> Cloud Monitoring and confirms they arrived.
 
-Nothing about what a metric *is* changes here. The histograms, the six names, the
-attributes are the same as Part 1; only the reader changes, from a console reader
-to one that exports over the network. The path is always the same four hops.
+Nothing about what a metric *is* changes here; only the reader changes, from a
+console reader to one that exports over the network. Pages 2.1 to 2.5 each run
+the [`baseline` scenario](../scenarios.md) through a different export route and
+read the results back. Page 2.6 is a reference page for non-Google backends.
 
 ```mermaid
 flowchart LR
@@ -25,10 +26,6 @@ flowchart LR
 ```
 
 *The four hops from a recorded histogram to a Cloud Monitoring series. Each page changes only how the reader is installed.*
-
-Each page runs the [`baseline` scenario](../scenarios.md) under load and reads the
-series back. The last two pages are reference: your own server, then non-Google
-backends.
 
 ## In this part
 
@@ -43,6 +40,6 @@ backends.
 
 ---
 
-[← 1.5 · Workflow-grain metrics](../part-1/1.5-workflow-grain-metrics.md)<br>
+[← 1.5 · Outer and inner agents](../part-1/1.5-workflow-grain-metrics.md)<br>
 [→ 2.1 · adk web --otel_to_cloud](2.1-adk-web-otel-to-cloud.md)<br>
 [Tutorial index](../../TUTORIAL.md)

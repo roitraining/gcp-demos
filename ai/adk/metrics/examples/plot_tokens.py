@@ -1,11 +1,11 @@
-"""Draw the token-usage series as a two-line chart (tutorial 2.1, Door 2).
+"""Draw the token-usage series as a two-line chart (tutorial 2.1, Option B).
 
-Reads the PromQL range-query JSON the page saved to ``out/metrics.json`` and
+Reads the PromQL range-query JSON the page saved to ``out/tokens.json`` and
 writes ``out/tokens.png``: one line per ``gen_ai.token.type`` over time. This is
-the exact query Door 1 runs in the Console, so the chart you get here is the same
-two lines the Console drew — same data, different tool.
+the exact query Option A runs in the Console, so the chart you get here is the
+same two lines the Console drew — same data, different tool.
 
-Run it after the Door 2 curl has written out/metrics.json::
+Run it after the Option B curl has written out/tokens.json::
 
     .venv/bin/python examples/plot_tokens.py
 """
@@ -22,7 +22,7 @@ matplotlib.use("Agg")  # write a file, no display needed
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.dates as mdates  # noqa: E402
 
-SRC = Path("out/metrics.json")
+SRC = Path("out/tokens.json")
 DST = Path("out/tokens.png")
 
 
@@ -55,7 +55,7 @@ def main() -> None:
     fig.tight_layout()
     fig.savefig(DST, dpi=120)
 
-    print(f"wrote {DST} — the same two lines Door 1 drew in the Console")
+    print(f"wrote {DST} — the same two lines Option A drew in the Console")
 
 
 if __name__ == "__main__":

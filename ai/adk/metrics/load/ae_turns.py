@@ -7,11 +7,13 @@ baseline scenario: one "What's the weather in London?" turn per fresh session.
 
 The script drives ten turns and then sleeps for the export margin, so the page
 can go straight to the Console read-back without a separate wait step. The
-request-driven reader flushes as each response completes (see 2.5's deep dive),
-so the wait only covers Cloud Monitoring's own aggregation.
+request-driven reader flushes after a response only when at least 5 s have
+passed since its last export (see 2.5's deep dive), so the last turn's points can
+stay in the process and never leave; the wait does not change that.
 
-It finds the engine the 2.5 deploy created by its display name, so you never copy
-the reasoning-engine id by hand. Set RESOURCE to a specific id to override.
+It finds the engine the 2.5 deploy created by its display name, so you do not
+pass the reasoning-engine id. It prints the id, which the Console read-back
+needs. Set RESOURCE to a specific id to override.
 
 Env: PROJECT_ID, REGION; optional RESOURCE, DISPLAY_NAME (default adk-metrics-ae).
 """

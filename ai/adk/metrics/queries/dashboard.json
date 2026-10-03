@@ -1,9 +1,4 @@
 {
-  "//": "Cloud Monitoring dashboard for the ADK metrics tutorial, page 3.5.",
-  "//create": "gcloud monitoring dashboards create --config-from-file=queries/dashboard.json",
-  "//delete": "gcloud monitoring dashboards delete <DASHBOARD_ID>   (teardown after capture)",
-  "//panels": "Mirrors the SigNoz google-adk panel list, built from ADK's own metrics: p95 latency, request duration, tokens over time, token split, error rate, model/agent distribution, requests over time.",
-  "//schema": "ASSUMPTION TO VERIFY: field names for a PromQL widget. This uses xyChart.dataSets[].timeSeriesQuery.prometheusQuery (a raw PromQL string) and scorecard.timeSeriesQuery.prometheusQuery. Confirm against a real 'gcloud monitoring dashboards create' before trusting; the API also accepts timeSeriesQueryLanguage (MQL) in the same slot, which is NOT what these strings are.",
   "displayName": "ADK agent metrics (tutorial 3.5)",
   "mosaicLayout": {
     "columns": 12,
@@ -20,7 +15,7 @@
               {
                 "plotType": "LINE",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "histogram_quantile(0.95, sum by (le, \"gen_ai.agent.name\") (rate({\"gen_ai.invoke_agent.duration_bucket\"}[5m])))"
+                  "prometheusQuery": "histogram_quantile(0.95, sum by (le, \"gen_ai.agent.name\") (rate({\"gen_ai.invoke_agent.duration_bucket\", job=\"adk-metrics-3-5\"}[10m])))"
                 }
               }
             ],
@@ -41,14 +36,14 @@
                 "plotType": "LINE",
                 "legendTemplate": "p50 ${'gen_ai.request.model'}",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "histogram_quantile(0.50, sum by (le, \"gen_ai.request.model\") (rate({\"gen_ai.client.operation.duration_bucket\"}[5m])))"
+                  "prometheusQuery": "histogram_quantile(0.50, sum by (le, \"gen_ai.request.model\") (rate({\"gen_ai.client.operation.duration_bucket\", job=\"adk-metrics-3-5\"}[10m])))"
                 }
               },
               {
                 "plotType": "LINE",
                 "legendTemplate": "p95 ${'gen_ai.request.model'}",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "histogram_quantile(0.95, sum by (le, \"gen_ai.request.model\") (rate({\"gen_ai.client.operation.duration_bucket\"}[5m])))"
+                  "prometheusQuery": "histogram_quantile(0.95, sum by (le, \"gen_ai.request.model\") (rate({\"gen_ai.client.operation.duration_bucket\", job=\"adk-metrics-3-5\"}[10m])))"
                 }
               }
             ],
@@ -69,7 +64,7 @@
                 "plotType": "STACKED_AREA",
                 "legendTemplate": "${'gen_ai.token.type'}",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "sum by (\"gen_ai.token.type\") (rate({\"gen_ai.client.token.usage_sum\", otel_scope_name=\"gcp.vertex.agent\"}[5m])) * 60"
+                  "prometheusQuery": "sum by (\"gen_ai.token.type\") (rate({\"gen_ai.client.token.usage_sum\", job=\"adk-metrics-3-5\"}[10m])) * 60"
                 }
               }
             ],
@@ -89,7 +84,7 @@
               {
                 "plotType": "LINE",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "sum(rate({\"gen_ai.client.token.usage_sum\", \"gen_ai.token.type\"=\"input\"}[5m])) / sum(rate({\"gen_ai.client.token.usage_count\", \"gen_ai.token.type\"=\"input\"}[5m]))"
+                  "prometheusQuery": "sum(rate({\"gen_ai.client.token.usage_sum\", job=\"adk-metrics-3-5\", \"gen_ai.token.type\"=\"input\"}[10m])) / sum(rate({\"gen_ai.client.token.usage_count\", job=\"adk-metrics-3-5\", \"gen_ai.token.type\"=\"input\"}[10m]))"
                 }
               }
             ],
@@ -110,7 +105,7 @@
                 "plotType": "LINE",
                 "legendTemplate": "${'gen_ai.tool.name'}",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "histogram_quantile(0.95, sum by (le, \"gen_ai.tool.name\") (rate({\"gen_ai.execute_tool.duration_bucket\"}[5m])))"
+                  "prometheusQuery": "histogram_quantile(0.95, sum by (le, \"gen_ai.tool.name\") (rate({\"gen_ai.execute_tool.duration_bucket\", job=\"adk-metrics-3-5\"}[10m])))"
                 }
               }
             ],
@@ -130,7 +125,7 @@
               {
                 "plotType": "LINE",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "sum(rate({\"gen_ai.execute_tool.duration_count\", \"error.type\"=~\".+\"}[5m])) / sum(rate({\"gen_ai.execute_tool.duration_count\"}[5m]))"
+                  "prometheusQuery": "sum(rate({\"gen_ai.execute_tool.duration_count\", job=\"adk-metrics-3-5\", \"error.type\"=~\".+\"}[10m])) / sum(rate({\"gen_ai.execute_tool.duration_count\", job=\"adk-metrics-3-5\"}[10m]))"
                 }
               }
             ],
@@ -151,7 +146,7 @@
                 "plotType": "LINE",
                 "legendTemplate": "${'gen_ai.agent.name'}",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "sum by (\"gen_ai.agent.name\") (rate({\"gen_ai.invoke_agent.duration_count\"}[5m])) * 60"
+                  "prometheusQuery": "sum by (\"gen_ai.agent.name\") (rate({\"gen_ai.invoke_agent.duration_count\", job=\"adk-metrics-3-5\"}[10m])) * 60"
                 }
               }
             ],
@@ -172,7 +167,7 @@
                 "plotType": "STACKED_BAR",
                 "legendTemplate": "${'gen_ai.request.model'}",
                 "timeSeriesQuery": {
-                  "prometheusQuery": "sum by (\"gen_ai.request.model\") (rate({\"gen_ai.client.operation.duration_count\"}[5m])) * 60"
+                  "prometheusQuery": "sum by (\"gen_ai.request.model\") (rate({\"gen_ai.client.operation.duration_count\", job=\"adk-metrics-3-5\"}[10m])) * 60"
                 }
               }
             ],

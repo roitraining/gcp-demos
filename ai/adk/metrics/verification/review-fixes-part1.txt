@@ -1,0 +1,27 @@
+Review fixes, Part 1 and Setup reruns. 2026-10-02, google-adk 2.8.0, model
+project jwd-gcp-demos (Vertex AI, gemini-3.7-flash), env.sh sourced.
+
+$ .venv/bin/python examples/01_console_metrics.py        (Setup, 1.1)
+(metrics written to out/metrics.json)
+AGENT: The current weather in London is 15°C with drizzle.
+resource.attributes = {service.instance.id: laptop-1, cloud.region: us-central1, service.name: adk-metrics}
+gen_ai.execute_tool.duration attrs = {gen_ai.agent.name, gen_ai.tool.name, gen_ai.tool.type}
+gen_ai.client.token.usage attrs = {gen_ai.agent.name, gen_ai.operation.name, gen_ai.provider.name,
+  gen_ai.request.model, gen_ai.response.model, gen_ai.token.type}   (six, page 1.1 shows three)
+
+$ .venv/bin/python examples/03_histogram_shape.py         (1.2)
+progress goes to stderr as "\rasking turn N/10..." and is erased with "\r<spaces>\r"
+before the histogram prints, so a terminal shows no progress lines afterward.
+count=20  sum=1116  min=42  max=78   buckets 25-50: 4, 50-75: 15, 75-100: 1
+
+$ .venv/bin/python examples/02_two_attribute_sets.py      (1.3, now also writes out/metrics.json)
+two series; get_weather healthy sum 0.0016 s, failing sum 0.0007 s (failure is not slower or faster
+in any meaningful way; the page's invented panels were removed)
+
+$ ADK_EXPERIMENTAL_TELEMETRY=true ... 01_console_metrics.py; grep names   (1.4 Step 1)
+12 names (6 adk.experimental.invoke_agent.*, 6 gen_ai.*)
+$ unset ADK_EXPERIMENTAL_TELEMETRY; ... ; grep names                       (1.4 Step 2)
+6 gen_ai.* names
+
+$ .venv/bin/python examples/05_workflow_metrics.py        (1.5)
+planner 3.67 s + weather_agent 5.76 s = weather_workflow 9.43 s (exact sum); no DeprecationWarning shown

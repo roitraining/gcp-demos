@@ -71,8 +71,8 @@ def install_cloud_metrics() -> None:
 
     # gcp.project_id is the attribute the Telemetry API requires and that a bare
     # script must supply itself. service.instance.id and cloud.region make the
-    # metrics land on prometheus_target on a laptop; read them from
-    # OTEL_RESOURCE_ATTRIBUTES if env.sh set them, else fall back.
+    # metrics land on prometheus_target on a laptop; Resource.create() reads them
+    # from OTEL_RESOURCE_ATTRIBUTES, which env.sh sets.
     resource = Resource.create(
         {
             "gcp.project_id": project,
