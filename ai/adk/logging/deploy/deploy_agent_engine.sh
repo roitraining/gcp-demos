@@ -16,9 +16,10 @@
 #                        GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true AND
 #                        ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false for you.
 #   ENABLE_VIA_ENV=1   — no flag. This script writes the telemetry env var and
-#                        BOTH content knobs into the temporary .env itself, so
-#                        the CLI adds nothing. Shows the .env route where you
-#                        must set the knobs yourself.
+#                        BOTH content knobs into the temporary .env itself. The
+#                        CLI still adds --otel_to_cloud to the server command,
+#                        but sets no content knobs. Shows the .env route where
+#                        you must set the knobs yourself.
 #
 # Usage:
 #   export PROJECT_ID=your-project
@@ -92,8 +93,8 @@ cat <<EOF
 
 Deployed to Agent Engine. What differs from Cloud Run for logging:
 
-  * You do not run uvicorn or write JSON lines yourself. The platform captures
-    stdout and the ADK OTel signals.
+  * You do not write the server: the CLI generated a container that runs
+    `adk api_server`. The platform captures its stdout and stderr.
   * Logs land against the monitored resource:
         aiplatform.googleapis.com/ReasoningEngine
     but the agent/framework log lines are on the STDERR log, not stdout:
@@ -102,12 +103,11 @@ Deployed to Agent Engine. What differs from Cloud Run for logging:
     platform installs its OWN logging handler, so your log FORMAT is the ADK
     CLI's timestamped "file:line" format, not your basicConfig format; a
     basicConfig(format=...) in the agent module is overridden.
-  * Telemetry (traces, logs, metrics) is governed by one env var on the
-    deployment, GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY. --otel_to_cloud
-    wrote it to "true" for this deploy; a line in the agent's .env does the same
-    on a plain 'adk deploy agent_engine' (this script writes its own temporary
-    .env, so it uses the flag; Part 6 shows the .env route). Set neither and the
-    platform decides. Do not rely on that.
+  * Telemetry is switched by GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY on the
+    deployment. --otel_to_cloud wrote it to "true" and put --otel_to_cloud on
+    the server's start command; a line in the agent's .env does the same on a
+    plain 'adk deploy agent_engine' (Part 6 shows the .env route). Set neither
+    and the platform decides. Do not rely on that.
 
 Read the agent logs — note it is the STDERR log, and use the resource filter so
 you catch both streams:
