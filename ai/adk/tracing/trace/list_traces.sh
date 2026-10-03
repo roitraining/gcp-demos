@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# List recent traces from the Cloud Trace v1 API, newest first, one id per line.
+# List recent traces from the Cloud Trace v1 API, newest first, one per line.
 #
 # Usage:   trace/list_traces.sh FILTER [MINUTES] [PROJECT_ID]
 #   FILTER    a v1 list filter, e.g. 'span:"execute_tool get_forecast"' or

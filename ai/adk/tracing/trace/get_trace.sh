@@ -43,10 +43,14 @@ kids = {}
 for s in spans:
     kids.setdefault(s.get("parentSpanId"), []).append(s)
 def dur(s):
+    import re
     from datetime import datetime
     f = "%Y-%m-%dT%H:%M:%S.%fZ"
+    # Cloud Run and Agent Runtime spans carry nine fractional digits; strptime
+    # takes at most six, so trim before parsing.
+    t = lambda v: datetime.strptime(re.sub(r"(\.\d{6})\d*Z", r"\1Z", v), f)
     try:
-        a = datetime.strptime(s["startTime"], f); b = datetime.strptime(s["endTime"], f)
+        a = t(s["startTime"]); b = t(s["endTime"])
         return f"{(b-a).total_seconds():.3f}s"
     except Exception:
         return ""

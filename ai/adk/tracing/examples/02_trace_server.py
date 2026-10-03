@@ -11,14 +11,15 @@ Two things the CLI does that a bare script must do by hand:
     separately builds ``get_gcp_resource(project_id)`` and hands it to
     ``maybe_set_otel_providers(otel_resource=...)``. Left out, the provider falls
     back to ``OTELResourceDetector().detect()``, which carries no
-    ``gcp.project_id`` (see 2.3's "recorded" rung).
+    ``gcp.project_id`` (see 2.3's "exported" step).
   - Return the trace id. So the caller can read its own request back, ``/chat``
-    returns the invocation's ``trace_id``. A tiny span processor captures the
-    root span's trace id per request.
+    returns the invocation's ``trace_id``. A tiny span processor records each
+    session's trace id as its spans end.
 
-``TUTORIAL_TRACE_ENDPOINT`` points the span exporter at a different URL (2.3's
-``export-outage``: a closed port, so the batch fails to leave). Unset, spans go
-to ``telemetry.googleapis.com``.
+``TUTORIAL_TRACE_ENDPOINT`` adds a second OTLP span exporter aimed at that URL,
+beside the Google one (2.3's ``export-outage``: a closed port, so that extra
+export fails and retries). The Google export is unaffected, so the trace still
+reaches Cloud Trace.
 
 Run it locally::
 
@@ -31,7 +32,6 @@ Run it locally::
 
 from __future__ import annotations
 
-import contextvars
 import os
 import sys
 from contextlib import asynccontextmanager
@@ -44,11 +44,7 @@ bootstrap()
 
 from fastapi import FastAPI
 from opentelemetry import trace
-from opentelemetry.sdk.trace.export import (
-    BatchSpanProcessor,
-    SpanExporter,
-    SpanExportResult,
-)
+from opentelemetry.sdk.trace import SpanProcessor
 from pydantic import BaseModel
 
 from google.adk.apps.app import App
@@ -60,31 +56,23 @@ from google.genai import types
 
 from demo_agent.agent import root_agent
 
-# Set per request, filled by the span processor below with the request's trace id.
-_current_trace: contextvars.ContextVar[str] = contextvars.ContextVar(
-    "current_trace", default=""
-)
+# Session id -> trace id, filled by the span processor below as each turn's
+# spans end, so /chat can return the id of the trace it just produced.
+_trace_by_session: dict[str, str] = {}
 
 
-class _TraceIdCapture(SpanExporter):
-    """A no-op exporter that records the root span's trace id into a ContextVar.
+class _TraceIdCapture(SpanProcessor):
+    """Records each session's trace id when a span carrying it ends.
 
-    The root `invocation` span has no parent; when it ends, stash its trace id so
-    the /chat handler can return it. Runs alongside the real Cloud exporter.
+    ``invoke_agent`` carries ``gen_ai.conversation.id`` (the session id). on_end
+    runs synchronously as the span closes, so the id is in the map before
+    ``run_async`` returns. Runs alongside the real Cloud exporter.
     """
 
-    def export(self, spans) -> SpanExportResult:
-        for s in spans:
-            if s.parent is None:
-                tid = format(s.context.trace_id, "032x")
-                try:
-                    _current_trace.set(tid)
-                except Exception:
-                    pass
-        return SpanExportResult.SUCCESS
-
-    def shutdown(self) -> None:
-        pass
+    def on_end(self, span) -> None:
+        session_id = (span.attributes or {}).get("gen_ai.conversation.id")
+        if session_id:
+            _trace_by_session[session_id] = format(span.context.trace_id, "032x")
 
 
 def install_cloud_tracing() -> None:
@@ -94,18 +82,19 @@ def install_cloud_tracing() -> None:
         sys.exit("needs GOOGLE_CLOUD_PROJECT set (in .env or the environment)")
     os.environ.setdefault("OTEL_SERVICE_NAME", "adk-trace-server")
 
-    # TUTORIAL_TRACE_ENDPOINT redirects the OTLP span exporter (2.3 export-outage).
-    # It is a standard OTel var, so setting it makes get_gcp_exporters target it.
+    # TUTORIAL_TRACE_ENDPOINT adds a second OTLP span exporter (2.3 export-outage).
+    # It is a standard OTel var, so ADK's setup adds a generic OTLP exporter for it
+    # beside the Google one; it does not replace the Google exporter.
     endpoint = os.getenv("TUTORIAL_TRACE_ENDPOINT")
     if endpoint:
         os.environ["OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"] = endpoint
-        print(f"(span exporter redirected to {endpoint})")
+        print(f"(extra span exporter sending to {endpoint})")
 
     hooks = get_gcp_exporters(enable_cloud_tracing=True, enable_cloud_logging=True)
     if not isinstance(hooks, OTelHooks):
         hooks = OTelHooks(span_processors=list(hooks))
     # Add the trace-id capture next to the Cloud exporter.
-    hooks.span_processors.append(BatchSpanProcessor(_TraceIdCapture()))
+    hooks.span_processors.append(_TraceIdCapture())
 
     maybe_set_otel_providers([hooks], otel_resource=get_gcp_resource(project))
     print(f"Exporting spans to Cloud Trace in project {project!r}.")
@@ -135,7 +124,6 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 async def chat(req: ChatRequest) -> dict[str, str]:
     runner: Runner = app.state.runner
-    _current_trace.set("")
     session = await runner.session_service.create_session(
         app_name=runner.app_name, user_id="u1"
     )
@@ -146,9 +134,9 @@ async def chat(req: ChatRequest) -> dict[str, str]:
     ):
         if event.is_final_response() and event.content:
             final = event.content.parts[0].text
-    # Flush so the root span ends and _TraceIdCapture runs before we read it.
+    # Flush so this turn's spans leave for Cloud Trace now, not on the next batch.
     trace.get_tracer_provider().force_flush()
-    return {"response": final, "trace_id": _current_trace.get()}
+    return {"response": final, "trace_id": _trace_by_session.pop(session.id, "")}
 
 
 if __name__ == "__main__":

@@ -28,7 +28,6 @@ Run it locally::
 
 from __future__ import annotations
 
-import contextvars
 import logging
 import os
 import sys
@@ -49,20 +48,12 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.propagate import set_global_textmap
 from opentelemetry.propagators.composite import CompositePropagator
 from opentelemetry.sdk._logs import LoggingHandler
-from opentelemetry.sdk.trace.export import (
-    BatchSpanProcessor,
-    SpanExporter,
-    SpanExportResult,
-)
 from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapPropagator
 from pydantic import BaseModel
 
-try:
-    from opentelemetry.propagators.cloud_trace_propagator import (
-        CloudTraceFormatPropagator,
-    )
-except ImportError:  # opentelemetry-propagator-gcp not installed
-    CloudTraceFormatPropagator = None
+from opentelemetry.propagators.cloud_trace_propagator import (
+    CloudTraceFormatPropagator,
+)
 
 from google.adk.apps.app import App
 from google.adk.runners import Runner
@@ -73,27 +64,7 @@ from google.genai import types
 
 from demo_agent.agent import root_agent
 
-_current_trace: contextvars.ContextVar[str] = contextvars.ContextVar(
-    "current_trace", default=""
-)
 logger = logging.getLogger("trace_server")
-
-
-class _TraceIdCapture(SpanExporter):
-    def export(self, spans) -> SpanExportResult:
-        for s in spans:
-            # With a server span present, ADK's root has a parent; the outermost
-            # span is the FastAPI server span. Capture whichever span has no
-            # parent -- the true root of the request's trace.
-            if s.parent is None:
-                try:
-                    _current_trace.set(format(s.context.trace_id, "032x"))
-                except Exception:
-                    pass
-        return SpanExportResult.SUCCESS
-
-    def shutdown(self) -> None:
-        pass
 
 
 def install() -> None:
@@ -103,15 +74,15 @@ def install() -> None:
     os.environ.setdefault("OTEL_SERVICE_NAME", "adk-trace-server")
 
     # The composite propagator: understand both header formats.
-    propagators = [TraceContextTextMapPropagator()]
-    if CloudTraceFormatPropagator is not None:
-        propagators.append(CloudTraceFormatPropagator())
-    set_global_textmap(CompositePropagator(propagators))
+    set_global_textmap(
+        CompositePropagator(
+            [TraceContextTextMapPropagator(), CloudTraceFormatPropagator()]
+        )
+    )
 
     hooks = get_gcp_exporters(enable_cloud_tracing=True, enable_cloud_logging=True)
     if not isinstance(hooks, OTelHooks):
         hooks = OTelHooks(span_processors=list(hooks))
-    hooks.span_processors.append(BatchSpanProcessor(_TraceIdCapture()))
     maybe_set_otel_providers([hooks], otel_resource=get_gcp_resource(project))
 
     handler = LoggingHandler(level=logging.INFO, logger_provider=get_logger_provider())
@@ -149,7 +120,6 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 async def chat(req: ChatRequest) -> dict[str, str]:
     runner: Runner = app.state.runner
-    _current_trace.set("")
     logger.info("chat request received")
     session = await runner.session_service.create_session(
         app_name=runner.app_name, user_id="u1"
