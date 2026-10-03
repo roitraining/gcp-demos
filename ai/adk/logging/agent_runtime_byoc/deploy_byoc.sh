@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Tutorial 1.6 (BYOC): build the minimal custom container and deploy it to Agent
+# Tutorial 1.7 (BYOC): build the minimal custom container and deploy it to Agent
 # Runtime (bring-your-own-container). Unlike deploy_agent_engine.sh (which
 # deploys the AGENT object via `adk deploy`), this ships OUR own FastAPI server
 # (main.py) as a container. There is no gcloud CLI for Agent Runtime, so the
@@ -80,10 +80,11 @@ prefix + the container's own /api route), then read the logs:
     -H 'content-type: application/json' \\
     -d '{"class_method":"async_stream_query","input":{"user_id":"u1","message":"What'\''s the weather in Tokyo?"}}'
 
-  # Our naive Part 1 logs land under reasoning_engine_stdout. ENGINE_ID is the
+  # Our naive Part 1 logs (basicConfig) land under reasoning_engine_stderr;
+  # uvicorn's access lines land under reasoning_engine_stdout. ENGINE_ID is the
   # last path segment of the resource name above.
   gcloud logging read \\
-    'logName:"reasoning_engine_stdout" resource.labels.reasoning_engine_id="ENGINE_ID"' \\
+    'logName:"reasoning_engine_stderr" resource.labels.reasoning_engine_id="ENGINE_ID"' \\
     --project="$PROJECT_ID" --limit=30 --freshness=10m
 
 Tear down (ENGINE_ID = last segment of the resource name):

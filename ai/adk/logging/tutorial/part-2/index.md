@@ -1,4 +1,4 @@
-[← 1.6 · The same agent on Agent Runtime, two ways](../part-1/1.6-agent-runtime.md)<br>
+[← 1.7 · The same agent in your own container on Agent Runtime](../part-1/1.7-agent-runtime-byoc.md)<br>
 [→ Part 3 · Plugins](../part-3/index.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
@@ -16,7 +16,7 @@
 ```mermaid
 flowchart LR
   CLI["adk web / api_server<br/>--log_level"]
-  CLI -->|"setLevel()"| S1["1 · your code"]
+  CLI -->|"root level"| S1["1 · your code"]
   CLI -->|"setLevel()"| S2["2 · google_adk"]
   CLI --x|"never reaches"| S3["3 · uvicorn.access"]
   UV["uvicorn startup"] -.->|"configures<br/>independently"| S3
@@ -24,13 +24,15 @@ flowchart LR
 
 *What `--log_level` reaches. Streams 1 and 2 obey the flag; stream 3 is configured by uvicorn itself.*
 
-**The flag worked. It does not reach this stream.** The access lines come from
+The flag worked, but it does not reach this stream. The access lines come from
 `uvicorn.access`, and uvicorn configures that logger itself, with its own level
 and handler, when it starts. ADK does not override it. This is how every
 uvicorn/FastAPI app behaves, not an ADK quirk.
 
-The fix, when you run your own server, is to hand uvicorn a logging config with a
-filter on `uvicorn.access`. The key piece from
+`adk web` and `adk api_server` start uvicorn for you with its default config, so
+they give you no place to add a filter. When you run your own server, hand
+uvicorn a logging config with a filter on `uvicorn.access`; Part 4 builds such a
+server. The key piece from
 [examples/02_tame_uvicorn.py](../../examples/02_tame_uvicorn.py) drops
 health-check paths:
 
@@ -66,20 +68,23 @@ curl -s localhost:8081/healthz
 curl -s localhost:8081/
 ```
 
-**Expected output** — in the server terminal:
+The `curl` calls print each response; the server terminal shows the access log.
+
+**Expected output** (the server terminal):
 
 ```console
 2026-08-31 20:08:06 - ACCESS - 127.0.0.1:51868 "GET / HTTP/1.1" 200 OK
 ```
 
 > [!IMPORTANT]
-> **What it means.** Three health checks produced **zero** log lines; the one
+> **What it means.** Three health checks produced zero log lines; the one
 > real request produced one. You did not lower a level, you filtered a specific
-> stream. That is the move the rest of this tutorial builds on: stop relying on a
-> global level and configure each stream deliberately.
+> stream.
+
+Part 3 turns to stream 2 and the two ADK plugins that narrate each step.
 
 ---
 
-[← 1.6 · The same agent on Agent Runtime, two ways](../part-1/1.6-agent-runtime.md)<br>
+[← 1.7 · The same agent in your own container on Agent Runtime](../part-1/1.7-agent-runtime-byoc.md)<br>
 [→ Part 3 · Plugins](../part-3/index.md)<br>
 [Tutorial index](../../TUTORIAL.md)

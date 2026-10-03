@@ -177,7 +177,7 @@ async def main() -> None:
     )
     runner = InMemoryRunner(app=app)
 
-    answer = await ask(runner, "What's the weather in New York?")
+    answer = await ask(runner, "What's the weather in Tokyo?")
     print("\nFINAL ANSWER:", answer)
 
     await runner.close()
