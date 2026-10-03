@@ -1,50 +1,36 @@
-# ADK logging tutorial — conventions
+# ADK logging tutorial
 
-Scope: the tutorial under `ai/adk/logging/`. Applies when editing the tutorial
-docs, examples, or deploy scripts here.
+## Governing model
 
-Page anatomy, nav, code-block labels, callouts, deep dives, and voice follow
-the `tutorial-style` skill in `.claude/skills/tutorial-style/`. Load it first.
-This file holds only what is specific to this tutorial.
+An ADK agent process produces **four log streams**: (1) your code, (2) the
+`google_adk` framework, (3) the uvicorn web server (`uvicorn.access`), and (4)
+OpenTelemetry telemetry. Most logging confusion is "configured one stream,
+expected it to cover another." Keep new content consistent with this framing and
+its numbering.
 
-## Layout
+## Facts that are easy to get wrong (google-adk 2.8.0)
 
-- `TUTORIAL.md` is the index. `tutorial/00-setup.md` is page 0.
-  `tutorial/part-N/index.md` is each multi-page part's landing page; Part 2
-  and the final page (`tutorial/how-to-choose.md`) are single pages that are
-  their own landing. Subtask pages are `tutorial/part-N/N.M-slug.md`.
-- The linear thread runs index → 00-setup → part-1/index → 1.1 … →
-  part-2/index → part-3/index → 3.1 … → how-to-choose.
-- Links to shared assets (`examples/`, `deploy/`, `otel/`, `demo_agent/`,
-  `agent_runtime_byoc/`) are `../../` from a `part-N/` page, but `../` from
-  `00-setup.md` and `how-to-choose.md`, which sit at `tutorial/` root.
-- Every code and console block is captured from a real run against a real GCP
-  project. If a block can't be verified yet, say so in the Verification status
-  section of `tutorial/how-to-choose.md` rather than faking it.
+- The model runs in `global` while services run in `us-central1`. Set
+  `GOOGLE_CLOUD_LOCATION` as a real Cloud Run env var: a copied `.env` loses to
+  the environment ADK re-applies on top.
+- ADK's servers load the first `.env` found walking up from the agent folder, so
+  `demo_agent/` has no `.env` of its own; the Agent Runtime deploy scripts write
+  one temporarily and remove it.
+- `opentelemetry-exporter-gcp-logging` ships only pre-releases; it stays pinned
+  to an exact version so pip installs it without `--pre`.
 
-## The four-streams framing
+## Conventions
 
-The whole tutorial rests on one model: an ADK agent process produces **four log
-streams** — (1) your code, (2) the `google_adk` framework, (3) the uvicorn web
-server (`uvicorn.access`), (4) OpenTelemetry telemetry. Most logging confusion is
-"configured one stream, expected it to cover another." Keep new content consistent
-with this framing and the stream numbering.
-
-## Examples and deploy scripts
-
-- Examples live in `examples/NN_name.py`; the shared agent is `demo_agent/`, shared
-  helpers are `examples/_common.py`.
-- Deploy scripts in `deploy/` are `set -euo pipefail`, take `PROJECT_ID`/`REGION`
-  from the env, copy the matching `deploy/Dockerfile*` to `./Dockerfile` with a
-  cleanup `trap`, and smoke-test the result (a ready service can still 500).
-- The model region is `global` while services run in `us-central1`; set
-  `GOOGLE_CLOUD_LOCATION` as a real Cloud Run env var, since a copied `.env` loses
-  to the environment ADK re-applies on top.
-
-## Tutorial-specific conventions
-
+- Deploy scripts in `deploy/` use `set -euo pipefail`, read `PROJECT_ID` and
+  `REGION` from the environment, copy their `deploy/Dockerfile*` to
+  `./Dockerfile` with a cleanup `trap`, and smoke-test the result (a ready
+  service can still return 500).
 - The repeated prompt is "What's the weather in Tokyo?" in Parts 1 and 4, and
-  "What's the weather in London?" in Parts 3, 5, and 6. Later steps on a page
-  say "ask the London question in a new session."
-- Point at 5.6 for content knobs and 5.7 for other backends before writing a
-  new deep dive on either.
+  "What's the weather in London?" in Parts 3, 5 and 6.
+- Captured output comes from `jwd-gcp-demos`, which has a Model Armor floor
+  setting that sanitizes every Gemini call. New captures belong on a project
+  without one, such as `jwd-dev-5`.
+- A claim that can't be verified yet goes in the Verification status section of
+  `tutorial/how-to-choose.md`, never in faked output.
+- Content knobs belong on 5.6 and other backends on 5.7; point there before
+  writing a new deep dive on either.

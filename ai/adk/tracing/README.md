@@ -61,12 +61,3 @@ Run the first example, then read the tutorial:
 ```bash
 .venv/bin/python examples/01_console_spans.py
 ```
-
-## Status
-
-Parts 1 to 4 are written and their output captured from real runs (Part 1
-locally on 2026-09-07; Parts 2 to 4 against live Cloud Trace and Cloud Logging,
-2026-09-07 to 2026-10-02). Part 4's console clicks are written as instructions
-and not yet observed. The reference page and the final link check are in
-progress. The plan and its verification tables live in
-`docs/adk-trace-tutorial.md` in the repo root.
