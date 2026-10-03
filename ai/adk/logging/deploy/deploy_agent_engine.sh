@@ -94,7 +94,7 @@ cat <<EOF
 Deployed to Agent Engine. What differs from Cloud Run for logging:
 
   * You do not write the server: the CLI generated a container that runs
-    `adk api_server`. The platform captures its stdout and stderr.
+    'adk api_server'. The platform captures its stdout and stderr.
   * Logs land against the monitored resource:
         aiplatform.googleapis.com/ReasoningEngine
     but the agent/framework log lines are on the STDERR log, not stdout:

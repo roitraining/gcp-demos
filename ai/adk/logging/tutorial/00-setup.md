@@ -15,7 +15,11 @@ All commands run from `ai/adk/logging/`. Do this once.
 cd ai/adk/logging
 python3.13 -m venv .venv
 .venv/bin/pip install -r requirements.txt
+source .venv/bin/activate
 ```
+
+Activating the venv puts its `adk` on your `PATH`, so the pages that run plain
+`adk web` or `adk api_server` get the pinned 2.8.0, not another install.
 
 Check that the pinned ADK version installed.
 
@@ -75,8 +79,9 @@ Open `env.sh`, set `PROJECT_ID` to your project, then load it.
 source env.sh
 ```
 
-`env.sh` is gitignored. `source env.sh` again in each new terminal. The
-tutorial opens a second terminal in 1.3, and variables do not cross terminals.
+`env.sh` is gitignored. In each new terminal, run `source env.sh` and
+`source .venv/bin/activate` again. The tutorial opens a second terminal in 1.3,
+and neither variables nor the venv cross terminals.
 
 ## Meet the agent
 
