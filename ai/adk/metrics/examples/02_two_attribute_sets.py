@@ -13,6 +13,7 @@ Run it:
 from __future__ import annotations
 
 import asyncio
+import os
 
 from _common import ask, bootstrap, install_inmemory_reader, summarize_series
 
@@ -29,7 +30,12 @@ async def main() -> None:
         answer = await ask(runner, f"What's the weather in {city}?")
         print(f"\nAGENT ({city}):", answer)
     print()
-    print(summarize_series(reader.get_metrics_data(), "gen_ai.execute_tool.duration"))
+    data = reader.get_metrics_data()
+    print(summarize_series(data, "gen_ai.execute_tool.duration"))
+    # The full datapoints, for the 1.3 deep dive.
+    os.makedirs("out", exist_ok=True)
+    with open("out/metrics.json", "w") as f:
+        f.write(data.to_json(indent=4))
 
 
 if __name__ == "__main__":

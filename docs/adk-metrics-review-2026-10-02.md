@@ -60,15 +60,15 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 5–6 | "Part 1 runs entirely on your laptop against a real model" | "Entirely on your laptop" suggests no cloud account is needed. Part 1 calls Gemini through Vertex AI, which needs a Google Cloud project and credentials. | "Part 1 runs on your laptop and calls Gemini through Vertex AI. It needs a Google Cloud project, but not Cloud Monitoring or BigQuery." | still real |
+| 5–6 | "Part 1 runs entirely on your laptop against a real model" | "Entirely on your laptop" suggests no cloud account is needed. Part 1 calls Gemini through Vertex AI, which needs a Google Cloud project and credentials. | "Part 1 runs on your laptop and calls Gemini through Vertex AI. It needs a Google Cloud project, but not Cloud Monitoring or BigQuery." | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 63–71 | The Status section | It describes the tutorial's drafting progress (pages still marked `NEEDS-RUN`, a plan file in `docs/`). That is information for the author, not the reader. | Delete the Status section, along with the matching status sentences at lines 6–7 and 17–18. | still real |
-| 28–33 | The Files table lists `01_console_metrics.py`, `03_histogram_shape.py`, `02_two_attribute_sets.py`, `05_workflow_metrics.py`, `03_metrics_server.py`, `04_bq_plugin.py`, in that order | The number prefixes on the example files do not follow the order the pages use them in. Page 1.2 uses `03_`, then page 1.3 uses `02_`. Two different files share the prefix `03_`. A reader would expect the numbers to give the running order, and they don't. | Rename the example files so their numbers follow page order. Or, if renaming is too disruptive, add a "Used on page" column to the table and stop relying on the numbers. | still real |
-| 41–61 | The Quick start section | The Quick start copies the first steps of the Setup page but leaves out `gcloud auth application-default login`. The example it then runs calls Vertex AI, which fails without those credentials. A reader who follows only the Quick start hits an authentication error. Keeping two copies of the setup steps also means they drift apart. | Replace the Quick start with one line: "Follow [Setup](tutorial/00-setup.md)." | still real |
+| 63–71 | The Status section | It describes the tutorial's drafting progress (pages still marked `NEEDS-RUN`, a plan file in `docs/`). That is information for the author, not the reader. | Delete the Status section, along with the matching status sentences at lines 6–7 and 17–18. | done |
+| 28–33 | The Files table lists `01_console_metrics.py`, `03_histogram_shape.py`, `02_two_attribute_sets.py`, `05_workflow_metrics.py`, `03_metrics_server.py`, `04_bq_plugin.py`, in that order | The number prefixes on the example files do not follow the order the pages use them in. Page 1.2 uses `03_`, then page 1.3 uses `02_`. Two different files share the prefix `03_`. A reader would expect the numbers to give the running order, and they don't. | Rename the example files so their numbers follow page order. Or, if renaming is too disruptive, add a "Used on page" column to the table and stop relying on the numbers. | done: added a "Used on" column; files not renamed |
+| 41–61 | The Quick start section | The Quick start copies the first steps of the Setup page but leaves out `gcloud auth application-default login`. The example it then runs calls Vertex AI, which fails without those credentials. A reader who follows only the Quick start hits an authentication error. Keeping two copies of the setup steps also means they drift apart. | Replace the Quick start with one line: "Follow [Setup](tutorial/00-setup.md)." | done |
 
 ### TUTORIAL.md
 
@@ -76,20 +76,20 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 3 | "This is a hands-on tutorial." | Filler: the sentence tells the reader nothing the title doesn't. | Start with what the reader does: "You run a small agent…". | still real |
+| 3 | "This is a hands-on tutorial." | Filler: the sentence tells the reader nothing the title doesn't. | Start with what the reader does: "You run a small agent…". | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 57 | "Local, no cloud." | Part 1 does use the cloud: it calls a model on Vertex AI. What stays local is the metrics. | "Local: metrics never leave your laptop." | still real |
+| 57 | "Local, no cloud." | Part 1 does use the cloud: it calls a model on Vertex AI. What stays local is the metrics. | "Local: metrics never leave your laptop." | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 25 | "exported every N seconds" | "N" leaves the reader to guess the interval. | "exported on a timer (every 5 seconds with `--otel_to_cloud`)" | still real |
-| 42–46 | "project `jwd-gcp-demos`" … "See the tutorial plan for status." | The author's project id means nothing to a reader, and "the tutorial plan" is a file the reader never sees. | Drop the project id. Point the status sentence to the how-to-choose page, which lists what was verified. | still real |
+| 25 | "exported every N seconds" | "N" leaves the reader to guess the interval. | "exported on a timer (every 5 seconds with `--otel_to_cloud`)" | done |
+| 42–46 | "project `jwd-gcp-demos`" … "See the tutorial plan for status." | The author's project id means nothing to a reader, and "the tutorial plan" is a file the reader never sees. | Drop the project id. Point the status sentence to the how-to-choose page, which lists what was verified. | done |
 
 ### tutorial/00-setup.md
 
@@ -97,23 +97,23 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 14–110 | 8 code blocks the reader runs, none labeled **Command:** | The house style labels every runnable block so the reader can tell what to run from what to read. | Add the **Command:** labels. | still real |
+| 14–110 | 8 code blocks the reader runs, none labeled **Command:** | The house style labels every runnable block so the reader can tell what to run from what to read. | Add the **Command:** labels. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 124 | `"resource": { "attributes": { "service.name": "adk-metrics" } }` | The page presents this as real output, but a real run shows three resource attributes, not one: `service.instance.id`, `cloud.region` and `service.name`. | Show all three, or label the block "trimmed". | still real |
-| 129–135 | The `execute_tool.duration` datapoint shows one attribute, `gen_ai.agent.name` | Page 1.1 shows the same datapoint with three attributes. A reader comparing the two pages will think something changed. | Reuse page 1.1's block, or label this one "trimmed". | still real |
-| 85–86 | "Two latencies are the whole reason the tool and token distributions have shape." | This is false for tokens: page 1.2's token histogram gets its shape from London-only turns, which call only one tool. | "The two tools give later scenarios a second latency to vary." | still real |
-| 150–151 | The note on a 403 error: "a shell variable is overriding `.env`" | Two different variables name the project: `GOOGLE_CLOUD_PROJECT` in `.env` and `PROJECT_ID` in `env.sh`. The note doesn't say which one is overriding which, so the reader can't act on it. | At line 52, say: "Set `PROJECT_ID` to the same id as in `.env`. If both are set, the shell value wins." | still real |
+| 124 | `"resource": { "attributes": { "service.name": "adk-metrics" } }` | The page presents this as real output, but a real run shows three resource attributes, not one: `service.instance.id`, `cloud.region` and `service.name`. | Show all three, or label the block "trimmed". | done |
+| 129–135 | The `execute_tool.duration` datapoint shows one attribute, `gen_ai.agent.name` | Page 1.1 shows the same datapoint with three attributes. A reader comparing the two pages will think something changed. | Reuse page 1.1's block, or label this one "trimmed". | done |
+| 85–86 | "Two latencies are the whole reason the tool and token distributions have shape." | This is false for tokens: page 1.2's token histogram gets its shape from London-only turns, which call only one tool. | "The two tools give later scenarios a second latency to vary." | done |
+| 150–151 | The note on a 403 error: "a shell variable is overriding `.env`" | Two different variables name the project: `GOOGLE_CLOUD_PROJECT` in `.env` and `PROJECT_ID` in `env.sh`. The note doesn't say which one is overriding which, so the reader can't act on it. | At line 52, say: "Set `PROJECT_ID` to the same id as in `.env`. If both are set, the shell value wins." | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 8 and 15 | Line 8: "All commands run from this folder". Line 15: `cd ai/adk/metrics` | Line 8 says the reader is already in the folder, then line 15 changes into it from the repo root. | Introduce line 15 with "From the repo root:". | still real |
-| 90–96 | The `StatusAwareTool` code | This code is the lesson of page 1.3. Showing it here, before the reader has a reason to care, adds weight to Setup and duplicates page 1.3. | Remove it here; page 1.3 shows it. | still real |
+| 8 and 15 | Line 8: "All commands run from this folder". Line 15: `cd ai/adk/metrics` | Line 8 says the reader is already in the folder, then line 15 changes into it from the repo root. | Introduce line 15 with "From the repo root:". | done |
+| 90–96 | The `StatusAwareTool` code | This code is the lesson of page 1.3. Showing it here, before the reader has a reason to care, adds weight to Setup and duplicates page 1.3. | Remove it here; page 1.3 shows it. | done |
 
 ### tutorial/scenarios.md
 
@@ -121,15 +121,15 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 35–48 | The section "The agent behind them" | It repeats the Setup page's "Meet the agent" section. | Keep one copy and link to it from the other page. | still real |
+| 35–48 | The section "The agent behind them" | It repeats the Setup page's "Meet the agent" section. | Keep one copy and link to it from the other page. | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 19–20 | "Scenario names are a fixed set, so they are safe as a metric attribute" | No metric carries the scenario name, so this sentence answers a question the reader never had, and suggests something that isn't true. | "The scenario name only selects what `load/turns.sh` sends. It is never recorded as a metric attribute." | still real |
-| 17–19 | "you run it under load with `load/turns.sh <scenario> [N]`" | The page lists eight scenarios, but `turns.sh` accepts only six. It exits with an error on `workflow` and `export-outage`. | Add: "`workflow` runs as a script (page 1.5). `export-outage` runs the `baseline` scenario against a deliberately misconfigured server." | still real |
-| 32–33 | "started without a valid metrics resource"; "the container series nests its children" | Both phrases only make sense if you already know what they describe. | "starts without `gcp.project_id`, so Cloud Monitoring rejects every batch with a 400 error"; "the outer agent's duration includes the durations of its sub-agents" | still real |
+| 19–20 | "Scenario names are a fixed set, so they are safe as a metric attribute" | No metric carries the scenario name, so this sentence answers a question the reader never had, and suggests something that isn't true. | "The scenario name only selects what `load/turns.sh` sends. It is never recorded as a metric attribute." | done |
+| 17–19 | "you run it under load with `load/turns.sh <scenario> [N]`" | The page lists eight scenarios, but `turns.sh` accepts only six. It exits with an error on `workflow` and `export-outage`. | Add: "`workflow` runs as a script (page 1.5). `export-outage` runs the `baseline` scenario against a deliberately misconfigured server." | done |
+| 32–33 | "started without a valid metrics resource"; "the container series nests its children" | Both phrases only make sense if you already know what they describe. | "starts without `gcp.project_id`, so Cloud Monitoring rejects every batch with a 400 error"; "the outer agent's duration includes the durations of its sub-agents" | done |
 
 ### tutorial/part-1/index.md
 
@@ -137,14 +137,14 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 13–14 | "with a console reader and no Google Cloud account" | Part 1 calls Vertex AI, which needs a Google Cloud account. | "with a console reader. No Cloud Monitoring or BigQuery is involved." | still real |
-| 1, 34 | `[← 0 · Setup](../00-setup.md)` | The reading order is Setup, then Scenarios, then Part 1. The "previous" link skips Scenarios. | `[← Scenarios](../scenarios.md)` | still real |
+| 13–14 | "with a console reader and no Google Cloud account" | Part 1 calls Vertex AI, which needs a Google Cloud account. | "with a console reader. No Cloud Monitoring or BigQuery is involved." | done |
+| 1, 34 | `[← 0 · Setup](../00-setup.md)` | The reading order is Setup, then Scenarios, then Part 1. The "previous" link skips Scenarios. | `[← Scenarios](../scenarios.md)` | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 19 | "Each page here installs a console reader" | Page 1.2 uses an in-memory reader instead, so the sentence is not true for every page. | "Each page installs a metric reader." | still real |
+| 19 | "Each page here installs a console reader" | Page 1.2 uses an in-memory reader instead, so the sentence is not true for every page. | "Each page installs a metric reader." | done |
 
 ### tutorial/part-1/1.1-your-first-datapoint.md
 
@@ -152,24 +152,24 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 12–15 | The "Why you are here" note names no scenario or question | This tutorial's convention is that every page's note names the scenario it runs and the operational question it answers. | "Scenario `baseline`: is the agent recording anything, and what did one turn cost?" | still real |
-| 142 | "operator question" | Elsewhere the tutorial says "operational question". Two terms for one idea make the reader wonder whether they differ. | "operational question" | still real |
-| 158–168 | The deep dive has no one-sentence summary and link in the page body | The house style gives each deep dive a summary sentence in the body that links down to it, so a reader knows it exists. | Add one sentence in the body, ending with `See [Why does the script need to flush?](#…)`. | still real |
+| 12–15 | The "Why you are here" note names no scenario or question | This tutorial's convention is that every page's note names the scenario it runs and the operational question it answers. | "Scenario `baseline`: is the agent recording anything, and what did one turn cost?" | done |
+| 142 | "operator question" | Elsewhere the tutorial says "operational question". Two terms for one idea make the reader wonder whether they differ. | "operational question" | done |
+| 158–168 | The deep dive has no one-sentence summary and link in the page body | The house style gives each deep dive a summary sentence in the body that links down to it, so a reader knows it exists. | Add one sentence in the body, ending with `See [Why does the script need to flush?](#…)`. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 88–90 | "that seventh metric stays silent until [1.5]" | This promises the seventh metric shows up on page 1.5. It doesn't: it needs ADK's newer `Workflow` primitive, and page 1.5 uses a `SequentialAgent`. | "that seventh metric needs ADK's newer `Workflow` primitive. Page 1.5 shows what a `SequentialAgent` records instead." | still real |
-| 98–101, 126 | "with its full field set"; attributes listed as "agent, model, token.type" | The real datapoint has six attributes, not three (`adk/telemetry/_metrics.py:556-575`): agent name, operation name, provider, request model, response model and token type. | Say "the fields this page uses", or list all six. | still real |
-| 19–20 | "The reader prints every histogram ADK recorded during the turn." | The reader writes to a file, not to the terminal. A reader looking at the terminal for the histograms won't find them. | "The reader writes every histogram ADK recorded during the turn to `out/metrics.json`." | still real |
+| 88–90 | "that seventh metric stays silent until [1.5]" | This promises the seventh metric shows up on page 1.5. It doesn't: it needs ADK's newer `Workflow` primitive, and page 1.5 uses a `SequentialAgent`. | "that seventh metric needs ADK's newer `Workflow` primitive. Page 1.5 shows what a `SequentialAgent` records instead." | done |
+| 98–101, 126 | "with its full field set"; attributes listed as "agent, model, token.type" | The real datapoint has six attributes, not three (`adk/telemetry/_metrics.py:556-575`): agent name, operation name, provider, request model, response model and token type. | Say "the fields this page uses", or list all six. | done |
+| 19–20 | "The reader prints every histogram ADK recorded during the turn." | The reader writes to a file, not to the terminal. A reader looking at the terminal for the histograms won't find them. | "The reader writes every histogram ADK recorded during the turn to `out/metrics.json`." | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 42–72 | A single `console` code block holding both what the terminal prints and the contents of the JSON file | The reader can't tell where the terminal output ends and the file begins. | Split it into a console block, then a separate block headed "Contents of `out/metrics.json` (trimmed)". | still real |
-| 162–163 | "so that points are not collected too close together", citing `setup.py:96-103` | The sentence doesn't explain the real reason for the flush, and the citation is off by one line. | "ADK does not flush the meter provider when the process exits (`adk/telemetry/setup.py:96-104`), so the script calls `force_flush()` itself." | still real |
+| 42–72 | A single `console` code block holding both what the terminal prints and the contents of the JSON file | The reader can't tell where the terminal output ends and the file begins. | Split it into a console block, then a separate block headed "Contents of `out/metrics.json` (trimmed)". | done |
+| 162–163 | "so that points are not collected too close together", citing `setup.py:96-103` | The sentence doesn't explain the real reason for the flush, and the citation is off by one line. | "ADK does not flush the meter provider when the process exits (`adk/telemetry/setup.py:96-104`), so the script calls `force_flush()` itself." | done |
 
 ### tutorial/part-1/1.2-reading-a-histogram.md
 
@@ -177,21 +177,21 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 23, 61, 64, 74 | The step label "👉 Run ten turns…"; the heading "What a histogram is for"; the word "actually" in "actually felt"; a NOTE callout used for a side path | Four small breaks from house style: step labels use the `**👉 Do this.**` form; deep-dive headings are questions; "actually" is filler; a side path belongs in a TIP, not a NOTE. | Use `**👉 Run ten turns.**`, turn the heading into a question under `###` in Deep dives, drop "actually", and change the NOTE to a TIP. | still real |
-| 36–52 | The expected output leaves out the `asking turn N/10...` progress lines | The reader's terminal shows lines the page doesn't, which makes them doubt they ran the right thing. | Show the progress lines, or note "progress lines trimmed". | still real |
+| 23, 61, 64, 74 | The step label "👉 Run ten turns…"; the heading "What a histogram is for"; the word "actually" in "actually felt"; a NOTE callout used for a side path | Four small breaks from house style: step labels use the `**👉 Do this.**` form; deep-dive headings are questions; "actually" is filler; a side path belongs in a TIP, not a NOTE. | Use `**👉 Run ten turns.**`, turn the heading into a question under `###` in Deep dives, drop "actually", and change the NOTE to a TIP. | done |
+| 36–52 | The expected output leaves out the `asking turn N/10...` progress lines | The reader's terminal shows lines the page doesn't, which makes them doubt they ran the right thing. | Show the progress lines, or note "progress lines trimmed". | not applicable: the script erases its progress line with `\r` before printing, so a terminal shows none (the reviewer captured redirected stderr) |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 56–58 | "most calls sit in the 50-to-75 band with a tail reaching 100" | The bucket counts change from run to run. The page's own capture shows 3, 9 and 8 calls in three buckets; the rerun showed 1, 3, 15 and 1 in four. A reader whose run differs will think something is wrong. | "The largest share of calls sits in the 50 to 75 bucket. The exact split moves from run to run." | still real |
-| 63–67 | "On the chart above, a slow turn would raise a bar in a high bucket" | The chart above shows token counts, not durations. A slow turn doesn't change token counts. | "On a duration histogram, a slow turn would raise a bar in a high bucket." | still real |
+| 56–58 | "most calls sit in the 50-to-75 band with a tail reaching 100" | The bucket counts change from run to run. The page's own capture shows 3, 9 and 8 calls in three buckets; the rerun showed 1, 3, 15 and 1 in four. A reader whose run differs will think something is wrong. | "The largest share of calls sits in the 50 to 75 bucket. The exact split moves from run to run." | done |
+| 63–67 | "On the chart above, a slow turn would raise a bar in a high bucket" | The chart above shows token counts, not durations. A slow turn doesn't change token counts. | "On a duration histogram, a slow turn would raise a bar in a high bucket." | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 36–52 | The 20 model calls are presented as one group | Each turn makes two different kinds of model call, and the page never says so. The reader can't explain why the histogram has the shape it does. | "Each turn makes two model calls: one that asks for the tool, and one that writes the answer. The histogram mixes both kinds." | still real |
+| 36–52 | The 20 model calls are presented as one group | Each turn makes two different kinds of model call, and the page never says so. The reader can't explain why the histogram has the shape it does. | "Each turn makes two model calls: one that asks for the tool, and one that writes the answer. The histogram mixes both kinds." | done |
 
 ### tutorial/part-1/1.3-attributes-and-cardinality.md
 
@@ -200,26 +200,26 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
 | 128–131 | "which FunctionTool leaves returning None" | `FunctionTool` does detect errors, but only one kind: a response with a truthy `error` key (`adk/tools/function_tool.py:355-359`). The demo's tool returns a `status` field instead, which is why it goes unnoticed. The same wrong wording is in `demo_agent/agent.py:97-99`. | "FunctionTool flags only a response that has an `error` key, so a `status` field goes unnoticed." Fix the comment in `demo_agent/agent.py` too. | fixed on main |
-| 111 | "(telemetry/_metrics.py:585-590)" | The cited lines don't contain the code the sentence describes. | `(adk/telemetry/_metrics.py:483-491, 504-520, 556-575)` | still real |
+| 111 | "(telemetry/_metrics.py:585-590)" | The cited lines don't contain the code the sentence describes. | `(adk/telemetry/_metrics.py:483-491, 504-520, 556-575)` | done |
 
 **Style**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 12–16, 147 | The "Why you are here" note runs three sentences; the handoff to the next page sits after the deep dives | House style limits the note to two sentences and puts the handoff above the deep dives, where a reader on the main path will see it. | Cut the note to two sentences that name the `unknown-city` scenario, and move the handoff above `## Deep dives`. | still real |
+| 12–16, 147 | The "Why you are here" note runs three sentences; the handoff to the next page sits after the deep dives | House style limits the note to two sentences and puts the handoff above the deep dives, where a reader on the main path will see it. | Cut the note to two sentences that name the `unknown-city` scenario, and move the handoff above `## Deep dives`. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 57–72 | "a failed lookup returns before the tool does its work", with latency panels ranging from 0.02 to 0.64 seconds | The rerun showed `get_weather` takes 0.002 seconds whether the lookup succeeds or fails, so failure isn't faster. `get_forecast` sleeps before it checks the city, so it isn't faster on failure either. The panels look like captured output but are invented. | Delete the panels and the claim that failure makes the tool faster. Or capture a real `unknown-city` run and show that. | still real |
-| 84–87 | "`gen_ai.invoke_agent.duration` kept one series" | The claim is true, but nothing on the page shows it, so the reader has to take it on faith. | Cite the source: `adk/telemetry/_metrics.py:285-292`. | still real |
+| 57–72 | "a failed lookup returns before the tool does its work", with latency panels ranging from 0.02 to 0.64 seconds | The rerun showed `get_weather` takes 0.002 seconds whether the lookup succeeds or fails, so failure isn't faster. `get_forecast` sleeps before it checks the city, so it isn't faster on failure either. The panels look like captured output but are invented. | Delete the panels and the claim that failure makes the tool faster. Or capture a real `unknown-city` run and show that. | done: panels and the faster-failure claim removed |
+| 84–87 | "`gen_ai.invoke_agent.duration` kept one series" | The claim is true, but nothing on the page shows it, so the reader has to take it on faith. | Cite the source: `adk/telemetry/_metrics.py:285-292`. | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 45–48, 121–124 | "See the deep dive"; "swap the reader for `install_console_reader()`…" | "See the deep dive" is not a link. The swap advice tells the reader to edit code without saying how. | Make "See the deep dive" a real link, and replace the swap advice with a command the reader can run. | still real |
+| 45–48, 121–124 | "See the deep dive"; "swap the reader for `install_console_reader()`…" | "See the deep dive" is not a link. The swap advice tells the reader to edit code without saying how. | Make "See the deep dive" a real link, and replace the swap advice with a command the reader can run. | done: the script now also writes `out/metrics.json`, and the deep dive opens it |
 
 ### tutorial/part-1/1.4-the-experimental-family.md
 
@@ -227,17 +227,17 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 63–72 | The rerun with the variable unset has no Command label, expected output or callout | The reader is asked to run something but never told what they should see. | Make it **Step 2 — Turn it off.** and show the expected result: 6 metric names. | still real |
-| 38–48, 58–61 | The expected output is shown as a table instead of a code block; the WARNING runs three sentences | House style shows output as it appears in the terminal, and keeps a WARNING to one sentence. | Use an excerpt of the real terminal output, and cut the WARNING to one sentence. | still real |
+| 63–72 | The rerun with the variable unset has no Command label, expected output or callout | The reader is asked to run something but never told what they should see. | Make it **Step 2 — Turn it off.** and show the expected result: 6 metric names. | done |
+| 38–48, 58–61 | The expected output is shown as a table instead of a code block; the WARNING runs three sentences | House style shows output as it appears in the terminal, and keeps a WARNING to one sentence. | Use an excerpt of the real terminal output, and cut the WARNING to one sentence. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 13 | "The six metrics so far measure each model call." | Only two of the six are recorded per model call. The others are recorded per tool call or per agent turn, which is the tutorial's central idea. | "The six metrics so far are recorded per model call, per tool call, or per agent turn." | still real |
-| 74–75 | "where a seventh framework metric can finally appear" | Page 1.5 does not produce the seventh metric (see the page 1.1 finding above). | "Page 1.5 adds a second agent to show how agent-level metrics split by agent name." | still real |
-| 19 | "(telemetry/_instrumentation.py:289)" | The cited line isn't where the gate is checked. | `(adk/telemetry/context.py:116-118, adk/telemetry/_instrumentation.py:586-589)` | still real |
-| 70–71 | "The gate is a plain environment check" | The environment variable is only the default. A per-request `RunConfig` setting can also turn the metrics on. | "The environment variable is the default switch (`1` or `true`). A per-request `RunConfig` setting can also turn it on (`adk/telemetry/context.py:276-285`)." | still real |
+| 13 | "The six metrics so far measure each model call." | Only two of the six are recorded per model call. The others are recorded per tool call or per agent turn, which is the tutorial's central idea. | "The six metrics so far are recorded per model call, per tool call, or per agent turn." | done |
+| 74–75 | "where a seventh framework metric can finally appear" | Page 1.5 does not produce the seventh metric (see the page 1.1 finding above). | "Page 1.5 adds a second agent to show how agent-level metrics split by agent name." | done |
+| 19 | "(telemetry/_instrumentation.py:289)" | The cited line isn't where the gate is checked. | `(adk/telemetry/context.py:116-118, adk/telemetry/_instrumentation.py:586-589)` | done |
+| 70–71 | "The gate is a plain environment check" | The environment variable is only the default. A per-request `RunConfig` setting can also turn the metrics on. | "The environment variable is the default switch (`1` or `true`). A per-request `RunConfig` setting can also turn it on (`adk/telemetry/context.py:276-285`)." | done |
 
 ### tutorial/part-1/1.5-workflow-grain-metrics.md
 
@@ -245,21 +245,21 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 63 | "(workflow/_node_runner.py, …)" | The citation has no line number. | `(adk/workflow/_node_runner.py:132)` | still real |
+| 63 | "(workflow/_node_runner.py, …)" | The citation has no line number. | `(adk/workflow/_node_runner.py:132)` | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 68–70 | "you will see a `DeprecationWarning` at construction" | The reader won't see it: `examples/05_workflow_metrics.py:28` silences the warning. | "`SequentialAgent` is deprecated in ADK 2.8.0 in favor of `Workflow`. The example silences the warning." | still real |
-| 54–56 | "children plus the sequencing between them, so it is roughly the sum" | The rerun gave 2.64 + 3.30 = 5.94 seconds, an exact sum. "Plus the sequencing" suggests extra overhead the data doesn't show. | "The outer agent's duration equals the sum of its two sub-agents' durations." | still real |
-| 13 | "This reference page adds" | Page 1.5 is a lesson page, not a reference page. | "This page adds" | still real |
+| 68–70 | "you will see a `DeprecationWarning` at construction" | The reader won't see it: `examples/05_workflow_metrics.py:28` silences the warning. | "`SequentialAgent` is deprecated in ADK 2.8.0 in favor of `Workflow`. The example silences the warning." | done |
+| 54–56 | "children plus the sequencing between them, so it is roughly the sum" | The rerun gave 2.64 + 3.30 = 5.94 seconds, an exact sum. "Plus the sequencing" suggests extra overhead the data doesn't show. | "The outer agent's duration equals the sum of its two sub-agents' durations." | done |
+| 13 | "This reference page adds" | Page 1.5 is a lesson page, not a reference page. | "This page adds" | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| title, 18 | "workflow-grain" in the title; the link text `SequentialAgent` pointing to a script | "Workflow-grain" is jargon, and it suggests the `Workflow` primitive, which this page does not use. Link text naming a class should not open a script file. | Retitle the page "Outer and inner agents", and use the script's path as the link text. | still real |
+| title, 18 | "workflow-grain" in the title; the link text `SequentialAgent` pointing to a script | "Workflow-grain" is jargon, and it suggests the `Workflow` primitive, which this page does not use. Link text naming a class should not open a script file. | Retitle the page "Outer and inner agents", and use the script's path as the link text. | done |
 
 ### tutorial/part-2/index.md
 

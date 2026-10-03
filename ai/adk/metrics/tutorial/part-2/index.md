@@ -1,4 +1,4 @@
-[← 1.5 · Workflow-grain metrics](../part-1/1.5-workflow-grain-metrics.md)<br>
+[← 1.5 · Outer and inner agents](../part-1/1.5-workflow-grain-metrics.md)<br>
 [→ 2.1 · adk web --otel_to_cloud](2.1-adk-web-otel-to-cloud.md)<br>
 [Tutorial index](../../TUTORIAL.md)
 
@@ -43,6 +43,6 @@ backends.
 
 ---
 
-[← 1.5 · Workflow-grain metrics](../part-1/1.5-workflow-grain-metrics.md)<br>
+[← 1.5 · Outer and inner agents](../part-1/1.5-workflow-grain-metrics.md)<br>
 [→ 2.1 · adk web --otel_to_cloud](2.1-adk-web-otel-to-cloud.md)<br>
 [Tutorial index](../../TUTORIAL.md)

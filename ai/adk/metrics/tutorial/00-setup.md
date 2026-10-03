@@ -5,11 +5,15 @@
 
 # Setup
 
-All commands run from this folder. Do this once. Part 1 needs only a model;
+All commands run from `ai/adk/metrics`. Do this once. Part 1 needs only a model;
 Parts 2 to 4 add Google Cloud APIs, which this page enables now so you do not
 stop later.
 
 ## Create the environment
+
+From the repo root:
+
+**Command:**
 
 ```bash
 cd ai/adk/metrics
@@ -20,6 +24,8 @@ python3.13 -m venv .venv
 ## Point the agent at a model
 
 Copy the example file:
+
+**Command:**
 
 ```bash
 cp .env.example .env
@@ -36,6 +42,8 @@ GOOGLE_CLOUD_LOCATION=global
 
 If you have not authenticated before, log in once:
 
+**Command:**
+
 ```bash
 gcloud auth application-default login
 ```
@@ -45,12 +53,17 @@ gcloud auth application-default login
 The cloud parts read your project and region, and the metrics resource labels,
 from shell variables. Copy the template:
 
+**Command:**
+
 ```bash
 cp env.sh.example env.sh
 ```
 
-Open `env.sh` in your editor and set `PROJECT_ID` to your real project id, then
-source it:
+Open `env.sh` in your editor and set `PROJECT_ID` to the same project id as in
+`.env`. `env.sh` also exports `GOOGLE_CLOUD_PROJECT` from it, and when both are
+set, the shell value wins over `.env`. Then source it:
+
+**Command:**
 
 ```bash
 source env.sh
@@ -60,6 +73,8 @@ source env.sh
 variables do not cross terminals.
 
 ## Enable the APIs (Parts 2 to 4)
+
+**Command:**
 
 ```bash
 gcloud services enable \
@@ -82,20 +97,14 @@ weather assistant with two tools of deliberately different latency.
   failure status without raising.
 - `get_forecast(city, days)` sleeps 0.3–1.5 s and returns more text.
 
-Two latencies are the whole reason the tool and token distributions have shape.
-The tools are wrapped in a `StatusAwareTool`, a `FunctionTool` subclass that
-reports a failure status to telemetry so [1.3](part-1/1.3-attributes-and-cardinality.md)
-can show a failing tool split its metric.
-
-```python
-class StatusAwareTool(FunctionTool):
-    def _detect_error_in_response(self, response):
-        if isinstance(response, dict) and response.get("status") == "error":
-            return "lookup_failed"
-        return None
-```
+The two tools give later scenarios a second latency to vary. The tools are
+wrapped in a `StatusAwareTool`, a `FunctionTool` subclass that reports a failure
+status to telemetry, so [1.3](part-1/1.3-attributes-and-cardinality.md) can show
+a failing tool split its metric.
 
 ## Verify it runs
+
+**Command:**
 
 ```bash
 .venv/bin/python examples/01_console_metrics.py
@@ -110,17 +119,25 @@ code out/metrics.json
 ```
 
 **Expected output:** the answer prints, then the file holds all six metric names.
-Here is the first metric:
 
 ```console
+(metrics written to out/metrics.json)
+
 AGENT: The weather in London is currently 15°C and drizzling.
 ```
+
+Contents of `out/metrics.json`, trimmed to the first metric and a few of its
+fields:
 
 ```json
 {
     "resource_metrics": [
         {
-            "resource": { "attributes": { "service.name": "adk-metrics" } },
+            "resource": { "attributes": {
+                "service.instance.id": "laptop-1",
+                "cloud.region": "us-central1",
+                "service.name": "adk-metrics"
+            } },
             "scope_metrics": [
                 {
                     "scope": { "name": "gcp.vertex.agent", "version": "2.8.0" },
@@ -129,7 +146,11 @@ AGENT: The weather in London is currently 15°C and drizzling.
                             "name": "gen_ai.execute_tool.duration",
                             "unit": "s",
                             "data": { "data_points": [ {
-                                "attributes": { "gen_ai.agent.name": "weather_agent" },
+                                "attributes": {
+                                    "gen_ai.agent.name": "weather_agent",
+                                    "gen_ai.tool.name": "get_weather",
+                                    "gen_ai.tool.type": "StatusAwareTool"
+                                },
                                 "count": 1,
                                 "sum": 0.002
                             } ] }
@@ -147,9 +168,10 @@ AGENT: The weather in London is currently 15°C and drizzling.
 > file each run, so the pane refreshes with the new results in place.
 
 If you see the answer and the file, your model and environment are set. A
-`403 PERMISSION_DENIED` on `your_project` instead means a shell variable is
-overriding `.env`; run `unset GOOGLE_CLOUD_PROJECT` and try again, or fix
-`env.sh`. [Part 1](part-1/index.md) walks through what these fields mean.
+`403 PERMISSION_DENIED` on `your_project` instead means `env.sh` still holds the
+placeholder, and its `GOOGLE_CLOUD_PROJECT` is overriding `.env`. Set
+`PROJECT_ID` in `env.sh` and source it again. [Part 1](part-1/index.md) walks
+through what these fields mean.
 
 ---
 

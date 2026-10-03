@@ -16,8 +16,11 @@
 
 Part 1 runs a scenario as a short script. From Part 2 on, you run it under load
 with `load/turns.sh <scenario> [N]`, which fires N turns of the named scenario
-against a running server. Scenario names are a fixed set, so they are safe as a
-metric attribute; nothing per run (a session id, a timestamp) ever is.
+against a running server. `workflow` runs as a script
+([1.5](part-1/1.5-workflow-grain-metrics.md)). `export-outage` runs the
+`baseline` scenario against a deliberately misconfigured server
+([2.1](part-2/2.1-adk-web-otel-to-cloud.md)). The scenario name only selects what
+`load/turns.sh` sends. It is never recorded as a metric attribute.
 
 ## The scenarios
 
@@ -29,23 +32,11 @@ metric attribute; nothing per run (a session id, a timestamp) ever is.
 | `multi-city` | One turn in four names three cities in a single prompt | `tool_calls` and `inference_calls` per invocation split into two populations; the three-city turns carry the tokens and the duration | Is repeated work driving latency and consumption? |
 | `growing-context` | N turns in one session instead of N fresh sessions | Input tokens per model call climb across the session; output tokens stay flat | Does accumulated context explain token growth? |
 | `concurrent` | `slow-tool` and `baseline` turns fired in parallel instead of in sequence | Per-tool and per-turn durations match the sequential runs | Do overlapping turns contaminate each other's timers? |
-| `export-outage` | The server started without a valid metrics resource, so Cloud Monitoring rejects every batch; `baseline` turns against it | Every turn answers; one 400 per batch in the log; no new points; the restart discards the process totals | Is the agent healthy while telemetry is incomplete? |
-| `workflow` | The two-agent `SequentialAgent` variant (planner → weather), one London turn | `invoke_agent.duration` splits by agent name; the container series nests its children | Which numbers belong to the outer agent and which to the agent inside it? |
+| `export-outage` | The server starts without its resource labels, so Cloud Monitoring rejects every batch with a `400`; `baseline` turns against it | Every turn answers; one 400 per batch in the log; no new points; the restart discards the process totals | Is the agent healthy while telemetry is incomplete? |
+| `workflow` | The two-agent `SequentialAgent` variant (planner → weather), one London turn | `invoke_agent.duration` splits by agent name; the outer agent's duration includes the durations of its sub-agents | Which numbers belong to the outer agent and which to the agent inside it? |
 
-## The agent behind them
-
-All scenarios drive the one shared agent in
-[demo_agent/agent.py](../demo_agent/agent.py):
-
-- `get_weather(city)` is instant, with a success branch and an error branch. The
-  error branch returns a failure status and does not raise. Its
-  `StatusAwareTool` wrapper maps that status to `error.type` so a failed tool
-  splits its metric while the turn still succeeds.
-- `get_forecast(city, days)` sleeps 0.3–1.5 s and returns more text, so its
-  latency and tokens sit in different buckets from `get_weather`.
-
-Two tools of different latency are the only reason the tool and token
-distributions have any shape.
+All scenarios drive the one shared agent that
+[Setup](00-setup.md#meet-the-agent) introduces.
 
 ---
 
