@@ -1,0 +1,48 @@
+=== Stage 5: 1.5 a trace per turn (five turns, one session, console exporter) — 2026-10-02 ===
+google-adk 2.8.0 (ai/adk/tracing/.venv), Python 3.13.3, Gemini 3.7 Flash / Vertex AI,
+project jwd-gcp-demos. Local only: install_console_spans() -> out/spans.json.
+The page's earlier block had no command and no run record; this run produced it.
+
+--- command (from ai/adk/tracing/, as on the page) ---
+.venv/bin/python - <<'PY'
+import asyncio, sys
+sys.path.insert(0, "examples")
+from _common import ask, bootstrap, flush_spans, install_console_spans
+bootstrap()
+from google.adk.runners import InMemoryRunner
+from demo_agent.agent import root_agent
+
+async def main():
+    install_console_spans()
+    runner = InMemoryRunner(agent=root_agent, app_name="tracing_1")
+    session = await runner.session_service.create_session(app_name="tracing_1", user_id="u1")
+    for _ in range(5):
+        await ask(runner, "What's the weather in London?", session_id=session.id)
+    flush_spans()
+
+asyncio.run(main())
+PY
+(spans written to out/spans.json)
+
+$ jq -s '{
+  turns: [.[] | select(.name == "invocation")] | length,
+  trace_ids: [.[].context.trace_id] | unique | length,
+  conversation_ids: [.[].attributes["gen_ai.conversation.id"] // empty] | unique | length
+}' out/spans.json
+{
+  "turns": 5,
+  "trace_ids": 5,
+  "conversation_ids": 1
+}
+
+--- detail ---
+35 spans total (7 per turn).
+invocation trace ids:
+  0x2071a16ca9d8920e75a5f8f35cd097de
+  0x5bece7a5cab5c6dc8c1530a961c01a87
+  0x8f41e36f7c3ef15fb497ea9b2f8b63ef
+  0xc171531e74dc29791170e50749b99219
+  0xcb2164a3a3d6c56a57e396bbb01acb7a
+gen_ai.conversation.id = e1277c41-1cc5-40e4-b335-dfb332dc2d90, on:
+  invoke_agent weather_agent x5, generate_content gemini-3.7-flash x10.
+Not on invocation, call_llm, or execute_tool.

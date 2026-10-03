@@ -1,0 +1,196 @@
+=== Stage 3.4 (plan row 15) — one trace id per request on Cloud Run — 2026-10-02 ===
+Python 3.13 (python:3.13-slim image), Gemini 3.7 Flash / Vertex, project jwd-dev-5,
+region us-central1. Server: examples/04_propagated_server.py via
+deploy/Dockerfile.trace_server (SERVER=examples/04_propagated_server.py),
+source-deployed with `gcloud run deploy --source .` from ai/adk/tracing/ (temp
+./Dockerfile copied from deploy/Dockerfile.trace_server, removed afterward).
+
+GOAL: one request, ONE trace id across (a) the Cloud Run request log
+(run.googleapis.com/requests `trace`), (b) the /chat response, (c) the ADK spans
+in Cloud Trace, (d) the bridged app log lines; plus the parent chain
+POST /chat -> invocation -> invoke_agent -> ...  This is the data basis for Logs
+Explorer's "Correlate by request_log" nesting. The Logs Explorer UI itself was
+NOT clicked (no UI access from this session); the nesting is inferred from the
+shared `trace` field, not observed.
+
+TWO RUNS. requirements.txt says `google-adk[otel-gcp]>=2.8.0`, so a fresh build
+resolved google-adk **2.11.0**, not the tutorial's 2.8.0. Run A is that image as
+the repo builds it today. Run B is an A/B with google-adk pinned to 2.8.0 (temp
+Dockerfile only: `pip install -r requirements.txt "google-adk[otel-gcp]==2.8.0"`).
+
+--- APIs (jwd-dev-5) ---
+run, cloudbuild, artifactregistry, aiplatform, cloudtrace, telemetry, logging:
+all already enabled. Nothing enabled by this run.
+
+--- Deploy (common) ---
+gcloud run deploy <SVC> --source . --project jwd-dev-5 --region us-central1 \
+  --no-allow-unauthenticated \
+  --set-env-vars GOOGLE_CLOUD_PROJECT=jwd-dev-5,GOOGLE_CLOUD_LOCATION=global,\
+GOOGLE_GENAI_USE_VERTEXAI=TRUE,OTEL_SERVICE_NAME=adk-trace-cloudrun-34,\
+GOOGLE_CLOUD_DEFAULT_LOG_NAME=adk-trace-cloudrun-34,SERVER=examples/04_propagated_server.py
+Auth: --no-allow-unauthenticated worked; calls used
+`Authorization: Bearer $(gcloud auth print-identity-token)`. No org-policy issue.
+First deploy created the cloud-run-source-deploy AR repo in jwd-dev-5.
+
+Calls (no traceparent of our own; Cloud Run's header is what propagates):
+curl -s -X POST $URL/chat -H "Authorization: Bearer $TOK" \
+  -H 'content-type: application/json' -d '{"text":"What'\''s the weather in London?"}'
+(then the same with Atlantis)
+
+Read-back:
+trace/get_trace.sh <ID> jwd-dev-5          (Trace v1; 404 for ~100 s, then OK)
+Trace v1 raw JSON for the parent chain (spanId decimal, shown as hex below)
+gcloud logging read 'trace="projects/jwd-dev-5/traces/<ID>"' --project jwd-dev-5
+gcloud logging read 'trace:"<ID>"' --project jwd-dev-5   (substring; see Run A)
+
+======================================================================
+RUN A — google-adk 2.11.0 (unpinned, as requirements.txt builds today)
+======================================================================
+service:  adk-trace-34 (revision adk-trace-34-00001-86d, 100% traffic)
+url:      https://adk-trace-34-240659336105.us-central1.run.app
+image:    us-central1-docker.pkg.dev/jwd-dev-5/cloud-run-source-deploy/adk-trace-34@sha256:3b514b4deabf91ccdb126bb8706a1ccc20d5e2e8e70da14d5a118c93126c92d6
+build:    google-adk 2.11.0, opentelemetry-sdk 1.42.1, instrumentation-fastapi 0.63b1
+stdout:   Exporting spans and bridged logs to Cloud in project 'jwd-dev-5'; one trace per request (sampler=always_on).
+
+London:   {"response":"The current weather in London is 15°C and drizzling.",
+           "trace_id":"0ce77c1794c36ebf63a4467c8a9e78c2"}
+Atlantis: {"response":"I do not have weather data for Atlantis.",
+           "trace_id":"a7c5b36c10ae4f15e962ab7624aed1ed"}
+
+Trace 0ce77c1794c36ebf63a4467c8a9e78c2 (12 spans), parent chain:
+  /chat                         b555962305664791  parent c5a9d2d009fb5f0e (external; Cloud Run's own AppServer span)
+  POST /chat                    bcd8c4f1a1ac6d54  parent /chat
+    POST /chat http receive     d1a5a2a53c78f8bb  parent POST /chat
+    invocation                  7daf9807b6e24d4c  parent POST /chat
+      invoke_agent weather_agent c618d4506c0e8667 parent invocation
+        call_llm                5df4d48f80d6a11e  parent invoke_agent
+          generate_content      084f1423c58f95dd  parent call_llm
+        execute_tool get_weather 1d84a8c2320f8968 parent invoke_agent   <== NOT call_llm on 2.11.0
+        call_llm                a960026833dca0a3  parent invoke_agent
+          generate_content      aa8c79e655c13579  parent call_llm
+    POST /chat http send x2                       parent POST /chat
+Trace a7c5b36c10ae4f15e962ab7624aed1ed (11 spans): same shape, NO Cloud Run
+  "/chat" span; POST /chat's parent 9e1bd317f1dc9ea7 is not in the trace.
+
+Logs, London (trace:"0ce77c17..."; 14 entries):
+  16:57:18.697 run.googleapis.com/requests INFO trace=projects/jwd-dev-5/traces/0ce77c1794c36ebf63a4467c8a9e78c2 span=b555962305664791 sampled=True POST .../chat 200 4.04s
+  16:57:18.723 adk-otel INFO  trace=0ce77c1794c36ebf63a4467c8a9e78c2 span=bcd8c4f1a1ac6d54 "chat request received"
+  16:57:19.385 gen_ai.system.message / gen_ai.user.message  span=084f1423c58f95dd
+  16:57:19.503 adk-otel INFO  span=084f1423c58f95dd "Sending out request, model: gemini-3.7-flash, ..."
+  16:57:21.182 adk-otel INFO  span=084f1423c58f95dd "Response received from the model."
+  16:57:21.183 gen_ai.choice  span=084f1423c58f95dd
+  ... second model call the same under span aa8c79e655c13579
+Logs, Atlantis (15 entries): request log span=9e1bd317f1dc9ea7, traceSampled unset;
+  adk-otel INFO "chat request received" span=84a8e3064eb994a6 (POST /chat);
+  adk-otel WARNING "weather lookup failed for 'Atlantis': no data" span=52eb9ec1c9df2cfc (execute_tool).
+
+RUN A SURPRISES (all from the 2.11.0 telemetry rewrite; google_cloud.py diff):
+  1. Bridged log `trace` is the BARE 32-hex id, not projects/P/traces/ID.
+     2.11.0 ships logs over OTLP to telemetry.googleapis.com/v1/logs (resource
+     generic_task, job=service.name) instead of CloudLoggingExporter.
+     So 'trace="projects/jwd-dev-5/traces/0ce77c17..."' returns ONLY the request
+     log (1 entry); 'trace="0ce77c17..."' returns the 13 bridged entries;
+     'trace:"0ce77c17..."' returns all 14. The request log and the bridged lines
+     carry different `trace` STRINGS for the same id, so "Correlate by
+     request_log" nesting on 2.11.0 is doubtful (not verified in the UI).
+  2. GOOGLE_CLOUD_DEFAULT_LOG_NAME is ignored: bridged lines land under
+     `adk-otel`. 2.11.0 reads GCP_DEFAULT_LOG_NAME instead.
+  3. execute_tool parents invoke_agent, not call_llm (both turns).
+  4. No INFO line from get_weather on the London turn: the demo tool logs only
+     on failure (WARNING); the INFO tool line is fetch_forecast's (forecast prompt).
+
+======================================================================
+RUN B — google-adk 2.8.0 pinned (the tutorial's version)
+======================================================================
+service:  adk-trace-34b (revision adk-trace-34b-00001-rvf, 100% traffic)
+url:      https://adk-trace-34b-240659336105.us-central1.run.app
+image:    us-central1-docker.pkg.dev/jwd-dev-5/cloud-run-source-deploy/adk-trace-34b@sha256:8e435fe4c85e68aab205698fa0eb6f463c066f0b94d5869e86858a546a19a2ed
+build:    google-adk 2.8.0 (confirmed in build log)
+
+London:   {"response":"The weather in London is currently 15°C and drizzling.",
+           "trace_id":"7411a4c4483e219a5730a9083c71b16e"}
+Atlantis: {"response":"I do not have weather data for Atlantis.",
+           "trace_id":"97b1e8361098f975aef2e5e2dfc47fc1"}
+
+trace/get_trace.sh 7411a4c4483e219a5730a9083c71b16e jwd-dev-5:
+trace 7411a4c4483e219a5730a9083c71b16e  (12 spans)
+/chat
+  POST /chat
+    POST /chat http receive
+    invocation
+      invoke_agent weather_agent
+        call_llm
+          generate_content gemini-3.7-flash
+          execute_tool get_weather
+        call_llm
+          generate_content gemini-3.7-flash
+    POST /chat http send
+    POST /chat http send
+Parent chain (hex span ids):
+  /chat                          56bef9654263f79a  parent 13b7722784782e78 (external)
+  POST /chat                     34bc59ae3a3eaa16  parent /chat
+  invocation                     5cc4c2d391a46fbc  parent POST /chat
+  invoke_agent weather_agent     0231cad250841c75  parent invocation
+  call_llm                       dd45c507cbcf29ee  parent invoke_agent
+  generate_content               545d7815a1321fdc  parent call_llm
+  execute_tool get_weather       5eeeb68df019474b  parent call_llm   (2.8.0 fact holds)
+  call_llm                       85e0d8cb832f6f33  parent invoke_agent
+  generate_content               985c546e562fd288  parent call_llm
+(The renderer showed no stray second root this time: get_trace.sh treats a
+parent not in the trace as root, and /chat is the only such span.)
+Trace 97b1e8361098f975aef2e5e2dfc47fc1: same 12-span shape, execute_tool
+3f145ae553ab1bc7 under call_llm 4f9142845e2816f1.
+
+gcloud logging read 'trace="projects/jwd-dev-5/traces/7411a4c4483e219a5730a9083c71b16e"' -> 14 entries:
+  17:06:25.874 run.googleapis.com/requests INFO  trace=projects/jwd-dev-5/traces/7411a4c4483e219a5730a9083c71b16e span=56bef9654263f79a sampled=True POST .../chat 200
+  17:06:25.900 adk-trace-cloudrun-34 INFO  same trace  span=34bc59ae3a3eaa16 "chat request received"
+  17:06:30.128 gen_ai.system.message / gen_ai.user.message  span=545d7815a1321fdc
+  17:06:30.546 adk-trace-cloudrun-34 INFO  span=545d7815a1321fdc "Sending out request, model: gemini-3.7-flash, ..."
+  17:06:32.626 adk-trace-cloudrun-34 INFO  span=545d7815a1321fdc "Response received from the model."
+  17:06:32.627 gen_ai.choice  span=545d7815a1321fdc
+  17:06:32.633 gen_ai.system.message / gen_ai.user.message x3  span=985c546e562fd288
+  17:06:32.633 adk-trace-cloudrun-34 INFO  span=985c546e562fd288 "Sending out request, ..."
+  17:06:55.400 adk-trace-cloudrun-34 INFO  span=985c546e562fd288 "Response received from the model."
+  17:06:55.400 gen_ai.choice  span=985c546e562fd288
+gcloud logging read 'trace="projects/jwd-dev-5/traces/97b1e8361098f975aef2e5e2dfc47fc1"' -> 15 entries:
+  request log span=81918ff615fd0dca sampled=True; "chat request received" span=9c9132c7a799a8d9;
+  WARNING "weather lookup failed for 'Atlantis': no data" span=3f145ae553ab1bc7 (execute_tool).
+Every entry's `trace` is the full projects/jwd-dev-5/traces/<ID> string, the
+same string as the request log's.
+
+======================================================================
+VERDICTS
+======================================================================
+                                              Run A (2.11.0)   Run B (2.8.0)
+(a) request-log trace == /chat trace_id       PASS             PASS
+      0ce77c17... / 7411a4c4...
+(b) ADK spans in Cloud Trace under that id    PASS (12 spans)  PASS (12 spans)
+(c) bridged app lines carry that id           PASS (bare id)   PASS (full path)
+(d) same `trace` string as request log        FAIL             PASS
+      (exact-filter on projects/P/traces/ID finds bridged lines)
+(e) parent chain POST /chat -> invocation ->  PASS             PASS
+      invoke_agent -> call_llm -> ...
+(f) execute_tool under call_llm (CLAUDE.md)   FAIL (invoke_agent) PASS
+(g) bridged log name = GOOGLE_CLOUD_DEFAULT_LOG_NAME  FAIL (adk-otel)  PASS
+(h) Logs Explorer "Correlate by request_log"  NOT CHECKED (no UI); data basis
+      present in Run B, doubtful in Run A per (d).
+
+ADDITIONAL OBSERVATIONS (both runs)
+  - Cloud Run's own span appears IN the trace. When Cloud Run samples the request
+    (request log traceSampled=True), a "/chat" span (labels /component=AppServer,
+    cloud.resource_id=//run.googleapis.com/.../revisions/<rev>) is the top of the
+    trace, with POST /chat as its child, and the request log's spanId == that
+    "/chat" span's id. When unsampled (Run A Atlantis), no "/chat" span; the
+    request log spanId (9e1bd317f1dc9ea7) is POST /chat's parent, absent from
+    the trace. So the tree on Cloud Run is /chat -> POST /chat -> invocation,
+    one level more than page 3.4's local tree.
+  - Live sampling-trap evidence: Run A Atlantis arrived unsampled from Cloud Run,
+    yet always_on recorded the full 11-span ADK tree under Cloud Run's id.
+  - Ingest delay ~100 s for Trace v1 (2 x 404 retries), as documented.
+
+--- Teardown ---
+gcloud run services delete adk-trace-34  -> Deleted service [adk-trace-34].
+gcloud run services delete adk-trace-34b -> Deleted service [adk-trace-34b].
+gcloud run services list (jwd-dev-5, us-central1) -> empty.
+Temporary ./Dockerfile removed (ls: No such file or directory).
+AR repo cloud-run-source-deploy (created by this run) left in place. Nothing committed.

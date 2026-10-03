@@ -1,0 +1,53 @@
+=== Stage 5 re-capture: 3.1 the free join (02 server, one London turn) — 2026-10-02 ===
+google-adk 2.8.0 (ai/adk/tracing/.venv), Python 3.13.3, Gemini 3.7 Flash / Vertex AI,
+project jwd-gcp-demos. pip: opentelemetry-sdk 1.42.1, opentelemetry-exporter-gcp-logging
+1.15.0a0, google-cloud-logging 3.16.3, uvicorn 0.52.4.
+env.sh sourced (OTEL_SERVICE_NAME=adk-tracing, GOOGLE_CLOUD_DEFAULT_LOG_NAME=adk-tracing).
+No TUTORIAL_* gates. OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT unset (default).
+Server: examples/02_trace_server.py on PORT=8096 (not 8080, to avoid parallel agents;
+nothing captured depends on the port). Trace Explorer UI NOT clicked.
+Replaces 3.1's earlier block, which showed trace ae6b5c65... (a classified-error
+Atlantis turn on 03) and put all three gen_ai.* events on one span.
+
+--- the turn ---
+$ export HOST=http://localhost:8096 ; export ENDPOINT=chat ; ./load/turns.sh baseline 1
+baseline        turn   1  5.21s  trace=6cbc244c5c204a4b2163a04a650c83cf
+
+--- the page's command (17:44Z) ---
+$ gcloud logging read 'trace="projects/'"$PROJECT_ID"'/traces/6cbc244c5c204a4b2163a04a650c83cf"' \
+    --format='value(logName.basename(),spanId,jsonPayload.content)'
+gen_ai.choice	11b40fdb8261449e	<elided>
+gen_ai.user.message	11b40fdb8261449e	<elided>
+gen_ai.user.message	11b40fdb8261449e	<elided>
+gen_ai.user.message	11b40fdb8261449e	<elided>
+gen_ai.system.message	11b40fdb8261449e	<elided>
+gen_ai.choice	6fb75b46347439a7	<elided>
+gen_ai.user.message	6fb75b46347439a7	<elided>
+gen_ai.system.message	6fb75b46347439a7	<elided>
+8 entries, all gen_ai.*, no severity set, traceSampled=true on every one.
+Counts: gen_ai.system.message x2, gen_ai.user.message x4, gen_ai.choice x2
+(same counts as stage3-31-33-log-join.txt).
+Content is <elided> because the content knob is off by default (page 1.3).
+
+--- span id -> span (Trace v1, decimal spanId converted to hex) ---
+b6b21a1ebe409e84  invocation
+c8b8841c153fdf51    invoke_agent weather_agent
+a62177f8a9052227      call_llm (1st)
+6fb75b46347439a7        generate_content gemini-3.7-flash   <== 3 events
+4ac0f57ae2f53b28        execute_tool get_weather
+15778c496174fe78      call_llm (2nd)
+11b40fdb8261449e        generate_content gemini-3.7-flash   <== 5 events
+
+$ trace/get_trace.sh 6cbc244c5c204a4b2163a04a650c83cf
+trace 6cbc244c5c204a4b2163a04a650c83cf  (7 spans)
+invocation                               4.595s
+  invoke_agent weather_agent               4.588s
+    call_llm                                 2.244s
+      generate_content gemini-3.7-flash        2.241s
+      execute_tool get_weather                 0.002s
+    call_llm                                 2.314s
+      generate_content gemini-3.7-flash        2.313s
+
+VERDICT: on 02 (no bridge) every log entry on the trace is a gen_ai.* event, each
+carrying the spanId of a generate_content span, never call_llm. Each model call's
+events sit on its own generate_content span: gen_ai.choice appears twice, once per span.

@@ -1,0 +1,35 @@
+=== Stage 3.2 + viewer gate — WARNING under its span, live — 2026-09-07 ===
+google-adk 2.8.0, Python 3.13.3, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos
+examples/03_correlated_server.py (02 + way-A LoggingHandler bridge on the root
+logger). TUTORIAL_CLASSIFY_ERRORS=1, GOOGLE_CLOUD_DEFAULT_LOG_NAME=adk-tracing.
+One classified-error (Atlantis) turn over /chat.
+
+Trace id: ae6b5c659c9cc62c3b664ad5d464b234
+
+--- The tool WARNING read back from Cloud Logging (gcloud logging read) ---
+gcloud logging read 'trace="projects/jwd-gcp-demos/traces/ae6b...234" AND severity=WARNING'
+  1 entry:
+    severity:     WARNING
+    trace:        projects/jwd-gcp-demos/traces/ae6b5c659c9cc62c3b664ad5d464b234
+    spanId:       9d20dbf0a73c5cf5
+    traceSampled: True
+    message:      weather lookup failed for 'Atlantis': no data
+
+--- Confirm the spanId IS the execute_tool span (Trace v1, decimal ids) ---
+log spanId 9d20dbf0a73c5cf5 = decimal 11322291289853811957
+Trace v1 spans:
+  invocation                        1715783375451835936
+  invoke_agent weather_agent        1443541392773825897
+  call_llm                          17887457467860598300
+  generate_content                  16414357137064288373
+  execute_tool get_weather          11322291289853811957  error.type=lookup_failed  <== WARNING here
+  call_llm                          1334702497527465483
+  generate_content                  2874131689397269952
+
+VERDICT: the bridged WARNING carries the exact spanId of the red execute_tool
+get_weather span. Way A works on a laptop through the Logging API. This resolves
+rows 3 (in-process, already), 13, 20 and the viewer gate's log->span join. It is
+also the 4.3 payoff (the failed step with its log line beside it).
+
+NOTE: v1 returns spanId as decimal; the LogEntry spanId is 16-hex. Convert to
+compare (int(hex,16)).

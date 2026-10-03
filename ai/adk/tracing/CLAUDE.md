@@ -42,9 +42,11 @@ Keep new content consistent with this framing.
   `error.type`. A returned `{"error": ...}` dict gets `error.type=TOOL_ERROR`
   for free. The demo's `{"status": "error"}` shape needs the `StatusAwareTool`
   hook to become `error.type=lookup_failed`. A raising tool gets ERROR,
-  `error.type=<class>`, **two** exception events on the tool span
-  (`LookupError` + a `DynamicNodeFailError` wrapper), and ERROR on both parents.
-  See page 1.4.
+  `error.type=<class>`, **two** exception events on the tool span (both
+  `LookupError` in the 2026-10-02 rerun: ADK's `record_exception`, then OTel's
+  on span exit; each stores the message), ERROR on `invoke_agent` and
+  `invocation`, and five spans instead of seven. Parents of a returned failure
+  stay UNSET. See page 1.4.
 - **Script export needs a flush.** A `BatchSpanProcessor` holds spans until its
   interval, so example scripts call `force_flush()` on the tracer provider
   (helper `flush_spans()` in `examples/_common.py`). `SimpleSpanProcessor`
@@ -96,4 +98,8 @@ tree is pure ADK:
   weather in Atlantis?" for the error turns; `load/turns.sh <scenario> [N]` for
   volume.
 - Cloud captures use `trace/get_trace.sh <trace-id>` (Trace v1, indented tree)
-  and `gcloud logging read 'trace="projects/P/traces/ID"'` for the log side.
+  and `gcloud logging read 'trace="projects/P/traces/ID"' --project="$PROJECT_ID"`
+  for the log side (without `--project`, gcloud searches its default project).
+- The `02` and `03` servers return the trace id from a span processor keyed on
+  `gen_ai.conversation.id`; `04` reads it from the current (server) span. A
+  sampled-out turn returns no id (`trace=—`).

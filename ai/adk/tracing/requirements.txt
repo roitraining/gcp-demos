@@ -1,4 +1,4 @@
-google-adk[otel-gcp]>=2.8.0
+google-adk[otel-gcp]==2.8.0
 # adk web --otel_to_cloud and get_gcp_exporters ship all three signals; the
 # otel-gcp extra pulls only the instrumentation, not these Cloud exporters.
 opentelemetry-exporter-otlp-proto-http

@@ -1,0 +1,62 @@
+=== Stage 5 re-capture: 3.3 framework and server logs (03 server, slow-tool) — 2026-10-02 ===
+google-adk 2.8.0 (ai/adk/tracing/.venv), Python 3.13.3, Gemini 3.7 Flash / Vertex AI,
+project jwd-gcp-demos. Versions as in stage5-31-free-join.txt.
+env.sh sourced (GOOGLE_CLOUD_DEFAULT_LOG_NAME=adk-tracing). No TUTORIAL_* gates.
+Server: examples/03_correlated_server.py on PORT=8097 (root logger at INFO, so
+google_adk and demo_agent INFO records reach the bridge). Trace Explorer UI NOT clicked.
+Replaces 3.3's earlier block, which showed trace ae6b5c65... (a classified-error
+Atlantis turn) for a page that describes a slow-tool turn.
+
+--- the turns ---
+$ export HOST=http://localhost:8097 ; export ENDPOINT=chat ; ./load/turns.sh slow-tool 2
+slow-tool       turn   1  4.62s  trace=84bda3ea9b4272b0ea4b3a84017f194c   (London)
+slow-tool       turn   2  7.48s  trace=497cc8ea3c440f6696053290428686f9   (forecast, used)
+
+--- the page's command: bridged entries on the forecast trace ---
+$ gcloud logging read 'trace="projects/'"$PROJECT_ID"'/traces/497cc8ea3c440f6696053290428686f9" AND logName="projects/'"$PROJECT_ID"'/logs/adk-tracing"' \
+    --format='value(severity,spanId,textPayload)'
+INFO	181261a0d84f913a	Response received from the model.
+INFO	181261a0d84f913a	Sending out request, model: gemini-3.7-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+INFO	97859d0f07ab07f3	fetched 3-day forecast for London
+INFO	598d358422a88224	Response received from the model.
+INFO	598d358422a88224	Sending out request, model: gemini-3.7-flash, backend: GoogleLLMVariant.VERTEX_AI, stream: False
+Labels: the four model lines carry code.file.path .../google/adk/models/google_llm.py
+(generate_content_async, lines 255 and 327); the forecast line carries
+demo_agent/agent.py (_fetch_forecast, line 93).
+The full trace read (no logName filter) returns 13 entries: these 5 plus 8 gen_ai.*.
+
+--- span id -> span (Trace v1, hex) ---
+c2fbdb532718c41e  invocation
+a9bd2f594bc6ec95    invoke_agent weather_agent
+2281a91358355945      call_llm
+598d358422a88224        generate_content gemini-3.7-flash   <== 2 INFO (google_adk)
+97859d0f07ab07f3        execute_tool get_forecast           <== 1 INFO (demo_agent)
+f6b2f048ccd99ff9      call_llm
+181261a0d84f913a        generate_content gemini-3.7-flash   <== 2 INFO (google_adk)
+
+$ trace/get_trace.sh 497cc8ea3c440f6696053290428686f9
+trace 497cc8ea3c440f6696053290428686f9  (7 spans)
+invocation                               7.195s
+  invoke_agent weather_agent               7.194s
+    call_llm                                 3.661s
+      generate_content gemini-3.7-flash        2.648s
+      execute_tool get_forecast                1.010s
+    call_llm                                 3.530s
+      generate_content gemini-3.7-flash        3.528s
+
+--- what does NOT join ---
+$ gcloud logging read 'logName="projects/jwd-gcp-demos/logs/adk-tracing" AND timestamp>="2026-10-02T17:40:00Z" AND -trace:*' \
+    --format='value(timestamp,severity,textPayload)'
+2026-10-02T17:42:26.012845056Z	INFO	trace server starting up (no span here)
+Negative control 1 confirmed live: the startup line is in Cloud Logging with no trace.
+
+uvicorn.access: the server's stdout shows
+  INFO:     127.0.0.1:50997 - "POST /chat HTTP/1.1" 200 OK
+but no Cloud Logging entry exists for it (search for "POST /chat" since 17:40Z: none).
+uvicorn's default LOGGING_CONFIG sets uvicorn.access propagate=False with its own
+stream handler, so the record never reaches the root-logger bridge. It is absent
+from Cloud Logging, not present-without-spanId.
+
+VERDICT: the bridge stamps the framework's INFO lines with their generate_content
+span ids and the tool's own INFO with the execute_tool get_forecast id. The startup
+line has no trace. The access log never leaves the process through the bridge.

@@ -1,0 +1,139 @@
+=== Stage 4.1 — the slow step (slow-tool under load), live — 2026-10-02 ===
+google-adk 2.8.0 (ai/adk/tracing/.venv), Python 3.13.3, Gemini 3.7 Flash / Vertex,
+project jwd-gcp-demos, OTEL_SERVICE_NAME=adk-tracing.
+Server: examples/03_correlated_server.py, TUTORIAL_CUSTOM_SPAN=1, PORT=8091
+(8091, not the page's 8080, to avoid parallel agents; nothing in the captures
+depends on the port). Load: HOST=http://localhost:8091 ENDPOINT=chat.
+Trace Explorer UI NOT clicked (no UI access from this session).
+
+--- Run A (discarded) 17:19:07Z ---
+baseline 5 + slow-tool 20 started, but the server received a shutdown after
+slow-tool turn 16 (cause outside this run; likely a parallel agent). Its traces
+are in the project but excluded from every number below by time window.
+
+--- Run B 17:21:55Z-17:24:35Z: ./load/turns.sh baseline 5 ; ./load/turns.sh slow-tool 20 ---
+baseline        turn   1  8.10s  trace=b43d1806d570087130db4983d3f0f12a
+baseline        turn   2  5.16s  trace=5b61975fbe3d3289c73090bbd4556a9c
+baseline        turn   3  5.99s  trace=86c56a55ae7dcb0857f0dc7b2bd9d661
+baseline        turn   4  5.25s  trace=f8c2e13cd707aa50f6e173f92a809cfd
+baseline        turn   5  5.72s  trace=84233ca5287c1c9311a9db167e60a069
+slow-tool       turn   1  6.24s  trace=30e0a720f64638cba2fd9d2da4ef2096
+slow-tool       turn   2  7.32s  trace=f430f9b62e0404dc0712a97acfb8e457
+slow-tool       turn   3  7.89s  trace=2c55812e4f75f2e24203ca5df7d57a0f
+slow-tool       turn   4  7.88s  trace=—
+slow-tool       turn   5  5.05s  trace=3219666053b88e541ff7ea19a667a280
+slow-tool       turn   6  5.87s  trace=6cad80c0f68deacba51874374d6cf4fb
+slow-tool       turn   7  5.64s  trace=aae7cdc4a8f2d8b9754dc62655130746
+slow-tool       turn   8  7.64s  trace=bc3884e6a5b8f8788fb9163825cb7bee
+slow-tool       turn   9  4.37s  trace=3dfebb6b92a8111bf2c1232ef530bd06
+slow-tool       turn  10  5.94s  trace=eb89c8c0a34a7d8e06c8bac1d2085d8a
+slow-tool       turn  11  5.84s  trace=7b69e5bae29ec2ae51cab34d7fa05f3e
+slow-tool       turn  12  5.53s  trace=be513db0dd17b16f74d7828dcd0cbf1a
+slow-tool       turn  13  5.36s  trace=a905aa78557a7aef871ae857f308b98b
+slow-tool       turn  14  7.49s  trace=e7d82890a394bf6c879cb7b1e0b4e136
+slow-tool       turn  15  6.99s  trace=—
+slow-tool       turn  16  7.48s  trace=e3edb49692f8aa12ef4ff7e79142427e
+slow-tool       turn  17  6.54s  trace=05079b4006fce21f3f9c152c6248ddd4
+slow-tool       turn  18  8.77s  trace=63c8dcc42e6f0a18eba78f1b3e085a44
+slow-tool       turn  19  4.92s  trace=34aa64bda9e802b968debbdd8a0727e7
+slow-tool       turn  20  6.42s  trace=36904fbfa834ddac97c71b3ef003c3e6
+2 of 25 turns printed trace=— (_TraceIdCapture contextvar race: the BSP worker
+thread exported the root span before the request's force_flush). Read-back
+found all 25 traces in the window, including 2c08a6b0... (slow-tool turn 15).
+
+--- List the forecast traces (page Step 3), direct v1 curl, 17:29:50Z ---
+export START=2026-10-02T17:21:50Z
+curl -s -H "Authorization: Bearer $(gcloud auth application-default print-access-token)" \
+  "https://cloudtrace.googleapis.com/v1/projects/$PROJECT_ID/traces?view=MINIMAL&startTime=$START&filter=span:%22execute_tool%20get_forecast%22" \
+  | grep traceId
+      "traceId": "2c08a6b0715a19f56bcd8d438d05f156"
+      "traceId": "36904fbfa834ddac97c71b3ef003c3e6"
+      "traceId": "63c8dcc42e6f0a18eba78f1b3e085a44"
+      "traceId": "6cad80c0f68deacba51874374d6cf4fb"
+      "traceId": "bc3884e6a5b8f8788fb9163825cb7bee"
+      "traceId": "be513db0dd17b16f74d7828dcd0cbf1a"
+      "traceId": "e3edb49692f8aa12ef4ff7e79142427e"
+      "traceId": "e7d82890a394bf6c879cb7b1e0b4e136"
+      "traceId": "eb89c8c0a34a7d8e06c8bac1d2085d8a"
+      "traceId": "f430f9b62e0404dc0712a97acfb8e457"
+=> 10 traces = the 10 forecast turns. VERDICT: quoted span-name filter works.
+Unquoted 'span:execute_tool get_forecast' => 0 traces (v1 splits filter terms on
+spaces). trace/list_traces.sh is broken as committed (stdin heredoc, see
+stage4-44); a scratch copy with only the 4.4 fix applied printed, at 17:27:44Z:
+  list_traces.sh 'span:"execute_tool get_forecast"' 6  -> (10 traces), each "8 spans".
+The page shows the curl, not list_traces.sh.
+
+--- Duration ranking via the API (page deep dive) ---
+filter 'span:"execute_tool get_forecast" latency:7s', orderBy=duration desc,
+view=ROOTSPAN, window 17:21:50Z-17:24:40Z:
+  63c8dcc42e6f0a18eba78f1b3e085a44 invocation 8.517s
+  2c08a6b0715a19f56bcd8d438d05f156 invocation 7.647s
+  bc3884e6a5b8f8788fb9163825cb7bee invocation 7.393s
+  e7d82890a394bf6c879cb7b1e0b4e136 invocation 7.287s
+  e3edb49692f8aa12ef4ff7e79142427e invocation 7.120s
+  f430f9b62e0404dc0712a97acfb8e457 invocation 7.051s
+latency: and orderBy act on the root span only.
+
+--- Per-span-name statistics (page Step 4), v1 view=COMPLETE read-back, all 25 run-B traces ---
+grouped by span name, all 25 traces of run B (linear-interpolated percentiles)
+invocation                           n= 25 p50= 5.700 p95= 7.789 max= 8.517
+invoke_agent weather_agent           n= 25 p50= 5.700 p95= 7.784 max= 8.516
+call_llm                             n= 50 p50= 2.918 p95= 4.516 max= 4.824
+generate_content gemini-3.7-flash    n= 50 p50= 2.838 p95= 4.079 max= 4.823
+execute_tool get_forecast            n= 10 p50= 1.059 p95= 1.450 max= 1.474
+fetch_forecast                       n= 10 p50= 1.057 p95= 1.449 max= 1.472
+execute_tool get_weather             n= 15 p50= 0.001 p95= 0.001 max= 0.002
+
+Split by turn kind (forecast = trace contains execute_tool get_forecast):
+  forecast (10): invoke_agent p50 7.084 p95 8.124, mean 6.774; generate_content
+                 per turn mean 5.687; execute_tool get_forecast mean 1.080
+                 per-span generate_content p50 2.924 p95 3.534
+  weather  (15): invoke_agent p50 5.411 p95 7.714, mean 5.587; generate_content
+                 per turn mean 5.578; execute_tool get_weather ~0.001
+  delta mean invoke_agent: 1.187 s; tool 1.080 s = 91% of it; model per turn +0.109 s.
+Tool share of invoke_agent (forecast turns): min 10.5%, p50 16.2%, max 24.3%;
+aggregate 10.80 s of 67.74 s = 15.9%.
+call_llm includes the tool (execute_tool parents the first call_llm), so the
+model-only comparison uses generate_content.
+
+--- Trees (page Step 5), trace/get_trace.sh ---
+slowest turn:
+trace 63c8dcc42e6f0a18eba78f1b3e085a44  (8 spans)
+invocation                               8.517s
+  invoke_agent weather_agent               8.516s
+    call_llm                                 4.048s
+      generate_content gemini-3.7-flash        2.958s
+      execute_tool get_forecast                1.087s
+        fetch_forecast                           1.086s
+    call_llm                                 4.464s
+      generate_content gemini-3.7-flash        4.463s
+slowest tool span:
+trace 36904fbfa834ddac97c71b3ef003c3e6  (8 spans)
+invocation                               6.075s
+  invoke_agent weather_agent               6.074s
+    call_llm                                 4.403s
+      generate_content gemini-3.7-flash        2.927s
+      execute_tool get_forecast                1.474s
+        fetch_forecast                           1.472s
+    call_llm                                 1.667s
+      generate_content gemini-3.7-flash        1.665s
+fetch_forecast labels (v1): forecast.days=3, service.name=adk-tracing.
+
+--- VERDICTS ---
+Plan Verify "grouped table shows the tool above the model spans": FAILS on the
+data. By duration, generate_content (p50 2.84 s, p95 4.08 s) and call_llm rank
+ABOVE execute_tool get_forecast (p50 1.06 s, p95 1.45 s). The scenarios.md
+claim "execute_tool get_forecast owns most of invoke_agent" also FAILS: 16%
+aggregate, 24% max. What holds: "model spans unchanged" (+0.11 s/turn) and the
+tool explains ~91% of the forecast-vs-weather delta. The slowest forecast turn
+was slow because of its second model call (4.46 s), not the tool (1.09 s).
+fetch_forecast covers execute_tool within 2 ms in both trees read.
+
+UI-only, NOT verified (page states these as instructions, not results):
+- Trace Explorer: OpenTelemetry service filter, Chart view = Span duration
+  (percentile), Grouped tab sorted by duration (row order and the exact
+  percentile values the console computes), Span name filter on the heatmap.
+- Search for trace 63c8dcc4..., details flyout waterfall, fetch_forecast
+  Attributes showing forecast.days.
+
+Server stopped (kill) after run B.

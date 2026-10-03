@@ -1,0 +1,33 @@
+=== Part 3 recapture after the 2026-10-02 review ===
+google-adk 2.8.0, Python 3.13, Gemini 3.7 Flash / Vertex, jwd-gcp-demos
+(04 sampler check also on jwd-dev-3). OTEL_* shell vars unset.
+
+--- 3.2 Step 3: 03 server, TUTORIAL_CLASSIFY_ERRORS=1, classified-error 1 ---
+classified-error turn   1  5.02s  trace=f5b60bce1e9c44d6752dd4697b7b2ab3
+Server terminal printed no tool WARNING (it goes to Cloud Logging).
+gcloud logging read '... AND severity=WARNING' --project --format='yaml(severity,trace,spanId,traceSampled,textPayload)':
+severity: WARNING
+spanId: 84b3ea6034419b76
+textPayload: "weather lookup failed for 'Atlantis': no data"
+trace: projects/jwd-gcp-demos/traces/f5b60bce1e9c44d6752dd4697b7b2ab3
+traceSampled: true
+
+--- 3.3: slow-tool 2 on 03 ---
+turn 1 0100c38f3ae4e8854882e7cfe553af6b (London), turn 2 d6453e74ead05871ef53324e69810ad2 (forecast)
+Turn 2 bridged lines: 4 google_adk INFO on two generate_content span ids, plus
+"fetched 3-day forecast for London" on 653f32f6ab01c3b7.
+
+--- 3.3 deep dive, controls 2-4 ---
+entries:write to logs/adk-tracing-neg: control 2 (jsonPayload.trace_id only),
+control 3 (trace, no spanId). trace= search returned only control 3 (empty
+spanId); jsonPayload.trace_id search returned control 2. Log deleted after.
+concurrent 4: traces 9c38ed1b, b4245601, 2c40e3f5, cb92664c. Each trace's
+bridged lines carry span ids unique to it; only the two forecast turns hold a
+"fetched 3-day forecast" line.
+
+--- 3.4 deep dive: 04 with OTEL_TRACES_SAMPLER=parentbased_always_on ---
+traceparent 00-5c0ffee5c0ffee5c0ffee5c0ffee5c0f-2222222222222222-00:
+/chat answered with trace_id 5c0ffee5...; get_trace.sh gave up after 12 tries,
+404 "Trace not found: 5c0ffee5c0ffee5c0ffee5c0ffee5c0f".
+jwd-dev-3: same header shape with the 04 default (always_on) read back 11 spans:
+POST /chat, http receive, the 7-span ADK tree, two http send.

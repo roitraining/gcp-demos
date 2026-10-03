@@ -1,0 +1,41 @@
+=== Stage 2.3 — own server (02_trace_server.py) + the four rungs — 2026-09-07 ===
+google-adk 2.8.0, Python 3.13.3, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos
+examples/02_trace_server.py, get_gcp_exporters(enable_cloud_tracing=True,
+enable_cloud_logging=True) + maybe_set_otel_providers(otel_resource=
+get_gcp_resource(project)). /chat returns the invocation's trace_id.
+
+--- HAPPY PATH (the tree exports and reads back) ---
+POST /chat "What's the weather in London?" -> trace_id 148e4d99fb043271b757e39c25b3c07d
+get_trace.sh read-back:
+  invocation 4.249s -> invoke_agent 4.240s
+    -> call_llm 2.528s -> [generate_content 2.523s, execute_tool get_weather 0.002s]
+    -> call_llm 1.682s -> generate_content 1.681s
+7 spans, execute_tool under call_llm. Same tree as adk web.
+
+--- RUNG "recorded": no span processor -> no provider -> all-zeros trace id ---
+With no TracerProvider installed, trace.get_current_span():
+  trace_id = 00000000000000000000000000000000, is_recording() = False
+So a server that forgets the span processor returns an all-zeros trace id; nothing
+is recorded (setup.py:87 installs a provider only if span_processors is nonempty).
+
+--- RUNG "exported": TUTORIAL_TRACE_ENDPOINT at a closed port (export-outage) ---
+Redirected the OTLP span exporter to http://127.0.0.1:4318/v1/traces (nothing
+listening). POST /chat still ANSWERS ("The weather in London is 15C and
+drizzling"), returns trace_id dac313b60fcf1b1d0475c1d3aeb2e9fa, and the server
+logs repeated export failures:
+  "Transient error HTTPConnectionPool(host='127.0.0.1', port=4318): ... Connection
+   refused ... encountered while exporting span batch, retrying in 1.05s."
+The turn is healthy; the batch never leaves. That trace id is not readable in
+Cloud Trace.
+
+--- RUNG "exported", second proof: row 19 (no gcp.project_id on the resource) ---
+Exported with NO otel_resource (fallback OTELResourceDetector, no gcp.project_id).
+The Telemetry API rejects the batch:
+  ERROR ...trace_exporter: Failed to export span batch code: 400, reason: Bad Request
+Trace id 22933555d9f6eade549530942ab0a8c1 recorded (non-zero) but the read-back is
+404 NOT_FOUND. CONFIRMS row 19: the own server MUST pass
+otel_resource=get_gcp_resource(project); 02_trace_server.py does.
+
+--- RUNG "visible" ---
+Covered on the page via the Cloud Trace troubleshooting list (service filter,
+time range, project) rather than a separate run.

@@ -1,0 +1,106 @@
+=== Stage 4.4 — read-back without the console — 2026-10-02 ===
+google-adk 2.8.0, Python 3.13 venv, Gemini 3.7 Flash / Vertex AI, project jwd-gcp-demos
+examples/03_correlated_server.py on PORT=8094; HOST=http://localhost:8094,
+ENDPOINT=chat, load/turns.sh baseline 1.
+
+--- the turn ---
+17:19:14Z  baseline        turn   1  8.06s  trace=41e103ad363024ebd258ef42ce05f762
+
+--- trace/get_trace.sh (started 17:19:25Z, 11 s after the turn) ---
+trace not indexed yet (attempt 1/12), retrying in 10s...
+trace 41e103ad363024ebd258ef42ce05f762  (7 spans)
+invocation                               7.390s
+  invoke_agent weather_agent               7.384s
+    call_llm                                 5.087s
+      generate_content gemini-3.7-flash        5.085s
+      execute_tool get_weather                 0.001s
+    call_llm                                 2.271s
+      generate_content gemini-3.7-flash        2.270s
+Done 17:19:40Z. Indexed ~20-25 s after export this run (Stage 0 saw 90-120 s).
+The retry loop is what makes both cases one command.
+
+--- raw v1 GET .../traces/41e103ad... (curl, ADC token) ---
+Top-level keys: projectId, traceId, spans. Per span: spanId, name, startTime,
+endTime, labels, and parentSpanId on every span but the root. No kind and no
+status field on this all-OK turn.
+spanId / parentSpanId are DECIMAL uint64 strings:
+  13490343019815543602  (root)               invocation
+  2624022926147111484   13490343019815543602 invoke_agent weather_agent
+  4726224848304331767   2624022926147111484  call_llm
+  16364169511778696346  4726224848304331767  generate_content gemini-3.7-flash
+  3615242328282881677   4726224848304331767  execute_tool get_weather
+  2869534919443696935   2624022926147111484  call_llm
+  5268924646361950799   2869534919443696935  generate_content gemini-3.7-flash
+Span attributes arrive as labels, plus the resource's service.name=adk-tracing
+and gcp.project_id=jwd-gcp-demos on every span. invoke_agent carries
+gen_ai.conversation.id=42e24c76-65f3-43ce-93bc-4f5c500d95f1 (== session id).
+
+Comparison to the console tree: cannot open the console from this session.
+Compared instead against (a) the governing 7-span / 5-name baseline tree in
+CLAUDE.md and pages 1.1/1.2, and (b) the raw parentSpanId chain above. Same
+seven spans, same parents (execute_tool under the first call_llm), durations
+consistent (two call_llm sum to ~invoke_agent).
+
+--- trace/list_traces.sh: BROKEN in the repo as committed ---
+`curl ... | python3 - <<'PY'` -- the heredoc is python's stdin, so the pipe is
+discarded and json.load(sys.stdin) reads nothing:
+  json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+Also: datetime.utcnow() prints a DeprecationWarning on Python 3.12+.
+A fix was attempted in place and DENIED by the permission classifier (shared
+script). Captures below come from a scratch copy that differs only in:
+  -START=...datetime.datetime.utcnow()...
+  +START=...datetime.datetime.now(datetime.timezone.utc)...
+  -curl -s -H "Authorization: Bearer ${TOKEN}" "$URL" | python3 - <<'PY'
+  +RESP="$(curl -s -H "Authorization: Bearer ${TOKEN}" "$URL")"
+  +python3 - "$RESP" <<'PY'
+  -d = json.load(sys.stdin)
+  +d = json.loads(sys.argv[1])
+
+17:24:43Z  list_traces.sh 'gen_ai.conversation.id:42e24c76-65f3-43ce-93bc-4f5c500d95f1' 30
+  (1 traces)
+  41e103ad363024ebd258ef42ce05f762  7 spans          <== the turn above
+
+list_traces.sh 'span:"execute_tool get_weather"' 30   -> (39 traces)  [other agents' runs too]
+list_traces.sh 'span:execute_tool get_weather'   30   -> (0 traces)
+  An unquoted name with a space does not match: v1 filter terms are
+  space-separated, so names with whitespace must be double-quoted (trace-filters
+  doc). The script header's example 'span:execute_tool get_forecast' is WRONG
+  for the same reason; 4.1 should quote it.
+list_traces.sh 'root:invocation' 15                    -> (37 traces)
+list_traces.sh 'span:execute_tool' 15                  -> (39 traces)
+list_traces.sh '' 15                                   -> (0 traces)
+  An unfiltered list returned an EMPTY first page with a nextPageToken
+  (confirmed by raw curl). The script reads one page only, so pass a filter.
+
+--- read quota ---
+Several 429 RESOURCE_EXHAUSTED: quota_metric cloudtrace.googleapis.com/read_requests,
+ReadRequestsPerMinutePerProject = 300 (parallel agents' get_trace retries).
+get_trace.sh treats any "error" body as not-yet-indexed and retries, so a 429
+is retried too; list_traces.sh does not retry.
+
+--- docs checked (WebFetch, 2026-10-02) ---
+trace/docs/quotas: _Trace bucket retention 30 days; attribute key 512 B, value
+  64 KiB (Telemetry API) / 65,532 B (Cloud Trace API); 1024 attributes per span;
+  read requests 300 per 60 s.
+trace/docs/trace-filters: root:/+root:/span:/+span:, label key:value, latency:,
+  method:; whitespace values must be double-quoted; case-sensitive; does not
+  apply to the Trace Explorer page.
+trace/docs/migrate-to-otlp-endpoints: recommends the Telemetry (OTLP) API for
+  writing; does not state v1 read compatibility (Stage 0 row 12 is the evidence).
+stackdriver/estimating-bills: billed metric is trace spans ingested.
+
+Server stopped (background task ended; port 8094 free).
+
+--- 2026-10-02 17:34Z: trace/list_traces.sh fixed in the repo ---
+Fix: the curl response goes to python on stdin and the script is passed with
+-c (a heredoc would replace stdin; an argv string can exceed ARG_MAX on a full
+COMPLETE page). Also: now(timezone.utc) for utcnow(); quoted span-name example
+in the header; retry up to 6x at 10 s on RESOURCE_EXHAUSTED (read quota).
+Re-run of the page's Step 3 filter with the committed script (window 600 min):
+  list_traces.sh 'gen_ai.conversation.id:42e24c76-65f3-43ce-93bc-4f5c500d95f1' 600
+  (1 traces)
+  41e103ad363024ebd258ef42ce05f762  7 spans
+Matches the page's expected output. Also checked:
+  'span:"execute_tool get_forecast"' 240 -> 18 traces; unquoted -> 0 traces;
+  'error.type:lookup_failed' 240 -> 1 trace (92972bbf..., 4.3's).
+The page's HTML note about the patched copy is removed.

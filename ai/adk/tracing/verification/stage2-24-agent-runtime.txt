@@ -1,0 +1,57 @@
+=== Stage 2.4 — Agent Runtime / Agent Engine — 2026-09-07 ===
+google-adk 2.8.0, Python 3.13, Gemini 3.7 Flash / Vertex, project jwd-dev-4, us-central1.
+adk deploy agent_engine --otel_to_cloud. Engine deleted after (torn down).
+
+VERDICT: POSITIVE. The schema-v2 tree appeared in Cloud Trace within ~4 min.
+
+--- Deploy ---
+adk deploy agent_engine --project=jwd-dev-4 --region=us-central1 --otel_to_cloud demo_agent
+engine: projects/143666653585/locations/us-central1/reasoningEngines/7439794302055612416
+deploy wall time ~7 min (Cloud Build dominates).
+NOTE: adk deploy reads env from demo_agent/.env (agent folder), not the root .env.
+GOTCHA: the deploy REWROTE requirements google-adk[otel-gcp] -> google-adk[a2a] in
+the pushed image, so GoogleGenAiSdkInstrumentor was NOT installed there. Native ADK
+span tracing still worked; the generate_content instrumentor-emitted extras were
+reduced. Warning in the engine log:
+  "Unable to import GoogleGenAiSdkInstrumentor - some telemetry will be disabled.
+   Make sure to install google-adk[otel-gcp]"
+
+--- Telemetry env ---
+GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true (set by --otel_to_cloud; also flips
+  ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false)
+OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental
+OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=EVENT_ONLY
+Schema v2 auto-selected via runtime GOOGLE_CLOUD_AGENT_ENGINE_ID
+  (_schema_version.py defaults to 2 on Agent Engine).
+
+--- What surfaced (6 traces, e.g. 112c1989992c776232fdf181248a62a6) ---
+Every trace, identical shape:
+  invoke_workflow weather_agent   (ROOT)
+    invoke_agent weather_agent
+      call_llm
+        generate_content gemini-3.7-flash
+Root span: invoke_workflow weather_agent (schema-v2). `invocation` root ABSENT.
+Root carries gen_ai.operation.name=invoke_workflow, gen_ai.workflow.name=weather_agent.
+service.name = 7439794302055612416 (the engine id).
+
+CORRECTION to the plan (Q1, 2.4, misconception table): the hypothesis was
+"invoke_workflow root AND no call_llm." On Agent Engine with ADK 2.8.0 today, the
+root IS invoke_workflow but call_llm STILL appears — the schema-v2 call_llm removal
+has not shipped. Fix the "no call_llm" claim everywhere.
+
+--- Viewers (both checked) ---
+Cloud Trace v1 / Explorer: 6 traces present (contrast the logging tutorial's earlier
+  Trace-Explorer negative -- likely too-short a wait or telemetry not enabled then).
+Agent Platform console Traces tab: backed by Cloud Trace filtered by
+  service.name=<engine id>; filter=service.name:7439794302055612416 returns exactly
+  those 6 traces -- same store, same v2 tree.
+
+--- Incidental error (did not block trace verification) ---
+gemini-3.7-flash 404'd in us-central1 for jwd-dev-4 ("Publisher model ... was not
+found or your project does not have access"). LLM calls failed but ADK still emitted
+the full v2 span tree. Also a metrics-export "Read timed out" to telemetry.googleapis.com;
+spans exported fine.
+
+--- Teardown ---
+reasoning engine deleted (app.delete(force=True)); verified GONE (404 on get,
+agent_engines.list() empty). Staging bucket never created. Nothing committed.

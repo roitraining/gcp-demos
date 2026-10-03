@@ -13,7 +13,8 @@ teaches without editing code between pages; unset, the span tree is pure ADK.
     duration; the helper is a separate function so a custom span (page 1.6) can
     wrap it *inside* the tool body.
 
-Three env gates, each defaulting off (see the Scope table in the plan):
+Three env gates, each defaulting off. A gate is on only when set to ``1``
+(see the Scope table in the plan):
 
   - ``TUTORIAL_CUSTOM_SPAN=1``   -> ``_fetch_forecast`` runs inside a
     ``fetch_forecast`` span, a child of ``execute_tool`` (page 1.6).
@@ -74,7 +75,7 @@ def get_weather(city: str) -> dict:
     # exception propagates through execute_tool and both parents (1.4 deep dive).
     # Otherwise it returns a failure status and logs a WARNING -- the only
     # failure evidence, and it is outside the trace until Part 3 bridges it.
-    if os.getenv("TUTORIAL_RAISE_ON_UNKNOWN"):
+    if os.getenv("TUTORIAL_RAISE_ON_UNKNOWN") == "1":
         raise LookupError(f"No weather data for {city!r}.")
     logger.warning("weather lookup failed for %r: no data", city)
     return {
@@ -119,7 +120,7 @@ def get_forecast(city: str, days: int = 3) -> dict:
             "error_message": f"No forecast data for {city!r}.",
         }
     days = max(1, min(int(days), 7))
-    if os.getenv("TUTORIAL_CUSTOM_SPAN"):
+    if os.getenv("TUTORIAL_CUSTOM_SPAN") == "1":
         with tracer.start_as_current_span("fetch_forecast") as span:
             span.set_attribute("forecast.days", days)
             report = _fetch_forecast(city, days)
@@ -150,7 +151,7 @@ class StatusAwareTool(FunctionTool):
 # so the same status turns the span red with error.type=lookup_failed (1.4,
 # classified).
 _ToolClass = (
-    StatusAwareTool if os.getenv("TUTORIAL_CLASSIFY_ERRORS") else FunctionTool
+    StatusAwareTool if os.getenv("TUTORIAL_CLASSIFY_ERRORS") == "1" else FunctionTool
 )
 
 root_agent = Agent(

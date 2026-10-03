@@ -15,9 +15,9 @@
 
 The tree from Part 1 does not change. What changes is where it goes: a
 `BatchSpanProcessor` ships each batch over OTLP to `telemetry.googleapis.com`,
-and the Trace Explorer draws it. Each page here turns on export by a different
-route — the built-in flag, Cloud Run, your own server, Agent Runtime — and reads
-the tree back with the same `trace/get_trace.sh` script.
+and the Trace Explorer draws it. Each page runs one scenario from
+[scenarios.md](../scenarios.md) and reads the tree back with
+`trace/get_trace.sh`.
 
 ```mermaid
 flowchart LR
@@ -33,8 +33,8 @@ flowchart LR
 | Section | Scenario | Question it answers |
 |---|---|---|
 | [2.1 · adk web --otel_to_cloud](2.1-adk-web-otel-to-cloud.md) | `slow-tool` | Did the tree land in Cloud Trace? |
-| [2.2 · Cloud Run](2.2-cloud-run.md) | `baseline` | Does a deployed service trace without my help? |
-| [2.3 · Your own server](2.3-your-own-server.md) | `baseline`, `export-outage` | Does my server export the same tree, and which rung failed when it does not? |
+| [2.2 · Cloud Run](2.2-cloud-run.md) | `baseline` | Does the same tree land from a deployed service? |
+| [2.3 · Your own server](2.3-your-own-server.md) | `baseline`, `export-outage` | Does my server export the same tree, and which step failed when it does not? |
 | [2.4 · Agent Runtime](2.4-agent-runtime.md) | `baseline` | What does the same agent's trace look like on Agent Runtime? |
 | [2.5 · Sampling](2.5-sampling.md) | `baseline` | Can I keep fewer traces? |
 | [2.6 · Other backends](2.6-other-backends.md) | — | Can the same tree go somewhere other than Google? |
