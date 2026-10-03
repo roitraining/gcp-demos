@@ -39,9 +39,10 @@ def bootstrap() -> None:
 def install_console_spans(out_path: str = "out/spans.json") -> None:
     """Install a TracerProvider whose processor writes each span to a JSON file.
 
-    This is ADK's own setup helper (``maybe_set_otel_providers``), the same one
-    ``adk web`` uses, given a ``SimpleSpanProcessor(ConsoleSpanExporter)`` instead
-    of a cloud exporter. ``SimpleSpanProcessor`` exports each span the moment it
+    This is ADK's own setup helper (``maybe_set_otel_providers``), the one
+    ``adk web --otel_to_cloud`` uses (plain ``adk web`` builds a bare provider;
+    ``google/adk/cli/api_server.py:649-665``), given a
+    ``SimpleSpanProcessor(ConsoleSpanExporter)`` instead of a cloud exporter. ``SimpleSpanProcessor`` exports each span the moment it
     ends, so the file is complete once the turn is; the script still flushes on
     exit (``flush_spans()``) to drain the batch the OTLP examples use.
 

@@ -38,7 +38,7 @@ invocation
 | `invoke_workflow {agent}` | none (root, schema v2, Agent Runtime) | `gen_ai.operation.name=invoke_workflow`, `gen_ai.workflow.name`; `call_llm` still present below it | [2.4](part-2/2.4-agent-runtime.md) |
 | `POST /chat`, plus `http receive` and two `http send` | the inbound `traceparent` | from `FastAPIInstrumentor`; `invocation` becomes a child of `POST /chat` | [3.4](part-3/3.4-one-trace-per-request.md) |
 | `/chat` (Cloud Run) | external | only on a request Cloud Run sampled; the request log's `spanId` | [3.4](part-3/3.4-one-trace-per-request.md) |
-| `execute_tool (merged)` | `invoke_agent` | parallel tool calls only; source only (`functions.py:526`, `:774`) | none |
+| `execute_tool (merged)` | `invoke_agent` | parallel tool calls only; source only (`google/adk/flows/llm_flows/functions.py:526`, `:774`) | none |
 
 Three facts that trip readers:
 
@@ -49,20 +49,20 @@ Three facts that trip readers:
 ## Tool-failure shapes
 
 The Atlantis turn, four ways ([1.4](part-1/1.4-an-error-turn-three-ways.md);
-the `{"error": ...}` row is a throwaway tool from the Stage 0 probes). Only the
-last three leave a mark on the span.
+the `{"error": ...}` row is a throwaway tool tried before the pages were
+written). Only the last three leave a mark on the span.
 
 | Tool behavior | `execute_tool` status | `error.type` | Exception events | Parents | User answer |
 |---|---|---|---|---|---|
 | returns `{"status": "error", ...}`, plain `FunctionTool` | UNSET | none | none | UNSET | "no data" |
 | returns `{"error": ...}`, plain `FunctionTool` | ERROR | `TOOL_ERROR` | none | not captured | not captured |
 | returns the status dict through the `StatusAwareTool` hook | ERROR, description `lookup_failed` | `lookup_failed` | none | UNSET | "no data" |
-| raises `LookupError` | ERROR | `LookupError` | two: `LookupError` and a `DynamicNodeFailError` wrapper | both ERROR, one exception event each | none; the request fails |
+| raises `LookupError` | ERROR | `LookupError` | two, both `LookupError` (ADK's, then OpenTelemetry's on span exit) | `invoke_agent` and `invocation` ERROR, one exception event each; five spans in all | none; the request fails |
 
 Rules behind the table:
 
-- `FunctionTool`'s own hook returns `TOOL_ERROR` for a dict with a truthy `error` key (`function_tool.py:355-359`).
-- `error.type` comes from an `error_type` attribute, then a genai `APIError` code, then the class name (`tracing.py:177-192`). The exception message never lands on the span.
+- `FunctionTool`'s own hook returns `TOOL_ERROR` for a dict with a truthy `error` key (`google/adk/tools/function_tool.py:355-359`).
+- `error.type` comes from an `error_type` attribute, then a genai `APIError` code, then the class name (`google/adk/telemetry/tracing.py:177-192`). `error.type` and the status hold only the class name, but each `exception` event stores the message and stack trace (`google/adk/telemetry/tracing.py:281`), so the city name does land on the span.
 - The v1 API exposes no span status, so `error.type` is the only error handle a script can filter on ([4.3](part-4/4.3-the-failed-step.md)).
 
 ## Correlation
@@ -83,16 +83,13 @@ span stored in the same project ([3.1](part-3/3.1-the-free-join.md)).
 | Which sampler with propagation | `OTEL_TRACES_SAMPLER=always_on` | the default `ParentBased(ALWAYS_ON)` records zero spans under an unsampled parent ([3.4](part-3/3.4-one-trace-per-request.md)) |
 | Which log name | `GOOGLE_CLOUD_DEFAULT_LOG_NAME` (`env.sh` sets it to the service name) | otherwise bridged lines land under `adk-otel` |
 
-## Content knobs
+## Content settings
 
-| Knob | Governs | Default | Off means |
-|---|---|---|---|
-| `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` | `gcp.vertex.agent.*` payload attributes | on | `llm_request`, `llm_response`, `tool_call_args`, `tool_response` read `"{}"` |
-| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | content of the `gen_ai.*` log events | `NO_CONTENT` | events still emitted, content `<elided>` |
-
-- `adk deploy agent_engine --otel_to_cloud` sets the span knob to `false`; `adk deploy cloud_run` does not (`cli_deploy.py:1273-1282`).
-- Always redacted: `http_options` credentials, `response_schema`, `inline_data` (`tracing.py:834-862`).
-- With both defaults, the only prompt text Cloud Trace holds is on the spans. Whether the **Inputs/Outputs** tab renders it is not verified.
+The two content variables, their defaults, the always-redacted payloads, and
+the deploy defaults are in
+[4.6 · Cost, retention, and content policy](part-4/4.6-cost-retention-content.md#what-should-never-be-in-a-span).
+With both defaults, the only prompt text Cloud Trace holds is on the spans.
+Whether the **Inputs/Outputs** tab renders it is not verified.
 
 ## Trace v1 API gotchas
 
@@ -106,13 +103,13 @@ span stored in the same project ([3.1](part-3/3.1-the-free-join.md)).
 | No status field | filter on `error.type:<value>` |
 | Lists come back ordered by trace id | sort by start time yourself |
 | 300 reads per minute per project; a 429 prints nothing through `grep` | retry after a minute |
-| Spans are kept 30 days | keep a run record for anything longer ([4.3](part-4/4.3-the-failed-step.md)) |
+| Spans expire ([How long can you read a trace back?](part-4/4.4-read-back-without-the-console.md#how-long-can-you-read-a-trace-back)) | save the evidence yourself for anything longer ([4.3](part-4/4.3-the-failed-step.md)) |
 
 ## 2.8.0 versus newer releases
 
 `requirements.txt` pins `google-adk[otel-gcp]==2.8.0`. An unpinned `>=2.8.0`
 build resolved 2.11.0 on 2026-10-02, which changes three things this tutorial
-depends on ([run record](../verification/stage3-34-request-log-cloudrun.txt)):
+depends on ([saved output](../verification/stage3-34-request-log-cloudrun.txt)):
 
 | Behavior | 2.8.0 | 2.11.0 |
 |---|---|---|
@@ -136,21 +133,21 @@ column names them.
 |---|---|---|---|---|
 | 1.1, 1.2 | 2026-09-07 | `stage0-local-probes.txt`, `stage1-console-spans.txt` | seven spans, `execute_tool` under `call_llm`, `force_flush()` sufficient | none |
 | 1.3 | 2026-09-07, 2026-10-02 | `stage1-console-spans.txt`, `stage5-tool-response-knob.txt` | `llm_request` ~1,955 chars, then `{}` | none |
-| 1.4 | 2026-09-07 | `stage0-local-probes.txt` | the four failure shapes | none |
+| 1.4 | 2026-09-07, 2026-10-02 | `stage0-local-probes.txt`; 2026-10-02 rerun on `jwd-dev-3` | the four failure shapes; the raised turn has five spans and two `LookupError` events, each with the message | none |
 | 1.5 | 2026-10-02 | `stage5-15-trace-per-turn.txt` | five turns, five trace ids, one `gen_ai.conversation.id` | none |
 | 1.6 | 2026-09-07 | `stage1-console-spans.txt` | `fetch_forecast` 0.695 s of the tool's 0.700 s | none |
 | 2.1 | 2026-09-07 | `stage2-21-adk-web-otel.txt` | same tree via v1; `service.name=adk-tracing` | **Details** waterfall |
-| 2.2 | 2026-09-07 | `stage2-22-cloudrun.txt` | Cloud Run tree; request log id differs from span id | **Service/workload** column |
-| 2.3 | 2026-09-07 | `stage2-23-own-server.txt` | recorded (all zeros) and exported (closed port, 400 without resource) rungs | visible rung |
-| 2.4 | 2026-09-07 | `stage2-24-agent-runtime.txt` | `invoke_workflow` root, `call_llm` present | Agent Platform **Traces** tab (same traces by `service.name` filter) |
-| 2.5 | 2026-09-07 | `stage2-25-sampling.txt` | 9 of 20 kept at 0.5, local console exporter | none |
-| 3.1, 3.3 | 2026-09-07, 2026-10-02 | `stage3-31-33-log-join.txt`, `stage5-31-free-join.txt`, `stage5-33-framework-logs.txt` | events under the two `generate_content` spans; framework INFO and the tool's INFO under their spans; `uvicorn.access` absent from Cloud Logging | **Logs & Events**, **View logs** |
+| 2.2 | 2026-09-07, 2026-10-02 | `stage2-22-cloudrun.txt`, `review-fixes-2026-10-02-part2.txt` | the `02` server on Cloud Run: seven-span tree; request log id differs from span id | **Service/workload** column |
+| 2.3 | 2026-09-07, 2026-10-02 | `stage2-23-own-server.txt`, `review-fixes-2026-10-02-part2.txt` | recorded step (500 with no provider); exported step (400 without resource); a closed-port extra exporter fails while the trace still lands | visible step |
+| 2.4 | 2026-09-07, 2026-10-02 | `stage2-24-agent-runtime.txt`, `review-fixes-2026-10-02-part2.txt` | `invoke_workflow` root, `call_llm` present, seven spans once the model location is `global`; content off | the engine's **Traces** tab (same traces by `service.name` filter) |
+| 2.5 | 2026-09-07, 2026-10-02 | `stage2-25-sampling.txt`, `review-fixes-2026-10-02-part2.txt` | 11 of 20 kept at 0.5 through the `02` server, each with seven spans in Cloud Trace | none |
+| 3.1, 3.3 | 2026-09-07, 2026-10-02 | `stage3-31-33-log-join.txt`, `stage5-31-free-join.txt`, `stage5-33-framework-logs.txt`, `review-fixes-2026-10-02-part3.txt` | events under the two `generate_content` spans; framework INFO and the tool's INFO under their spans; `uvicorn.access` absent from Cloud Logging; controls 2 to 4 and a `concurrent` run hold | **Logs & Events**, **View logs** |
 | 3.2 | 2026-09-07, 2026-10-02 | `stage3-32-viewer-gate.txt`, `stage5-32-before.txt` | before: no WARNING in Cloud Logging; after: WARNING `spanId` equals the `execute_tool` span | **Logs & Events** before and after |
-| 3.4 | 2026-09-07, 2026-10-02 | `stage3-34-propagation.txt`, `stage3-34-request-log-cloudrun.txt` | header id = returned id; `always_on` keeps an unsampled parent; Cloud Run request log joins | **Correlate by** `request_log` |
-| 4.1 | 2026-10-02 | `stage4-41-slow-step.txt` | per-name percentiles; model spans rank above the tool | heatmap, **Grouped** tab, waterfall |
-| 4.2 | 2026-10-02 | `stage4-42-one-users-request.txt` | five traces for one conversation id; content-off `{}` | attribute filter, **Search for trace**, **Find in Trace**, **Inputs/Outputs** |
+| 3.4 | 2026-09-07, 2026-10-02 | `stage3-34-propagation.txt`, `stage3-34-request-log-cloudrun.txt`, `review-fixes-2026-10-02-part3.txt` | header id = returned id; `parentbased_always_on` records nothing under an unsampled parent, `always_on` keeps it; Cloud Run request log joins | **Correlate by** `request_log` |
+| 4.1 | 2026-10-02 | `stage4-41-slow-step.txt`, `review-fixes-2026-10-02-part4.txt` | per-name percentiles; model spans rank above the tool; medians | **OpenTelemetry service** filter, **Span duration** chart, **Grouped** tab, **Span name** filter, trace details panel, **Attributes** |
+| 4.2 | 2026-10-02 | `stage4-42-one-users-request.txt`, `review-fixes-2026-10-02-part4.txt` | five traces for one conversation id; full prompt on turn five; content-off `{}` | **Add filter**, attribute filter, **Search for trace**, trace details panel, **Find in Trace**, **Inputs/Outputs** |
 | 4.3 | 2026-10-02 | `stage4-43-failed-step.txt`, `classified-error-92972bbf….txt` | `error.type` filter finds one trace; WARNING under the span | **Span status** filter, bar color, **Attributes**, **Logs & Events** |
-| 4.4 | 2026-10-02 | `stage4-44-read-back.txt` | scripts match the raw v1 response | none |
+| 4.4 | 2026-10-02 | `stage4-44-read-back.txt`, `review-fixes-2026-10-02-part4.txt` | scripts match the raw v1 response (`list_traces.sh` after a same-day fix) | comparison with the Trace Explorer waterfall |
 | 2.6, 3.5, 4.5, 4.6 | none | none | reference pages; 4.5's BigQuery section is source only; 4.6 cites the quotas page, read 2026-10-02 | none |
 
 Two cloud probes settled design questions before any page was written:
@@ -162,23 +159,23 @@ Two cloud probes settled design questions before any page was written:
 | Item | Status |
 |---|---|
 | Every console step in the right-hand column above | written from Google's docs |
-| 3.3 negative controls 2 to 4, and a live `concurrent` run | reasoned from the client's extraction rule; control 1 confirmed live (`stage5-33-framework-logs.txt`) |
 | A plain `{"error": ...}` tool's user answer and parent status | not captured |
 | Ways B and C ([3.5](part-3/3.5-three-ways-to-stamp.md)) and OTLP backends ([2.6](part-2/2.6-other-backends.md)) | not run |
 | The BigQuery plugin's `trace_id` columns ([4.5](part-4/4.5-traces-logs-metrics-rows.md)) | source only |
 | Everything on 2.11.0 beyond the three rows above | not run; pinned to 2.8.0 |
+| The `adk-python` `main` claims above | source only; never run |
 | Free tier and per-span price ([4.6](part-4/4.6-cost-retention-content.md)) | linked, not quoted |
 
 ## References
 
 - [Cloud Trace: find and explore traces](https://docs.cloud.google.com/trace/docs/finding-traces): the Trace Explorer, filters, **Search for trace**, **Find in Trace**, generative AI events.
-- [Cloud Trace: view trace details](https://docs.cloud.google.com/trace/docs/viewing-details): the **Details** flyout and **Logs & Events**.
+- [Cloud Trace: view trace details](https://docs.cloud.google.com/trace/docs/viewing-details): the trace details panel and **Logs & Events**.
 - [Cloud Trace: log integration](https://docs.cloud.google.com/trace/docs/trace-log-integration): how `trace` and `spanId` join a log to a span.
 - [Cloud Logging: correlate logs](https://docs.cloud.google.com/logging/docs/view/correlate-logs): **Correlate by** in Logs Explorer.
 - [Cloud Trace: trace filters](https://docs.cloud.google.com/trace/docs/trace-filters): the v1 list filter syntax.
 - [Cloud Trace: quotas and limits](https://docs.cloud.google.com/trace/docs/quotas): retention, attribute limits, read quota.
 - [Cloud Trace: migrate to OTLP endpoints](https://docs.cloud.google.com/trace/docs/migrate-to-otlp-endpoints): the Telemetry API as the write path.
-- [Cloud Trace: troubleshooting](https://docs.cloud.google.com/trace/docs/troubleshooting): the visible rung and an empty **Logs & Events** tab.
+- [Cloud Trace: troubleshooting](https://docs.cloud.google.com/trace/docs/troubleshooting): the visible step and an empty **Logs & Events** tab.
 - [Python logging client: automatic trace and span extraction](https://docs.cloud.google.com/python/docs/reference/logging/latest/auto-trace-span-extraction): way B's lookup order and the hand-set override rule.
 - [Telemetry IAM roles](https://docs.cloud.google.com/iam/docs/roles-permissions/telemetry): the writer roles in Setup.
 - [Agent Platform: tracing](https://docs.cloud.google.com/gemini-enterprise-agent-platform/scale/runtime/tracing): Agent Runtime telemetry settings and truncation.

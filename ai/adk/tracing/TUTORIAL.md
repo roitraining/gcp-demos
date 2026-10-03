@@ -10,7 +10,8 @@ request.
 A trace in ADK is one idea repeated: **a trace is the tree of spans ADK opens
 around one turn; its trace id is the key every log line can carry; and Cloud
 Trace draws the logs inside the spans when both carry the same id in the same
-project.** Nothing leaves the process until you install an exporter. Keep that
+project.** Nothing leaves the process until you install an exporter or set an
+OTLP endpoint. Keep that
 picture in mind and the rest follows.
 
 ```mermaid
@@ -26,14 +27,14 @@ flowchart LR
     e1["gen_ai.* events<br/>stamped for free"]
     e2["your logger.info<br/>stamped by a bridge (Part 3)"]
   end
-  subgraph cloud["Cloud Trace · Details flyout"]
+  subgraph cloud["Cloud Trace · trace details panel"]
     wf["waterfall + Logs &amp; Events<br/>each entry under its span"]
   end
   gen -->|"OTLP · telemetry.googleapis.com"| wf
   logs -->|"trace + spanId fields"| wf
 ```
 
-*The join is one field. Spans arrive over OTLP; logs arrive through Cloud
+*The join is two fields. Spans arrive over OTLP; logs arrive through Cloud
 Logging; the Trace Explorer matches them on trace id and span id.*
 
 > Verified against **google-adk 2.8.0** (pinned) on Python 3.13, serving Gemini
@@ -46,7 +47,8 @@ Logging; the Trace Explorer matches them on trace id and span id.*
 ## Contents
 
 Read them in order (each page has a **Next →** link), or jump to the one you
-need. Start with Setup, then Scenarios, the spine of the tutorial.
+need. Start with Setup, then Scenarios, which lists every experiment the
+tutorial runs.
 
 | Part | What it covers |
 |---|---|
