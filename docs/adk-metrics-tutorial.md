@@ -46,7 +46,7 @@ Facts worth teaching:
 
 - **The two stable-semconv metrics** are `gen_ai.client.token.usage` and `gen_ai.client.operation.duration` (OTel GenAI semconv; the openobserve and opentelemetry.io posts cover only these two). The agent- and tool-level ones follow ADK's reading of unmerged drafts. The `adk.experimental.*` names say so in the name.
 - **Token usage is two datapoints per model call**, split by `gen_ai.token.type`. Input sums prompt and server-side tool tokens; output sums candidates and thoughts. Cached tokens are inside input, not separate (`_metrics.py:459-466`, `_token_usage.py:47-70`). Streaming takes the last chunk's usage, not a sum (`:451-455`).
-- **`error.type` on tool duration is NOT free (Stage 1, corrected).** A plain function returning `{"status": "error"}` does not stamp `error.type`. ADK reads the response only through `FunctionTool._detect_error_in_response`, which the base class leaves returning `None` (`flows/llm_flows/functions.py:88,695`; `_instrumentation.py:525`). The demo agent wraps its tools in a `StatusAwareTool(FunctionTool)` that overrides the hook to map a failure status to `error.type="lookup_failed"` (renamed from `no_data`, which read as "no metric data"; `lookup_failed` names the failure category so a future `timeout` sits beside it). A raising tool also stamps `error.type` (the exception class name) but crashes the invocation, so the hook is the path that keeps the invocation successful while the tool series splits. This is 1.3's lesson, verified 2026-09-06.
+- **`error.type` on tool duration is NOT free (Stage 1, corrected).** A plain function returning `{"status": "error"}` does not stamp `error.type`. ADK reads the response only through `FunctionTool._detect_error_in_response`, whose default returns `"TOOL_ERROR"` only for a dict with a truthy `"error"` key and `None` otherwise (`tools/function_tool.py:355`; `flows/llm_flows/functions.py:88,695`; `_instrumentation.py:525`). The `TOOL_ERROR` path is seen on the span (tracing tutorial), not yet captured on the metric. A `{"status": "error"}` return has no `"error"` key, so it needs the override. The demo agent wraps its tools in a `StatusAwareTool(FunctionTool)` that overrides the hook to map a failure status to `error.type="lookup_failed"` (renamed from `no_data`, which read as "no metric data"; `lookup_failed` names the failure category so a future `timeout` sits beside it). A raising tool also stamps `error.type` (the exception class name) but crashes the invocation, so the hook is the path that keeps the invocation successful while the tool series splits. This is 1.3's lesson, verified 2026-09-06.
 - **Cardinality is bounded by design.** Skill exit codes collapse to a boolean (`:585-590`). No session, user, or invocation id is ever a metric attribute. That is the reason Part 4 exists.
 - **Semconv opt-in does not rename metrics.** `_metrics.py` never reads `OTEL_SEMCONV_STABILITY_OPT_IN`; it governs spans and events only.
 
@@ -99,7 +99,7 @@ IAM and API: `telemetry.googleapis.com` enabled; `roles/telemetry.metricsWriter`
 | Columns | `timestamp`, `event_id`, `event_type`, `agent`, `session_id`, `invocation_id`, `user_id`, `trace_id`, `span_id`, `parent_span_id`, `content` (JSON), `attributes` (JSON), `latency_ms` (JSON), `status`, `error_message`, `content_parts`, `is_truncated` (`:3570-3830`) |
 | Event types | `USER_MESSAGE_RECEIVED`, `INVOCATION_STARTING/COMPLETED`, `AGENT_STARTING/COMPLETED/RESPONSE/TRANSFER`, `LLM_REQUEST/RESPONSE/ERROR`, `TOOL_STARTING/COMPLETED/ERROR/PAUSED`, `STATE_DELTA`, `EVENT_COMPACTION`, HITL and A2A types (adk.dev plugin page; `:3968-4109`) |
 | Token and latency columns in `v_llm_response` | `usage_prompt_tokens`, `usage_completion_tokens`, `usage_total_tokens`, `usage_cached_tokens`, `usage_thinking_tokens`, `usage_tool_use_tokens`, `context_cache_hit_rate`, `total_ms`, `ttft_ms`, `model_version` (`:3918-3965`) |
-| OTel join | `enable_otel_correlation=False` by default; `True` stamps the ambient trace and span ids (`:1848`). Metrics carry no ids, so the join is rows ↔ Cloud Trace, never rows ↔ metrics. |
+| OTel join | `trace_id` takes the ambient OTel trace id whenever a span is active, flag or not (`:5932-5943`); with no tracer provider it is plugin-generated, so `04` exports spans (`enable_cloud_tracing=True`) to make the join real. The typed `span_id` is the plugin's execution-tree id, not an OTel span id (`:3648-3656`). `enable_otel_correlation=False` by default (`:1848`); `True` adds `attributes.otel.{trace_id,span_id}` from the ambient span (`:6193-6209`). Metrics carry no ids, so the join is rows ↔ Cloud Trace, never rows ↔ metrics. |
 | IAM | `roles/bigquery.jobUser` (project), `roles/bigquery.dataEditor` (dataset or table); Storage Write API is billed ingestion |
 | SDK | `bigquery-agent-analytics` 0.5.2 on PyPI: `Client(project_id, dataset_id).get_trace(id).render()`, system evaluator (latency, turn count, tool error rate, token efficiency, TTFT, cost), `bq-agent-sdk` CLI, and a 37-chart Looker Studio template that needs only the base table (`dashboard/looker_studio/README.md`) |
 | Sample | `adk-samples/python/agents/agent-observability-bq`: plugin in an `App(plugins=[...])`, dataset id from `BQ_ANALYTICS_DATASET_ID`, `bq mk --location=us-east1 --dataset` first |
@@ -322,14 +322,17 @@ Verify (met): every read-back replaced its `NEEDS-RUN` with a real capture; seri
 
 Verify: every query file is pasted verbatim on exactly one page; dashboard and policy deleted after capture; Part 1 scripts still emit exactly six names with the flag unset.
 
-### Stage 4 · Part 4 BigQuery (J; cloud writes) — DRAFTED 2026-09-06, captures pending
+### Stage 4 · Part 4 BigQuery (J; cloud writes) — CAPTURED 2026-10-02 (`verification/stage4-part4-tracing-on.txt`); 4.5 browser step open
 
 - [x] `04_bq_plugin.py` (server + `BigQueryAgentAnalyticsPlugin`, dataset id from `BQ_ANALYTICS_DATASET_ID`); `google-cloud-storage` added to `requirements.txt` (the plugin needs it and the extras did not pull it).
 - [x] Pages 4.1–4.6 drafted with `NEEDS-RUN` on every `bq query`/SDK result; SQL and column names written out as deterministic text.
-- [ ] **Cloud captures:** `bq mk` dataset; 4.1–4.3 `bq query`; 4.4 SDK (`render`, evaluator, CLI); dataset teardown on 4.6.
-- [ ] **Verify against a live run:** the `content` JSON accessor path (4.3); the `bq-agent-sdk` CLI subcommand names (4.4); the `v_*` view set the plugin creates (4.1).
+- [x] **Cloud captures:** `bq mk` dataset; 4.1–4.3 `bq query`; 4.4 SDK (`render`, evaluator); 4.6 row → Cloud Trace read-back and dataset teardown. 2026-10-02, `jwd-gcp-demos`.
+- [x] **Verify against a live run:** `content` path is `$.text_summary`, not `$.text` (4.3); CLI flags are `--project-id`/`--dataset-id`, one `--evaluator` per run (4.4); the plugin creates all 25 `v_*` views with the table (4.1).
+- [x] **Row → trace join (decision B, 2026-10-02):** `04` now exports spans (`enable_cloud_tracing=True`), so each row's `trace_id` is the OTel trace id; 4.6 Step 1 reads the slowest turn's trace back from Cloud Trace v1. `enable_otel_correlation` left off: the trace-level join is what the pages teach.
+- [x] **Fixes the run forced:** `google-adk[otel-gcp,bigquery-analytics]` (pyarrow); `04` serves `turns.sh`'s session and `/run` routes; reserved alias `rows` → `events` (4.1); 4.4 `get_trace()` takes the row's `trace_id`, not an invocation id; 4.4 evaluator reads 0 tool errors on `unknown-city` (it counts only raised `TOOL_ERROR`), so the page now teaches that mismatch.
+- [ ] 4.5 Looker Studio template: browser step, not run.
 
-Verify: 4.2's per-run token total equals the Part 3 histogram `sum` for the same run window (state the tolerance).
+Verify: 4.2's per-run token total equals the Part 3 histogram `sum` for the same run window (state the tolerance). **Met:** input 22,874 on both sides, exact; histogram output 1,778 = row completion 616 + thinking 1,162.
 
 ### Stage 5 · Reference page, cross-links, link check (M) — DRAFTED 2026-09-06
 
@@ -352,7 +355,7 @@ Common harness: fresh `python3.13 -m venv .venv`, `pip install -r requirements.t
 | 1 | `01`, `02`, `05` locally | six names single-agent; two attribute sets; `force_flush` returns True; `SequentialAgent` splits agent series but emits no workflow metric | **done 2026-09-06** |
 | 2 | `adk web --otel_to_cloud` with and without the resource; Cloud Run deploy; `03` locally; Agent Runtime deploy | series readable for each route; outage window shows answers and no points; resources torn down | not started |
 | 3 | PromQL reads per scenario; `concurrent`; dashboard create; alert create and trigger; the outcome counter | captures match the fired mix; concurrent percentiles within tolerance; dashboard and policy deleted; counter lands as `/counter` | not started |
-| 4 | `04` locally; `bq query`; SDK render | row counts match turns; token totals reconcile with Part 3 | not started |
+| 4 | `04` locally; `bq query`; SDK render | row counts match turns; token totals reconcile with Part 3 | **done 2026-10-02** except 4.5 (browser) |
 | 5 | none | links resolve; labels present; tables reconciled | not started |
 
 **Not verified.** Evidence levels: source inspection, doc inspection, proposed, verified. The gate is the stage whose run resolves the row; inline NEEDS-RUN markers in this plan cite rows here.
@@ -378,9 +381,10 @@ Common harness: fresh `python3.13 -m venv .venv`, `pip install -r requirements.t
 | 15 | Overlapping turns do not cross timers: per-tool and per-turn percentiles match the sequential run | proposed | Stage 3 (3.1 deep dive) |
 | 16 | `tutorial.weather.requests` reaches Cloud Monitoring as `/counter` through the provider `--otel_to_cloud` installs | proposed | Stage 3 (3.7) |
 | 17 | PromQL alert policy opens an incident on `unknown-city` | proposed | Stage 3 (3.6) |
-| 18 | Plugin creates `agent_events` and the `v_*` views on 2.8.0 with the cited columns | source inspection | Stage 4 (4.1) |
-| 19 | 4.2's per-run token total equals the Part 3 histogram `sum` within tolerance | proposed | Stage 4 |
-| 20 | SDK 0.5.2 render, evaluator, and CLI against the plugin's table | doc inspection | Stage 4 (4.4) |
+| 18 | Plugin creates `agent_events` and the `v_*` views on 2.8.0 with the cited columns | **verified** (Stage 4: table plus all 25 views on first write; 120 rows for 10 `baseline` turns) | resolved |
+| 19 | 4.2's per-run token total equals the Part 3 histogram `sum` within tolerance | **verified with correction** (Stage 4: input exact; metric output = row completion + thinking) | resolved |
+| 20 | SDK 0.5.2 render, evaluator, and CLI against the plugin's table | **verified with corrections** (Stage 4: `get_trace()` needs a `trace_id`; CLI flags `--project-id`/`--dataset-id`; `error_rate` 0 on `unknown-city`) | resolved |
+| 20a | A row's `trace_id` opens its trace in Cloud Trace | **verified** (Stage 4: 206 s turn's `trace_id` read back from Cloud Trace v1, 204 s in one model call) | resolved; needs span export in the process |
 | 21 | Looker Studio template opens on `agent_events` | doc inspection | Stage 4 (4.5) |
 
 **Run log.** One row per `verification/<run-id>.txt`, filled as stages run.
@@ -391,6 +395,7 @@ Common harness: fresh `python3.13 -m venv .venv`, `pip install -r requirements.t
 | stage0-cloud | 2026-09-06 | Stage 0 (Q1/Q2) | 5 turns: London×3, Tokyo, Atlantis | Same env; `get_gcp_exporters(enable_cloud_metrics=True)` into `jwd-gcp-demos`; `OTEL_RESOURCE_ATTRIBUTES` incl. `gcp.project_id`. Read back via PromQL: `_sum`/`_count`/`_bucket` suffixed, one scope, counts reconcile (5 inv, 5 tool, 10 model, 20 token pts). |
 | stage1-console | 2026-09-06 | 1.1–1.5 | `baseline`, `unknown-city`, `workflow` | `verification/stage1-console-runs.txt`. Six names; token twice; `inference_calls` sum=2/turn; 1.3 two tool sets incl. `error.type=lookup_failed` with a clean invocation; 1.4 six experimental names with the flag; 1.5 three agent-name series, no workflow metric. |
 | stage1-13 | 2026-09-06 | 1.3 | `unknown-city` | `verification/stage1-13-attributes-cardinality.txt`. `02` via in-memory reader + `summarize_series`; two `execute_tool.duration` series, second `error.type=lookup_failed`; `invoke_agent.duration` single series (invocation succeeded). |
+| stage4-part4-tracing-on | 2026-10-02 | 4.1–4.4, 4.6 | `baseline` 10, `growing-context` 10, `multi-city` 20, `unknown-city` 10 | `verification/stage4-part4-tracing-on.txt`. `04` with metrics and spans, google-adk 2.8.0 + `[bigquery-analytics]`, SDK 0.5.2, `jwd-gcp-demos`. 120 rows for 10 turns; 25 views; token input 22,874 both stores; row `trace_id` → Cloud Trace v1 for a 206 s turn; `get_trace(trace_id)` render; `error_rate` 0; dataset deleted. |
 
 ## Open questions
 

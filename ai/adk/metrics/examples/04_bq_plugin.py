@@ -1,12 +1,21 @@
 """Metrics server plus per-event rows in BigQuery (tutorial 4.1).
 
-This is the 03 metrics server with one addition: a
-``BigQueryAgentAnalyticsPlugin`` on the App. The metrics keep flowing to Cloud
-Monitoring exactly as in 03; the plugin writes one row per lifecycle event
-(user message, LLM request/response, tool start/end, invocation start/end, ...)
-to a BigQuery table through the Storage Write API. Metrics answer "how much, how
-fast, how often, by dimension"; rows answer "which session, which prompt, at
-what cost" (Part 4).
+This is the 03 metrics server with two additions: a
+``BigQueryAgentAnalyticsPlugin`` on the App, and span export to Cloud Trace. The
+metrics keep flowing to Cloud Monitoring exactly as in 03; the plugin writes one
+row per lifecycle event (user message, LLM request/response, tool start/end,
+invocation start/end, ...) to a BigQuery table through the Storage Write API.
+Metrics answer "how much, how fast, how often, by dimension"; rows answer "which
+session, which prompt, at what cost" (Part 4).
+
+Tracing is on so the rows join Cloud Trace: with a tracer provider installed,
+the plugin fills each row's ``trace_id`` with the active OTel trace id, so a row
+opens to its trace (4.6). Without one, ``trace_id`` is a random id that matches
+nothing.
+
+The server speaks the two routes ``load/turns.sh`` calls (create a session, then
+``/run``), so the Part 4 scenarios drive it unchanged, including
+``growing-context``'s one reused session.
 
 The dataset must already exist -- the plugin creates the table and, with
 ``create_views=True`` (the default), one ``v_<event_type>`` view per event
@@ -23,11 +32,7 @@ Run it locally::
     export BQ_ANALYTICS_DATASET_ID=agent_analytics
     .venv/bin/python examples/04_bq_plugin.py
     # then, in another terminal, fire baseline turns (tutorial 4.1):
-    for i in $(seq 10); do
-      curl -s -X POST localhost:8080/chat \
-        -H 'content-type: application/json' \
-        -d '{"message": "What'\''s the weather in London?"}' >/dev/null
-    done
+    HOST=http://localhost:8080 load/turns.sh baseline 10
     # then count rows by event type:
     bq query --use_legacy_sql=false \
       'SELECT event_type, COUNT(*) c
@@ -35,8 +40,8 @@ Run it locally::
        GROUP BY event_type ORDER BY c DESC'
 
 Requires ``GOOGLE_CLOUD_PROJECT``, ``BQ_ANALYTICS_DATASET_ID``,
-``google-adk[otel-gcp]``, and ``bigquery-agent-analytics`` with its Storage
-Write API deps.
+``google-adk[otel-gcp,bigquery-analytics]`` (the extra brings pyarrow and the
+Storage Write API deps), and ``bigquery-agent-analytics``.
 """
 
 from __future__ import annotations
@@ -67,7 +72,7 @@ from demo_agent.agent import root_agent
 
 
 def install_cloud_metrics(project: str) -> None:
-    """Same metric export as 03: build the exporter, register it with a resource."""
+    """03's metric export, plus spans to Cloud Trace so rows carry a real trace_id."""
     os.environ.setdefault("OTEL_SERVICE_NAME", "adk-metrics-server")
     resource = Resource.create(
         {
@@ -75,9 +80,12 @@ def install_cloud_metrics(project: str) -> None:
             "service.name": os.environ["OTEL_SERVICE_NAME"],
         }
     )
-    hooks = get_gcp_exporters(enable_cloud_metrics=True)
+    hooks = get_gcp_exporters(enable_cloud_metrics=True, enable_cloud_tracing=True)
     maybe_set_otel_providers([hooks], otel_resource=resource)
-    print(f"Exporting gen_ai.* metrics to Cloud Monitoring in project {project!r}.")
+    print(
+        f"Exporting gen_ai.* metrics to Cloud Monitoring and spans to Cloud Trace"
+        f" in project {project!r}."
+    )
 
 
 def build_bq_plugin(project: str) -> BigQueryAgentAnalyticsPlugin:
@@ -120,20 +128,29 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Metrics + BigQuery ADK server", lifespan=lifespan)
 
 
-class ChatRequest(BaseModel):
-    message: str
+class RunRequest(BaseModel):
+    user_id: str
+    session_id: str
+    new_message: types.Content
 
 
-@app.post("/chat")
-async def chat(req: ChatRequest) -> dict[str, str]:
+@app.post("/apps/{app_name}/users/{user_id}/sessions")
+async def create_session(app_name: str, user_id: str) -> dict[str, str]:
+    """Same route as the adk web run API; turns.sh reads back the new id."""
     runner: Runner = app.state.runner
     session = await runner.session_service.create_session(
-        app_name=runner.app_name, user_id="u1"
+        app_name=runner.app_name, user_id=user_id
     )
-    message = types.Content(role="user", parts=[types.Part(text=req.message)])
+    return {"id": session.id}
+
+
+@app.post("/run")
+async def run(req: RunRequest) -> dict[str, str]:
+    """One turn in an existing session, so growing-context can reuse one."""
+    runner: Runner = app.state.runner
     final = ""
     async for event in runner.run_async(
-        user_id="u1", session_id=session.id, new_message=message
+        user_id=req.user_id, session_id=req.session_id, new_message=req.new_message
     ):
         if event.is_final_response() and event.content:
             final = event.content.parts[0].text

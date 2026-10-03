@@ -29,6 +29,8 @@ This is the largest dataset we can reasonably store for instructor use. If you w
 
 1. Log into the cloud console, and select an appropriate project. Queries used to derive the not-normalized tables and do the demos are expensive, so choose your project wisely.
 
+    > **ROI Training instructors:** see the BigQuery DIN setup page in the instructor docs for recommended project configurations.
+
 2. In your target project, make sure that there is a dataset named `bq_demo` (create it if necessary).
 
 3. Run the query in **load_data.sql**. This will take about 70 minutes, cost $200, and create four new tables in your target project/dataset:

@@ -4,15 +4,15 @@
 #
 # The custom instrument is a Counter, tutorial.weather.requests, recorded in an
 # after_tool_callback with one attribute, outcome (answered | unavailable),
-# taken from the tool's returned status. A Counter surfaces in Cloud Monitoring
-# as a monotonic series with a _total suffix, so PromQL addresses it as
-# {"tutorial.weather.requests_total"} in the UTF-8 brace form.
+# taken from the tool's returned status.
 #
-# ASSUMPTION TO VERIFY on the first live run: the exact suffix. The plan expects
-# _total (counter -> _total, the standard Prometheus convention). If the OTLP
-# ingestion instead exposes it without a suffix or as _counter, swap the name
-# below. Confirm against metricDescriptors.list for
-# prometheus.googleapis.com/tutorial.weather.requests before trusting these.
+# SUFFIX: none. VERIFIED 2026-09-12 on a live 40-turn unknown-city run: the
+# series is {"tutorial.weather.requests"}, with NO _total. The plan had assumed
+# _total on the standard Prometheus counter convention, and that was wrong --
+# Cloud Monitoring appends _count/_sum to the histograms this tutorial uses, but
+# leaves this counter's name alone. The _total form returns zero series and no
+# error, so the mistake is silent. All three candidate names were tried; only
+# the unsuffixed one returns data.
 #
 # POST each block to:
 #   monitoring.googleapis.com/v1/projects/jwd-gcp-demos/location/global/prometheus/api/v1/query
@@ -23,22 +23,22 @@
 # Atlantis mix and 3.3's tool error ratio.
 
 sum by (outcome) (
-  rate({"tutorial.weather.requests_total"}[5m])
+  rate({"tutorial.weather.requests"}[5m])
 ) * 60
 
 # --- Unavailable share -----------------------------------------------------
 # The fraction of tool-answered turns that got no weather. Reads about 0.5 for a
 # 50% Atlantis mix, beside 3.3's invocation-error ratio of 0.
 
-sum(rate({"tutorial.weather.requests_total", outcome="unavailable"}[5m]))
+sum(rate({"tutorial.weather.requests", outcome="unavailable"}[5m]))
   /
-sum(rate({"tutorial.weather.requests_total"}[5m]))
+sum(rate({"tutorial.weather.requests"}[5m]))
 
 # --- Counter total vs invocation count -------------------------------------
 # A turn whose model never called the tool records nothing on this counter, so
 # its total can be lower than the invoke_agent turn count. Missing is not zero:
 # compare the two before reading the outcome as complete.
 
-sum(rate({"tutorial.weather.requests_total"}[5m]))
+sum(rate({"tutorial.weather.requests"}[5m]))
   /
 sum(rate({"gen_ai.invoke_agent.duration_count"}[5m]))

@@ -62,18 +62,18 @@
     return true;
   }
 
-  if (attempt()) return;
+  attempt();
 
   // The bar is created during element upgrade, which may not have happened by
-  // the time this runs. Watch for it, and stop watching once it is handled.
-  var observer = new MutationObserver(function () {
-    if (attempt()) observer.disconnect();
-  });
+  // the time this runs, and the element can rebuild the bar's contents after
+  // the link is in, discarding it. Keep re-injecting on every mutation;
+  // inject() is a no-op while the link is present.
+  var observer = new MutationObserver(attempt);
 
   observer.observe(document.documentElement, {childList: true, subtree: true});
 
-  // Backstop: if the codelab bundle fails to load, the bar never appears and
-  // the observer would otherwise run for the life of the page.
+  // Backstop: stop watching once the element has long since settled, and so
+  // the observer doesn't run for the life of the page if the bundle fails.
   setTimeout(function () {
     observer.disconnect();
   }, 10000);
