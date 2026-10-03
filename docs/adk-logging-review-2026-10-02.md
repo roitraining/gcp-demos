@@ -26,8 +26,8 @@
 1. **wrong.** Part 6 says no `--otel_to_cloud` flag reaches a server on Agent Runtime and that an `AdkApp` reads `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY`. In ADK 2.8.0, `adk deploy agent_engine` deploys a container that starts `adk api_server`, and both of Part 6's methods (the flag in 6.2, the `.env` line in 6.3) make the CLI add `--otel_to_cloud` to that start command (`cli/cli_deploy.py:1273-1292`, `:1392`). The 6.3 rerun printed "`--otel_to_cloud` is set to True by GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY". The pages' result still holds: no `gen_ai.*` logs and no traces arrived. *Status: still real.*
 2. **wrong.** 5.5 Step 4 fails today. The service answers, but no `gen_ai.*` entries reach Cloud Logging, and it logs `Failed to export logs batch code: 400`. `requirements.txt` asks for `google-adk>=2.8.0`, so the image gets 2.11.0, which rejects this server's log export. *Status: still real (the `>=2.8.0` cause is fixed on main; rerun pending).*
 3. **wrong.** 5.4 says the logs hide message content because of `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS`. That variable only affects spans. The logs hide content because `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` defaults to `NO_CONTENT`. 5.4 also expects one `operation.details` event per model call; the rerun got three separate event types, because the deploy doesn't opt in to the experimental format. *Status: still real.*
-4. **wrong.** 4.2 says one logging config covers "all four streams", including the `uvicorn.access` filter from Part 2. `examples/06_custom_server.py` sets up neither OpenTelemetry nor that filter, and its access lines carry no trace id. *Status: still real.*
-5. **wrong.** 4.4 says you can filter Cloud Logging on the logger name `agent.telemetry`. The deployed server's formatter never writes the logger name, and the filter returned nothing on the rerun. *Status: still real.*
+4. **wrong.** 4.2 says one logging config covers "all four streams", including the `uvicorn.access` filter from Part 2. `examples/06_custom_server.py` sets up neither OpenTelemetry nor that filter, and its access lines carry no trace id. *Status: done.*
+5. **wrong.** 4.4 says you can filter Cloud Logging on the logger name `agent.telemetry`. The deployed server's formatter never writes the logger name, and the filter returned nothing on the rerun. *Status: done.*
 6. **wrong.** Five pages create cloud resources and never delete them: 1.4 (a Cloud Run job), 1.5 (two services), 3.4 (a storage bucket holding full prompts), 6.2 and 6.3 (two Agent Runtime engines). *Status: still real.*
 7. **misleading.** The gitignored `demo_agent/.env` changes results from page to page. Setup never creates it, but 1.6 and Part 6 write it, and Cloud Run images include it. On the reruns, its `LOG_LEVEL=info` overrode `--log_level WARNING` in 1.3, and its `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` hid span content in 5.2. 6.2's "restore" step writes `LOG_LEVEL=info` back into it. *Status: still real.*
 8. **wrong.** 4.1 shows 3 of the 6 lines one question produces, and 4.3's table shows 6 of 8. A question that uses the weather tool calls the model twice, and several pages show only one call without saying the output is trimmed. *Status: still real.*
@@ -436,7 +436,7 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F110 | 13–17 | "**Why you are here.**" note, "Part 3's visibility", "owns every stream" | House style keeps the note to two sentences. This one runs three and uses two phrases the reader has to decode. | Cut the note to two sentences and drop both phrases: "**Why you are here.** `LoggingPlugin` prints and DEBUG is plain text, so neither gives a running service logs you can query and alert on. This part builds a plugin that emits JSON records and runs it in your own server on Cloud Run." | still real |
+| F110 | 13–17 | "**Why you are here.**" note, "Part 3's visibility", "owns every stream" | House style keeps the note to two sentences. This one runs three and uses two phrases the reader has to decode. | Cut the note to two sentences and drop both phrases: "**Why you are here.** `LoggingPlugin` prints and DEBUG is plain text, so neither gives a running service logs you can query and alert on. This part builds a plugin that emits JSON records and runs it in your own server on Cloud Run." | done |
 
 ### tutorial/part-4/4.1-structured-plugin.md
 
@@ -444,7 +444,7 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F111 | 39–45 | The **Expected output** block, three lines with no `"logger"` or `"event"` key | `JsonFormatter` always writes `"logger"` (`examples/05_structured_plugin.py:155`) and passes `event` through, and `before_model_callback` emits `llm_request` lines the block leaves out. The rerun on jwd-dev-3 showed six lines per question, each with `logger` and `event`. | Recapture the output. Or label the block "(trimmed)" and show the real keys, for example `{"severity": "INFO", "message": "llm_response", "logger": "agent.telemetry", "event": "llm_response", …}`. | still real |
+| F111 | 39–45 | The **Expected output** block, three lines with no `"logger"` or `"event"` key | `JsonFormatter` always writes `"logger"` (`examples/05_structured_plugin.py:155`) and passes `event` through, and `before_model_callback` emits `llm_request` lines the block leaves out. The rerun on jwd-dev-3 showed six lines per question, each with `logger` and `event`. | Recapture the output. Or label the block "(trimmed)" and show the real keys, for example `{"severity": "INFO", "message": "llm_response", "logger": "agent.telemetry", "event": "llm_response", …}`. | done |
 
 **Style**
 
@@ -456,14 +456,14 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F113 | 31 and 43 | "asks *"What's the weather in New York?"*" | The example asks about New York, but pages 4.2 and 4.3 both use Tokyo. The prompt comes from `examples/05_structured_plugin.py:180`. | Change the example prompt to Tokyo and recapture the output. | still real |
+| F113 | 31 and 43 | "asks *"What's the weather in New York?"*" | The example asks about New York, but pages 4.2 and 4.3 both use Tokyo. The prompt comes from `examples/05_structured_plugin.py:180`. | Change the example prompt to Tokyo and recapture the output. | done (example 05 now asks the Tokyo question) |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F114 | 11 and 57 | No **Why you are here.** note, no closing handoff | The page opens straight into code. House style gives every page a short note on why the reader is here, and a line pointing to the next page. | Add "> **Why you are here.** `LoggingPlugin` prints text. To query and alert on events, write your own plugin that emits JSON `logging` records." at the top, and end with "4.2 runs this plugin inside a real HTTP server." | still real |
-| F115 | 54–57 | "One detail the example teaches by doing… This bites everyone once." | The gotcha is the key name `tool_args` versus `args`. It is told in informal shorthand, interrupts the main steps and gives no reason. | Move it to `## Deep dives` under the question "Why is the key `tool_args`, not `args`?" | still real |
+| F114 | 11 and 57 | No **Why you are here.** note, no closing handoff | The page opens straight into code. House style gives every page a short note on why the reader is here, and a line pointing to the next page. | Add "> **Why you are here.** `LoggingPlugin` prints text. To query and alert on events, write your own plugin that emits JSON `logging` records." at the top, and end with "4.2 runs this plugin inside a real HTTP server." | done |
+| F115 | 54–57 | "One detail the example teaches by doing… This bites everyone once." | The gotcha is the key name `tool_args` versus `args`. It is told in informal shorthand, interrupts the main steps and gives no reason. | Move it to `## Deep dives` under the question "Why is the key `tool_args`, not `args`?" | done |
 
 ### tutorial/part-4/4.2-custom-server.md
 
@@ -471,31 +471,31 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F116 | 8, 14 and 59 | "All four streams under one config" (the What it means callout), and "owns all four streams" in the title, intro, and Part 4 subtitle (`index.md` lines 9 and 24) | The page claims the server configures four streams, but it configures three. Nothing in `06_custom_server.py` configures OpenTelemetry (stream 4), and the captured output shows only streams 1 and 2. | Replace the callout with "Your code, the framework, and uvicorn share one config (streams 1–3). Stream 4 is Part 5." Change "all four streams" to match in the title, intro, and subtitle. | still real |
-| F117 | 88–89 | "The `dictConfig` at startup covers your telemetry logger, the `google_adk` level, the root handler, and the `uvicorn.access` filter from Part 2." | The page names a `uvicorn.access` filter the config does not have. `configure_logging()` in `examples/06_custom_server.py` sets up no `uvicorn.access` logger or filter. `log_config=None` (line 251) sends access lines to the root JSON handler unfiltered. | Change to "…covers your telemetry logger, the `google_adk` level, and the root handler. With `log_config=None`, uvicorn's access lines reach that root handler as JSON." | still real |
-| F118 | 115–116 | "Logs Explorer groups every line of one request, across all four streams." | Access lines are logged after `current_trace.reset`, so they carry no trace field. The rerun on jwd-dev-3 confirmed this. OpenTelemetry output does not pass through this formatter at all. | Change to "groups every line written while the request runs: your code, the plugin, and `google_adk`." | still real |
+| F116 | 8, 14 and 59 | "All four streams under one config" (the What it means callout), and "owns all four streams" in the title, intro, and Part 4 subtitle (`index.md` lines 9 and 24) | The page claims the server configures four streams, but it configures three. Nothing in `06_custom_server.py` configures OpenTelemetry (stream 4), and the captured output shows only streams 1 and 2. | Replace the callout with "Your code, the framework, and uvicorn share one config (streams 1–3). Stream 4 is Part 5." Change "all four streams" to match in the title, intro, and subtitle. | done |
+| F117 | 88–89 | "The `dictConfig` at startup covers your telemetry logger, the `google_adk` level, the root handler, and the `uvicorn.access` filter from Part 2." | The page names a `uvicorn.access` filter the config does not have. `configure_logging()` in `examples/06_custom_server.py` sets up no `uvicorn.access` logger or filter. `log_config=None` (line 251) sends access lines to the root JSON handler unfiltered. | Change to "…covers your telemetry logger, the `google_adk` level, and the root handler. With `log_config=None`, uvicorn's access lines reach that root handler as JSON." | done |
+| F118 | 115–116 | "Logs Explorer groups every line of one request, across all four streams." | Access lines are logged after `current_trace.reset`, so they carry no trace field. The rerun on jwd-dev-3 confirmed this. OpenTelemetry output does not pass through this formatter at all. | Change to "groups every line written while the request runs: your code, the plugin, and `google_adk`." | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F119 | 46, 61 and 133 | "**and**", "**not**", "**every**" | House style does not use bold for emphasis inside sentences. | Remove the bold. | still real |
+| F119 | 46, 61 and 133 | "**and**", "**not**", "**every**" | House style does not use bold for emphasis inside sentences. | Remove the bold. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F120 | 132 and 153 | The sequence diagram's "middleware" participant, and "The server parses it once at the start of each request". | The diagram shows middleware that does not exist. The server has no middleware. The `/chat` handler sets the context variable that carries the trace id. | Rename the participant "/chat handler" and reword the sentence to say the handler parses it. | still real |
-| F121 | 19–20 | "its formatter writes two fields Cloud Logging understands" | The formatter writes three fields. `CloudRunJsonFormatter` also writes `logging.googleapis.com/sourceLocation` (`examples/06_custom_server.py:102-106`). Neither the snippet nor the output shows it. | Name the third field. Or say the snippet and output are trimmed. | still real |
-| F122 | 90–103 | The `TruncateFilter` block in the deep dive | The deep dive is about severity and trace fields, and this block is unrelated to both. | Replace the block with one sentence: "The same config attaches a filter that truncates long DEBUG lines." | still real |
+| F120 | 132 and 153 | The sequence diagram's "middleware" participant, and "The server parses it once at the start of each request". | The diagram shows middleware that does not exist. The server has no middleware. The `/chat` handler sets the context variable that carries the trace id. | Rename the participant "/chat handler" and reword the sentence to say the handler parses it. | done |
+| F121 | 19–20 | "its formatter writes two fields Cloud Logging understands" | The formatter writes three fields. `CloudRunJsonFormatter` also writes `logging.googleapis.com/sourceLocation` (`examples/06_custom_server.py:102-106`). Neither the snippet nor the output shows it. | Name the third field. Or say the snippet and output are trimmed. | done |
+| F122 | 90–103 | The `TruncateFilter` block in the deep dive | The deep dive is about severity and trace fields, and this block is unrelated to both. | Replace the block with one sentence: "The same config attaches a filter that truncates long DEBUG lines." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F123 | 43 | `-d '{"message":"weather in Tokyo?"}'` | The curl prompt is not the question the rest of Part 4 asks. Other pages ask "What's the weather in Tokyo?", so output may not match. | Change to `-d '{"message":"What'\''s the weather in Tokyo?"}'`. | still real |
-| F124 | 69, 105 and 130 | "The server shape", "The two fields the formatter writes", "How the trace reaches framework logs" | Deep-dive headings are labels, not questions. House style words them as questions the reader would ask. | Rename to "What does the server look like?", "Which two fields does the formatter write?", and "How does the trace reach framework logs?" Then update every link to those anchors (lines 22–23 and 63–64). | still real |
-| F125 | 71 | "Built on ADK 2.x idioms." | The phrase names no idiom, so the reader cannot tell what to look for. | Replace with "The server builds an `App` with your plugin, hands it to a `Runner`, and closes the runner on shutdown." | still real |
+| F123 | 43 | `-d '{"message":"weather in Tokyo?"}'` | The curl prompt is not the question the rest of Part 4 asks. Other pages ask "What's the weather in Tokyo?", so output may not match. | Change to `-d '{"message":"What'\''s the weather in Tokyo?"}'`. | done |
+| F124 | 69, 105 and 130 | "The server shape", "The two fields the formatter writes", "How the trace reaches framework logs" | Deep-dive headings are labels, not questions. House style words them as questions the reader would ask. | Rename to "What does the server look like?", "Which two fields does the formatter write?", and "How does the trace reach framework logs?" Then update every link to those anchors (lines 22–23 and 63–64). | done |
+| F125 | 71 | "Built on ADK 2.x idioms." | The phrase names no idiom, so the reader cannot tell what to look for. | Replace with "The server builds an `App` with your plugin, hands it to a `Runner`, and closes the runner on shutdown." | done |
 
 ### tutorial/part-4/4.3-server-cloud-run.md
 
@@ -503,28 +503,28 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F126 | 49–60 | The **Expected output** table for the `jsonPayload.message:*` read | The table does not match a real run. The rerun on jwd-dev-3 returned 8 rows per question, not 6, because a question that uses the tool calls the model twice, so `llm_request` and `llm_response` each appear twice. Rows came newest first, the reverse of the page's order. Two uvicorn startup lines (`Started server process [1]`, `Uvicorn running on…`) also matched, because their `color_message` extra keeps them in `jsonPayload`. | Recapture with `--order=asc`, show 8 rows per question, and add `jsonPayload.event:*` to the filter to drop the startup lines. | still real |
+| F126 | 49–60 | The **Expected output** table for the `jsonPayload.message:*` read | The table does not match a real run. The rerun on jwd-dev-3 returned 8 rows per question, not 6, because a question that uses the tool calls the model twice, so `llm_request` and `llm_response` each appear twice. Rows came newest first, the reverse of the page's order. Two uvicorn startup lines (`Started server process [1]`, `Uvicorn running on…`) also matched, because their `color_message` extra keeps them in `jsonPayload`. | Recapture with `--order=asc`, show 8 rows per question, and add `jsonPayload.event:*` to the filter to drop the startup lines. | done (filter is `jsonPayload.message:* trace:*` with `--order=asc`; the review's `jsonPayload.event:*` would also drop the two `chat_request_*` rows, so it shows 6 rows, not 8) |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F127 | 89 | "`jsonPayload.latency_ms` a metric you can chart" | Charting a log field needs a log-based metric, so the field is not a metric by itself. | Change to "a field you can turn into a log-based metric". | still real |
+| F127 | 89 | "`jsonPayload.latency_ms` a metric you can chart" | Charting a log field needs a log-based metric, so the field is not a metric by itself. | Change to "a field you can turn into a log-based metric". | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F128 | 65–66 | "The framework and Uvicorn lines are still there, as plain `textPayload`." | This was observed, but page 4.2 shows the same lines as JSON, so the pages seem to contradict each other, and no reason is given. The server writes them as JSON with three fields: `message`, `logging.googleapis.com/trace`, and `logging.googleapis.com/sourceLocation`. Cloud Logging moves the last two into the log entry's own fields, and a payload left with only `message` is stored as plain text. | Add "Cloud Logging moves the trace and source-location fields out of each JSON line into the log entry. A line left with only `message` is stored as `textPayload`, so the framework lines land there even though the server wrote them as JSON." | still real |
-| F129 | 90–92 | "shows the whole request's lifecycle grouped, framework and access lines included." | The page says framework and access lines are grouped by request. The rerun on jwd-dev-3 showed the container's access line has no trace, because uvicorn writes it after the handler clears the trace id. Only Cloud Run's own `run.googleapis.com/requests` entry is grouped with the rest. | Change to "…grouped: your lines, the plugin's events, the `google_adk` lines, and Cloud Run's own request entry." | still real |
+| F128 | 65–66 | "The framework and Uvicorn lines are still there, as plain `textPayload`." | This was observed, but page 4.2 shows the same lines as JSON, so the pages seem to contradict each other, and no reason is given. The server writes them as JSON with three fields: `message`, `logging.googleapis.com/trace`, and `logging.googleapis.com/sourceLocation`. Cloud Logging moves the last two into the log entry's own fields, and a payload left with only `message` is stored as plain text. | Add "Cloud Logging moves the trace and source-location fields out of each JSON line into the log entry. A line left with only `message` is stored as `textPayload`, so the framework lines land there even though the server wrote them as JSON." | done |
+| F129 | 90–92 | "shows the whole request's lifecycle grouped, framework and access lines included." | The page says framework and access lines are grouped by request. The rerun on jwd-dev-3 showed the container's access line has no trace, because uvicorn writes it after the handler clears the trace id. Only Cloud Run's own `run.googleapis.com/requests` entry is grouped with the rest. | Change to "…grouped: your lines, the plugin's events, the `google_adk` lines, and Cloud Run's own request entry." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F130 | 94–100 | "**Your model's region is not your service's region.**" | The WARNING callout runs five sentences. House style allows one sentence in a WARNING callout, and this one buries the action. | Replace with "> **Set `GOOGLE_CLOUD_LOCATION` as a real Cloud Run env var.** Without it, a deploy can succeed while every `/chat` returns 500." Move the rest to a `## Deep dives` question. | still real |
-| F131 | 32–47 | One fence holding `URL=$(gcloud …)`, a `curl` with `-s -X -H` on one line, and `gcloud logging read` | One code block mixes three jobs and a crowded curl line, so the reader cannot tell where one step ends. House style puts one action per block and one flag per line. | Split into three steps. Use `export URL=$(gcloud …)` in the first, and put each curl flag on its own line. | still real |
-| F132 | 108 | No closing handoff to 4.4 | House style ends each page with a line pointing to the next. | Add "4.4 compares a per-agent callback with this plugin." | still real |
+| F130 | 94–100 | "**Your model's region is not your service's region.**" | The WARNING callout runs five sentences. House style allows one sentence in a WARNING callout, and this one buries the action. | Replace with "> **Set `GOOGLE_CLOUD_LOCATION` as a real Cloud Run env var.** Without it, a deploy can succeed while every `/chat` returns 500." Move the rest to a `## Deep dives` question. | done |
+| F131 | 32–47 | One fence holding `URL=$(gcloud …)`, a `curl` with `-s -X -H` on one line, and `gcloud logging read` | One code block mixes three jobs and a crowded curl line, so the reader cannot tell where one step ends. House style puts one action per block and one flag per line. | Split into three steps. Use `export URL=$(gcloud …)` in the first, and put each curl flag on its own line. | done |
+| F132 | 108 | No closing handoff to 4.4 | House style ends each page with a line pointing to the next. | Add "4.4 compares a per-agent callback with this plugin." | done |
 
 ### tutorial/part-4/4.4-callback-or-plugin.md
 
@@ -532,28 +532,28 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F133 | 51–53 | "in Cloud Logging you can filter to `agent.telemetry` and see your events without the framework's." | The page says you can filter Cloud Logging by `agent.telemetry`, but that field is not shipped. `CloudRunJsonFormatter` leaves out `record.name` because `name` is in `_RESERVED` (`examples/06_custom_server.py:96`), so the JSON has no logger field. The rerun on jwd-dev-3 returned 0 entries for `jsonPayload.logger="agent.telemetry"`. | Change to "…add `entry["logger"] = record.name` to your formatter, then filter on `jsonPayload.logger="agent.telemetry"`." | still real |
+| F133 | 51–53 | "in Cloud Logging you can filter to `agent.telemetry` and see your events without the framework's." | The page says you can filter Cloud Logging by `agent.telemetry`, but that field is not shipped. `CloudRunJsonFormatter` leaves out `record.name` because `name` is in `_RESERVED` (`examples/06_custom_server.py:96`), so the JSON has no logger field. The rerun on jwd-dev-3 returned 0 entries for `jsonPayload.logger="agent.telemetry"`. | Change to "…add `entry["logger"] = record.name` to your formatter, then filter on `jsonPayload.logger="agent.telemetry"`." | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F134 | 63 | "downstream BigQuery or Looker analysis" | The page never introduces those tools. | Change to "one field schema for every agent". | still real |
+| F134 | 63 | "downstream BigQuery or Looker analysis" | The page never introduces those tools. | Change to "one field schema for every agent". | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F135 | 23–24 | "A level on `google_adk` answers the first for free: requests sent, responses received, retries, errors." | This overstates what a `google_adk` level shows. At INFO, ADK logs only "Sending out request". The response log is DEBUG only (`google_llm.py`, `_build_response_log`). Retries are logged by `google_genai`, outside the `google_adk` loggers. | Change to "A `google_adk` level shows requests and errors at INFO, and request and response bodies at DEBUG. Retry lines come from the separate `google_genai` logger." | still real |
-| F136 | 70 | "Both run in the request thread" | Plugin and agent callbacks run on the asyncio event loop, and a `StreamHandler` writes synchronously, so slow work blocks every request. | Change to "Both run on the event loop, so keep the work cheap and non-blocking." | still real |
+| F135 | 23–24 | "A level on `google_adk` answers the first for free: requests sent, responses received, retries, errors." | This overstates what a `google_adk` level shows. At INFO, ADK logs only "Sending out request". The response log is DEBUG only (`google_llm.py`, `_build_response_log`). Retries are logged by `google_genai`, outside the `google_adk` loggers. | Change to "A `google_adk` level shows requests and errors at INFO, and request and response bodies at DEBUG. Retry lines come from the separate `google_genai` logger." | done |
+| F136 | 70 | "Both run in the request thread" | Plugin and agent callbacks run on the asyncio event loop, and a `StreamHandler` writes synchronously, so slow work blocks every request. | Change to "Both run on the event loop, so keep the work cheap and non-blocking." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F137 | 76 | No step to run, no closing handoff | Every other page in Part 4 has something to run, and ends by pointing to the next page. | Add a step that attaches `log_tool` to the demo agent and shows one captured line. Or treat the page as reference and end with "Part 5 adds stream 4, OpenTelemetry." | still real |
-| F138 | 27, 51–52, 67 and 69–70 | "the callback-or-plugin job", "siloed by design", "the name rides on every record", "turns the hook into a guardrail" | Each phrase compresses an idea the reader must decode. | Replace with "what a callback or plugin is for", "scoped to one agent", "the logger name is on every record", and "so the hook can block or replace the step". | still real |
-| F139 | 73–76 | "**The takeaway.** …" | House style does not allow a closing summary of what the page just said. | Delete the takeaway. | still real |
+| F137 | 76 | No step to run, no closing handoff | Every other page in Part 4 has something to run, and ends by pointing to the next page. | Add a step that attaches `log_tool` to the demo agent and shows one captured line. Or treat the page as reference and end with "Part 5 adds stream 4, OpenTelemetry." | done (kept as a reference page; ends with the Part 5 handoff) |
+| F138 | 27, 51–52, 67 and 69–70 | "the callback-or-plugin job", "siloed by design", "the name rides on every record", "turns the hook into a guardrail" | Each phrase compresses an idea the reader must decode. | Replace with "what a callback or plugin is for", "scoped to one agent", "the logger name is on every record", and "so the hook can block or replace the step". | done |
+| F139 | 73–76 | "**The takeaway.** …" | House style does not allow a closing summary of what the page just said. | Delete the takeaway. | done |
 
 ### tutorial/part-5/index.md
 

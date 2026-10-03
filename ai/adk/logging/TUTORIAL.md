@@ -62,7 +62,7 @@ variables, and the shared demo agent.
 | [1. Log levels](tutorial/part-1/index.md) | The `DEBUG`/`INFO`/`WARNING`/`ERROR` dial on a script, `adk web`, `adk api_server`, Cloud Run, a real HTTP server, and Agent Runtime (1.1–1.7). |
 | [2. Access logs](tutorial/part-2/index.md) | Why `--log_level` never silences uvicorn's access log, and how to filter it. |
 | [3. Plugins](tutorial/part-3/index.md) | `LoggingPlugin` and `DebugLoggingPlugin` for readable step narration, local and on Cloud Run (3.1–3.5). |
-| [4. Structured logging](tutorial/part-4/index.md) | A JSON `BasePlugin`, a custom server that owns all four streams, and that server on Cloud Run with explicit `severity` and a trace field (4.1–4.4). |
+| [4. Structured logging](tutorial/part-4/index.md) | A JSON `BasePlugin`, a custom server that owns streams 1–3, and that server on Cloud Run with explicit `severity` and a trace field (4.1–4.4). |
 | [5. OpenTelemetry](tutorial/part-5/index.md) | Stream 4: `gen_ai.*` events read back from Cloud Logging (locally, `adk api_server`, Cloud Run, your own server, other OTLP backends), and the content-capture knob (5.0–5.8). |
 | [6. Agent Runtime](tutorial/part-6/index.md) | The telemetry layer on Vertex AI Agent Engine, and what plugin code carries over (6.1–6.4). |
 | [How to choose & reference](tutorial/how-to-choose.md) | The decision table, best-practice summary, verification status, and references. |

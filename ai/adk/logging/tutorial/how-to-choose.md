@@ -19,7 +19,7 @@
 | Capturing one bad turn in full | `DebugLoggingPlugin` (3.3, 3.5) | Complete YAML record, secrets redacted. |
 | Emitting metrics for production | Custom `BasePlugin` (4.1) | Real `logging` records; queryable, alertable. |
 | Logging or guarding one agent only | Per-agent callback (4.4) | Siloed by design; can short-circuit a step. |
-| Running your own HTTP server | `dictConfig` + the 4.1 plugin (4.2) | Own all four streams in one place. |
+| Running your own HTTP server | `dictConfig` + the 4.1 plugin (4.2) | Own streams 1–3 in one place. |
 | Seeing raw logs reach the cloud, fast | Cloud Run Job/service, no JSON (1.4, 1.5) | Zero setup; but severity is Cloud Run's guess (Default), not yours. |
 | Deploying to Cloud Run for real | JSON to stdout + trace field (4.3) | Auto-ingested; severity you set; grouped by request. |
 | Deploying the agent to Agent Runtime | `adk deploy agent_engine` (1.6) + `--otel_to_cloud` | Managed; but the platform owns log format/stream. |
