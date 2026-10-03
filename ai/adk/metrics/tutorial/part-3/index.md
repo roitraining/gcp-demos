@@ -21,6 +21,11 @@ counter for whether the task got done. Every page runs one scenario from
 label every query on the page filters on, so pages run back to back with no wait
 between them.
 
+Queries read a `[10m]` window, so it still holds the page's load a minute after
+the load ends. A per-minute rate averages over all 10 minutes, including the
+quiet ones: 30 turns sent in 3 minutes read as 3 turns per minute, not 10.
+Ratios and percentiles are unaffected.
+
 ## In this part
 
 | Section | Scenario | Question it answers |
