@@ -36,9 +36,13 @@ MODEL_LOCATION="${MODEL_LOCATION:-global}"
 ENABLE_VIA_ENV="${ENABLE_VIA_ENV:-0}"
 
 # Save the original .env and restore it after deploy (success or failure), so
-# LOG_LEVEL does not leak into local runs like `adk web`.
+# LOG_LEVEL does not leak into local runs like `adk web`. If there was no
+# demo_agent/.env, remove the one we write: ADK uses the first .env it finds
+# walking up from the agent folder, so a leftover file would hide the root .env.
+_HAD_ENV=""
+[[ -f ./demo_agent/.env ]] && _HAD_ENV=1
 _ORIG_ENV="$(cat ./demo_agent/.env 2>/dev/null || true)"
-trap 'printf "%s\n" "$_ORIG_ENV" > ./demo_agent/.env' EXIT
+trap 'if [[ -n "$_HAD_ENV" ]]; then printf "%s\n" "$_ORIG_ENV" > ./demo_agent/.env; else rm -f ./demo_agent/.env; fi' EXIT
 
 # Write the env the deployed agent needs. `adk deploy agent_engine` copies the
 # agent directory's .env into the deployment.

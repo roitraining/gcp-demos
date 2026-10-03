@@ -97,24 +97,24 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F013 | 25 and 29 | "# if you have not already", "# edit .env to contain:" | House style keeps comments out of runnable fences. | Move both comments out of the bash fences and into prose. | still real |
-| F014 | 43 | "**`source env.sh` again in each new terminal.**" | House style does not use bold for instructions. | Remove the bold. | still real |
-| F015 | 73–78 | The logger-tree diagram shows `agent.telemetry`, `uvicorn.error`, `sessions`, and `plugin_manager` | This page never explains those four nodes. | Remove those four nodes. Or caption "`agent.telemetry` is the logger you create in Part 4." | still real |
+| F013 | 25 and 29 | "# if you have not already", "# edit .env to contain:" | House style keeps comments out of runnable fences. | Move both comments out of the bash fences and into prose. | done |
+| F014 | 43 | "**`source env.sh` again in each new terminal.**" | House style does not use bold for instructions. | Remove the bold. | done |
+| F015 | 73–78 | The logger-tree diagram shows `agent.telemetry`, `uvicorn.error`, `sessions`, and `plugin_manager` | This page never explains those four nodes. | Remove those four nodes. Or caption "`agent.telemetry` is the logger you create in Part 4." | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F016 | 25 | "edit .env to contain:" | `.env.example` already holds those lines, so the copied `.env` needs only the project id changed. | "Open `.env` and replace `your-project-id` with your project." | still real |
+| F016 | 25 | "edit .env to contain:" | `.env.example` already holds those lines, so the copied `.env` needs only the project id changed. | "Open `.env` and replace `your-project-id` with your project." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F017 | 30 | No mention of `demo_agent/.env` | That file is gitignored, so a fresh clone lacks it. Yet 5.4 and 6.2 read it and overwrite it. | Add "ADK's servers also read `demo_agent/.env`. Create it with `cp .env.example demo_agent/.env`." Check the wording against what 1.2 needs. | still real |
-| F018 | 81 | No verification step at the end of Setup | A broken setup first shows up as a failure in 1.1. | Add a **Command:** `.venv/bin/python -c "import google.adk; print(google.adk.__version__)"` with **Expected output** `2.8.0`. | still real |
-| F019 | 28 | "GOOGLE_CLOUD_LOCATION=global" next to `REGION=us-central1` | Two different locations appear with no explanation of which is used for what. | Add "`global` is where the model runs. Your Cloud Run services use `REGION` (`us-central1`)." | still real |
-| F020 | 8 | "All commands run from this folder." | The page sits under `tutorial/`, so "this folder" points to the wrong place. | "All commands run from `ai/adk/logging/`." | still real |
+| F017 | 30 | No mention of `demo_agent/.env` | That file is gitignored, so a fresh clone lacks it. Yet 5.4 and 6.2 read it and overwrite it. | Add "ADK's servers also read `demo_agent/.env`. Create it with `cp .env.example demo_agent/.env`." Check the wording against what 1.2 needs. | done (Setup says not to create `demo_agent/.env`; ADK falls back to the root `.env`) |
+| F018 | 81 | No verification step at the end of Setup | A broken setup first shows up as a failure in 1.1. | Add a **Command:** `.venv/bin/python -c "import google.adk; print(google.adk.__version__)"` with **Expected output** `2.8.0`. | done |
+| F019 | 28 | "GOOGLE_CLOUD_LOCATION=global" next to `REGION=us-central1` | Two different locations appear with no explanation of which is used for what. | Add "`global` is where the model runs. Your Cloud Run services use `REGION` (`us-central1`)." | done |
+| F020 | 8 | "All commands run from this folder." | The page sits under `tutorial/`, so "this folder" points to the wrong place. | "All commands run from `ai/adk/logging/`." | done |
 
 ### tutorial/part-1/index.md
 
@@ -122,14 +122,14 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F021 | 29 | "All four streams land together on a service" | The tutorial's fourth stream (OpenTelemetry) is covered in Part 5, not Part 1, so Part 1 never reaches it. | "Streams 1–3 land together on a service" | still real |
+| F021 | 29 | "All four streams land together on a service" | The tutorial's fourth stream (OpenTelemetry) is covered in Part 5, not Part 1, so Part 1 never reaches it. | "Streams 1–3 land together on a service" | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F022 | 9–10 | "What `DEBUG`, `INFO`, `WARNING`, and `ERROR` each reveal" | The subtitle promises `ERROR`, but no Part 1 page runs the agent at that level. | Drop `ERROR` from the subtitle, or add an `error` run to 1.1. | still real |
-| F023 | 14–15 | "instead of drowning in output or flying blind" | The metaphor does not say what the reader will be able to do. | "so you can pick a level that shows what you need without burying you in output." | still real |
+| F022 | 9–10 | "What `DEBUG`, `INFO`, `WARNING`, and `ERROR` each reveal" | The subtitle promises `ERROR`, but no Part 1 page runs the agent at that level. | Drop `ERROR` from the subtitle, or add an `error` run to 1.1. | done |
+| F023 | 14–15 | "instead of drowning in output or flying blind" | The metaphor does not say what the reader will be able to do. | "so you can pick a level that shows what you need without burying you in output." | done |
 
 ### tutorial/part-1/1.1-test-harness.md
 
@@ -137,24 +137,24 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F024 | 89 | "**Expected output** — the same run now dumps…" | House style allows an em dash only in a Step label. The same pattern recurs on other pages. | "**Expected output** (trimmed): the same run now dumps…". Do the same wherever the pattern recurs. | still real |
-| F025 | 46 and 51 | "**Your tool**", "**shape**" | Bold on ordinary words is not house style. | Remove the bold. | still real |
-| F026 | 14 | "the `google_adk` group" | "Group" is not the logging term. | "the `google_adk` logger and its children" | still real |
+| F024 | 89 | "**Expected output** — the same run now dumps…" | House style allows an em dash only in a Step label. The same pattern recurs on other pages. | "**Expected output** (trimmed): the same run now dumps…". Do the same wherever the pattern recurs. | done |
+| F025 | 46 and 51 | "**Your tool**", "**shape**" | Bold on ordinary words is not house style. | Remove the bold. | done |
+| F026 | 14 | "the `google_adk` group" | "Group" is not the logging term. | "the `google_adk` logger and its children" | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F027 | 29–37, 92–104 and 138–140 | The three Expected output blocks, none labeled as trimmed | `examples/01_log_levels.py:53` prints a `===== running at INFO =====` banner first, and the blocks omit it (1.4 shows it). The DEBUG `LLM Request` block drops the `Config:`, `Text:`, and `Raw response:` sections. The rerun on jwd-dev-1 also showed `Closing runner…` and `Runner closed.` at INFO. | Keep the banner and label each block "**Expected output** (trimmed):". | still real |
-| F028 | 123–124 | "ADK omits auth headers from these dumps, so a DEBUG log will not leak your bearer token." | That is true only of ADK's own model dump (`google_llm.py:686-745` excludes `http_options`). Root-level DEBUG also turns on debug output from every other library. | "ADK leaves request headers out of its own model dumps. Other libraries' DEBUG output is not covered." | still real |
-| F029 | 143–144 | "At WARNING and ERROR a healthy run is silent." | The rerun on jwd-dev-1 printed a two-line Python `UserWarning: [EXPERIMENTAL] … JSON_SCHEMA_FOR_FUNC_DECL` on stderr at every level. It also appears in the Cloud Logging reads in 1.4 and 1.5. | "At WARNING the framework logs nothing on a healthy run. Python may still print a `UserWarning` about an experimental ADK feature; that is not a log record." | still real |
+| F027 | 29–37, 92–104 and 138–140 | The three Expected output blocks, none labeled as trimmed | `examples/01_log_levels.py:53` prints a `===== running at INFO =====` banner first, and the blocks omit it (1.4 shows it). The DEBUG `LLM Request` block drops the `Config:`, `Text:`, and `Raw response:` sections. The rerun on jwd-dev-1 also showed `Closing runner…` and `Runner closed.` at INFO. | Keep the banner and label each block "**Expected output** (trimmed):". | done |
+| F028 | 123–124 | "ADK omits auth headers from these dumps, so a DEBUG log will not leak your bearer token." | That is true only of ADK's own model dump (`google_llm.py:686-745` excludes `http_options`). Root-level DEBUG also turns on debug output from every other library. | "ADK leaves request headers out of its own model dumps. Other libraries' DEBUG output is not covered." | done |
+| F029 | 143–144 | "At WARNING and ERROR a healthy run is silent." | The rerun on jwd-dev-1 printed a two-line Python `UserWarning: [EXPERIMENTAL] … JSON_SCHEMA_FOR_FUNC_DECL` on stderr at every level. It also appears in the Cloud Logging reads in 1.4 and 1.5. | "At WARNING the framework logs nothing on a healthy run. Python may still print a `UserWarning` about an experimental ADK feature; that is not a log record." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F030 | 128 and 144–145 | "Ask about a city the tool does not know and you would see the one `WARNING` line the tool emits" | The page never runs this, and its heading promises "then ERROR", which no step shows. | Run it and show the line, or cite `demo_agent/agent.py:<line>`. Retitle the section "Turn it down to WARNING". | still real |
-| F031 | 19, 81 and 128 | "#### 1.1.1 Start at INFO (the default)" | House style uses `**Step N — …**` labels, not `####` headings. The page also lacks a Why you are here note and a closing handoff sentence. | "**Step 1 — Run at INFO (the default).**" and likewise for the other steps. Add the note, and end with "1.2 runs the same agent under `adk web`." | still real |
+| F030 | 128 and 144–145 | "Ask about a city the tool does not know and you would see the one `WARNING` line the tool emits" | The page never runs this, and its heading promises "then ERROR", which no step shows. | Run it and show the line, or cite `demo_agent/agent.py:<line>`. Retitle the section "Turn it down to WARNING". | done |
+| F031 | 19, 81 and 128 | "#### 1.1.1 Start at INFO (the default)" | House style uses `**Step N — …**` labels, not `####` headings. The page also lacks a Why you are here note and a closing handoff sentence. | "**Step 1 — Run at INFO (the default).**" and likewise for the other steps. Add the note, and end with "1.2 runs the same agent under `adk web`." | done |
 
 ### tutorial/part-1/1.2-adk-web.md
 
@@ -162,21 +162,21 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F032 | 37 | "### What the flag really does" | House style writes deep-dive headings as questions. | "### What does `--log_level` do?" | still real |
-| F033 | 12 | "**`--log_level`**" | Bold on a flag name is not house style. | Remove the bold. | still real |
+| F032 | 37 | "### What the flag really does" | House style writes deep-dive headings as questions. | "### What does `--log_level` do?" | done |
+| F033 | 12 | "**`--log_level`**" | Bold on a flag name is not house style. | Remove the bold. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F034 | 30–33 | "You get the same five-line lifecycle trail as the script … Same agent, same level, same logs." | The ADK CLI installs its own timestamped `file:line` format (shown in 1.3), so the lines are not the same. The page shows no output to compare. | "You get the same lifecycle events as the script, in the CLI's timestamped format (1.3 shows it)," and add a captured output block. | still real |
+| F034 | 30–33 | "You get the same five-line lifecycle trail as the script … Same agent, same level, same logs." | The ADK CLI installs its own timestamped `file:line` format (shown in 1.3), so the lines are not the same. The page shows no output to compare. | "You get the same lifecycle events as the script, in the CLI's timestamped format (1.3 shows it)," and add a captured output block. | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F035 | Whole page | No Step label, no Expected output, no handoff; the prompt fence at lines 26–28 has no lead-in | The page does not follow the house page structure, and the prompt block appears without introduction. | Add a Step label, an Expected output block, and a handoff sentence. Put "Send this in the chat box:" before the prompt fence. | still real |
-| F036 | 17–18 | "open the URL it prints, pick **demo_agent** from the app dropdown, and send the same question." | The reader must carry out three separate actions from one sentence. | Split into three bullets, one action each. | still real |
+| F035 | Whole page | No Step label, no Expected output, no handoff; the prompt fence at lines 26–28 has no lead-in | The page does not follow the house page structure, and the prompt block appears without introduction. | Add a Step label, an Expected output block, and a handoff sentence. Put "Send this in the chat box:" before the prompt fence. | done |
+| F036 | 17–18 | "open the URL it prints, pick **demo_agent** from the app dropdown, and send the same question." | The reader must carry out three separate actions from one sentence. | Split into three bullets, one action each. | done |
 
 ### tutorial/part-1/1.3-adk-api-server.md
 
@@ -184,28 +184,28 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F037 | 56 | "2026-09-03 12:51:24,435 - INFO - agent.py:40 - tool get_weather called…" | The `logger.info` call is now at `demo_agent/agent.py:54`. The rerun on jwd-dev-1 printed `agent.py:54`; 1.6 shows `:53` and 6.2 shows `:54`. | Recapture the output. | still real |
+| F037 | 56 | "2026-09-03 12:51:24,435 - INFO - agent.py:40 - tool get_weather called…" | The `logger.info` call is now at `demo_agent/agent.py:54`. The rerun on jwd-dev-1 printed `agent.py:54`; 1.6 shows `:53` and 6.2 shows `:54`. | Recapture the output. | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F038 | 27–33 and 82–88 | The curl commands put `-s -X POST` and `-H … -d` on shared lines | House style puts one flag per continuation line. | Put one flag per continuation line. | still real |
+| F038 | 27–33 and 82–88 | The curl commands put `-s -X POST` and `-H … -d` on shared lines | House style puts one flag per continuation line. | Put one flag per continuation line. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F039 | 68–75 | The `--log_level WARNING` step, with no mention of `LOG_LEVEL` in `demo_agent/.env` | `demo_agent/agent.py:29-33` applies `LOG_LEVEL` at import, over the flag. `deploy/deploy_agent_engine.sh` (1.6, Part 6) writes `LOG_LEVEL` into that file, and the working tree's file holds `LOG_LEVEL=info`. The rerun on jwd-dev-1 confirmed it: the WARNING server printed the full INFO trail, and with `export LOG_LEVEL=warning` the output matched the page. 1.6 explains this only after the reader has run 1.3. | Add before the step: "If `demo_agent/.env` sets `LOG_LEVEL`, remove that line first; the agent applies it over the flag." | still real |
-| F040 | 64 | "Two formats in one stream." | The tutorial's four-streams model already uses "stream" for something else, so the reader cannot map this sentence to it. | "Two formats in one terminal. The timestamped lines are streams 1 and 2, in the ADK CLI's format. The bare `INFO:` lines are stream 3, uvicorn's access log." | still real |
+| F039 | 68–75 | The `--log_level WARNING` step, with no mention of `LOG_LEVEL` in `demo_agent/.env` | `demo_agent/agent.py:29-33` applies `LOG_LEVEL` at import, over the flag. `deploy/deploy_agent_engine.sh` (1.6, Part 6) writes `LOG_LEVEL` into that file, and the working tree's file holds `LOG_LEVEL=info`. The rerun on jwd-dev-1 confirmed it: the WARNING server printed the full INFO trail, and with `export LOG_LEVEL=warning` the output matched the page. 1.6 explains this only after the reader has run 1.3. | Add before the step: "If `demo_agent/.env` sets `LOG_LEVEL`, remove that line first; the agent applies it over the flag." | done |
+| F040 | 64 | "Two formats in one stream." | The tutorial's four-streams model already uses "stream" for something else, so the reader cannot map this sentence to it. | "Two formats in one terminal. The timestamped lines are streams 1 and 2, in the ADK CLI's format. The bare `INFO:` lines are stream 3, uvicorn's access log." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F041 | 106–112 | The TIP about `adk run` | `adk run` has nothing to do with this step and distracts from it. | Move it to a deep dive titled "### Where do `adk run` logs go?". | still real |
-| F042 | 111 | `tail -F "${TMPDIR:-/tmp}/agents_log/agent.latest.log"` | House style puts a **Command:** label before each command block. | Add the **Command:** label. | still real |
-| F043 | Whole page | No Why you are here note, no handoff, no Deep dives | The page does not follow the house page structure. | Add the note and the handoff sentence. Add a Deep dives section (the `adk run` item above can go there). | still real |
+| F041 | 106–112 | The TIP about `adk run` | `adk run` has nothing to do with this step and distracts from it. | Move it to a deep dive titled "### Where do `adk run` logs go?". | done |
+| F042 | 111 | `tail -F "${TMPDIR:-/tmp}/agents_log/agent.latest.log"` | House style puts a **Command:** label before each command block. | Add the **Command:** label. | done |
+| F043 | Whole page | No Why you are here note, no handoff, no Deep dives | The page does not follow the house page structure. | Add the note and the handoff sentence. Add a Deep dives section (the `adk run` item above can go there). | done |
 
 ### tutorial/part-1/1.4-cloud-run.md
 
@@ -213,23 +213,23 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F044 | Whole page | The page runs 812 words against a 750 limit | The house limit is 750 words per page. | Trim the deploy-script deep dive. | still real |
-| F045 | 95, 101 and 128 | Deep-dive headings are statements ("### Why a Job and not a service") | House style writes deep-dive headings as questions. | Rename them as questions, for example "### Why a Job and not a service?". | still real |
+| F044 | Whole page | The page runs 812 words against a 750 limit | The house limit is 750 words per page. | Trim the deploy-script deep dive. | done |
+| F045 | 95, 101 and 128 | Deep-dive headings are statements ("### Why a Job and not a service") | House style writes deep-dive headings as questions. | Rename them as questions, for example "### Why a Job and not a service?". | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F046 | 71 | "The INFO execution shows the five-line lifecycle from 1.1.1." | The block shows three lines, ordered Sending, tool, Response, while 1.1.1 shows Sending, Response, tool. The rerun on jwd-dev-1 also logged two `httpx` request lines and `Closing runner…` / `Runner closed.`, and the lines were not batched. | "The INFO execution carries the lifecycle lines from 1.1.1 (trimmed)" | still real |
-| F047 | 148 | No teardown step | The page creates the Cloud Run Job `adk-logging-job` and never deletes it. | Add "**Step N — Tear down.**" with `gcloud run jobs delete adk-logging-job`, one flag per line. | still real |
+| F046 | 71 | "The INFO execution shows the five-line lifecycle from 1.1.1." | The block shows three lines, ordered Sending, tool, Response, while 1.1.1 shows Sending, Response, tool. The rerun on jwd-dev-1 also logged two `httpx` request lines and `Closing runner…` / `Runner closed.`, and the lines were not batched. | "The INFO execution carries the lifecycle lines from 1.1.1 (trimmed)" | done |
+| F047 | 148 | No teardown step | The page creates the Cloud Run Job `adk-logging-job` and never deletes it. | Add "**Step N — Tear down.**" with `gcloud run jobs delete adk-logging-job`, one flag per line. | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F048 | 74–76 | "The Cloud Run docs … say a line written to stderr is recorded as ERROR." | No docs page is cited. The only source found is ADK's own comment at `google/adk/models/lite_llm.py:3002`, which says "GCP". | Cite the docs URL, or write "ADK's own source comment (`lite_llm.py:3002`) says…". | still real |
-| F049 | 88–91 | "Cloud Run batches burst console output…" | No source is given, and the rerun on jwd-dev-1 showed lines were not batched. It is a caveat, not orientation, so it distracts from the step. | Delete the NOTE, or move it to a deep dive with a source. | still real |
-| F050 | 15–16 and 82–83 | "the answer is not what the common advice says" and "two-thirds of the way" | Neither phrase states the finding. | "Cloud Run files plain stderr lines as Default severity, not ERROR" and "Deploying with no logging changes still delivers your logs, and `LOG_LEVEL` still controls which ones appear." | still real |
+| F048 | 74–76 | "The Cloud Run docs … say a line written to stderr is recorded as ERROR." | No docs page is cited. The only source found is ADK's own comment at `google/adk/models/lite_llm.py:3002`, which says "GCP". | Cite the docs URL, or write "ADK's own source comment (`lite_llm.py:3002`) says…". | done |
+| F049 | 88–91 | "Cloud Run batches burst console output…" | No source is given, and the rerun on jwd-dev-1 showed lines were not batched. It is a caveat, not orientation, so it distracts from the step. | Delete the NOTE, or move it to a deep dive with a source. | done |
+| F050 | 15–16 and 82–83 | "the answer is not what the common advice says" and "two-thirds of the way" | Neither phrase states the finding. | "Cloud Run files plain stderr lines as Default severity, not ERROR" and "Deploying with no logging changes still delivers your logs, and `LOG_LEVEL` still controls which ones appear." | done |
 
 ### tutorial/part-1/1.5-http-server.md
 
@@ -237,25 +237,25 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F051 | 31 | "SERVICE=adk-logging-api-warn LOG_LEVEL=warning ./deploy/deploy_api.sh" | House style does not use inline environment prefixes. | Replace the inline prefixes with `export SERVICE=…`, `export LOG_LEVEL=warning`, the script call, then `unset SERVICE LOG_LEVEL`. | still real |
-| F052 | Whole page | The page runs 752 words | The house limit is 750 words per page. | Trim to 750 words or fewer. | still real |
-| F053 | 114 | "### How the server is composed" | House style writes deep-dive headings as questions. | "### How is the server composed?" | still real |
+| F051 | 31 | "SERVICE=adk-logging-api-warn LOG_LEVEL=warning ./deploy/deploy_api.sh" | House style does not use inline environment prefixes. | Replace the inline prefixes with `export SERVICE=…`, `export LOG_LEVEL=warning`, the script call, then `unset SERVICE LOG_LEVEL`. | done |
+| F052 | Whole page | The page runs 752 words | The house limit is 750 words per page. | Trim to 750 words or fewer. | done |
+| F053 | 114 | "### How the server is composed" | House style writes deep-dive headings as questions. | "### How is the server composed?" | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F054 | 16, 63 and 100 | "Four sources interleave in the INFO service" and "all of Part 1's streams in one place" | The four loggers are three streams. `agent.server` and `demo_agent.agent` are both stream 1 (your code). Stream 4 (OpenTelemetry) is Part 5. | "Three streams interleave: your code (`agent.server`, `demo_agent.agent`), `google_adk`, and uvicorn's access line. Stream 4 is Part 5." | still real |
-| F055 | 100 | "Four sources interleave in the INFO service" | The rerun on jwd-dev-1 also shows `INFO - httpx - HTTP Request: POST https://aiplatform.googleapis.com/…` twice per request. It comes from a library outside `google_adk`. | Name the `httpx` lines, and say they show that the root log level also reaches third-party libraries. | still real |
-| F056 | 152 | "`GET /healthz` for the readiness probe" | `deploy_api.sh` configures no probe, and Cloud Run's default startup probe only checks the TCP port. | "`GET /healthz`, a conventional health endpoint; Cloud Run's default probe only checks that the port is open." | still real |
-| F057 | 120–121 | "the module calls the same `configure(level)` as 1.1" | 1.1 never shows a `configure()`. `09_min_api.py:41-53` adds a `getattr` default and a root `setLevel`. | "makes the same two calls as 1.1 (`basicConfig` and `setLevel` on `google_adk`), plus a root `setLevel`." | still real |
-| F058 | 166 | No teardown step | The page deploys `adk-logging-api` and `adk-logging-api-warn` and never deletes them. | Add a teardown step that deletes both services. | still real |
+| F054 | 16, 63 and 100 | "Four sources interleave in the INFO service" and "all of Part 1's streams in one place" | The four loggers are three streams. `agent.server` and `demo_agent.agent` are both stream 1 (your code). Stream 4 (OpenTelemetry) is Part 5. | "Three streams interleave: your code (`agent.server`, `demo_agent.agent`), `google_adk`, and uvicorn's access line. Stream 4 is Part 5." | done |
+| F055 | 100 | "Four sources interleave in the INFO service" | The rerun on jwd-dev-1 also shows `INFO - httpx - HTTP Request: POST https://aiplatform.googleapis.com/…` twice per request. It comes from a library outside `google_adk`. | Name the `httpx` lines, and say they show that the root log level also reaches third-party libraries. | not applicable (with the `==2.8.0` pin, the 2026-10-02 rerun on jwd-gcp-demos logged no `httpx` lines) |
+| F056 | 152 | "`GET /healthz` for the readiness probe" | `deploy_api.sh` configures no probe, and Cloud Run's default startup probe only checks the TCP port. | "`GET /healthz`, a conventional health endpoint; Cloud Run's default probe only checks that the port is open." | done |
+| F057 | 120–121 | "the module calls the same `configure(level)` as 1.1" | 1.1 never shows a `configure()`. `09_min_api.py:41-53` adds a `getattr` default and a root `setLevel`. | "makes the same two calls as 1.1 (`basicConfig` and `setLevel` on `google_adk`), plus a root `setLevel`." | done |
+| F058 | 166 | No teardown step | The page deploys `adk-logging-api` and `adk-logging-api-warn` and never deletes them. | Add a teardown step that deletes both services. | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F059 | 93–97 | The WARNING block, with a bare `WARNING` row and a `favicon.ico` 404 | The page never explains either row. | Add "(the favicon 404 comes from opening the URL in a browser)", or recapture the output. | still real |
+| F059 | 93–97 | The WARNING block, with a bare `WARNING` row and a `favicon.ico` 404 | The page never explains either row. | Add "(the favicon 404 comes from opening the URL in a browser)", or recapture the output. | done |
 
 ### tutorial/part-1/1.6-agent-runtime.md
 
@@ -263,35 +263,35 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F060 | 212 | "about ninety lines" | `agent_runtime_byoc/main.py` has 107 lines. | "about a hundred lines" | still real |
+| F060 | 212 | "about ninety lines" | `agent_runtime_byoc/main.py` has 107 lines. | "about a hundred lines" | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F061 | 146 | "**Expected output** — your logs in **your** format:" | House style allows an em dash only in a Step label, and does not bold ordinary words. | "**Expected output** (BYOC, your format):". Remove the bold from "**your**". | still real |
+| F061 | 146 | "**Expected output** — your logs in **your** format:" | House style allows an em dash only in a Step label, and does not bold ordinary words. | "**Expected output** (BYOC, your format):". Remove the bold from "**your**". | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F062 | Whole page | "It deploys by one of two telemetry routes… `ENABLE_VIA_ENV=1`…" (line 237 onward) | The page runs 1,748 words against a 750 limit. It covers two deploys, two ways of querying them, two script walkthroughs, and a passage on turning on telemetry that Part 6 covers. | Split the native deploy and the BYOC deploy into 1.6 and 1.7. Replace the telemetry passage with "Part 6 covers telemetry." | still real |
-| F063 | 323–325 | "the same `stream_query` SDK call … fails on a BYOC handle with `AttributeError`" | `agent_runtime_byoc/deploy_byoc.py:28-46` registers `stream_query` and `async_stream_query` in `class_methods`, and the SDK builds handle methods from them (`_register_api_methods` in `vertexai/_genai/agent_engines.py`). The rerun on jwd-dev-1 used the page's curl path, so it did not exercise this. | Show the captured error, or write "This tutorial queries BYOC through the `/api` passthrough." | still real |
-| F064 | 187 | "`adk deploy agent_engine` **creates a new reasoning engine on every deploy**" | That happens only when `--agent_engine_id` is not passed. | "…on every deploy unless you pass `--agent_engine_id`." | still real |
-| F065 | 200 | "The deploy command has no env flag" | `--env_file` exists but is deprecated in 2.8.0. | "Its `--env_file` flag is deprecated, so it reads the agent folder's `.env`." | still real |
-| F066 | 245 | `--otel_to_cloud \                 # ENABLE_VIA_ENV=1 drops this…` | A `#` comment after a `\` continuation stops the shell from continuing the command. | Move the comments into prose and put one flag per line. | still real |
-| F067 | 114 | "Your `basicConfig` format did not take." | On a native deploy the agent calls `basicConfig` only when `LOG_LEVEL` is set, so this blames the wrong thing. | "The platform, not your code, sets the format here." | still real |
+| F062 | Whole page | "It deploys by one of two telemetry routes… `ENABLE_VIA_ENV=1`…" (line 237 onward) | The page runs 1,748 words against a 750 limit. It covers two deploys, two ways of querying them, two script walkthroughs, and a passage on turning on telemetry that Part 6 covers. | Split the native deploy and the BYOC deploy into 1.6 and 1.7. Replace the telemetry passage with "Part 6 covers telemetry." | done (split into 1.6 native and 1.7 BYOC) |
+| F063 | 323–325 | "the same `stream_query` SDK call … fails on a BYOC handle with `AttributeError`" | `agent_runtime_byoc/deploy_byoc.py:28-46` registers `stream_query` and `async_stream_query` in `class_methods`, and the SDK builds handle methods from them (`_register_api_methods` in `vertexai/_genai/agent_engines.py`). The rerun on jwd-dev-1 used the page's curl path, so it did not exercise this. | Show the captured error, or write "This tutorial queries BYOC through the `/api` passthrough." | done |
+| F064 | 187 | "`adk deploy agent_engine` **creates a new reasoning engine on every deploy**" | That happens only when `--agent_engine_id` is not passed. | "…on every deploy unless you pass `--agent_engine_id`." | done |
+| F065 | 200 | "The deploy command has no env flag" | `--env_file` exists but is deprecated in 2.8.0. | "Its `--env_file` flag is deprecated, so it reads the agent folder's `.env`." | done |
+| F066 | 245 | `--otel_to_cloud \                 # ENABLE_VIA_ENV=1 drops this…` | A `#` comment after a `\` continuation stops the shell from continuing the command. | Move the comments into prose and put one flag per line. | done |
+| F067 | 114 | "Your `basicConfig` format did not take." | On a native deploy the agent calls `basicConfig` only when `LOG_LEVEL` is set, so this blames the wrong thing. | "The platform, not your code, sets the format here." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F068 | 189–190 | "Delete old engines when you are done; both deploy scripts print teardown commands." | Teardown is mentioned but not given. The reader must find the commands in script output. | Add a teardown step with the delete commands. | still real |
-| F069 | 105–111, 148–154 and 261–269 | The two log tables for the native and BYOC deploys, and the BYOC setup traps list | On jwd-dev-1, neither engine's logs appeared under `resource.type="aiplatform.googleapis.com/ReasoningEngine"` in about 10 minutes, although both answered. The same filter returns September data in jwd-gcp-demos, so the cause is likely the project, but the page's two log tables could not be rechecked. The first BYOC registration also failed with "failed to start and cannot serve traffic", not the documented `FAILED_PRECONDITION`, and an unchanged rerun succeeded. | Add to the list of BYOC deploy problems: "On a fresh project the first registration can fail while new IAM grants propagate; rerun the script." | still real |
-| F070 | 73 and 120 | "**Test the native deploy (terminal 1).**" and "**Test the BYOC deploy (terminal 2).**" | House style uses `**Step N — …**` labels, and each command fence needs a **Command:** label. These have neither. | Rewrite as Step labels and add **Command:** before each fence. | still real |
-| F071 | 336–337 | "`agentplatform.Client` is the current name for what used to be `vertexai.Client`" | The code uses `vertexai.Client`, so the reader cannot tell which to use. | "The code uses `vertexai.Client`, which still works but warns; `agentplatform.Client` is its new name." | still real |
-| F072 | 108 | "agent.py:53" | The current code logs at `demo_agent/agent.py:54` (see 1.3). | Recapture the native output. | still real |
-| F073 | 186–190 | The WARNING callout, three sentences | House style allows one sentence in a WARNING callout. | "> `adk deploy agent_engine` can exit 0 when the deploy failed, so confirm with the query." | still real |
+| F068 | 189–190 | "Delete old engines when you are done; both deploy scripts print teardown commands." | Teardown is mentioned but not given. The reader must find the commands in script output. | Add a teardown step with the delete commands. | done |
+| F069 | 105–111, 148–154 and 261–269 | The two log tables for the native and BYOC deploys, and the BYOC setup traps list | On jwd-dev-1, neither engine's logs appeared under `resource.type="aiplatform.googleapis.com/ReasoningEngine"` in about 10 minutes, although both answered. The same filter returns September data in jwd-gcp-demos, so the cause is likely the project, but the page's two log tables could not be rechecked. The first BYOC registration also failed with "failed to start and cannot serve traffic", not the documented `FAILED_PRECONDITION`, and an unchanged rerun succeeded. | Add to the list of BYOC deploy problems: "On a fresh project the first registration can fail while new IAM grants propagate; rerun the script." | done (both engines' logs read back on jwd-gcp-demos; propagation trap added to 1.7) |
+| F070 | 73 and 120 | "**Test the native deploy (terminal 1).**" and "**Test the BYOC deploy (terminal 2).**" | House style uses `**Step N — …**` labels, and each command fence needs a **Command:** label. These have neither. | Rewrite as Step labels and add **Command:** before each fence. | done |
+| F071 | 336–337 | "`agentplatform.Client` is the current name for what used to be `vertexai.Client`" | The code uses `vertexai.Client`, so the reader cannot tell which to use. | "The code uses `vertexai.Client`, which still works but warns; `agentplatform.Client` is its new name." | done |
+| F072 | 108 | "agent.py:53" | The current code logs at `demo_agent/agent.py:54` (see 1.3). | Recapture the native output. | done |
+| F073 | 186–190 | The WARNING callout, three sentences | House style allows one sentence in a WARNING callout. | "> `adk deploy agent_engine` can exit 0 when the deploy failed, so confirm with the query." | done |
 
 ### tutorial/part-2/index.md
 
@@ -299,22 +299,22 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F074 | 27 | "**The flag worked. It does not reach this stream.**" | House style does not use bold for body sentences. | "The flag worked, but it does not reach this stream." Drop the bold. | still real |
-| F075 | 67 of tutorial/how-to-choose.md | The Date cell is empty in the how-to-choose run row matching this page | The captured lines on this page are dated 2026-08-31. | Fill it in with 2026-08-31. | still real |
+| F074 | 27 | "**The flag worked. It does not reach this stream.**" | House style does not use bold for body sentences. | "The flag worked, but it does not reach this stream." Drop the bold. | done |
+| F075 | 67 of tutorial/how-to-choose.md | The Date cell is empty in the how-to-choose run row matching this page | The captured lines on this page are dated 2026-08-31. | Fill it in with 2026-08-31. | still real (date goes in with the how-to-choose fixes) |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F076 | 19 | `CLI -->\|"setLevel()"\| S1["1 · your code"]` | The diagram shows `setLevel()` on the wrong stream. `setup_adk_logger` calls `logging.basicConfig(level=…)` on the root logger, which stream 1 inherits. It calls `setLevel` only on `google_adk`. | Label the stream 1 edge "root level" and keep "setLevel()" on the stream 2 edge. | still real |
-| F077 | 32 | "The fix, when you run your own server, is to hand uvicorn a logging config with a filter" | The reader just ran `adk api_server` in 1.3 and gets no answer for that case. | "`adk web` and `adk api_server` start uvicorn for you with its default config, so they give you no place to add the filter. Part 4 builds a server where you can." | still real |
+| F076 | 19 | `CLI -->\|"setLevel()"\| S1["1 · your code"]` | The diagram shows `setLevel()` on the wrong stream. `setup_adk_logger` calls `logging.basicConfig(level=…)` on the root logger, which stream 1 inherits. It calls `setLevel` only on `google_adk`. | Label the stream 1 edge "root level" and keep "setLevel()" on the stream 2 edge. | done |
+| F077 | 32 | "The fix, when you run your own server, is to hand uvicorn a logging config with a filter" | The reader just ran `adk api_server` in 1.3 and gets no answer for that case. | "`adk web` and `adk api_server` start uvicorn for you with its default config, so they give you no place to add the filter. Part 4 builds a server where you can." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F078 | 77–79 | "That is the move the rest of this tutorial builds on: …" | "The move" does not say what it is, and the page ends without the handoff sentence house style requires. | Replace the sentence with "Part 3 turns to stream 2 and the two ADK plugins that narrate each step." | still real |
-| F079 | 52–72 | The `02_tame_uvicorn.py` fence has no expected output | The four `curl` calls' client-side output is not described either. | Add "The `curl` calls print each response; the server terminal shows the access log." | still real |
+| F078 | 77–79 | "That is the move the rest of this tutorial builds on: …" | "The move" does not say what it is, and the page ends without the handoff sentence house style requires. | Replace the sentence with "Part 3 turns to stream 2 and the two ADK plugins that narrate each step." | done |
+| F079 | 52–72 | The `02_tame_uvicorn.py` fence has no expected output | The four `curl` calls' client-side output is not described either. | Add "The `curl` calls print each response; the server terminal shows the access log." | done |
 
 ### tutorial/part-3/index.md
 
@@ -940,13 +940,13 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F237 | requirements.txt 1; deploy_byoc.py 1 and 44; main.py 1 and 12; Dockerfile 1 | "tutorial 1.7", "Tutorial 1.7: naive Part 1 logging" (docstrings and deploy description) | The page is now 1.6, so these references are stale. | Change "1.7" to "1.6". | still real |
+| F237 | requirements.txt 1; deploy_byoc.py 1 and 44; main.py 1 and 12; Dockerfile 1 | "tutorial 1.7", "Tutorial 1.7: naive Part 1 logging" (docstrings and deploy description) | The page is now 1.6, so these references are stale. | Change "1.7" to "1.6". | done (after the 1.6/1.7 split the BYOC page is 1.7 again, so the files are right; `deploy_byoc.sh` updated to 1.7) |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F238 | deploy_byoc.sh 83 | the logs "land under reasoning_engine_stdout" | `basicConfig` writes to stderr, and 1.6 reads stderr for the native deploy. | Name the stream the BYOC run actually used, and state it in 1.6's BYOC table too. | still real |
+| F238 | deploy_byoc.sh 83 | the logs "land under reasoning_engine_stdout" | `basicConfig` writes to stderr, and 1.6 reads stderr for the native deploy. | Name the stream the BYOC run actually used, and state it in 1.6's BYOC table too. | done |
 
 ### deploy/deploy_agent_engine.sh
 
@@ -954,7 +954,7 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F239 | 41 | `printf "%s\n" "$_ORIG_ENV" > ./demo_agent/.env` (in the trap) | It recreates `demo_agent/.env` even if none existed. ADK then finds that file first and never loads the root `.env`, so a later `adk web` loses its model config. | Record `_HAD_ENV` before the write, then use `trap '[ -n "$_HAD_ENV" ] && printf … \|\| rm -f ./demo_agent/.env' EXIT`. | still real |
+| F239 | 41 | `printf "%s\n" "$_ORIG_ENV" > ./demo_agent/.env` (in the trap) | It recreates `demo_agent/.env` even if none existed. ADK then finds that file first and never loads the root `.env`, so a later `adk web` loses its model config. | Record `_HAD_ENV` before the write, then use `trap '[ -n "$_HAD_ENV" ] && printf … \|\| rm -f ./demo_agent/.env' EXIT`. | done |
 
 ### deploy/deploy_job.sh and deploy/deploy_api.sh
 
@@ -962,7 +962,7 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F240 | deploy_job.sh 53; deploy_api.sh 47 and 63 | `deploy_job.sh:53` "its records are written to stderr, which Cloud Run records as ERROR severity" and `deploy_api.sh:63` "…ERROR severity. That is the "before" the rest of the tutorial fixes." | 1.4 and 1.5 both find Default severity, so the scripts contradict the pages. `deploy_api.sh:47` also suggests a `severity>=ERROR` query that returns nothing. | Change both to "…which Cloud Run records with Default severity (see 1.4)." Replace the `severity>=ERROR` query in `deploy_api.sh:47`. | still real |
+| F240 | deploy_job.sh 53; deploy_api.sh 47 and 63 | `deploy_job.sh:53` "its records are written to stderr, which Cloud Run records as ERROR severity" and `deploy_api.sh:63` "…ERROR severity. That is the "before" the rest of the tutorial fixes." | 1.4 and 1.5 both find Default severity, so the scripts contradict the pages. `deploy_api.sh:47` also suggests a `severity>=ERROR` query that returns nothing. | Change both to "…which Cloud Run records with Default severity (see 1.4)." Replace the `severity>=ERROR` query in `deploy_api.sh:47`. | done |
 
 ### requirements.txt
 
@@ -1125,3 +1125,10 @@ The standards come from four sources, listed here in the order they win when two
 | Use em dashes only in step labels. | House style | 1.1, 1.4 to 1.6, 5.2 |
 | Answer first; don't close with a summary or hedge a confident conclusion. | Global writing rules | Part 2, 3.1, 4.4, 6.4 |
 | On the reference page, record what was verified and keep the "Not verified" table current. | House style | how-to-choose |
+
+
+## Found while fixing
+
+| ID | Where | Problem | Status |
+|---|---|---|---|
+| N01 | `requirements.txt`, 1.6 | A venv built from `requirements.txt` has no `vertexai`, so 1.6's `deploy_agent_engine.sh` fails with "Deploy failed: No module named 'vertexai'" and the SDK queries in 1.6 and Part 6 cannot run. | done (pinned `google-cloud-aiplatform[agent_engines,adk]==2.1.0`, the version the author's venv had) |

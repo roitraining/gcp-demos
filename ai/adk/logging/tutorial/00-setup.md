@@ -5,9 +5,11 @@
 
 # Setup
 
-All commands run from this folder. Do this once.
+All commands run from `ai/adk/logging/`. Do this once.
 
 ## Create the environment
+
+**Command:**
 
 ```bash
 cd ai/adk/logging
@@ -15,33 +17,66 @@ python3.13 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
 
+Check that the pinned ADK version installed.
+
+**Command:**
+
+```bash
+.venv/bin/python -c "import google.adk; print(google.adk.__version__)"
+```
+
+**Expected output:**
+
+```console
+2.8.0
+```
+
 ## Point the agent at a model
 
 Copy `.env.example` to `.env`. On GCP the simplest path is Vertex AI with your
-existing `gcloud` credentials:
+existing `gcloud` credentials, which is what `.env.example` already selects.
+
+**Command:**
 
 ```bash
 cp .env.example .env
-# edit .env to contain:
-#   GOOGLE_GENAI_USE_VERTEXAI=TRUE
-#   GOOGLE_CLOUD_PROJECT=your_project_id
-#   GOOGLE_CLOUD_LOCATION=global
-gcloud auth application-default login   # if you have not already
 ```
+
+Open `.env` and replace `your-project-id` with your project. `global` in
+`GOOGLE_CLOUD_LOCATION` is where the model runs; your Cloud Run services use
+`REGION` (`us-central1`) from the next section. If you have not set up
+Application Default Credentials yet, run:
+
+```bash
+gcloud auth application-default login
+```
+
+ADK's servers (`adk web`, `adk api_server`) load the first `.env` they find
+walking up from the agent folder, so with no `demo_agent/.env` they use this
+root `.env`. Do not create `demo_agent/.env`; the Agent Runtime deploy scripts
+write one temporarily and remove it afterward.
 
 ## Set your shell variables
 
 The cloud parts (1.4 onward) read your project, region, and a few derived
 values from shell variables. Set them once in a file you `source`.
 
+**Command:**
+
 ```bash
 cp env.sh.example env.sh
-# edit env.sh: set PROJECT_ID to your real project
+```
+
+Open `env.sh`, set `PROJECT_ID` to your project, then load it.
+
+**Command:**
+
+```bash
 source env.sh
 ```
 
-`env.sh` is gitignored. **`source env.sh` again in each new terminal.** The
-tutorial opens a second terminal in 1.6, and variables do not cross terminals.
+`env.sh` is gitignored. `source env.sh` again in each new terminal. The
+tutorial opens a second terminal in 1.3, and variables do not cross terminals.
 
 ## Meet the agent
 
@@ -70,12 +105,8 @@ flowchart TD
   root --> ga["google_adk<br/>(stream 2 · the framework group)"]
   root --> da["demo_agent.agent<br/>(stream 1 · your tool)"]
   root --> uv["uvicorn"]
-  root --> at["agent.telemetry<br/>(Part 4 · your namespace)"]
   ga --> gllm["google_adk...google_llm"]
-  ga --> gsess["google_adk...sessions"]
-  ga --> gplug["google_adk...plugin_manager"]
   uv --> ua["uvicorn.access<br/>(stream 3 · own handler)"]
-  uv --> ue["uvicorn.error"]
 ```
 
 *The Python logger tree. Setting a level on `google_adk` controls every child under it; `uvicorn.access` is a separate subtree.*

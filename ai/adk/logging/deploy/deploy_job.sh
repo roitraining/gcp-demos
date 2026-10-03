@@ -50,10 +50,9 @@ Done. The script's stdout/stderr went to Cloud Logging. Read it back:
     --project="$PROJECT_ID" --limit=30 --format='table(severity,textPayload)' --freshness=10m
 
 Watch the SEVERITY column. Because 01_log_levels.py uses logging.basicConfig,
-its records are written to stderr, which Cloud Run records as ERROR severity
-regardless of the record's own level (the print()ed answer, on stdout, comes
-through as Default/INFO). That mismatch is the problem Part 4 fixes with JSON
-on stdout and an explicit severity field.
+its records are written to stderr, which Cloud Run records with Default
+severity (see 1.4), whatever the record's own level. That mismatch is the
+problem Part 4 fixes with JSON on stdout and an explicit severity field.
 
   # Re-run at a different level without redeploying:
   gcloud run jobs execute "$JOB" --project="$PROJECT_ID" --region="$REGION" \\

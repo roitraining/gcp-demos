@@ -44,7 +44,7 @@ CODE=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$URL/chat" \
 if [[ "$CODE" != "200" ]]; then
   echo "Smoke test FAILED: POST /chat returned $CODE. Recent error:" >&2
   gcloud logging read \
-    "resource.type=\"cloud_run_revision\" resource.labels.service_name=\"$SERVICE\" severity>=ERROR" \
+    "resource.type=\"cloud_run_revision\" resource.labels.service_name=\"$SERVICE\" textPayload:\"Traceback\"" \
     --project="$PROJECT_ID" --limit=3 --format='value(textPayload)' --freshness=5m >&2
   exit 1
 fi
@@ -59,8 +59,8 @@ Send a turn:
 
 Read the raw logs. Note this server does NOTHING clever: plain-text lines from
 basicConfig, and uvicorn's default access lines. In Cloud Logging you will see
-all three streams, unstructured, and the basicConfig lines (on stderr) show as
-ERROR severity. That is the "before" the rest of the tutorial fixes.
+all three streams, unstructured, and the basicConfig lines (on stderr) carry
+Default severity (see 1.4). That is the "before" the rest of the tutorial fixes.
 
   gcloud run services logs read "$SERVICE" \\
     --project="$PROJECT_ID" --region="$REGION" --limit=40
