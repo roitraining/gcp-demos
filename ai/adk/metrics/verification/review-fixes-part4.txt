@@ -1,0 +1,17 @@
+Review fixes, Part 4 rerun. 2026-10-02, google-adk 2.8.0, bigquery-agent-analytics 0.5.2,
+project jwd-gcp-demos, dataset agent_analytics (US). Server: PORT=8380 examples/04_bq_plugin.py
+with env.sh sourced; HOST=http://localhost:8380. Every block on 4.1 to 4.4 and 4.6 recaptured.
+
+4.1 bq mk ok; baseline 10 all 200 (turn 1 33 s, then 4-6 s); 26 objects (table + 25 views);
+    10 event types, 120 rows.
+4.2 growing-context 10 all 200; the session filter (session with most LLM rows) returns its 20
+    calls in timestamp order: prompt 323 -> 1113, completion 14-16, cache columns NULL,
+    ttft_ms = total_ms. Rows: input 22093, completion 608, thinking 1037.
+    Metric side (job adk-metrics, scope gcp.vertex.agent, this server): input 22093, output 1645.
+4.3 multi-city 20 all 200; top session 4.2's (20 calls, 15530); one-turn sessions 914-932;
+    second row's prompt "What's the weather in London, Tokyo, and New York?".
+4.4 unknown-city 10 all 200; Atlantis trace 6228f79f57409eedd3189d9fc4a2f4b1 rendered
+    (TOOL_COMPLETED marked ok); evaluate --evaluator error_rate: 41 sessions, 41 passed.
+4.6 slowest INVOCATION_COMPLETED 32366 ms; Cloud Trace v1 read: invocation 33.04 s,
+    invoke_agent 6.18 s starting 26 s after invocation, model calls 2.59 s and 3.56 s,
+    tool 0.01 s. Server stopped; bq rm -f --recursive deleted the dataset; bq ls: Not found.

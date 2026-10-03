@@ -22,6 +22,8 @@ This review read an older copy of the tutorial. Every finding was rechecked agai
 
 The finding tables carry a Status column. The top 10 and the inconsistencies carry a status too.
 
+**Outcome, 2026-10-02:** of 181 findings, 19 were fixed on main, 161 are done on this branch, 1 is not applicable, and none were skipped. Run records are in `ai/adk/metrics/verification/review-fixes-part*.txt`.
+
 ## Verdict
 
 | Part | Demo results | State of the part |
@@ -33,7 +35,7 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 ### Top 10 findings
 
-1. **wrong.** `load/turns.sh` cannot send turns to the server in `examples/04_bq_plugin.py`. Every turn gets an HTTP 404 on pages 4.1 to 4.4, yet the script still ends by printing "good to go". *Status: fixed on main (the server has the session and `/run` routes); still real: `turns.sh` prints "good to go" after failed turns.*
+1. **wrong.** `load/turns.sh` cannot send turns to the server in `examples/04_bq_plugin.py`. Every turn gets an HTTP 404 on pages 4.1 to 4.4, yet the script still ends by printing "good to go". *Status: done: `turns.sh` now refuses "good to go" after failed turns.*
 2. **wrong.** Cloud Monitoring rejects `queries/dashboard.json` and `queries/alert-policy.json`, because both files use `//` as a JSON key to hold comments. This breaks pages 3.5 and 3.6. *Status: done.*
 3. **wrong.** The counter query on page 3.7 adds a `_total` suffix to the metric name. The Telemetry API never adds that suffix, so the query returns nothing. *Status: fixed on main.*
 4. **wrong.** Part 3 hardcodes `export PROJECT=jwd-gcp-demos` in 10 places, so a reader's own project is ignored. *Status: done.*
@@ -43,9 +45,9 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
    - page 4.3 reads `$.text` from the JSON, but the field is `$.text_summary`;
    - page 4.4 passes an invocation id to `get_trace()`, which expects a trace id;
    - page 4.4 uses the flags `--project` and `--dataset`, which do not exist.
-7. **wrong.** On page 4.4, when a tool returns `{"status": "error"}` without raising an exception, the BigQuery plugin records the call as successful. The SDK's error rate therefore reads 0, not the 0.5 the page promises. For the same reason, the `v_tool_error` view on page 4.2 stays empty. *Status: still real: page 4.4 now explains it, but the 4.2 deep dive still says `v_tool_error` gets rows.*
-8. **misleading.** Pages 1.1, 1.4, 2.2 and how-to-choose each say something different about the seventh metric, `gen_ai.invoke_workflow.duration`. In fact it appears only when an app uses ADK's newer `Workflow` primitive. *Status: still real.*
-9. **misleading.** On page 2.5, Agent Runtime exports metrics at most once every 5 seconds, so the points from the last turn are lost when the run ends. The rerun exported 9 of 10 turns. The page says points leave as each turn completes. *Status: still real.*
+7. **wrong.** On page 4.4, when a tool returns `{"status": "error"}` without raising an exception, the BigQuery plugin records the call as successful. The SDK's error rate therefore reads 0, not the 0.5 the page promises. For the same reason, the `v_tool_error` view on page 4.2 stays empty. *Status: done.*
+8. **misleading.** Pages 1.1, 1.4, 2.2 and how-to-choose each say something different about the seventh metric, `gen_ai.invoke_workflow.duration`. In fact it appears only when an app uses ADK's newer `Workflow` primitive. *Status: done.*
+9. **misleading.** On page 2.5, Agent Runtime exports metrics at most once every 5 seconds, so the points from the last turn are lost when the run ends. The rerun exported 9 of 10 turns. The page says points leave as each turn completes. *Status: done.*
 10. **wrong.** Two Part 3 queries cannot show what their pages claim. Page 3.2 reads histogram buckets that count everything since the server started, not just the current scenario. Page 3.4 asks the reader to watch a value change across the run but uses an instant query, which returns a single number. *Status: done.*
 
 ---
@@ -267,13 +269,13 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 11–31 | The "Why you are here" note runs three sentences, followed by three paragraphs | House style keeps the note to two sentences and the landing page to one paragraph. | Cut to two sentences and one paragraph. | still real |
+| 11–31 | The "Why you are here" note runs three sentences, followed by three paragraphs | House style keeps the note to two sentences and the landing page to one paragraph. | Cut to two sentences and one paragraph. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 29–31 | "The last two pages are reference: your own server, then non-Google backends." and "Each page runs the `baseline` scenario" | Page 2.4 (your own server) is a hands-on lesson, not reference. Only page 2.6 is reference. | "Pages 2.1 to 2.5 each run `baseline` through a different export route and read the results back. Page 2.6 is a reference page for non-Google backends." | still real |
+| 29–31 | "The last two pages are reference: your own server, then non-Google backends." and "Each page runs the `baseline` scenario" | Page 2.4 (your own server) is a hands-on lesson, not reference. Only page 2.6 is reference. | "Pages 2.1 to 2.5 each run `baseline` through a different export route and read the results back. Page 2.6 is a reference page for non-Google backends." | done |
 
 ### tutorial/part-2/2.1-adk-web-otel-to-cloud.md
 
@@ -281,31 +283,31 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 165–168 | "On Cloud Run and Agent Runtime the resource detector supplies both from the metadata server" | True for Cloud Run only. On Agent Runtime, ADK builds the resource from environment variables the runtime sets (`adk/telemetry/google_cloud.py:308-333`). | "On Cloud Run, the resource detector reads both from the metadata server. On Agent Runtime, ADK builds the resource from the runtime's environment variables." | still real |
-| 101 | `export START=$(date -u -v-30M +%s)` | The `-v` flag exists only in the macOS (BSD) version of `date`. The command fails on Linux and in Cloud Shell. | `export END=$(date -u +%s)` then `export START=$((END - 1800))` | still real |
+| 165–168 | "On Cloud Run and Agent Runtime the resource detector supplies both from the metadata server" | True for Cloud Run only. On Agent Runtime, ADK builds the resource from environment variables the runtime sets (`adk/telemetry/google_cloud.py:308-333`). | "On Cloud Run, the resource detector reads both from the metadata server. On Agent Runtime, ADK builds the resource from the runtime's environment variables." | done |
+| 101 | `export START=$(date -u -v-30M +%s)` | The `-v` flag exists only in the macOS (BSD) version of `date`. The command fails on Linux and in Cloud Shell. | `export END=$(date -u +%s)` then `export START=$((END - 1800))` | done |
 
 **Style**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| whole page | 923 words; the deep-dive heading is a statement, not a question | House style caps a page at 750 words and phrases deep-dive headings as questions. | Move the `plot_tokens.py` step into a deep dive, and retitle the deep dive "Why do metrics need `OTEL_RESOURCE_ATTRIBUTES`?" | still real |
+| whole page | 923 words; the deep-dive heading is a statement, not a question | House style caps a page at 750 words and phrases deep-dive headings as questions. | Move the `plot_tokens.py` step into a deep dive, and retitle the deep dive "Why do metrics need `OTEL_RESOURCE_ATTRIBUTES`?" | done: plot step moved to a deep dive, heading is a question; 750 words |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 31 | `adk web --otel_to_cloud ./` | In the rerun, a bare `adk` ran the copy installed in a different virtual environment (`ai/adk/.venv`), not this tutorial's. | Use `.venv/bin/adk`, as pages 2.3 and 2.5 do. | still real |
-| 95–96, 110 | The PromQL response is written to `out/metrics.json` | Part 1 already uses that file for the metric reader's output, so this step overwrites it. | Write to `out/tokens.json`, and update `examples/plot_tokens.py` to read that file. | still real |
+| 31 | `adk web --otel_to_cloud ./` | In the rerun, a bare `adk` ran the copy installed in a different virtual environment (`ai/adk/.venv`), not this tutorial's. | Use `.venv/bin/adk`, as pages 2.3 and 2.5 do. | done |
+| 95–96, 110 | The PromQL response is written to `out/metrics.json` | Part 1 already uses that file for the metric reader's output, so this step overwrites it. | Write to `out/tokens.json`, and update `examples/plot_tokens.py` to read that file. | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 203–206 | "you get no new points … discards the process totals" | The deep dive states what happens during an export outage but never shows it. | Show the query and its result. The rerun saw the count stay at 20 after 5 turns sent during the outage. | still real |
-| 75–94 | "two front doors"; "**Door 1 — …**", "**Door 2 — …**"; "That gap is the whole point." | "Front doors" is a metaphor for two ways to query the data. "That gap is the whole point" assumes the reader already knows what the gap is. | Label them "**Option A, Metrics Explorer.**" and "**Option B, PromQL API.**", and cut the "gap" sentence. | still real |
-| 79–82 | Directions for Option A written as a paragraph | Clicking through a console is easier to follow one action at a time. | Make it a bulleted list, one action per bullet. | still real |
-| 36–37, 168 | "the logging tutorial documents in its 5.2" | The reader may never have read the logging tutorial, and there is no link. | Link the page, or state the rule in one sentence here. | still real |
-| 190–196 | The outage output ends with "good to go — the series are in Cloud Monitoring" | The load script prints this even while Cloud Monitoring rejects every batch, so the message is false here. The page doesn't point that out. | Call it out as a trap: the script reports success even though every batch was rejected. | still real: the page no longer shows the line, but `turns.sh` still prints it during an outage |
+| 203–206 | "you get no new points … discards the process totals" | The deep dive states what happens during an export outage but never shows it. | Show the query and its result. The rerun saw the count stay at 20 after 5 turns sent during the outage. | done: deep dive shows the job-filtered count query and its real result (20) |
+| 75–94 | "two front doors"; "**Door 1 — …**", "**Door 2 — …**"; "That gap is the whole point." | "Front doors" is a metaphor for two ways to query the data. "That gap is the whole point" assumes the reader already knows what the gap is. | Label them "**Option A, Metrics Explorer.**" and "**Option B, PromQL API.**", and cut the "gap" sentence. | done |
+| 79–82 | Directions for Option A written as a paragraph | Clicking through a console is easier to follow one action at a time. | Make it a bulleted list, one action per bullet. | done |
+| 36–37, 168 | "the logging tutorial documents in its 5.2" | The reader may never have read the logging tutorial, and there is no link. | Link the page, or state the rule in one sentence here. | done |
+| 190–196 | The outage output ends with "good to go — the series are in Cloud Monitoring" | The load script prints this even while Cloud Monitoring rejects every batch, so the message is false here. The page doesn't point that out. | Call it out as a trap: the script reports success even though every batch was rejected. | done: a WARNING after the outage output; `turns.sh` now also refuses "good to go" when a turn fails |
 
 ### tutorial/part-2/2.2-the-metric-catalog.md
 
@@ -313,29 +315,29 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 45, 60–65 | `prometheus.googleapis.com/gen_ai.invoke_workflow.duration/histogram` … "present only because an earlier workflow run (1.5) created its descriptor" | Part 1 never exports anything to Cloud Monitoring, so page 1.5 can't have created this descriptor. The rerun on a fresh project listed six descriptors, not seven. | Show six descriptors, and add: "A seventh appears only if something in this project ran the `Workflow` primitive." | still real |
-| 118–119 | The rows for the two `client.*` metrics list `gen_ai.response.model` and `error.type` as labels | The real labels are `gen_ai.system`, `gen_ai.request.model`, `gen_ai.operation.name` and `gen_ai.token.type` (`opentelemetry/instrumentation/google_genai/generate_content.py:946-973`). The rerun saw exactly those four. | Replace the label list with those four. | still real |
-| 122–123 | The `inference_calls` and `tool_calls` rows | These rows have two cells in a three-column table, so the table renders incorrectly. | `\| …/inference_calls/histogram \| gcp.vertex.agent \| gen_ai.agent.name \|` | still real |
+| 45, 60–65 | `prometheus.googleapis.com/gen_ai.invoke_workflow.duration/histogram` … "present only because an earlier workflow run (1.5) created its descriptor" | Part 1 never exports anything to Cloud Monitoring, so page 1.5 can't have created this descriptor. The rerun on a fresh project listed six descriptors, not seven. | Show six descriptors, and add: "A seventh appears only if something in this project ran the `Workflow` primitive." | done, differently: kept the captured seven descriptors (another app on the capture project ran `Workflow`) and rewrote the explanation; a fresh project lists six |
+| 118–119 | The rows for the two `client.*` metrics list `gen_ai.response.model` and `error.type` as labels | The real labels are `gen_ai.system`, `gen_ai.request.model`, `gen_ai.operation.name` and `gen_ai.token.type` (`opentelemetry/instrumentation/google_genai/generate_content.py:946-973`). The rerun saw exactly those four. | Replace the label list with those four. | done |
+| 122–123 | The `inference_calls` and `tool_calls` rows | These rows have two cells in a three-column table, so the table renders incorrectly. | `\| …/inference_calls/histogram \| gcp.vertex.agent \| gen_ai.agent.name \|` | done |
 
 **Style**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 56, 68, 111, 128, 141 | Em dashes with spaces around them; a sentence fragment; links `[3.4]` and `[3.7]` that both open `part-3/index.md` | House style avoids em dashes outside step labels and needs full sentences. The links should open the pages they name. | Use commas, write the fragment as a full sentence, and point the links at pages 3.4 and 3.7. | still real: the 3.4 link is fixed; spaced em dashes and the 3.7 link remain |
+| 56, 68, 111, 128, 141 | Em dashes with spaces around them; a sentence fragment; links `[3.4]` and `[3.7]` that both open `part-3/index.md` | House style avoids em dashes outside step labels and needs full sentences. The links should open the pages they name. | Use commas, write the fragment as a full sentence, and point the links at pages 3.4 and 3.7. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 125–128 | "Every descriptor also carries `otel_scope_name` … (`gcp.vertex.agent`)" | Not every descriptor has that value. The two `client.*` metrics carry `opentelemetry.instrumentation.google_genai`. | "…`gcp.vertex.agent` for ADK's own metrics, and `opentelemetry.instrumentation.google_genai` for the two `client.*` metrics." | still real |
-| 107–109 | "the client metrics come from the genai instrumentation scope, not ADK's meter" | This depends on how the agent is served. It holds when the genai instrumentation is active, as under `adk web` and `adk api_server` (`adk/cli/api_server.py:736-745`). Page 2.4's server records them under `gcp.vertex.agent`. | Add: "when the genai instrumentation is active, as under `adk web` and `adk api_server`. Page 2.4's server records them under `gcp.vertex.agent`." | still real |
+| 125–128 | "Every descriptor also carries `otel_scope_name` … (`gcp.vertex.agent`)" | Not every descriptor has that value. The two `client.*` metrics carry `opentelemetry.instrumentation.google_genai`. | "…`gcp.vertex.agent` for ADK's own metrics, and `opentelemetry.instrumentation.google_genai` for the two `client.*` metrics." | done |
+| 107–109 | "the client metrics come from the genai instrumentation scope, not ADK's meter" | This depends on how the agent is served. It holds when the genai instrumentation is active, as under `adk web` and `adk api_server` (`adk/cli/api_server.py:736-745`). Page 2.4's server records them under `gcp.vertex.agent`. | Add: "when the genai instrumentation is active, as under `adk web` and `adk api_server`. Page 2.4's server records them under `gcp.vertex.agent`." | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 15–16 | "No query language yet." | The page then runs a PromQL query. | "One PromQL lookup. Part 3 teaches the language." | still real |
-| 20 | "The PromQL proxy has no `/series` endpoint" | The Cloud Monitoring docs say `/api/v1/series` supports GET requests, which contradicts this. | Check the claim. If it doesn't hold, reword to: "`metricDescriptors.list` lists which metrics exist without querying their values." | still real |
+| 15–16 | "No query language yet." | The page then runs a PromQL query. | "One PromQL lookup. Part 3 teaches the language." | done |
+| 20 | "The PromQL proxy has no `/series` endpoint" | The Cloud Monitoring docs say `/api/v1/series` supports GET requests, which contradicts this. | Check the claim. If it doesn't hold, reword to: "`metricDescriptors.list` lists which metrics exist without querying their values." | done: `/api/v1/series` does work (verified); claim replaced with the review's wording |
 
 ### tutorial/part-2/2.3-api-server-and-cloud-run.md
 
@@ -343,29 +345,29 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 127–139 | The cleanup step deletes only the Cloud Run service | `adk deploy` also leaves a 133 MB container image in Artifact Registry and a source archive in `gs://run-sources-<project>-<region>`. The reader keeps paying to store both. | Add commands that delete the image and the source archive. | still real |
+| 127–139 | The cleanup step deletes only the Cloud Run service | `adk deploy` also leaves a 133 MB container image in Artifact Registry and a source archive in `gs://run-sources-<project>-<region>`. The reader keeps paying to store both. | Add commands that delete the image and the source archive. | done: teardown deletes the image and the source archive; verified on a dev project |
 
 **Style**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 68–75 | The expected output leaves out the "waiting 10s" and "good to go" lines | The reader sees lines the page doesn't show. | Show them. | still real |
+| 68–75 | The expected output leaves out the "waiting 10s" and "good to go" lines | The reader sees lines the page doesn't show. | Show them. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 118–119 | "A deployed ADK service needs the flag and nothing else" | It also needs the exporter packages in `requirements.txt`; without them the service crashes on startup. | "A deployed ADK service needs the flag and the exporter packages in its requirements, but no `OTEL_RESOURCE_ATTRIBUTES`." | still real |
-| 113–117 | "the `400` that hit the laptop in 2.1" | The 400 error appeared only in page 2.1's deep dive. A reader who skipped it won't recognize the reference. | Say it occurred in page 2.1's deep dive, and link to it. | still real |
-| 101–111 | `model calls/min ~10`, `turns/min ~5` shown in a console block | These look like captured output, but the rerun peaked at about 8 model calls, 4 turns and 4 tool calls per minute. | Capture real values, or label the block illustrative. | still real |
+| 118–119 | "A deployed ADK service needs the flag and nothing else" | It also needs the exporter packages in `requirements.txt`; without them the service crashes on startup. | "A deployed ADK service needs the flag and the exporter packages in its requirements, but no `OTEL_RESOURCE_ATTRIBUTES`." | done |
+| 113–117 | "the `400` that hit the laptop in 2.1" | The 400 error appeared only in page 2.1's deep dive. A reader who skipped it won't recognize the reference. | Say it occurred in page 2.1's deep dive, and link to it. | done |
+| 101–111 | `model calls/min ~10`, `turns/min ~5` shown in a console block | These look like captured output, but the rerun peaked at about 8 model calls, 4 turns and 4 tool calls per minute. | Capture real values, or label the block illustrative. | done: labeled illustrative, with peaks read through the API on a dev project (8, 4, 4) |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 36, 59 | `$PROJECT_ID` and `$REGION` used without `source env.sh` | A reader in a new shell has neither variable set, so the commands fail or target the wrong project. | Add `source env.sh` to Step 1. | still real |
-| 29–51 | Three side issues in the main body: the crash when exporter requirements are missing, `GOOGLE_CLOUD_LOCATION`, and "exits 0 on a failed build" | These are troubleshooting details that interrupt the main path. | Move them to Deep dives. The exit-code claim is confirmed at `adk/cli/cli_tools_click.py:2457`; cite it there. | still real |
-| 50–53, 110 | "The curl in Step 2 is the real check"; "create a session"; "2:1:1 profile" | Step 2 runs `turns.sh`, not a bare curl. The reader never creates a session by hand. "2:1:1 profile" is a compressed label. | Name `turns.sh`, drop "create a session", and write "two model calls and one tool call per turn". | still real |
+| 36, 59 | `$PROJECT_ID` and `$REGION` used without `source env.sh` | A reader in a new shell has neither variable set, so the commands fail or target the wrong project. | Add `source env.sh` to Step 1. | done |
+| 29–51 | Three side issues in the main body: the crash when exporter requirements are missing, `GOOGLE_CLOUD_LOCATION`, and "exits 0 on a failed build" | These are troubleshooting details that interrupt the main path. | Move them to Deep dives. The exit-code claim is confirmed at `adk/cli/cli_tools_click.py:2457`; cite it there. | done |
+| 50–53, 110 | "The curl in Step 2 is the real check"; "create a session"; "2:1:1 profile" | Step 2 runs `turns.sh`, not a bare curl. The reader never creates a session by hand. "2:1:1 profile" is a compressed label. | Name `turns.sh`, drop "create a session", and write "two model calls and one tool call per turn". | done |
 
 ### tutorial/part-2/2.4-your-own-server.md
 
@@ -373,31 +375,31 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 13–14 | "the metrics are recorded but never leave the process" | With no `MeterProvider` installed, OpenTelemetry records nothing at all. | "…nothing installs a `MeterProvider`, so the metrics are never recorded." | still real |
-| 150–160 | "`get_gcp_exporters` builds the resource by merging two detectors" | `get_gcp_exporters` builds exporters only (`adk/telemetry/google_cloud.py:80-148`). The resource merge happens in `get_gcp_resource` (`:335-352`), which only the CLI calls (`adk/cli/api_server.py:712`). | Attribute the merge to `get_gcp_resource`, and say only the CLI calls it. | still real |
-| 37 | `#why-the-script-needs-gcpprojectid` | The link goes nowhere; the heading's real anchor is `#why-the-script-needs-gcpproject_id`. | Fix the anchor. Better, retitle the heading as a question, "Why does a script need `gcp.project_id`?", and link to that. | still real |
+| 13–14 | "the metrics are recorded but never leave the process" | With no `MeterProvider` installed, OpenTelemetry records nothing at all. | "…nothing installs a `MeterProvider`, so the metrics are never recorded." | done |
+| 150–160 | "`get_gcp_exporters` builds the resource by merging two detectors" | `get_gcp_exporters` builds exporters only (`adk/telemetry/google_cloud.py:80-148`). The resource merge happens in `get_gcp_resource` (`:335-352`), which only the CLI calls (`adk/cli/api_server.py:712`). | Attribute the merge to `get_gcp_resource`, and say only the CLI calls it. | done |
+| 37 | `#why-the-script-needs-gcpprojectid` | The link goes nowhere; the heading's real anchor is `#why-the-script-needs-gcpproject_id`. | Fix the anchor. Better, retitle the heading as a question, "Why does a script need `gcp.project_id`?", and link to that. | done |
 
 **Style**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| `examples/03_metrics_server.py`, around lines 72–75 | The comment "else fall back" | The code has no fallback, so the comment describes behavior that doesn't exist. | Remove the comment. | still real |
+| `examples/03_metrics_server.py`, around lines 72–75 | The comment "else fall back" | The code has no fallback, so the comment describes behavior that doesn't exist. | Remove the comment. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 23–29, 39–48 | The snippet `maybe_set_otel_providers([hooks])`, and Step 1's `export OTEL_RESOURCE_ATTRIBUTES=…,gcp.project_id=…` | The script really passes `otel_resource=Resource.create({"gcp.project_id": …})`, so the snippet doesn't match the code, and the export is unnecessary. | Show the call the script makes, and remove the export. | still real |
-| 94–95, 119–122 | "`job="adk-metrics"` … so only your own server appears" | Page 2.1's `adk web` used the same service name, instance and location, so both servers write to the same series. In the rerun they merged into one series, and the counter reset when the server restarted. | Give this server a distinct `OTEL_SERVICE_NAME`, or tell the reader to stop page 2.1's server and query a time window after it stopped. | still real |
-| 119 | "exports the same six metrics as `adk web`" | The names match, but here the two `client.*` metrics carry ADK's labels and scope instead of the genai instrumentation's. | Say that the names match but the `client.*` labels differ. | still real |
+| 23–29, 39–48 | The snippet `maybe_set_otel_providers([hooks])`, and Step 1's `export OTEL_RESOURCE_ATTRIBUTES=…,gcp.project_id=…` | The script really passes `otel_resource=Resource.create({"gcp.project_id": …})`, so the snippet doesn't match the code, and the export is unnecessary. | Show the call the script makes, and remove the export. | done |
+| 94–95, 119–122 | "`job="adk-metrics"` … so only your own server appears" | Page 2.1's `adk web` used the same service name, instance and location, so both servers write to the same series. In the rerun they merged into one series, and the counter reset when the server restarted. | Give this server a distinct `OTEL_SERVICE_NAME`, or tell the reader to stop page 2.1's server and query a time window after it stopped. | done: the page sets `OTEL_SERVICE_NAME=adk-metrics-server` and filters on it |
+| 119 | "exports the same six metrics as `adk web`" | The names match, but here the two `client.*` metrics carry ADK's labels and scope instead of the genai instrumentation's. | Say that the names match but the `client.*` labels differ. | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 59–66 | A curl loop timed with `date +%s.%N` | `%N` (nanoseconds) works only in the GNU version of `date`; on macOS it prints a literal "N". | Use `curl -w '%{http_code} %{time_total}s\n'`, or add a `/chat` mode to `turns.sh`. | still real |
-| 32–34 | "every `OTEL_*` variable can live in `.env` here" | A variable already exported in the shell takes precedence over `.env`, which surprises readers. | Add: "If the variable is already exported in your shell, the shell value wins." | still real |
-| 18, 152 | A reference to the logging tutorial with no link; "Agent Engine" | The reader can't follow the reference. The tutorial calls the product "Agent Runtime" everywhere else. | Add the link, and write "Agent Runtime" in prose. | still real |
+| 59–66 | A curl loop timed with `date +%s.%N` | `%N` (nanoseconds) works only in the GNU version of `date`; on macOS it prints a literal "N". | Use `curl -w '%{http_code} %{time_total}s\n'`, or add a `/chat` mode to `turns.sh`. | done: the loop times with `curl -w`; `load/turns.sh` changed the same way |
+| 32–34 | "every `OTEL_*` variable can live in `.env` here" | A variable already exported in the shell takes precedence over `.env`, which surprises readers. | Add: "If the variable is already exported in your shell, the shell value wins." | done |
+| 18, 152 | A reference to the logging tutorial with no link; "Agent Engine" | The reader can't follow the reference. The tutorial calls the product "Agent Runtime" everywhere else. | Add the link, and write "Agent Runtime" in prose. | done |
 
 ### tutorial/part-2/2.5-agent-runtime.md
 
@@ -405,30 +407,30 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 67, 72–74, 102 | Line 67: "Note the reasoning-engine id … the next step needs it". Lines 72–74: "you never copy the reasoning-engine id". Line 102: "paste the id Step 4 printed" | The three lines contradict each other about whether the reader copies the id. | Pick one flow: delete line 67, and have Step 4 `export ENGINE_ID` from its own output. | still real |
-| 128 | "`instance` is a runtime-supplied id" | ADK generates the id itself, as `{uuid4().hex}-{pid}` (`adk/telemetry/google_cloud.py:317`). | "`instance` is an id ADK generates for each process" | still real |
-| 181 | "(`google/adk/telemetry/google_cloud.py:244`)" | The code is elsewhere. | `adk/telemetry/_agent_engine.py:241`, called from `adk/telemetry/google_cloud.py:253` | still real |
+| 67, 72–74, 102 | Line 67: "Note the reasoning-engine id … the next step needs it". Lines 72–74: "you never copy the reasoning-engine id". Line 102: "paste the id Step 4 printed" | The three lines contradict each other about whether the reader copies the id. | Pick one flow: delete line 67, and have Step 4 `export ENGINE_ID` from its own output. | done |
+| 128 | "`instance` is a runtime-supplied id" | ADK generates the id itself, as `{uuid4().hex}-{pid}` (`adk/telemetry/google_cloud.py:317`). | "`instance` is an id ADK generates for each process" | done |
+| 181 | "(`google/adk/telemetry/google_cloud.py:244`)" | The code is elsewhere. | `adk/telemetry/_agent_engine.py:241`, called from `adk/telemetry/google_cloud.py:253` | done |
 
 **Style**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| whole page | 919 words; Step 6 teaches a second lesson | House style caps pages at 750 words and one lesson each. Step 6 (Agent Runtime's own service metrics) is a separate topic. | Move Step 6 to a deep dive. | still real |
+| whole page | 919 words; Step 6 teaches a second lesson | House style caps pages at 750 words and one lesson each. Step 6 (Agent Runtime's own service metrics) is a separate topic. | Move Step 6 to a deep dive. | done: Step 6 moved to a deep dive; 749 words |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 186–190 | "the points leave as the turns complete, not on a clock" | The exporter waits at least 5 seconds between exports (`_agent_engine_metric_exporter.py:162-190, 313-323`). Points recorded in the last 5 seconds before the run ends are never sent. The rerun exported 9 of 10 turns. | Describe the 5-second minimum and the lost last turn. Fix the docstring in `load/ae_turns.py` (lines 8–10), which makes the same claim. | still real |
-| 144–153 | `request_count` "tracks your turns", with value `12` and labels `reasoning_engine_id` and `location` | The rerun read 20, because the metric also counts `create_session` calls. The metric took about 8 minutes to appear, and it carried the labels `response_code` and `response_code_class`. | Recapture from one run, and tell the reader to expect a delay of several minutes. | still real |
-| 177 | "Every other route installs a `PeriodicExportingMetricReader` that flushes on a 5 s daemon thread" | The OTLP route configured through environment variables exports every 60 seconds, not 5. | "Every other Google route…" | still real |
+| 186–190 | "the points leave as the turns complete, not on a clock" | The exporter waits at least 5 seconds between exports (`_agent_engine_metric_exporter.py:162-190, 313-323`). Points recorded in the last 5 seconds before the run ends are never sent. The rerun exported 9 of 10 turns. | Describe the 5-second minimum and the lost last turn. Fix the docstring in `load/ae_turns.py` (lines 8–10), which makes the same claim. | done: deep dive and `load/ae_turns.py` docstring describe the 5 s floor; this capture exported 10 of 10 |
+| 144–153 | `request_count` "tracks your turns", with value `12` and labels `reasoning_engine_id` and `location` | The rerun read 20, because the metric also counts `create_session` calls. The metric took about 8 minutes to appear, and it carried the labels `response_code` and `response_code_class`. | Recapture from one run, and tell the reader to expect a delay of several minutes. | done: recaptured (20 requests, labels `response_code`, about 4 min delay), in a deep dive |
+| 177 | "Every other route installs a `PeriodicExportingMetricReader` that flushes on a 5 s daemon thread" | The OTLP route configured through environment variables exports every 60 seconds, not 5. | "Every other Google route…" | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 35–49 | Step 2 has no command | It's labeled as a step, but the reader has nothing to do; it explains how the demo agent already handles the model's region. | Remove the step label. Give the explanation one sentence in the page body and move the detail to a deep dive. | still real |
-| 22–79 | `$PROJECT_ID` and `$REGION` used without `source env.sh`; Step 3 has no expected output or time estimate | A reader in a new shell lacks the variables. A deploy that runs for minutes with no expected output looks stuck. | Add `source env.sh`, show the line that means the deploy finished, and say "takes several minutes". | still real |
+| 35–49 | Step 2 has no command | It's labeled as a step, but the reader has nothing to do; it explains how the demo agent already handles the model's region. | Remove the step label. Give the explanation one sentence in the page body and move the detail to a deep dive. | done: step removed; the explanation is a deep dive |
+| 22–79 | `$PROJECT_ID` and `$REGION` used without `source env.sh`; Step 3 has no expected output or time estimate | A reader in a new shell lacks the variables. A deploy that runs for minutes with no expected output looks stuck. | Add `source env.sh`, show the line that means the deploy finished, and say "takes several minutes". | done |
 
 ### tutorial/part-2/2.6-other-backends.md
 
@@ -436,15 +438,15 @@ The finding tables carry a Status column. The top 10 and the inconsistencies car
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 19–20 | "You do not touch the flag or the code, only the endpoint variables." | The reader does change the flag: `--otel_to_cloud` must be removed (or, in code, the Google Cloud hooks), or both routes run. | "Drop `--otel_to_cloud` (or the Google Cloud hooks in code) and set the endpoint variables." | still real |
-| 36 | "Two limits carry over from the Google path" | The two limits are not inherited from the Google path; they belong to the OTLP exporter. | "Two limits apply:" | still real |
+| 19–20 | "You do not touch the flag or the code, only the endpoint variables." | The reader does change the flag: `--otel_to_cloud` must be removed (or, in code, the Google Cloud hooks), or both routes run. | "Drop `--otel_to_cloud` (or the Google Cloud hooks in code) and set the endpoint variables." | done |
+| 36 | "Two limits carry over from the Google path" | The two limits are not inherited from the Google path; they belong to the OTLP exporter. | "Two limits apply:" | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 24–46 | Claims about exporter behavior with no source | The reader can't check them. The fact checker confirmed both claims. | Cite `adk/telemetry/setup.py:124-147` (the OTLP exporter) and `:156-159` (only the http/protobuf protocol is supported). | still real |
-| 59–74 | "SigNoz, as one documented example", with no link; a code block nobody ran | The reader can't find the docs, and the block looks like captured output. The rerun skipped it because no backend endpoint was available. | Link the SigNoz docs, and label the block illustrative. | still real |
+| 24–46 | Claims about exporter behavior with no source | The reader can't check them. The fact checker confirmed both claims. | Cite `adk/telemetry/setup.py:124-147` (the OTLP exporter) and `:156-159` (only the http/protobuf protocol is supported). | done |
+| 59–74 | "SigNoz, as one documented example", with no link; a code block nobody ran | The reader can't find the docs, and the block looks like captured output. The rerun skipped it because no backend endpoint was available. | Link the SigNoz docs, and label the block illustrative. | done: SigNoz docs linked; the block is labeled illustrative |
 
 ### tutorial/part-3/index.md
 
@@ -618,14 +620,14 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 7, and every Part 4 nav line and subtitle | "Consume — rows in BigQuery" | Same em-dash issue as Part 3. | "Consume: rows in BigQuery" | still real |
-| 21–34 | No link to the Scenarios page | This tutorial's convention is that every part landing page links to Scenarios. | Add the link. | still real |
+| 7, and every Part 4 nav line and subtitle | "Consume — rows in BigQuery" | Same em-dash issue as Part 3. | "Consume: rows in BigQuery" | done |
+| 21–34 | No link to the Scenarios page | This tutorial's convention is that every part landing page links to Scenarios. | Add the link. | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 17 | "traded detail for cheapness" | Compressed: the reader has to infer what detail and whose cheapness. | "gave up per-event detail to keep storage cheap" | still real |
+| 17 | "traded detail for cheapness" | Compressed: the reader has to infer what detail and whose cheapness. | "gave up per-event detail to keep storage cheap" | done |
 
 ### Findings that apply to pages 4.1 to 4.4
 
@@ -634,13 +636,13 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 | Where | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
 | 4.1 lines 53–62; 4.2 line 24; 4.3 line 25; 4.4 line 23 | `.venv/bin/python examples/04_bq_plugin.py`, then `load/turns.sh baseline 10` | The two don't fit together. `04_bq_plugin.py` serves only `POST /chat` on port 8080, with a fixed `user_id="u1"` and a new session per call. `turns.sh` sends requests to `/apps/…/sessions` and `/run` on port 8000. Every turn returned 404, and the script still printed "good to go". | Attach the plugin to `adk api_server` instead, or add those routes to `04_bq_plugin.py`. Then have the page export `HOST` so `turns.sh` finds the server. | fixed on main |
-| Queries on 4.2, 4.3 and 4.4 | Queries over the whole `agent_events` table | Rows from earlier pages stay in the table and skew every later result. Page 4.2's growing-context session ranked first on page 4.3, and the page 4.4 evaluator scored 42 sessions. | Filter each query by `session_id` or `timestamp`, or give each page its own dataset. | still real: 4.2 and 4.3 now explain the mix, but 4.2's query still reads the whole table |
+| Queries on 4.2, 4.3 and 4.4 | Queries over the whole `agent_events` table | Rows from earlier pages stay in the table and skew every later result. Page 4.2's growing-context session ranked first on page 4.3, and the page 4.4 evaluator scored 42 sessions. | Filter each query by `session_id` or `timestamp`, or give each page its own dataset. | done: 4.2 filters to its own session; 4.3 explains the ranking; 4.4's evaluator still scores every session in the table |
 
 **Unclear**
 
 | Where | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 4.1 lines 31 and 56, and 4.2 to 4.6 | `BQ_ANALYTICS_DATASET_ID` exported in one shell; a "second shell" opened later | The second shell doesn't have the variable, so commands there use the wrong dataset or fail. | "In each shell, run `source env.sh` and `export BQ_ANALYTICS_DATASET_ID=agent_analytics`." | still real: Part 4's second shell now exports it, but Step 1 runs `bq mk` without `source env.sh` |
+| 4.1 lines 31 and 56, and 4.2 to 4.6 | `BQ_ANALYTICS_DATASET_ID` exported in one shell; a "second shell" opened later | The second shell doesn't have the variable, so commands there use the wrong dataset or fail. | "In each shell, run `source env.sh` and `export BQ_ANALYTICS_DATASET_ID=agent_analytics`." | done |
 
 ### tutorial/part-4/4.1-one-line-one-table.md
 
@@ -656,14 +658,14 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 |---|---|---|---|---|
 | 72–74, 89–90 | "one `v_<event_type>` view per event type it has seen" | The plugin creates all 25 views at startup, whether or not that event type has occurred (`adk/plugins/bigquery_agent_analytics_plugin.py:5094-5113`). | "one `v_<event_type>` view for each of the 25 event types, created at startup" | fixed on main |
 | 114–125 | "`trace_id`, `span_id` \| The Cloud Trace join keys" | `span_id` is the plugin's own internal id, not an OpenTelemetry span id (`bigquery_agent_analytics_plugin.py:3647-3659`). `trace_id` matches Cloud Trace only when a trace is active, and `04_bq_plugin.py` sets up no tracing. | Explain that neither column joins to Cloud Trace in this demo. | fixed on main |
-| 148–149 | "jobUser … lets it run the query and metadata jobs that create the table and views" | The two roles do different things. `jobUser` runs the `CREATE VIEW` jobs; `dataEditor` creates the table and writes the rows. | Describe each role separately. | still real |
+| 148–149 | "jobUser … lets it run the query and metadata jobs that create the table and views" | The two roles do different things. `jobUser` runs the `CREATE VIEW` jobs; `dataEditor` creates the table and writes the rows. | Describe each role separately. | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 18–19 | "Grant those to your ADC identity before you start." | The reader isn't told how to grant the roles, or whether they already have them. | Give the `add-iam-policy-binding` commands, or note that a project Owner already has both roles. | still real |
-| 46–48 | "batches with `batch_size=1` and flushes on each run end" | Describes configuration, not what the reader will see. | "By default, the plugin writes each event within about a second." (The rerun could query rows within about 3 seconds.) | still real |
+| 18–19 | "Grant those to your ADC identity before you start." | The reader isn't told how to grant the roles, or whether they already have them. | Give the `add-iam-policy-binding` commands, or note that a project Owner already has both roles. | done |
+| 46–48 | "batches with `batch_size=1` and flushes on each run end" | Describes configuration, not what the reader will see. | "By default, the plugin writes each event within about a second." (The rerun could query rows within about 3 seconds.) | done |
 
 ### tutorial/part-4/4.2-tokens-latency-cache-per-call.md
 
@@ -672,20 +674,20 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
 | 72–97 | "should match the histogram `sum`"; "Two stores, one truth" | Input tokens matched exactly (23,530 in both). Output tokens didn't: 637 in the rows versus 1,881 in the metrics, because the histogram includes thinking tokens and the rows report them separately. | Sum `usage_completion_tokens + usage_thinking_tokens` on the row side, and use `increase(…[30m])` on the metric side. | fixed on main |
-| 106–109 | "`v_tool_completed` … with its `latency_ms`"; "`v_tool_error` has one row per tool that returned an error status" | The column is named `total_ms`. `v_tool_error` gets rows only when a tool raises an exception; it had 0 rows after 5 Atlantis errors. | Use `total_ms`, and explain that returned error statuses don't reach `v_tool_error`. | still real |
+| 106–109 | "`v_tool_completed` … with its `latency_ms`"; "`v_tool_error` has one row per tool that returned an error status" | The column is named `total_ms`. `v_tool_error` gets rows only when a tool raises an exception; it had 0 rows after 5 Atlantis errors. | Use `total_ms`, and explain that returned error statuses don't reach `v_tool_error`. | done |
 | 67 | "`usage_thinking_tokens` \| Reasoning tokens, inside completion" | Thinking tokens are reported separately, not included in the completion count. | "reported separately from `usage_completion_tokens`" | fixed on main |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 41–58 | `ORDER BY usage_total_tokens DESC`; cache columns described as "non-zero" | Sorting by size reverses the climb the page wants to show. The cache columns were NULL on all 42 rows. | Use `WHERE session_id = … ORDER BY timestamp`, and tell the reader to expect no cache hits. The rerun saw prompt tokens rise from 323 to 1151. | still real: cache NULLs are now explained; the size ordering remains |
+| 41–58 | `ORDER BY usage_total_tokens DESC`; cache columns described as "non-zero" | Sorting by size reverses the climb the page wants to show. The cache columns were NULL on all 42 rows. | Use `WHERE session_id = … ORDER BY timestamp`, and tell the reader to expect no cache hits. The rerun saw prompt tokens rise from 323 to 1151. | done: query filters to the session and orders by timestamp; all of Part 4 recaptured |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 57 | `ttft_ms` among the columns shown | Time to first token equals `total_ms` on every row, because the demo doesn't stream. | Say so, or drop the column. | still real |
+| 57 | `ttft_ms` among the columns shown | Time to first token equals `total_ms` on every row, because the demo doesn't stream. | Say so, or drop the column. | done |
 
 ### tutorial/part-4/4.3-cost-per-session-and-user.md
 
@@ -700,14 +702,14 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 84–87 | The WARNING runs three sentences | House style keeps a WARNING to one sentence. | Cut to one sentence. | still real |
+| 84–87 | The WARNING runs three sentences | House style keeps a WARNING to one sentence. | Cut to one sentence. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 18–20, 55–58 | "three-city sessions rank above"; "three times the work" | Rank 1 was page 4.2's session, not a three-city one. Three-city turns made 3 tool calls but used only about 14% more tokens (941 versus 829). | Filter out earlier pages' sessions, and replace "three times the work" with the measured difference. | still real: the ranking is now explained; "three times the work" remains |
-| title, 36 | "per user" | Every session has the same user, `load-user`, so there's nothing to compare across users. | Drop "per user", or have the load vary `USER_ID`. | still real |
+| 18–20, 55–58 | "three-city sessions rank above"; "three times the work" | Rank 1 was page 4.2's session, not a three-city one. Three-city turns made 3 tool calls but used only about 14% more tokens (941 versus 829). | Filter out earlier pages' sessions, and replace "three times the work" with the measured difference. | done |
+| title, 36 | "per user" | Every session has the same user, `load-user`, so there's nothing to compare across users. | Drop "per user", or have the load vary `USER_ID`. | done: kept "per user"; the page says every session has user `load-user` and why |
 
 ### tutorial/part-4/4.4-the-sdk.md
 
@@ -730,7 +732,7 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 32–47 | `pip install bigquery-agent-analytics` | The package is already in `requirements.txt`, so the reader installed it during Setup. | Replace the install with "confirm it is installed with `pip show bigquery-agent-analytics`". | still real |
+| 32–47 | `pip install bigquery-agent-analytics` | The package is already in `requirements.txt`, so the reader installed it during Setup. | Replace the install with "confirm it is installed with `pip show bigquery-agent-analytics`". | done |
 
 ### tutorial/part-4/4.5-looker-studio-template.md
 
@@ -738,20 +740,20 @@ The tool error ratio matched the page: the rerun gave exactly 0.5.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 22–34 | The flow "Make a copy", choose BigQuery, pick the table | The template doesn't work this way. Its README uses a configurator that builds a Looker Studio Linking API URL. | Link the README (`GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/dashboard/looker_studio/README.md`) and give its steps as bullets. | still real |
-| 38–46 | A table describing four groups of charts | The template has 8 pages, including a Trace Inspector. | Describe the template's real pages. | still real |
+| 22–34 | The flow "Make a copy", choose BigQuery, pick the table | The template doesn't work this way. Its README uses a configurator that builds a Looker Studio Linking API URL. | Link the README (`GoogleCloudPlatform/BigQuery-Agent-Analytics-SDK/dashboard/looker_studio/README.md`) and give its steps as bullets. | done |
+| 38–46 | A table describing four groups of charts | The template has 8 pages, including a Trace Inspector. | Describe the template's real pages. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 54–57 | The TIP says a viewer "sees the charts without direct access to the `content` column" | With the owner's credentials, viewers see whatever the charts show, and the Trace Inspector page can display content. | Qualify the TIP to say what viewers can see. | still real |
+| 54–57 | The TIP says a viewer "sees the charts without direct access to the `content` column" | With the owner's credentials, viewers see whatever the charts show, and the Trace Inspector page can display content. | Qualify the TIP to say what viewers can see. | done |
 
 **Unclear**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 12–16 | No scenario or question; no step to delete the copy | The reader doesn't know what the page answers, and the copy breaks once page 4.6 deletes the dataset. | Add the scenario and question, and "Delete your copy afterward; it stops working once page 4.6 deletes the dataset." | still real |
+| 12–16 | No scenario or question; no step to delete the copy | The reader doesn't know what the page answers, and the copy breaks once page 4.6 deletes the dataset. | Add the scenario and question, and "Delete your copy afterward; it stops working once page 4.6 deletes the dataset." | done |
 
 The page's "37 charts" claim is correct.
 
@@ -770,13 +772,13 @@ The page's "37 charts" claim is correct.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 22–50 | Reference material, and a heading phrased as a statement, inside a hands-on page | House style keeps one lesson per page and phrases deep-dive headings as questions. The comparison is reference material. | Move the comparison to how-to-choose. | still real |
+| 22–50 | Reference material, and a heading phrased as a statement, inside a hands-on page | House style keeps one lesson per page and phrases deep-dive headings as questions. The comparison is reference material. | Move the comparison to how-to-choose. | done: comparison table moved to how-to-choose; statement heading removed |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 26–30 | The comparison rows "Per series stored", "Weeks, then downsampled", and join key `span_id` | No source is given, and the first is wrong: Cloud Monitoring bills per sample ingested, not per series stored. | Cite the docs for each row, or remove the rows. | still real |
+| 26–30 | The comparison rows "Per series stored", "Weeks, then downsampled", and join key `span_id` | No source is given, and the first is wrong: Cloud Monitoring bills per sample ingested, not per series stored. | Cite the docs for each row, or remove the rows. | done: cost row cites per-sample pricing; retention row cites 24 months |
 
 ### tutorial/how-to-choose.md
 
@@ -784,20 +786,20 @@ The page's "37 charts" claim is correct.
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 18 | "the seven ADK emits (six for a single agent…)" | ADK emits six; the seventh needs the `Workflow` primitive. | "ADK emits six for a single agent. A seventh needs the `Workflow` primitive." | still real |
-| 68–71, 85–98 | "Parts 1 … is verified … Parts 2 through 4 are drafted", and the "Not verified" table | Out of date: Part 2 and page 3.1 already have run records in `verification/`. | Move them to the Verified list, with dates. Add this review's results, including the failures on pages 3.5, 3.6, 3.7 and Part 4. | still real: partly updated; Part 2, 3.1, 3.4 and 3.7 still listed as unverified or pending |
+| 18 | "the seven ADK emits (six for a single agent…)" | ADK emits six; the seventh needs the `Workflow` primitive. | "ADK emits six for a single agent. A seventh needs the `Workflow` primitive." | done |
+| 68–71, 85–98 | "Parts 1 … is verified … Parts 2 through 4 are drafted", and the "Not verified" table | Out of date: Part 2 and page 3.1 already have run records in `verification/`. | Move them to the Verified list, with dates. Add this review's results, including the failures on pages 3.5, 3.6, 3.7 and Part 4. | done: verification status rewritten with 2026-10-02 reruns; Not verified lists 4.5 and 2.6 |
 
 **Style**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 59–64, 100–110 | "differs in two ways", where one of the two is not a difference; a reference list with no links | The first misleads the reader about how many differences there are. The second gives the reader nothing to click. | Rewrite the first, and add URLs to the reference list. | still real |
+| 59–64, 100–110 | "differs in two ways", where one of the two is not a difference; a reference list with no links | The first misleads the reader about how many differences there are. The second gives the reader nothing to click. | Rewrite the first, and add URLs to the reference list. | done |
 
 **Misleading**
 
 | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|
-| 37, 50, 53–55 | `Client().get_trace().render()`; "the only join is a row's `trace_id` … enabled with `enable_otel_correlation=True`" | The call omits required arguments. The join description has the same error as page 4.6. | Use `Client(project, dataset).get_trace(trace_id).render()`, and fix the join text as on page 4.6. | still real: the join text is fixed; `Client().get_trace()` remains |
+| 37, 50, 53–55 | `Client().get_trace().render()`; "the only join is a row's `trace_id` … enabled with `enable_otel_correlation=True`" | The call omits required arguments. The join description has the same error as page 4.6. | Use `Client(project, dataset).get_trace(trace_id).render()`, and fix the join text as on page 4.6. | done |
 
 ---
 
@@ -859,21 +861,21 @@ No demo was skipped for cost. All runs together were estimated to cost under $3.
 
 | # | Inconsistency | Pages | Status |
 |---|---|---|---|
-| 1 | When the seventh metric appears. Page 1.1 says it "stays silent until 1.5"; page 1.4 says it "can finally appear" on 1.5; page 1.5 says it still doesn't appear; page 2.2 says it is "present because 1.5 created it"; how-to-choose says "the seven ADK emits". | 1.1, 1.4, 1.5, 2.2, how-to-choose | still real |
-| 2 | Whether Part 1 needs Google Cloud. Some pages say "no Google Cloud account", while Setup requires Vertex AI and credentials. | README, TUTORIAL, part-1/index, Setup | still real |
-| 3 | The same datapoint is shown with 1 attribute on one page and 3 on another. The real datapoint has 6. | Setup, 1.1 | still real |
-| 4 | Healthy tool latency: 0.002 seconds in page 1.1's capture, but 0.02 to 0.64 seconds in page 1.3's invented panels. | 1.1, 1.3 | still real |
+| 1 | When the seventh metric appears. Page 1.1 says it "stays silent until 1.5"; page 1.4 says it "can finally appear" on 1.5; page 1.5 says it still doesn't appear; page 2.2 says it is "present because 1.5 created it"; how-to-choose says "the seven ADK emits". | 1.1, 1.4, 1.5, 2.2, how-to-choose | done |
+| 2 | Whether Part 1 needs Google Cloud. Some pages say "no Google Cloud account", while Setup requires Vertex AI and credentials. | README, TUTORIAL, part-1/index, Setup | done |
+| 3 | The same datapoint is shown with 1 attribute on one page and 3 on another. The real datapoint has 6. | Setup, 1.1 | done |
+| 4 | Healthy tool latency: 0.002 seconds in page 1.1's capture, but 0.02 to 0.64 seconds in page 1.3's invented panels. | 1.1, 1.3 | done |
 | 5 | The instrumentation scope label. Page 2.2 says every descriptor has `gcp.vertex.agent`; page 3.4 says the client metrics have the genai scope; page 3.5's dashboard filters on `gcp.vertex.agent`. | 2.2, 3.4, 3.5 | done |
 | 6 | The project variable. Setup and Part 2 use `PROJECT_ID`; Part 3 hardcodes `PROJECT=jwd-gcp-demos`. | Part 2, Part 3 | done |
 | 7 | What happened to Atlantis users. Pages 3.3 and 3.7 say they got no weather; page 3.6 says "every user got an answer". | 3.3, 3.6, 3.7 | done |
 | 8 | How soon BigQuery rows appear: "about a second" on page 4.1, "about a minute" on page 4.6. | 4.1, 4.6 | fixed on main |
 | 9 | Whether metrics link to Cloud Trace. Page 4.6's text says metrics carry no trace id; its diagram and how-to-choose draw a link. | 4.6, how-to-choose | fixed on main |
-| 10 | What `out/metrics.json` holds. In Part 1 it is the metric reader's output; page 2.1 overwrites it with a PromQL response. | Part 1, 2.1 | still real |
-| 11 | Shell date commands that work on only one platform. Pages 2.1 and 2.2 use the macOS-only `-v-30M`; page 2.4 uses the Linux-only `%N`. | 2.1, 2.2, 2.4 | still real |
-| 12 | Three names for one product: Agent Runtime, Agent Engine and reasoning engine. | 2.4, 2.5 | still real |
-| 13 | The part-title separator: a colon in page 2.6's nav line ("Consume: …"), an em dash in Parts 3 and 4 ("Consume — …"). | 2.6, Part 3, Part 4 | still real |
-| 14 | The "Why you are here" notes. Almost none name a scenario and an operational question, and most run to three sentences instead of two. | All lesson pages | still real |
-| 15 | Two pages exceed the 750-word limit: 2.1 (923 words) and 2.5 (919 words). | 2.1, 2.5 | still real |
+| 10 | What `out/metrics.json` holds. In Part 1 it is the metric reader's output; page 2.1 overwrites it with a PromQL response. | Part 1, 2.1 | done |
+| 11 | Shell date commands that work on only one platform. Pages 2.1 and 2.2 use the macOS-only `-v-30M`; page 2.4 uses the Linux-only `%N`. | 2.1, 2.2, 2.4 | done |
+| 12 | Three names for one product: Agent Runtime, Agent Engine and reasoning engine. | 2.4, 2.5 | done |
+| 13 | The part-title separator: a colon in page 2.6's nav line ("Consume: …"), an em dash in Parts 3 and 4 ("Consume — …"). | 2.6, Part 3, Part 4 | done |
+| 14 | The "Why you are here" notes. Almost none name a scenario and an operational question, and most run to three sentences instead of two. | All lesson pages | done |
+| 15 | Two pages exceed the 750-word limit: 2.1 (923 words) and 2.5 (919 words). | 2.1, 2.5 | done |
 
 ---
 
@@ -910,11 +912,11 @@ The tracing review file came from a separate session reviewing the tracing tutor
 
 The standards come from five sources, listed here in the order they win when two disagree:
 
-1. **The tutorial-review skill:** `.claude/skills/tutorial-review/SKILL.md`. *Status: fixed on main (the server has the session and `/run` routes); still real: `turns.sh` prints "good to go" after failed turns.*
-2. **This tutorial's conventions:** `ai/adk/metrics/CLAUDE.md`. *Status: still real.*
-3. **The house tutorial style:** `.claude/skills/tutorial-style/SKILL.md` and the reference files in that folder. *Status: fixed on main.*
-4. **Jeff's global writing rules** (the Writing section of `~/.claude/CLAUDE.md`), and Jeff's tutorial pedagogy note (`feedback-tutorial-pedagogy.md` in the project memory). *Status: still real.*
-5. **The "set the env you read" note** in the project memory, which the review skill's own rule on exporting variables also covers. *Status: still real.*
+1. **The tutorial-review skill:** `.claude/skills/tutorial-review/SKILL.md`.
+2. **This tutorial's conventions:** `ai/adk/metrics/CLAUDE.md`.
+3. **The house tutorial style:** `.claude/skills/tutorial-style/SKILL.md` and the reference files in that folder.
+4. **Jeff's global writing rules** (the Writing section of `~/.claude/CLAUDE.md`), and Jeff's tutorial pedagogy note (`feedback-tutorial-pedagogy.md` in the project memory).
+5. **The "set the env you read" note** in the project memory, which the review skill's own rule on exporting variables also covers.
 
 **Where sources disagreed:**
 

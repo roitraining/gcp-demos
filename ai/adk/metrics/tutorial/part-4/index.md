@@ -4,7 +4,7 @@
 
 ---
 
-# Part 4 · Consume — rows in BigQuery
+# Part 4 · Consume: rows in BigQuery
 
 *The questions a histogram cannot answer: which session, which prompt, at what cost.*
 
@@ -14,13 +14,14 @@
 > caused it. This part records one row per lifecycle event in BigQuery, where an
 > unbounded id and the full content belong.
 
-Parts 1 through 3 traded detail for cheapness: a histogram folds many turns into
+Parts 1 through 3 gave up per-event detail to keep storage cheap: a histogram folds many turns into
 `count`, `sum`, and buckets, and [1.3](../part-1/1.3-attributes-and-cardinality.md)
 showed why a session id can never be an attribute. That is the right trade for
 "how slow, how many, how often, how much" in near real time, and the wrong store
 for "which session, which prompt, at what cost". `BigQueryAgentAnalyticsPlugin`
 writes one row per event, with ids, content, per-call tokens, and latency. You add
-the plugin once and query with SQL from then on.
+the plugin once and query with SQL from then on. Every page runs one scenario
+from [scenarios.md](../scenarios.md).
 
 ## In this part
 
