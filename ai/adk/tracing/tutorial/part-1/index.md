@@ -13,11 +13,10 @@
 > ADK opens, when, and what one span contains. This part answers that on your
 > laptop, with a console exporter and no Google Cloud account.
 
-A trace is the tree of spans ADK opens around one turn. ADK opens them for you:
-you do not add tracing, you install a reader and watch the tree that is already
-there. Nothing leaves the process on its own, and with no provider installed
-every span is dropped. Each page here runs one scenario from
-[scenarios.md](../scenarios.md) and reads the result.
+A trace is the tree of spans ADK opens around one turn. You do not add
+tracing; you install an exporter and watch the tree that is already there. Each
+page here runs one scenario from [scenarios.md](../scenarios.md) and reads the
+result.
 
 ## In this part
 

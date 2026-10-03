@@ -7,7 +7,7 @@
 
 All commands run from this folder. Do this once. Part 1 needs only a model;
 Parts 2 to 4 add Google Cloud APIs, which this page enables now so you do not
-stop later.
+stop later. You need Python 3.13, the `gcloud` CLI, and `jq`.
 
 ## Create the environment
 
@@ -61,6 +61,9 @@ source env.sh
 name you can find. `env.sh` is gitignored. **`source env.sh` again in each new
 terminal**, since variables do not cross terminals.
 
+Unset any `OTEL_EXPORTER_OTLP_*` variables left in your shell. ADK adds an
+exporter when they are set, so the local Part 1 scripts would send spans there.
+
 ## Enable the APIs (Parts 2 to 4)
 
 ```bash
@@ -90,28 +93,36 @@ weather assistant with two tools of deliberately different latency.
 - `get_forecast(city, days)` calls a helper that sleeps 0.3–1.5 s and logs one
   INFO line, so its span owns real time.
 
-Two latencies are the whole reason the tree has shape. Three env gates, all off
-by default so the tree is pure ADK, let the one agent show every span shape the
-tutorial teaches: `TUTORIAL_CUSTOM_SPAN` (a span inside the forecast tool, 1.6),
+ADK builds the tree; the two latencies make the slow step visible in it. Three
+env gates, all off by default so the tree is pure ADK, let the one agent show
+every span shape the tutorial teaches. Each is on only when set to `1`:
+`TUTORIAL_CUSTOM_SPAN` (a span inside the forecast tool, 1.6),
 `TUTORIAL_CLASSIFY_ERRORS` (turn a failed tool's span red, 1.4), and
 `TUTORIAL_RAISE_ON_UNKNOWN` (make the tool raise, 1.4).
 
 ## Verify it runs
 
+**Command:**
+
 ```bash
 .venv/bin/python examples/01_console_spans.py
 ```
 
-**Expected output:** the agent's answer prints to the console, and the span tree
-is written to `out/spans.json` (a full dump is too long to read in a terminal):
+**Expected output:** the file path prints at startup, then the agent's answer.
+The span tree is written to `out/spans.json` (a full dump is too long to read in
+a terminal):
 
 ```console
-AGENT: The weather in London is currently 15°C and drizzling.
 (spans written to out/spans.json)
+
+AGENT: The weather in London is currently 15°C and drizzling.
 ```
 
+Every run also prints `UserWarning: [EXPERIMENTAL] feature
+FeatureName.JSON_SCHEMA_FOR_FUNC_DECL is enabled.` It is harmless for traces.
+
 If you see the answer and the file, your model and environment are set. A
-`403 PERMISSION_DENIED` on `your_project` instead means a shell variable is
+`403 PERMISSION_DENIED` on `your-project-id` instead means a shell variable is
 overriding `.env`; run `unset GOOGLE_CLOUD_PROJECT` and try again, or fix
 `env.sh`. [Part 1](part-1/index.md) reads what is in that file.
 

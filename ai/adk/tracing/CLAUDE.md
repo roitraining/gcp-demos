@@ -42,9 +42,11 @@ Keep new content consistent with this framing.
   `error.type`. A returned `{"error": ...}` dict gets `error.type=TOOL_ERROR`
   for free. The demo's `{"status": "error"}` shape needs the `StatusAwareTool`
   hook to become `error.type=lookup_failed`. A raising tool gets ERROR,
-  `error.type=<class>`, **two** exception events on the tool span
-  (`LookupError` + a `DynamicNodeFailError` wrapper), and ERROR on both parents.
-  See page 1.4.
+  `error.type=<class>`, **two** exception events on the tool span (both
+  `LookupError` in the 2026-10-02 rerun: ADK's `record_exception`, then OTel's
+  on span exit; each stores the message), ERROR on `invoke_agent` and
+  `invocation`, and five spans instead of seven. Parents of a returned failure
+  stay UNSET. See page 1.4.
 - **Script export needs a flush.** A `BatchSpanProcessor` holds spans until its
   interval, so example scripts call `force_flush()` on the tracer provider
   (helper `flush_spans()` in `examples/_common.py`). `SimpleSpanProcessor`
