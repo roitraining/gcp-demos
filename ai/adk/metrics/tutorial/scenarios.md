@@ -20,7 +20,9 @@ against a running server. `workflow` runs as a script
 ([1.5](part-1/1.5-workflow-grain-metrics.md)). `export-outage` runs the
 `baseline` scenario against a deliberately misconfigured server
 ([2.1](part-2/2.1-adk-web-otel-to-cloud.md)). The scenario name only selects what
-`load/turns.sh` sends. It is never recorded as a metric attribute.
+`load/turns.sh` sends. It is never recorded as a metric attribute. In Part 3,
+each page keeps its run apart by starting the server under its own
+`OTEL_SERVICE_NAME`, which becomes the `job` label its queries filter on.
 
 ## The scenarios
 

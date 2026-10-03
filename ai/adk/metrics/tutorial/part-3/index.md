@@ -16,7 +16,10 @@
 How slow, how many, how often failing, and how much each map to a PromQL signal;
 3.5 puts them on a dashboard and 3.6 turns one into an alert. 3.7 adds a custom
 counter for whether the task got done. Every page runs one scenario from
-[scenarios.md](../scenarios.md) against the server you start on 3.1.
+[scenarios.md](../scenarios.md) against a server it starts under its own
+`OTEL_SERVICE_NAME`, such as `adk-metrics-3-2`. That name becomes the `job`
+label every query on the page filters on, so pages run back to back with no wait
+between them.
 
 ## In this part
 

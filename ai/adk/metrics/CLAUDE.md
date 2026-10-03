@@ -62,9 +62,12 @@ dive may run one more.
 
 - Examples live in `examples/NN_name.py`; the shared agent is `demo_agent/`,
   shared helpers are `examples/_common.py`.
-- Every console block on a page is captured from a real run against
-  `jwd-gcp-demos`. Token counts vary run to run (a real model), so quote them as
-  representative, not exact. Save the run record under `verification/`.
+- Every console block on a page is captured from a real run. New captures use
+  `jwd-dev-5`: `jwd-gcp-demos` has a Model Armor floor setting that sanitizes
+  every Gemini call, which adds model latency a reader's project won't have.
+  Pages captured before 2026-10-03 still quote `jwd-gcp-demos`. Token counts
+  vary run to run (a real model), so quote them as representative, not exact.
+  Save the run record under `verification/`.
 - `install_console_reader()` writes its JSON to a file (default `out/metrics.json`)
   rather than the console, since a full dump is too long to read in a terminal;
   pages tell the reader to open it (`code out/metrics.json` in VS Code). The
@@ -76,6 +79,12 @@ dive may run one more.
   (see the skill's "Console directions"; page 2.3 Step 3 is the exemplar).
 - The repeated prompt is "What's the weather in London?" for single turns;
   `load/turns.sh <scenario> [N]` for volume.
+- Part 3 separates pages by label, not by time. Each page starts its server with
+  `OTEL_SERVICE_NAME=adk-metrics-3-N` (3.1's concurrent deep dive uses
+  `adk-metrics-3-1c`), and every query on the page filters on that `job`. Read
+  queries use `[10m]` windows so they cover the page's load at read time; only
+  the 3.6 alert uses `[1m]` (60 s hold, 30 s evaluation). No page tells the
+  reader to wait for an earlier page's data to age out.
 - The custom task-outcome counter (page 3.7) is gated behind
   `TUTORIAL_OUTCOME_METRIC` so Parts 1 and 2 show exactly the six framework
   metrics.
