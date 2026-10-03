@@ -1,17 +1,17 @@
 {
-  "displayName": "ADK tool error ratio > 20% (tutorial 3.6)",
+  "displayName": "ADK tool error ratio > 20% for 1m (tutorial 3.6)",
   "documentation": {
-    "content": "The execute_tool.duration error ratio has been above 20% for 5 minutes. A dependency the agent calls is failing; the invocation may still be reporting success (invoke_agent error ratio stays 0), so users are getting turns that complete without an answer. See tutorial page 3.3 for the tool-vs-invocation split and 3.7 for the task-outcome counter.",
+    "content": "The execute_tool.duration error ratio for job adk-metrics-3-6 has been above 20% for 1 minute. A dependency the agent calls is failing; the invocation may still be reporting success (invoke_agent error ratio stays 0), so users are getting turns that complete without an answer. The 1-minute hold keeps the tutorial short; a production policy should hold 5 minutes or more. See tutorial page 3.3 for the tool-vs-invocation split and 3.7 for the task-outcome counter.",
     "mimeType": "text/markdown"
   },
   "combiner": "OR",
   "conditions": [
     {
-      "displayName": "tool error ratio > 0.20 for 5m",
+      "displayName": "tool error ratio > 0.20 for 1m",
       "conditionPrometheusQueryLanguage": {
-        "query": "sum(rate({\"gen_ai.execute_tool.duration_count\", \"error.type\"=~\".+\"}[5m])) / sum(rate({\"gen_ai.execute_tool.duration_count\"}[5m])) > 0.2",
-        "duration": "300s",
-        "evaluationInterval": "60s"
+        "query": "sum(rate({\"gen_ai.execute_tool.duration_count\", job=\"adk-metrics-3-6\", \"error.type\"=~\".+\"}[1m])) / sum(rate({\"gen_ai.execute_tool.duration_count\", job=\"adk-metrics-3-6\"}[1m])) > 0.2",
+        "duration": "60s",
+        "evaluationInterval": "30s"
       }
     }
   ]

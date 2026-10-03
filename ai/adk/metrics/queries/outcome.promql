@@ -17,28 +17,32 @@
 # POST each block to:
 #   monitoring.googleapis.com/v1/projects/$PROJECT_ID/location/global/prometheus/api/v1/query
 # with body  query=<urlencoded>  and an ADC bearer token.
+#
+# Every selector filters on job="adk-metrics-3-7", the OTEL_SERVICE_NAME page
+# 3.7 starts its server with, so no other page's run leaks into the reading.
+# Change the job to read another server.
 
 # --- Requests per minute, by outcome ---------------------------------------
 # Two lines: answered and unavailable. The unavailable share should match the
 # Atlantis mix and 3.3's tool error ratio.
 
 sum by (outcome) (
-  rate({"tutorial.weather.requests"}[5m])
+  rate({"tutorial.weather.requests", job="adk-metrics-3-7"}[10m])
 ) * 60
 
 # --- Unavailable share -----------------------------------------------------
 # The fraction of tool-answered turns that got no weather. Reads about 0.5 for a
 # 50% Atlantis mix, beside 3.3's invocation-error ratio of 0.
 
-sum(rate({"tutorial.weather.requests", outcome="unavailable"}[5m]))
+sum(rate({"tutorial.weather.requests", job="adk-metrics-3-7", outcome="unavailable"}[10m]))
   /
-sum(rate({"tutorial.weather.requests"}[5m]))
+sum(rate({"tutorial.weather.requests", job="adk-metrics-3-7"}[10m]))
 
 # --- Counter total vs invocation count -------------------------------------
 # A turn whose model never called the tool records nothing on this counter, so
 # its total can be lower than the invoke_agent turn count. Missing is not zero:
 # compare the two before reading the outcome as complete.
 
-sum(rate({"tutorial.weather.requests"}[5m]))
+sum(rate({"tutorial.weather.requests", job="adk-metrics-3-7"}[10m]))
   /
-sum(rate({"gen_ai.invoke_agent.duration_count"}[5m]))
+sum(rate({"gen_ai.invoke_agent.duration_count", job="adk-metrics-3-7"}[10m]))

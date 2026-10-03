@@ -11,14 +11,19 @@
 # POST each block on its own to:
 #   monitoring.googleapis.com/v1/projects/$PROJECT_ID/location/global/prometheus/api/v1/query
 # with body  query=<urlencoded>  and an ADC bearer token.
+#
+# Every selector filters on job="adk-metrics-3-1", the OTEL_SERVICE_NAME page
+# 3.1 starts its server with, so no other page's run leaks into the reading.
+# Change the job to read another server. The concurrent deep dive uses
+# job="adk-metrics-3-1c".
 
-# --- Agent invocation latency, p50 and p95 over the last 5 minutes ---------
+# --- Agent invocation latency, p50 and p95 over the last 10 minutes --------
 
 # p50 of the whole turn (invoke_agent.duration), one line per agent.
 histogram_quantile(
   0.50,
   sum by (le, "gen_ai.agent.name") (
-    rate({"gen_ai.invoke_agent.duration_bucket"}[5m])
+    rate({"gen_ai.invoke_agent.duration_bucket", job="adk-metrics-3-1"}[10m])
   )
 )
 
@@ -26,7 +31,7 @@ histogram_quantile(
 histogram_quantile(
   0.95,
   sum by (le, "gen_ai.agent.name") (
-    rate({"gen_ai.invoke_agent.duration_bucket"}[5m])
+    rate({"gen_ai.invoke_agent.duration_bucket", job="adk-metrics-3-1"}[10m])
   )
 )
 
@@ -36,11 +41,11 @@ histogram_quantile(
 # (0, 5, 10, 25, ...), so a p95 only says "under 5 s". Read the mean instead.
 
 sum by ("gen_ai.request.model") (
-  rate({"gen_ai.client.operation.duration_sum"}[5m])
+  rate({"gen_ai.client.operation.duration_sum", job="adk-metrics-3-1"}[10m])
 )
   /
 sum by ("gen_ai.request.model") (
-  rate({"gen_ai.client.operation.duration_count"}[5m])
+  rate({"gen_ai.client.operation.duration_count", job="adk-metrics-3-1"}[10m])
 )
 
 # --- Tool latency, p95 by tool ---------------------------------------------
@@ -51,6 +56,6 @@ sum by ("gen_ai.request.model") (
 histogram_quantile(
   0.95,
   sum by (le, "gen_ai.tool.name") (
-    rate({"gen_ai.execute_tool.duration_bucket"}[5m])
+    rate({"gen_ai.execute_tool.duration_bucket", job="adk-metrics-3-1"}[10m])
   )
 )
