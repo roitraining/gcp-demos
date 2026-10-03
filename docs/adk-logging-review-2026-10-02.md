@@ -326,29 +326,29 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F080 | 112–116 | "`BasePlugin` declares fourteen async callbacks (… three error hooks, and `close`)" | The callback and error-hook counts are off. `base_plugin.py:114-394` declares fifteen callbacks, with four error hooks: `on_model_error_callback`, `on_tool_error_callback`, `on_agent_error_callback`, and `on_run_error_callback`. | "fifteen async callbacks (… four error hooks for the model, tool, agent, and run, and `close`)" | still real |
+| F080 | 112–116 | "`BasePlugin` declares fourteen async callbacks (… three error hooks, and `close`)" | The callback and error-hook counts are off. `base_plugin.py:114-394` declares fifteen callbacks, with four error hooks: `on_model_error_callback`, `on_tool_error_callback`, `on_agent_error_callback`, and `on_run_error_callback`. | "fifteen async callbacks (… four error hooks for the model, tool, agent, and run, and `close`)" | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F081 | 110 and 153, linked at 29–30 | "How plugin hooks fire", "What LoggingPlugin fixes in source" | House style writes deep-dive headings as questions. | Rename both headings to questions, such as "How do plugin hooks fire?". Update the anchors that link to them. | still real |
+| F081 | 110 and 153, linked at 29–30 | "How plugin hooks fire", "What LoggingPlugin fixes in source" | House style writes deep-dive headings as questions. | Rename both headings to questions, such as "How do plugin hooks fire?". Update the anchors that link to them. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F082 | 40–44 and 151 | "29 lines" and "lightly trimmed" | The sample output is far shorter than the real run. The rerun on jwd-dev-2 printed 64 plugin lines for one question, in the same hook order. The page's output is much more than lightly trimmed. | "64 lines for one question; trimmed here to one of each kind." | still real |
-| F083 | 169 | "Text and system-instruction length \| truncated at 200 characters \| `_format_content`" | The table credits the wrong function for system-instruction truncation. `_format_content` truncates only message text. The system instruction is cut by `[:200]` in `before_model_callback`. | Split the row in two, and name `before_model_callback` on the system-instruction row. | still real |
-| F084 | 11 | No **Why you are here.** note | House style requires that note on every page. The page runs 865 words against a 750-word limit, and the first **Command:** arrives about ten sentences in. | Add "> **Why you are here.** INFO says little about tool calls. `LoggingPlugin` prints every step of one question to your terminal." Then trim the deep-dive source excerpts to one. | still real |
+| F082 | 40–44 and 151 | "29 lines" and "lightly trimmed" | The sample output is far shorter than the real run. The rerun on jwd-dev-2 printed 64 plugin lines for one question, in the same hook order. The page's output is much more than lightly trimmed. | "64 lines for one question; trimmed here to one of each kind." | done |
+| F083 | 169 | "Text and system-instruction length \| truncated at 200 characters \| `_format_content`" | The table credits the wrong function for system-instruction truncation. `_format_content` truncates only message text. The system instruction is cut by `[:200]` in `before_model_callback`. | Split the row in two, and name `before_model_callback` on the system-instruction row. | done |
+| F084 | 11 | No **Why you are here.** note | House style requires that note on every page. The page runs 865 words against a 750-word limit, and the first **Command:** arrives about ten sentences in. | Add "> **Why you are here.** INFO says little about tool calls. `LoggingPlugin` prints every step of one question to your terminal." Then trim the deep-dive source excerpts to one. | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F085 | 100–106 | "**The catch that decides where you use it.**" | The WARNING callout is six sentences long. House style allows one. | Replace it with "> **Use it locally only.** It writes with `print()` and terminal color codes, so it ignores your log levels and garbles Cloud Logging." Move the rest into the body. | still real |
-| F086 | 27–28 | "neither `--log_level` nor a `dictConfig` can reach it." | "a `dictConfig`" does not say why the plugin is unreachable. The plugin's lines are plain stdout, outside all four log streams, so no logging config touches them. | "neither `--log_level` nor your own logging config can reach it: these are plain stdout lines, outside the four log streams." | still real |
-| F087 | 23–24 | "Read this section for how a plugin works as much as for what this one prints." | It promises a benefit the section's own heading already delivers. | Delete the sentence. | still real |
+| F085 | 100–106 | "**The catch that decides where you use it.**" | The WARNING callout is six sentences long. House style allows one. | Replace it with "> **Use it locally only.** It writes with `print()` and terminal color codes, so it ignores your log levels and garbles Cloud Logging." Move the rest into the body. | done |
+| F086 | 27–28 | "neither `--log_level` nor a `dictConfig` can reach it." | "a `dictConfig`" does not say why the plugin is unreachable. The plugin's lines are plain stdout, outside all four log streams, so no logging config touches them. | "neither `--log_level` nor your own logging config can reach it: these are plain stdout lines, outside the four log streams." | done |
+| F087 | 23–24 | "Read this section for how a plugin works as much as for what this one prints." | It promises a benefit the section's own heading already delivers. | Delete the sentence. | done |
 
 ### tutorial/part-3/3.2-loggingplugin-cloud-run.md
 
@@ -356,22 +356,22 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F088 | 19–21 | "Example 03 configures no logging of its own, so `LOG_LEVEL` controls only the framework (stream 2), never the plugin." | `LOG_LEVEL` also controls your tool's own lines. `demo_agent/agent.py:29-33` applies `LOG_LEVEL` to the root logger too, so it also silences the tool's own `tool get_weather called` line (stream 1, your code's loggers). | "Example 03 configures no logging, but `demo_agent` applies `LOG_LEVEL` to the root and `google_adk` loggers, so it controls your tool's lines (stream 1) and the framework (stream 2), never the plugin." | still real |
+| F088 | 19–21 | "Example 03 configures no logging of its own, so `LOG_LEVEL` controls only the framework (stream 2), never the plugin." | `LOG_LEVEL` also controls your tool's own lines. `demo_agent/agent.py:29-33` applies `LOG_LEVEL` to the root logger too, so it also silences the tool's own `tool get_weather called` line (stream 1, your code's loggers). | "Example 03 configures no logging, but `demo_agent` applies `LOG_LEVEL` to the root and `google_adk` loggers, so it controls your tool's lines (stream 1) and the framework (stream 2), never the plugin." | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F089 | 81–82 | "**Expected output** — the full narration for both runs" | The output is two lines, not the full narration. It comes from a `--limit=10` read. The rerun on jwd-dev-2 returned the 10 newest lines of the WARNING run, and each run emits 64 plugin lines. | "**Expected output** (newest first, trimmed to two): plugin lines with blank severity and the terminal color codes in the payload" | still real |
-| F090 | 37 | "Two reads, each isolating one stream by a substring of its lines." | The first read does not isolate one stream. `textPayload:"logging_plugin"` also matches the framework's "Plugin 'logging_plugin' registered." line (`plugin_manager.py:121`). | "Two reads, each selecting lines by a substring. The first also catches the framework's 'Plugin registered' line." | still real |
+| F089 | 81–82 | "**Expected output** — the full narration for both runs" | The output is two lines, not the full narration. It comes from a `--limit=10` read. The rerun on jwd-dev-2 returned the 10 newest lines of the WARNING run, and each run emits 64 plugin lines. | "**Expected output** (newest first, trimmed to two): plugin lines with blank severity and the terminal color codes in the payload" | done |
+| F090 | 37 | "Two reads, each isolating one stream by a substring of its lines." | The first read does not isolate one stream. `textPayload:"logging_plugin"` also matches the framework's "Plugin 'logging_plugin' registered." line (`plugin_manager.py:121`). | "Two reads, each selecting lines by a substring. The first also catches the framework's 'Plugin registered' line." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F091 | 29 and 102 | "SCRIPT=examples/03_logging_plugin.py ./deploy/deploy_plugin_job.sh" | House style forbids inline env prefixes: export the variable, then run the script. The teardown also puts its flags on one line, and nothing says what the script does. | Use `export SCRIPT=examples/03_logging_plugin.py`, then the script, then `unset SCRIPT`. Put one flag per line in the teardown. Add "The script deploys the Job and runs it once at INFO." | still real |
-| F092 | 12 | "> [!TIP] **Optional. Why you are here.**" | The opening callout uses the wrong type. House style calls for a NOTE here, not a TIP. | Change `> [!TIP]` to `> [!NOTE]`. | still real |
-| F093 | 93 | "(The `google_adk` lines have 1.4's problem: on stderr, still Default.)" | "1.4's problem" is not spelled out. A reader has to remember 1.4 to decode "problem". | "(The `google_adk` lines also land with Default severity, as in 1.4.)" | still real |
+| F091 | 29 and 102 | "SCRIPT=examples/03_logging_plugin.py ./deploy/deploy_plugin_job.sh" | House style forbids inline env prefixes: export the variable, then run the script. The teardown also puts its flags on one line, and nothing says what the script does. | Use `export SCRIPT=examples/03_logging_plugin.py`, then the script, then `unset SCRIPT`. Put one flag per line in the teardown. Add "The script deploys the Job and runs it once at INFO." | done |
+| F092 | 12 | "> [!TIP] **Optional. Why you are here.**" | The opening callout uses the wrong type. House style calls for a NOTE here, not a TIP. | Change `> [!TIP]` to `> [!NOTE]`. | done |
+| F093 | 93 | "(The `google_adk` lines have 1.4's problem: on stderr, still Default.)" | "1.4's problem" is not spelled out. A reader has to remember 1.4 to decode "problem". | "(The `google_adk` lines also land with Default severity, as in 1.4.)" | done |
 
 ### tutorial/part-3/3.3-debugloggingplugin.md
 
@@ -379,23 +379,23 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F094 | 25 | "**👉 Do this**, then open the file it writes." | House style ends the Do this label with a period and puts the instruction after it. | "**👉 Do this.**" | still real |
-| F095 | 75 | The deep-dive heading "How it differs from LoggingPlugin in source" | House style writes deep-dive headings as questions, and this one is a statement. | Rename it to a question. | still real |
+| F094 | 25 | "**👉 Do this**, then open the file it writes." | House style ends the Do this label with a period and puts the instruction after it. | "**👉 Do this.**" | done |
+| F095 | 75 | The deep-dive heading "How it differs from LoggingPlugin in source" | House style writes deep-dive headings as questions, and this one is a statement. | Rename it to a question. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F096 | 54–58 | No mention that the user message is missing from the entry sequence | The file has no user-message entry, and the page never says so. `on_user_message_callback` runs before `before_run_callback` (`runners.py:677` vs `:695`). The plugin therefore drops the `user_message` entry and logs `No debug state for invocation …, skipping entry` on every run. | Add "Unlike `LoggingPlugin`, the file has no user-message entry; the prompt appears inside the first `llm_request`." | still real |
-| F097 | 38–52 | "**Expected output** — one YAML document for the invocation, a list of timestamped entries:" | The excerpt hides the document's header and per-entry fields. The real document is a mapping with `invocation_id`, `session_id`, `app_name`, `user_id`, `start_time`, then `entries:`. Each entry also carries `invocation_id` and `agent_name`. The excerpt drops these without saying so. The rerun on jwd-dev-2 confirmed the header, 14 entries, and no `user_message`. | Change the label to "one YAML document per invocation: a header, then an `entries:` list. First entry, trimmed:", and show the real fields. | still real |
-| F098 | 38 | "one YAML document" | The file holds one document per run, not one in total. The plugin opens the file with `O_APPEND` and writes `---` per invocation, so `cat` shows every earlier run. The rerun on jwd-dev-2 saw the existing file go from 4 to 5 documents. | Add "Each run appends a `---` document; delete the file first for a clean view." | still real |
-| F099 | 49 | "- text: What's the weather in a city you don't know, like Paris?" | The question changes from London to Paris with no explanation. Part 3 uses the London question everywhere else. | Add "Example 04 asks about a city the tool does not know, so the file includes an error path." Or switch the question to London. | still real |
+| F096 | 54–58 | No mention that the user message is missing from the entry sequence | The file has no user-message entry, and the page never says so. `on_user_message_callback` runs before `before_run_callback` (`runners.py:677` vs `:695`). The plugin therefore drops the `user_message` entry and logs `No debug state for invocation …, skipping entry` on every run. | Add "Unlike `LoggingPlugin`, the file has no user-message entry; the prompt appears inside the first `llm_request`." | done |
+| F097 | 38–52 | "**Expected output** — one YAML document for the invocation, a list of timestamped entries:" | The excerpt hides the document's header and per-entry fields. The real document is a mapping with `invocation_id`, `session_id`, `app_name`, `user_id`, `start_time`, then `entries:`. Each entry also carries `invocation_id` and `agent_name`. The excerpt drops these without saying so. The rerun on jwd-dev-2 confirmed the header, 14 entries, and no `user_message`. | Change the label to "one YAML document per invocation: a header, then an `entries:` list. First entry, trimmed:", and show the real fields. | done |
+| F098 | 38 | "one YAML document" | The file holds one document per run, not one in total. The plugin opens the file with `O_APPEND` and writes `---` per invocation, so `cat` shows every earlier run. The rerun on jwd-dev-2 saw the existing file go from 4 to 5 documents. | Add "Each run appends a `---` document; delete the file first for a clean view." | done |
+| F099 | 49 | "- text: What's the weather in a city you don't know, like Paris?" | The question changes from London to Paris with no explanation. Part 3 uses the London question everywhere else. | Add "Example 04 asks about a city the tool does not know, so the file includes an error path." Or switch the question to London. | done (kept Paris and said why: the file then includes the error path) |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F100 | 65 | "credential models, secret-named keys, private-key blocks, and **all** `temp:` state" | "credential models", "secret-named keys", and `temp:` state are not explained. | "credential objects, keys with secret-like names, private-key blocks, and every `temp:` state key (ADK's per-question scratch state)" | still real |
+| F100 | 65 | "credential models, secret-named keys, private-key blocks, and **all** `temp:` state" | "credential models", "secret-named keys", and `temp:` state are not explained. | "credential objects, keys with secret-like names, private-key blocks, and every `temp:` state key (ADK's per-question scratch state)" | done |
 
 ### tutorial/part-3/3.4-debugloggingplugin-cloud-run.md
 
@@ -403,17 +403,17 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F101 | 51–54 | "have the script `cat` the file to stdout at the end. It lands in Cloud Logging as one large text payload" | Stdout lands as one entry per line, not one payload. Cloud Run splits plain stdout on newlines, so the YAML lands as one entry per line. | "It lands in Cloud Logging as one entry per line, which you would have to stitch back together." | still real |
-| F102 | 31–32 and 61 | No mention that the script creates a bucket, and no step that deletes it | The teardown leaves the bucket and file behind. `deploy_plugin_job.sh` creates `gs://$BUCKET` if missing, which the page never says. The teardown deletes only the Job, so the bucket and `adk_debug.yaml` remain. | Add "The script creates `gs://$BUCKET` if it does not exist," and add `gcloud storage rm --recursive "gs://$BUCKET"` to the teardown. | still real |
+| F101 | 51–54 | "have the script `cat` the file to stdout at the end. It lands in Cloud Logging as one large text payload" | Stdout lands as one entry per line, not one payload. Cloud Run splits plain stdout on newlines, so the YAML lands as one entry per line. | "It lands in Cloud Logging as one entry per line, which you would have to stitch back together." | done |
+| F102 | 31–32 and 61 | No mention that the script creates a bucket, and no step that deletes it | The teardown leaves the bucket and file behind. `deploy_plugin_job.sh` creates `gs://$BUCKET` if missing, which the page never says. The teardown deletes only the Job, so the bucket and `adk_debug.yaml` remain. | Add "The script creates `gs://$BUCKET` if it does not exist," and add `gcloud storage rm --recursive "gs://$BUCKET"` to the teardown. | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F103 | 27 | "MOUNT=1 SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh" | House style forbids inline env prefixes. `$BUCKET` is never set on this page: it comes from `env.sh`, which only 3.2 sources. | Use `source env.sh`, `export MOUNT=1`, `export SCRIPT=examples/04_debug_plugin.py`, the script, then `unset MOUNT SCRIPT`. | still real |
-| F104 | 34–36 | "Cloud Logging has one more line, the plugin's own warning about the file it wrote:" | No command shows how to read the plugin's warning. The rerun on jwd-dev-2 found two plugin warnings in Cloud Logging: the file-mode one and `No debug state for invocation …, skipping entry`. | Add a `gcloud logging read` **Command:** before the output, and mention both warnings. | still real |
-| F105 | 44, 46 and 53 | "bucket IAM is your new `0600`", "'file, not stream' property", "Cloud Storage FUSE mount" | Each phrase is Unix or storage shorthand a reader has to decode. | "access to the bucket now protects the file", "the one-file-per-run property", and "the Cloud Storage volume mount" | still real |
-| F106 | 13–14 | "You would not run it on Cloud Run in practice" | This page and 3.5 disagree about Cloud Run. 3.5 says "From a Cloud Run Job, use the mounted bucket from 3.4." The two pages give opposite advice. | Reword one so both say the same thing. Suggest keeping 3.4's mounted-bucket advice and softening this sentence. | still real |
+| F103 | 27 | "MOUNT=1 SCRIPT=examples/04_debug_plugin.py ./deploy/deploy_plugin_job.sh" | House style forbids inline env prefixes. `$BUCKET` is never set on this page: it comes from `env.sh`, which only 3.2 sources. | Use `source env.sh`, `export MOUNT=1`, `export SCRIPT=examples/04_debug_plugin.py`, the script, then `unset MOUNT SCRIPT`. | done |
+| F104 | 34–36 | "Cloud Logging has one more line, the plugin's own warning about the file it wrote:" | No command shows how to read the plugin's warning. The rerun on jwd-dev-2 found two plugin warnings in Cloud Logging: the file-mode one and `No debug state for invocation …, skipping entry`. | Add a `gcloud logging read` **Command:** before the output, and mention both warnings. | done |
+| F105 | 44, 46 and 53 | "bucket IAM is your new `0600`", "'file, not stream' property", "Cloud Storage FUSE mount" | Each phrase is Unix or storage shorthand a reader has to decode. | "access to the bucket now protects the file", "the one-file-per-run property", and "the Cloud Storage volume mount" | done |
+| F106 | 13–14 | "You would not run it on Cloud Run in practice" | This page and 3.5 disagree about Cloud Run. 3.5 says "From a Cloud Run Job, use the mounted bucket from 3.4." The two pages give opposite advice. | Reword one so both say the same thing. Suggest keeping 3.4's mounted-bucket advice and softening this sentence. | done (3.4 now frames the run as a lesson, not as advice against Cloud Run) |
 
 ### tutorial/part-3/3.5-plugin-or-level.md
 
@@ -421,14 +421,14 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F107 | 41–43 | "DEBUG shows the framework's own internals (the wire-level request, HTTP retries, session-service work), none of which have plugin hooks." | Plugins can see the wire-level request. It passes through `before_model_callback`, and `DebugLoggingPlugin` captures it in full (3.3). | "DEBUG shows internals plugins cannot see: HTTP retries and session-service work." | still real |
+| F107 | 41–43 | "DEBUG shows the framework's own internals (the wire-level request, HTTP retries, session-service work), none of which have plugin hooks." | Plugins can see the wire-level request. It passes through `before_model_callback`, and `DebugLoggingPlugin` captures it in full (3.3). | "DEBUG shows internals plugins cannot see: HTTP retries and session-service work." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F108 | 24 | "3.2 proved it: WARNING silenced the framework and the narration kept going" | WARNING silenced more than the framework. It also silenced the tool's own line (stream 1), as 3.2 shows. | "WARNING silenced the `logging` lines and the narration kept going." | still real |
-| F109 | 26 and 56 | "You own the sink" and no handoff sentence to Part 4 | House style requires a closing sentence that introduces the next page. "Sink" is jargon for where output goes. | Add "Part 4 builds the structured plugin that works wherever you deploy," and change "You own the sink" to "You choose where the output goes." | still real |
+| F108 | 24 | "3.2 proved it: WARNING silenced the framework and the narration kept going" | WARNING silenced more than the framework. It also silenced the tool's own line (stream 1), as 3.2 shows. | "WARNING silenced the `logging` lines and the narration kept going." | done |
+| F109 | 26 and 56 | "You own the sink" and no handoff sentence to Part 4 | House style requires a closing sentence that introduces the next page. "Sink" is jargon for where output goes. | Add "Part 4 builds the structured plugin that works wherever you deploy," and change "You own the sink" to "You choose where the output goes." | done |
 
 ### tutorial/part-4/index.md
 
