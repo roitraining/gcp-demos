@@ -10,21 +10,21 @@
 
 > [!NOTE]
 > **Why you are here.** The tree is in Cloud Trace, but most of your logs are
-> not in it. This part joins them: one field on a log entry puts it under its
-> span, and this part stamps that field on every stream.
+> not in it. This part joins them: two fields on a log entry put it under its
+> span, and each page brings one more log stream into the join.
 
-The mechanism is one field. A log entry that carries a `trace` and a `spanId`
-matching a stored span shows up under that span in the Trace Explorer. ADK's own
-`gen_ai.*` events carry it for free; your logs, the framework's logs, and the
-request log do not, until you stamp them. Each page runs one scenario from
-[scenarios.md](../scenarios.md).
+A log entry that carries a `trace` and a `spanId` matching a stored span shows
+up under that span in the Trace Explorer. ADK's `gen_ai.*` events carry both for
+free. Your logs and the framework's need a bridge: a logging handler that copies
+the current span's ids onto each log record. The request log needs
+propagation.
 
 ```mermaid
 flowchart LR
   subgraph streams["log streams"]
     a["gen_ai.* events<br/>stamped by default"]
     b["your logger.info"]
-    c["google_adk / uvicorn"]
+    c["google_adk"]
     d["Cloud Run request_log"]
   end
   a --> J{{"trace + spanId<br/>match a span?"}}
@@ -34,7 +34,7 @@ flowchart LR
   J -->|yes| span["under its span in Trace Explorer"]
 ```
 
-*Four streams, one join. Each page below stamps the field on one more of them.*
+*Four streams, one join. Each page below brings one more stream in.*
 
 ## In this part
 
