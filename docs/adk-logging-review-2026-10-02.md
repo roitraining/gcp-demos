@@ -24,14 +24,14 @@
 ### Top 10 findings
 
 1. **wrong.** Part 6 says no `--otel_to_cloud` flag reaches a server on Agent Runtime and that an `AdkApp` reads `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY`. In ADK 2.8.0, `adk deploy agent_engine` deploys a container that starts `adk api_server`, and both of Part 6's methods (the flag in 6.2, the `.env` line in 6.3) make the CLI add `--otel_to_cloud` to that start command (`cli/cli_deploy.py:1273-1292`, `:1392`). The 6.3 rerun printed "`--otel_to_cloud` is set to True by GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY". The pages' result still holds: no `gen_ai.*` logs and no traces arrived. *Status: still real.*
-2. **wrong.** 5.5 Step 4 fails today. The service answers, but no `gen_ai.*` entries reach Cloud Logging, and it logs `Failed to export logs batch code: 400`. `requirements.txt` asks for `google-adk>=2.8.0`, so the image gets 2.11.0, which rejects this server's log export. *Status: still real (the `>=2.8.0` cause is fixed on main; rerun pending).*
-3. **wrong.** 5.4 says the logs hide message content because of `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS`. That variable only affects spans. The logs hide content because `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` defaults to `NO_CONTENT`. 5.4 also expects one `operation.details` event per model call; the rerun got three separate event types, because the deploy doesn't opt in to the experimental format. *Status: still real.*
+2. **wrong.** 5.5 Step 4 fails today. The service answers, but no `gen_ai.*` entries reach Cloud Logging, and it logs `Failed to export logs batch code: 400`. `requirements.txt` asks for `google-adk>=2.8.0`, so the image gets 2.11.0, which rejects this server's log export. *Status: done (pin fixed on main; Step 4 now delivers events, rerun 2026-10-02).*
+3. **wrong.** 5.4 says the logs hide message content because of `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS`. That variable only affects spans. The logs hide content because `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` defaults to `NO_CONTENT`. 5.4 also expects one `operation.details` event per model call; the rerun got three separate event types, because the deploy doesn't opt in to the experimental format. *Status: done.*
 4. **wrong.** 4.2 says one logging config covers "all four streams", including the `uvicorn.access` filter from Part 2. `examples/06_custom_server.py` sets up neither OpenTelemetry nor that filter, and its access lines carry no trace id. *Status: done.*
 5. **wrong.** 4.4 says you can filter Cloud Logging on the logger name `agent.telemetry`. The deployed server's formatter never writes the logger name, and the filter returned nothing on the rerun. *Status: done.*
 6. **wrong.** Five pages create cloud resources and never delete them: 1.4 (a Cloud Run job), 1.5 (two services), 3.4 (a storage bucket holding full prompts), 6.2 and 6.3 (two Agent Runtime engines). *Status: still real.*
 7. **misleading.** The gitignored `demo_agent/.env` changes results from page to page. Setup never creates it, but 1.6 and Part 6 write it, and Cloud Run images include it. On the reruns, its `LOG_LEVEL=info` overrode `--log_level WARNING` in 1.3, and its `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` hid span content in 5.2. 6.2's "restore" step writes `LOG_LEVEL=info` back into it. *Status: still real.*
 8. **wrong.** 4.1 shows 3 of the 6 lines one question produces, and 4.3's table shows 6 of 8. A question that uses the weather tool calls the model twice, and several pages show only one call without saying the output is trimmed. *Status: still real.*
-9. **wrong.** Two 5.5 claims hold only with settings in the author's gitignored root `.env`: the `generic_task` resource with a `job` label (needs `service.instance.id`), and `<elided>` content. A reader starting from `.env.example` sees neither. *Status: still real.*
+9. **wrong.** Two 5.5 claims hold only with settings in the author's gitignored root `.env`: the `generic_task` resource with a `job` label (needs `service.instance.id`), and `<elided>` content. A reader starting from `.env.example` sees neither. *Status: done.*
 10. **wrong.** `deploy/deploy_job.sh` and `deploy/deploy_api.sh` end by telling the reader that stderr lines get ERROR severity. 1.4 shows, and the rerun confirmed, that they arrive with blank (Default) severity. *Status: still real.*
 
 ---
@@ -561,9 +561,9 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F140 | 13–16 | The "Why you are here" note | The note runs longer than one sentence. House style allows one. | Cut it to one sentence. | still real |
-| F141 | 16 | "adds **export**, not tracing" | House style does not use bold for emphasis. | Remove the bold from "export". | still real |
-| F142 | 23, 24, 27, 28 and 29 | The table titles for 5.1, 5.2, 5.5, 5.6 and 5.7 | They differ from each page's H1 and nav label, so one page has two titles. | Make them match, so every page has one title. | still real |
+| F140 | 13–16 | The "Why you are here" note | The note runs longer than one sentence. House style allows one. | Cut it to one sentence. | done |
+| F141 | 16 | "adds **export**, not tracing" | House style does not use bold for emphasis. | Remove the bold from "export". | done |
+| F142 | 23, 24, 27, 28 and 29 | The table titles for 5.1, 5.2, 5.5, 5.6 and 5.7 | They differ from each page's H1 and nav label, so one page has two titles. | Make them match, so every page has one title. | done |
 
 ### tutorial/part-5/5.0-what-stream-4-is.md
 
@@ -571,21 +571,21 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F143 | 48–49 | "every trace in this part reads itself" | The phrase is figurative and gives the reader nothing to act on. | "The traces in this part use only these." | still real |
+| F143 | 48–49 | "every trace in this part reads itself" | The phrase is figurative and gives the reader nothing to act on. | "The traces in this part use only these." | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F144 | 13–14 | "all produced by ADK itself with no extra packages" | This holds only when nothing is configured. With `--otel_to_cloud` and `google-adk[otel-gcp]` installed, a separate library, `opentelemetry-instrumentation-google-genai`, produces the `generate_content` span, the `gen_ai.*` events and the token metrics instead of ADK (ADK checks this in `_should_emit_native_telemetry`). The 5.2 deep dive says so, so the two pages disagree. | Add "With `--otel_to_cloud` and `google-adk[otel-gcp]`, the `opentelemetry-instrumentation-google-genai` library produces the `generate_content` span and the events instead (5.2)." | still real |
-| F145 | 8 | "# 5.0 · What stream 4 is" | Part 5 is the only part numbered from N.0. 5.0 is a concept page with no "Why you are here" note, no step and no command. Every other part starts at N.1. | Fold 5.0 into `part-5/index.md` and start numbering at 5.1. Or give 5.0 the standard subtask layout and record the N.0 convention in the tutorial's `CLAUDE.md`. | still real |
+| F144 | 13–14 | "all produced by ADK itself with no extra packages" | This holds only when nothing is configured. With `--otel_to_cloud` and `google-adk[otel-gcp]` installed, a separate library, `opentelemetry-instrumentation-google-genai`, produces the `generate_content` span, the `gen_ai.*` events and the token metrics instead of ADK (ADK checks this in `_should_emit_native_telemetry`). The 5.2 deep dive says so, so the two pages disagree. | Add "With `--otel_to_cloud` and `google-adk[otel-gcp]`, the `opentelemetry-instrumentation-google-genai` library produces the `generate_content` span and the events instead (5.2)." | done |
+| F145 | 8 | "# 5.0 · What stream 4 is" | Part 5 is the only part numbered from N.0. 5.0 is a concept page with no "Why you are here" note, no step and no command. Every other part starts at N.1. | Fold 5.0 into `part-5/index.md` and start numbering at 5.1. Or give 5.0 the standard subtask layout and record the N.0 convention in the tutorial's `CLAUDE.md`. | done (kept the 5.0 number and gave the page a Why-you-are-here note and handoff; the N.0 convention is not recorded in the tutorial's CLAUDE.md, which this pass did not edit) |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F146 | 12–14 | No definition of OpenTelemetry, OTel, span, trace or OTLP | This is where the reader first meets all five terms, and none is explained. | Add "Stream 4 is OpenTelemetry (OTel), a separate telemetry SDK. A span is one timed operation; a trace is the tree of spans for one question." | still real |
-| F147 | 12 | "Streams 1-3 are Python `logging`" | The reader has to look back to learn which streams these are. | "Streams 1-3 (your code, `google_adk`, `uvicorn.access`) are Python `logging`." | still real |
+| F146 | 12–14 | No definition of OpenTelemetry, OTel, span, trace or OTLP | This is where the reader first meets all five terms, and none is explained. | Add "Stream 4 is OpenTelemetry (OTel), a separate telemetry SDK. A span is one timed operation; a trace is the tree of spans for one question." | done |
+| F147 | 12 | "Streams 1-3 are Python `logging`" | The reader has to look back to learn which streams these are. | "Streams 1-3 (your code, `google_adk`, `uvicorn.access`) are Python `logging`." | done |
 
 ### tutorial/part-5/5.1-adk-web-already-tracing.md
 
@@ -593,16 +593,16 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F148 | Whole page | The page runs 852 words | It is over the 750-word limit. | Cut to the 750-word limit. | still real |
-| F149 | 13–16 | "a short list of deltas" | The "Why you are here" note runs three sentences. House style allows one. | Cut the note to one sentence. | still real |
-| F150 | 84 and 104 | "Where these spans have been living"; "The endpoint behind the tab" | House style writes deep-dive headings as questions. | Rename both to questions. | still real |
+| F148 | Whole page | The page runs 852 words | It is over the 750-word limit. | Cut to the 750-word limit. | done |
+| F149 | 13–16 | "a short list of deltas" | The "Why you are here" note runs three sentences. House style allows one. | Cut the note to one sentence. | done |
+| F150 | 84 and 104 | "Where these spans have been living"; "The endpoint behind the tab" | House style writes deep-dive headings as questions. | Rename both to questions. | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F151 | 26–27 | "Go to `localhost:8000`, pick **demo_agent** from the app dropdown, start a new session or reuse one, and ask:" | Four separate actions share one sentence, which is hard to follow while clicking. | Split it into one bullet per action. | still real |
-| F152 | 71 | "the join key back to the `/run` response's event list" | Nothing on this page calls `/run`, so the reader has no response to compare against. | "it matches the event ids in an `adk api_server` `/run` response (1.3)." | still real |
+| F151 | 26–27 | "Go to `localhost:8000`, pick **demo_agent** from the app dropdown, start a new session or reuse one, and ask:" | Four separate actions share one sentence, which is hard to follow while clicking. | Split it into one bullet per action. | done |
+| F152 | 71 | "the join key back to the `/run` response's event list" | Nothing on this page calls `/run`, so the reader has no response to compare against. | "it matches the event ids in an `adk api_server` `/run` response (1.3)." | done |
 
 ### tutorial/part-5/5.2-otel-to-cloud.md
 
@@ -610,31 +610,31 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F153 | 181–183 | "If they hold the prompt and reply, `=true` turned content on in both streams, and Step 3 turns the span side off. If they are already empty, Step 3 has nothing to turn off." | The page says the spans may be empty of prompt and reply text. `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` defaults to on (`google/adk/telemetry/context.py:107-113`), so the spans carry the prompt and reply from Step 1 on, whatever `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` says. The rerun on jwd-dev-4 showed full text in a clean copy, but empty spans (`{}`) in the working tree, because the gitignored `demo_agent/.env` sets `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false`. | Replace both sentences with "The spans hold the prompt and reply, and did in Step 1 too: `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` defaults to on and does not depend on the event setting. Step 3 turns it off." Also add to Step 1's "What you are looking at" (line 114): "`<elided>` applies to the log events only, not the spans." | still real |
+| F153 | 181–183 | "If they hold the prompt and reply, `=true` turned content on in both streams, and Step 3 turns the span side off. If they are already empty, Step 3 has nothing to turn off." | The page says the spans may be empty of prompt and reply text. `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` defaults to on (`google/adk/telemetry/context.py:107-113`), so the spans carry the prompt and reply from Step 1 on, whatever `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` says. The rerun on jwd-dev-4 showed full text in a clean copy, but empty spans (`{}`) in the working tree, because the gitignored `demo_agent/.env` sets `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false`. | Replace both sentences with "The spans hold the prompt and reply, and did in Step 1 too: `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` defaults to on and does not depend on the event setting. Step 3 turns it off." Also add to Step 1's "What you are looking at" (line 114): "`<elided>` applies to the log events only, not the spans." | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F154 | Whole page | The page runs 2,024 words | It is 2.7 times the word limit, and about 1,000 words are deep dives. | Cut toward the limit. | still real |
-| F155 | 119–312 | Steps 2 to 5, which cover the content settings | They make one page do two jobs: the flag, and the content settings. | Move them to their own page. | still real |
-| F156 | 318–425 | Deep dives on IAM roles, the metrics 400 error and `.env` | They are reference material that lengthens a tutorial page. | Move them to how-to-choose or 5.6. | still real |
-| F157 | 57, 132, 221 and 279 | The London prompt fence appears four times | Repeating the same fence adds length and nothing new. | Show it once, then say "Ask the London question in a new session." | still real |
+| F154 | Whole page | The page runs 2,024 words | It is 2.7 times the word limit, and about 1,000 words are deep dives. | Cut toward the limit. | done in part (2,024 to about 1,370 words by moving three deep dives to how-to-choose and showing the prompt once; still over 750, see F155) |
+| F155 | 119–312 | Steps 2 to 5, which cover the content settings | They make one page do two jobs: the flag, and the content settings. | Move them to their own page. | skipped: splitting Steps 4-8 into their own page would renumber 5.3-5.8 and every cross-reference to them; left for an author decision |
+| F156 | 318–425 | Deep dives on IAM roles, the metrics 400 error and `.env` | They are reference material that lengthens a tutorial page. | Move them to how-to-choose or 5.6. | done (moved to a new 'OpenTelemetry setup details' section in how-to-choose) |
+| F157 | 57, 132, 221 and 279 | The London prompt fence appears four times | Repeating the same fence adds length and nothing new. | Show it once, then say "Ask the London question in a new session." | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F158 | 20–21 | "The flag authenticates with Application Default Credentials (ADC), not a key file or `GOOGLE_API_KEY`." | A key file named by `GOOGLE_APPLICATION_CREDENTIALS` is itself a form of ADC, so the contrast is false. | "…with Application Default Credentials (ADC), not `GOOGLE_API_KEY`." | still real |
+| F158 | 20–21 | "The flag authenticates with Application Default Credentials (ADC), not a key file or `GOOGLE_API_KEY`." | A key file named by `GOOGLE_APPLICATION_CREDENTIALS` is itself a form of ADC, so the contrast is false. | "…with Application Default Credentials (ADC), not `GOOGLE_API_KEY`." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F159 | 206 and 213 | "semantic convention" and `gen_ai_latest_experimental` (Step 4) | Step 4 uses both terms without defining them. The reader cannot tell what the two formats are or how they differ. | Add "A semantic convention is OpenTelemetry's naming scheme for GenAI telemetry. The default format writes separate `gen_ai.system.message`, `gen_ai.user.message`, and `gen_ai.choice` events; the experimental one writes one `gen_ai.client.inference.operation.details` event per model call." | still real |
-| F160 | 442 | No cleanup step at the end of the page | Exports from Steps 1 to 5 stay set in the shell. `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false`, `OTEL_SEMCONV_STABILITY_OPT_IN` and the `EVENT_ONLY` event content setting are all still exported when the reader starts 5.3. The rerun on jwd-dev-4 confirmed this. | End the page with `unset` lines for all four variables. Or add "Close this terminal before 5.3." | still real |
-| F161 | 17, 64 and 178 | "**Before you start, once.**", "**Read the turn back.**" and "Now check the spans." | These are steps but lack the `**Step N — …**` label, and the prerequisite commands sit as inline code in a list with no command fence. | Make each one a numbered Step with a **Command:** fence, and have 5.3 and 5.4 link back to them. | still real |
-| F162 | 67, 64–65 and 178–179; 5.4 lines 66–69 | **Command:** followed by the query `logName=~"gen_ai\."` | It is a query typed into a browser, not a command. The Logs Explorer and Trace Explorer directions are also prose, not bullets. 5.4 has the same problem. | Label it "**Query:**" and write the Logs Explorer and Trace Explorer directions as bullets, here and in 5.4. | still real |
+| F159 | 206 and 213 | "semantic convention" and `gen_ai_latest_experimental` (Step 4) | Step 4 uses both terms without defining them. The reader cannot tell what the two formats are or how they differ. | Add "A semantic convention is OpenTelemetry's naming scheme for GenAI telemetry. The default format writes separate `gen_ai.system.message`, `gen_ai.user.message`, and `gen_ai.choice` events; the experimental one writes one `gen_ai.client.inference.operation.details` event per model call." | done |
+| F160 | 442 | No cleanup step at the end of the page | Exports from Steps 1 to 5 stay set in the shell. `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false`, `OTEL_SEMCONV_STABILITY_OPT_IN` and the `EVENT_ONLY` event content setting are all still exported when the reader starts 5.3. The rerun on jwd-dev-4 confirmed this. | End the page with `unset` lines for all four variables. Or add "Close this terminal before 5.3." | done |
+| F161 | 17, 64 and 178 | "**Before you start, once.**", "**Read the turn back.**" and "Now check the spans." | These are steps but lack the `**Step N — …**` label, and the prerequisite commands sit as inline code in a list with no command fence. | Make each one a numbered Step with a **Command:** fence, and have 5.3 and 5.4 link back to them. | done |
+| F162 | 67, 64–65 and 178–179; 5.4 lines 66–69 | **Command:** followed by the query `logName=~"gen_ai\."` | It is a query typed into a browser, not a command. The Logs Explorer and Trace Explorer directions are also prose, not bullets. 5.4 has the same problem. | Label it "**Query:**" and write the Logs Explorer and Trace Explorer directions as bullets, here and in 5.4. | done |
 
 ### tutorial/part-5/5.3-api-server.md
 
@@ -642,20 +642,20 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F163 | 55–61 | `curl -s -X POST localhost:8000/apps/demo_agent/users/u1/sessions/s5-api \` and the `/run` call | Several flags share one line, which is hard to scan. | Put each flag on its own line. | still real |
+| F163 | 55–61 | `curl -s -X POST localhost:8000/apps/demo_agent/users/u1/sessions/s5-api \` and the `/run` call | Several flags share one line, which is hard to scan. | Put each flag on its own line. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F164 | 65–69 | "The entries match 5.2 Step 4…" | The page shows no output block, and how-to-choose says this run was not repeated, but the page does not say so. The rerun on jwd-dev-4 confirmed there is nothing to compare against. | Capture the output and show it. Or add "Not re-run in this sequence; see Not verified in how-to-choose." | still real |
+| F164 | 65–69 | "The entries match 5.2 Step 4…" | The page shows no output block, and how-to-choose says this run was not repeated, but the page does not say so. The rerun on jwd-dev-4 confirmed there is nothing to compare against. | Capture the output and show it. Or add "Not re-run in this sequence; see Not verified in how-to-choose." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F165 | 64–65 | "terminal 1 prints the same five INFO lines as 5.1" | 5.1 never shows those lines. 5.2 does. | Change "5.1" to "5.2". | still real |
-| F166 | 53 | `START=$(date -u +%Y-%m-%dT%H:%M:%SZ)` | Nothing later reads `START`, so the reader wonders what it is for. | Delete the line. | still real |
+| F165 | 64–65 | "terminal 1 prints the same five INFO lines as 5.1" | 5.1 never shows those lines. 5.2 does. | Change "5.1" to "5.2". | done |
+| F166 | 53 | `START=$(date -u +%Y-%m-%dT%H:%M:%SZ)` | Nothing later reads `START`, so the reader wonders what it is for. | Delete the line. | done |
 
 ### tutorial/part-5/5.4-cloud-run.md
 
@@ -663,28 +663,28 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F167 | 75–76 | "The same events appear, one `gen_ai.client.inference.operation.details` per `call_llm`" | The deploy does not set `OTEL_SEMCONV_STABILITY_OPT_IN`, so the events come in the default format: separate `gen_ai.system.message`, `gen_ai.user.message`, and `gen_ai.choice` events (`opentelemetry/instrumentation/google_genai/generate_content.py:1017`). The rerun on jwd-dev-4 showed eight events in that format and none named `operation.details`. | "The same `gen_ai.system.message`, `gen_ai.user.message`, and `gen_ai.choice` events as 5.2 Step 1 appear, now from Cloud Run. To get one `operation.details` event per model call instead, add `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental` to `--set-env-vars`." | still real |
-| F168 | 76–78 | "Content is off (`<elided>`) because `demo_agent/.env`'s `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` shipped inside the image." | That variable controls content on spans only, as 5.6 itself says. Content in the log events is off because `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` is `NO_CONTENT`, which is also its default. | "Event content is elided because `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` defaults to `NO_CONTENT`. Span content is controlled separately by `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS`, which defaults to on; `adk deploy cloud_run` does not turn it off." | still real |
-| F169 | 109–111 | "The container needs `google-adk[otel-gcp]` or it boot-crashes on the unconditional Cloud Logging import (`telemetry/google_cloud.py:272`)." | The page names the wrong package for the boot crash. Line 272 imports `opentelemetry.exporter.cloud_logging`, which comes from the `opentelemetry-exporter-gcp-logging` package. The `[otel-gcp]` extra installs only three instrumentation libraries (google-genai, grpc, httpx), checked with `importlib.metadata.requires("google-adk")`. | "The container needs `opentelemetry-exporter-gcp-logging` and `opentelemetry-exporter-otlp-proto-http`, or it crashes on boot at the Cloud Logging import (`telemetry/google_cloud.py:272`). `demo_agent/requirements.txt` pins both." | still real |
+| F167 | 75–76 | "The same events appear, one `gen_ai.client.inference.operation.details` per `call_llm`" | The deploy does not set `OTEL_SEMCONV_STABILITY_OPT_IN`, so the events come in the default format: separate `gen_ai.system.message`, `gen_ai.user.message`, and `gen_ai.choice` events (`opentelemetry/instrumentation/google_genai/generate_content.py:1017`). The rerun on jwd-dev-4 showed eight events in that format and none named `operation.details`. | "The same `gen_ai.system.message`, `gen_ai.user.message`, and `gen_ai.choice` events as 5.2 Step 1 appear, now from Cloud Run. To get one `operation.details` event per model call instead, add `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental` to `--set-env-vars`." | done |
+| F168 | 76–78 | "Content is off (`<elided>`) because `demo_agent/.env`'s `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` shipped inside the image." | That variable controls content on spans only, as 5.6 itself says. Content in the log events is off because `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` is `NO_CONTENT`, which is also its default. | "Event content is elided because `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` defaults to `NO_CONTENT`. Span content is controlled separately by `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS`, which defaults to on; `adk deploy cloud_run` does not turn it off." | done |
+| F169 | 109–111 | "The container needs `google-adk[otel-gcp]` or it boot-crashes on the unconditional Cloud Logging import (`telemetry/google_cloud.py:272`)." | The page names the wrong package for the boot crash. Line 272 imports `opentelemetry.exporter.cloud_logging`, which comes from the `opentelemetry-exporter-gcp-logging` package. The `[otel-gcp]` extra installs only three instrumentation libraries (google-genai, grpc, httpx), checked with `importlib.metadata.requires("google-adk")`. | "The container needs `opentelemetry-exporter-gcp-logging` and `opentelemetry-exporter-otlp-proto-http`, or it crashes on boot at the Cloud Logging import (`telemetry/google_cloud.py:272`). `demo_agent/requirements.txt` pins both." | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F170 | 51–52, 54–60 and 86 | The `describe`, `delete` and curl commands | Several flags share one line, which is hard to scan. | Put each flag on its own line. | still real |
-| F171 | 94 and 105 | "Where .env goes and why the location is repeated"; "Two deploy traps" | House style writes deep-dive headings as questions. | Rename both to questions. | still real |
+| F170 | 51–52, 54–60 and 86 | The `describe`, `delete` and curl commands | Several flags share one line, which is hard to scan. | Put each flag on its own line. | done |
+| F171 | 94 and 105 | "Where .env goes and why the location is repeated"; "Two deploy traps" | House style writes deep-dive headings as questions. | Rename both to questions. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F172 | 96–97 | "`adk deploy cloud_run` copies the whole agent folder, including `demo_agent/.env`" | The page assumes a `demo_agent/.env` exists. It is gitignored and Setup never creates it, so a reader following the tutorial ships no such file. | "…including a `demo_agent/.env` if you created one." Setup needs a matching fix (see the 00-setup finding). | still real |
+| F172 | 96–97 | "`adk deploy cloud_run` copies the whole agent folder, including `demo_agent/.env`" | The page assumes a `demo_agent/.env` exists. It is gitignored and Setup never creates it, so a reader following the tutorial ships no such file. | "…including a `demo_agent/.env` if you created one." Setup needs a matching fix (see the 00-setup finding). | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F173 | 46–79 | No Expected output in Steps 2 and 3 | The reader cannot tell whether their run worked. | Add a trimmed response and one log entry from a real run to each step. | still real |
+| F173 | 46–79 | No Expected output in Steps 2 and 3 | The reader cannot tell whether their run worked. | Add a trimmed response and one log entry from a real run to each step. | done |
 
 ### tutorial/part-5/5.5-your-own-server.md
 
@@ -692,25 +692,25 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F174 | 134–135 | "Curl the service, read `gen_ai.*` back as in Step 2 (the resource `job` is now the Cloud Run service, content `<elided>`)" | Step 4 expects log entries that never arrive. In the rerun on jwd-dev-4, `/chat` answered but no `gen_ai.*` entries reached Cloud Logging; the service logged `Failed to export logs batch code: 400`. The image installs `google-adk[otel-gcp]>=2.8.0`, which now gets 2.11.0, and 2.11.0's log export needs a `gcp.project_id` this server never sets. Steps 1–3 work because the local `.venv` has 2.8.0. Even on 2.8.0, this server does not detect Cloud Run (`telemetry/setup.py:117-122`), so `job` stays `weather-agent`. | Pin `google-adk[otel-gcp]==2.8.0` in the image (see the requirements.txt finding below). Change the parenthetical to "(the `job` is still `weather-agent`; this path does not detect Cloud Run)". | still real (the `>=2.8.0` cause is fixed on main; the `job` claim remains) |
-| F175 | 64–66 | "They land on a `generic_task` resource whose `job` is your `OTEL_SERVICE_NAME` (`weather-agent`)" | The resource type is wrong. OpenTelemetry's GCP resource detector uses `generic_task` only when both `service.name` and `service.instance.id` are set (`opentelemetry/resourcedetector/gcp_resource_detector/_mapping.py:164-173`). Otherwise it uses `generic_node`, which has no `job` label. `.env.example` sets no `OTEL_RESOURCE_ATTRIBUTES`. The author's gitignored `.env` sets `service.instance.id=laptop-1`, which is why the page's capture worked. The rerun on jwd-dev-4 confirmed it. | "Set `OTEL_RESOURCE_ATTRIBUTES=service.instance.id=laptop-1` so the entries land on `generic_task` with `job` = `weather-agent`." | still real |
-| F176 | 104 | "Every `gen_ai.*` entry now reads `<elided>` in the content field" | Step 3 also turns on the experimental event format. In that format, with this server (where ADK emits the events itself), `NO_CONTENT` leaves the content fields out entirely (`_experimental_semconv.py:611-625`). `<elided>` appears only in the default format. The rerun on jwd-dev-4 confirmed it. | "Each entry is now one `gen_ai.client.inference.operation.details` event with no `gen_ai.input.messages` or `gen_ai.output.messages` field." | still real |
+| F174 | 134–135 | "Curl the service, read `gen_ai.*` back as in Step 2 (the resource `job` is now the Cloud Run service, content `<elided>`)" | Step 4 expects log entries that never arrive. In the rerun on jwd-dev-4, `/chat` answered but no `gen_ai.*` entries reached Cloud Logging; the service logged `Failed to export logs batch code: 400`. The image installs `google-adk[otel-gcp]>=2.8.0`, which now gets 2.11.0, and 2.11.0's log export needs a `gcp.project_id` this server never sets. Steps 1–3 work because the local `.venv` has 2.8.0. Even on 2.8.0, this server does not detect Cloud Run (`telemetry/setup.py:117-122`), so `job` stays `weather-agent`. | Pin `google-adk[otel-gcp]==2.8.0` in the image (see the requirements.txt finding below). Change the parenthetical to "(the `job` is still `weather-agent`; this path does not detect Cloud Run)". | done (with the pin, the 2026-10-02 Cloud Run run delivered the events; they land on `generic_node` with no `job`, so the page says that instead of the review's `weather-agent`) |
+| F175 | 64–66 | "They land on a `generic_task` resource whose `job` is your `OTEL_SERVICE_NAME` (`weather-agent`)" | The resource type is wrong. OpenTelemetry's GCP resource detector uses `generic_task` only when both `service.name` and `service.instance.id` are set (`opentelemetry/resourcedetector/gcp_resource_detector/_mapping.py:164-173`). Otherwise it uses `generic_node`, which has no `job` label. `.env.example` sets no `OTEL_RESOURCE_ATTRIBUTES`. The author's gitignored `.env` sets `service.instance.id=laptop-1`, which is why the page's capture worked. The rerun on jwd-dev-4 confirmed it. | "Set `OTEL_RESOURCE_ATTRIBUTES=service.instance.id=laptop-1` so the entries land on `generic_task` with `job` = `weather-agent`." | done (Step 1 adds `OTEL_RESOURCE_ATTRIBUTES=service.instance.id=laptop-1` to the root `.env`) |
+| F176 | 104 | "Every `gen_ai.*` entry now reads `<elided>` in the content field" | Step 3 also turns on the experimental event format. In that format, with this server (where ADK emits the events itself), `NO_CONTENT` leaves the content fields out entirely (`_experimental_semconv.py:611-625`). `<elided>` appears only in the default format. The rerun on jwd-dev-4 confirmed it. | "Each entry is now one `gen_ai.client.inference.operation.details` event with no `gen_ai.input.messages` or `gen_ai.output.messages` field." | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F177 | 71–73 | "it carries `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`, so the Step 1 entries show the prompt and reply text. Comment out that `true` line if it is there" | The Step 1 content setting cannot be reproduced. `.env.example` has no `=true` line, so a new reader's Step 1 shows no content, and Step 3's before and after cannot be reproduced. The rerun on jwd-dev-4 showed no content in the working tree too, because the author's `.env` holds `NO_CONTENT` and the experimental format. | "Before Step 1, add `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true` to the root `.env`. Step 3 changes it to `NO_CONTENT`." | still real |
-| F178 | 113–129 | Step 4's `gcloud run deploy`, with no "not run" label | how-to-choose lists this deploy as not verified, but the page does not say so. | Capture a real deploy and its output. Or add "Not yet deployed; see how-to-choose." | still real |
-| F179 | 119–128 | `cp deploy/Dockerfile.otel_server ./Dockerfile … gcloud run deploy … rm -f ./Dockerfile` | `rm` runs only if the deploy succeeds, so a failed deploy leaves `./Dockerfile` in the repo. | Move the commands into a `deploy/` script that removes the file on exit, as the other deploy scripts do. | still real |
+| F177 | 71–73 | "it carries `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true`, so the Step 1 entries show the prompt and reply text. Comment out that `true` line if it is there" | The Step 1 content setting cannot be reproduced. `.env.example` has no `=true` line, so a new reader's Step 1 shows no content, and Step 3's before and after cannot be reproduced. The rerun on jwd-dev-4 showed no content in the working tree too, because the author's `.env` holds `NO_CONTENT` and the experimental format. | "Before Step 1, add `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true` to the root `.env`. Step 3 changes it to `NO_CONTENT`." | done |
+| F178 | 113–129 | Step 4's `gcloud run deploy`, with no "not run" label | how-to-choose lists this deploy as not verified, but the page does not say so. | Capture a real deploy and its output. Or add "Not yet deployed; see how-to-choose." | done (deployed and captured on jwd-gcp-demos, 2026-10-02) |
+| F179 | 119–128 | `cp deploy/Dockerfile.otel_server ./Dockerfile … gcloud run deploy … rm -f ./Dockerfile` | `rm` runs only if the deploy succeeds, so a failed deploy leaves `./Dockerfile` in the repo. | Move the commands into a `deploy/` script that removes the file on exit, as the other deploy scripts do. | done (new `deploy/deploy_otel_server.sh` removes `./Dockerfile` on exit) |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F180 | 67 | No mention of traces | This server sets up export for logs only, not traces. With no trace export configured, ADK's spans record nothing, so the log entries carry no `trace` or `spanId`. The rerun on jwd-dev-4 confirmed it, and 5.8's "correlated automatically" does not hold here. | Add "This exports log events only. Spans need `enable_cloud_tracing=True`." | still real |
-| F181 | 53, 100 and 145 | `"What is the weather in London?"` | The prompt is spelled three different ways across Part 5. The rest of the part uses a different phrasing for the same question. | Change all three to "What's the weather in London?" | still real |
-| F182 | 69 and 79–83 | "**Step 3 — The content knob, set through `.env`.**" | Step labels are verb phrases. The `.env` snippet also sits in a `bash` fence with a `#` line, though it is not shell. | "**Step 3 — Set the content setting in `.env`.**" and put the snippet in a plain fence. | still real |
+| F180 | 67 | No mention of traces | This server sets up export for logs only, not traces. With no trace export configured, ADK's spans record nothing, so the log entries carry no `trace` or `spanId`. The rerun on jwd-dev-4 confirmed it, and 5.8's "correlated automatically" does not hold here. | Add "This exports log events only. Spans need `enable_cloud_tracing=True`." | done |
+| F181 | 53, 100 and 145 | `"What is the weather in London?"` | The prompt is spelled three different ways across Part 5. The rest of the part uses a different phrasing for the same question. | Change all three to "What's the weather in London?" | done |
+| F182 | 69 and 79–83 | "**Step 3 — The content knob, set through `.env`.**" | Step labels are verb phrases. The `.env` snippet also sits in a `bash` fence with a `#` line, though it is not shell. | "**Step 3 — Set the content setting in `.env`.**" and put the snippet in a plain fence. | done |
 
 ### tutorial/part-5/5.6-content-knobs.md
 
@@ -718,26 +718,26 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F183 | 27–29 | "A truthy value like `=true` on the event knob is read as `EVENT_ONLY` for back-compat (`telemetry/context.py:94-101`), which is why 5.2 Step 2's `=true` worked." | The page says `=true` always works as `EVENT_ONLY`. With `--otel_to_cloud` and a Gemini model, the `opentelemetry-instrumentation-google-genai` library emits the events and reads `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` itself (`google_genai/flags.py`), not through ADK's mapping. In the default format only `true` turns content on. In the experimental format only `EVENT_ONLY`, `SPAN_ONLY` and `SPAN_AND_EVENT` work; `true` logs a warning and falls back to `NO_CONTENT` (`opentelemetry/util/genai/utils.py:45-65`). ADK's mapping of `true` to `EVENT_ONLY` applies only when ADK emits the events itself, as on 5.5's server. | "Which value works depends on who emits the events. With the CLI flag, the default format takes `true`, and the experimental format takes `EVENT_ONLY`, `SPAN_ONLY`, or `SPAN_AND_EVENT`. On your own server (5.5), ADK reads it and also accepts `true` (`context.py:94-101`)." | still real |
+| F183 | 27–29 | "A truthy value like `=true` on the event knob is read as `EVENT_ONLY` for back-compat (`telemetry/context.py:94-101`), which is why 5.2 Step 2's `=true` worked." | The page says `=true` always works as `EVENT_ONLY`. With `--otel_to_cloud` and a Gemini model, the `opentelemetry-instrumentation-google-genai` library emits the events and reads `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` itself (`google_genai/flags.py`), not through ADK's mapping. In the default format only `true` turns content on. In the experimental format only `EVENT_ONLY`, `SPAN_ONLY` and `SPAN_AND_EVENT` work; `true` logs a warning and falls back to `NO_CONTENT` (`opentelemetry/util/genai/utils.py:45-65`). ADK's mapping of `true` to `EVENT_ONLY` applies only when ADK emits the events itself, as on 5.5's server. | "Which value works depends on who emits the events. With the CLI flag, the default format takes `true`, and the experimental format takes `EVENT_ONLY`, `SPAN_ONLY`, or `SPAN_AND_EVENT`. On your own server (5.5), ADK reads it and also accepts `true` (`context.py:94-101`)." | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F184 | 21 | "Read by" (column header) | The column holds source paths, so the header does not describe it. | Rename to "ADK source". | still real |
-| F185 | 24 | "**`true`**" | House style does not use bold for emphasis. | Remove the bold. | still real |
+| F184 | 21 | "Read by" (column header) | The column holds source paths, so the header does not describe it. | Rename to "ADK source". | done |
+| F185 | 24 | "**`true`**" | House style does not use bold for emphasis. | Remove the bold. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F186 | 34 | "including one in `demo_agent/.env`" | The page assumes a `demo_agent/.env`, which is gitignored and never created by Setup. It also omits a limit: per-request `RunConfig.telemetry` does not reach the `generate_content` span when the `opentelemetry-instrumentation-google-genai` library emits it (see "Limitations" in the `TelemetryConfig` docs in `context.py`). | "including one in `demo_agent/.env` if you created it", and add the `RunConfig.telemetry` limit as one sentence after line 42. | still real |
+| F186 | 34 | "including one in `demo_agent/.env`" | The page assumes a `demo_agent/.env`, which is gitignored and never created by Setup. It also omits a limit: per-request `RunConfig.telemetry` does not reach the `generate_content` span when the `opentelemetry-instrumentation-google-genai` library emits it (see "Limitations" in the `TelemetryConfig` docs in `context.py`). | "including one in `demo_agent/.env` if you created it", and add the `RunConfig.telemetry` limit as one sentence after line 42. | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F187 | 44–47 | "**The one place a default is chosen for you.**" | This describes `adk deploy agent_engine`, which belongs to Part 6, so the reader sees an unexplained command. | Replace the passage with one line pointing to 6.1. | still real |
+| F187 | 44–47 | "**The one place a default is chosen for you.**" | This describes `adk deploy agent_engine`, which belongs to Part 6, so the reader sees an unexplained command. | Replace the passage with one line pointing to 6.1. | done |
 
 ### tutorial/part-5/5.7-other-backends.md
 
@@ -745,13 +745,13 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F188 | 35–36 | "(… grep for `grpc` in the telemetry package returns nothing)" | It narrates the author's check instead of stating the fact. | "(`telemetry/setup.py` imports only the HTTP exporters)" | still real |
+| F188 | 35–36 | "(… grep for `grpc` in the telemetry package returns nothing)" | It narrates the author's check instead of stating the fact. | "(`telemetry/setup.py` imports only the HTTP exporters)" | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F189 | 13 | "OTLP" | No expansion appears anywhere in Part 5, so the reader cannot tell what the acronym stands for. | Write "OTLP (the OpenTelemetry protocol)" at first use. | still real |
+| F189 | 13 | "OTLP" | No expansion appears anywhere in Part 5, so the reader cannot tell what the acronym stands for. | Write "OTLP (the OpenTelemetry protocol)" at first use. | done |
 
 ### tutorial/part-5/5.8-relates-to-parts-1-4.md
 
@@ -759,21 +759,21 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F190 | 22–34 | Bold used for emphasis throughout the table | House style does not use bold for emphasis. | Remove it. | still real |
+| F190 | 22–34 | Bold used for emphasis throughout the table | House style does not use bold for emphasis. | Remove it. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F191 | 20–25 | The table's `#` column numbering "four places" 1 to 4 | The "four places" do not match the four streams. Place 1 is stream 2, place 2 is stream 1, and places 3 and 4 are both stream 4. | Drop the `#` column and label each row by its stream. | still real |
-| F192 | 51 | "That leaves one place, not four." | The advice keeps spans and `gen_ai.*` events, which are two places. | "That leaves two, spans and events, joined by trace id." | still real |
-| F193 | 34; 5.2 line 116 | "Part 4's `X-Cloud-Trace-Context` trace ↔ OTel span trace \| **Different trace ids**" | 5.2 says the trace join is free and 5.8 says the ids differ. 5.2's "Part 4 built this join by hand… here it is free" will be read to mean the same ids. | In 5.2, change the sentence to "OTel does this join with its own trace ids, which are not Part 4's." | still real |
+| F191 | 20–25 | The table's `#` column numbering "four places" 1 to 4 | The "four places" do not match the four streams. Place 1 is stream 2, place 2 is stream 1, and places 3 and 4 are both stream 4. | Drop the `#` column and label each row by its stream. | done |
+| F192 | 51 | "That leaves one place, not four." | The advice keeps spans and `gen_ai.*` events, which are two places. | "That leaves two, spans and events, joined by trace id." | done |
+| F193 | 34; 5.2 line 116 | "Part 4's `X-Cloud-Trace-Context` trace ↔ OTel span trace \| **Different trace ids**" | 5.2 says the trace join is free and 5.8 says the ids differ. 5.2's "Part 4 built this join by hand… here it is free" will be read to mean the same ids. | In 5.2, change the sentence to "OTel does this join with its own trace ids, which are not Part 4's." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F194 | 34 | "`cli/fast_api.py:531-547` handles only the Agent Engine header" | This omits the `traceparent` header. `telemetry/_agent_engine.py:63-69` also reads a standard W3C `traceparent` header, but only stores it as extra context, not as the parent of ADK's spans. The page's conclusion (ADK never reads `X-Cloud-Trace-Context`) still stands. | Add "(a standard `traceparent` header is recorded, but not used as the parent span)". | still real |
+| F194 | 34 | "`cli/fast_api.py:531-547` handles only the Agent Engine header" | This omits the `traceparent` header. `telemetry/_agent_engine.py:63-69` also reads a standard W3C `traceparent` header, but only stores it as extra context, not as the parent of ADK's spans. The page's conclusion (ADK never reads `X-Cloud-Trace-Context`) still stands. | Add "(a standard `traceparent` header is recorded, but not used as the parent span)". | done |
 
 ### tutorial/part-6/index.md
 
