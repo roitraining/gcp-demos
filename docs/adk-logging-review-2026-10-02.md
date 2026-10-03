@@ -23,16 +23,16 @@
 
 ### Top 10 findings
 
-1. **wrong.** Part 6 says no `--otel_to_cloud` flag reaches a server on Agent Runtime and that an `AdkApp` reads `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY`. In ADK 2.8.0, `adk deploy agent_engine` deploys a container that starts `adk api_server`, and both of Part 6's methods (the flag in 6.2, the `.env` line in 6.3) make the CLI add `--otel_to_cloud` to that start command (`cli/cli_deploy.py:1273-1292`, `:1392`). The 6.3 rerun printed "`--otel_to_cloud` is set to True by GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY". The pages' result still holds: no `gen_ai.*` logs and no traces arrived. *Status: still real.*
+1. **wrong.** Part 6 says no `--otel_to_cloud` flag reaches a server on Agent Runtime and that an `AdkApp` reads `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY`. In ADK 2.8.0, `adk deploy agent_engine` deploys a container that starts `adk api_server`, and both of Part 6's methods (the flag in 6.2, the `.env` line in 6.3) make the CLI add `--otel_to_cloud` to that start command (`cli/cli_deploy.py:1273-1292`, `:1392`). The 6.3 rerun printed "`--otel_to_cloud` is set to True by GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY". The pages' result still holds: no `gen_ai.*` logs and no traces arrived. *Status: done.*
 2. **wrong.** 5.5 Step 4 fails today. The service answers, but no `gen_ai.*` entries reach Cloud Logging, and it logs `Failed to export logs batch code: 400`. `requirements.txt` asks for `google-adk>=2.8.0`, so the image gets 2.11.0, which rejects this server's log export. *Status: done (pin fixed on main; Step 4 now delivers events, rerun 2026-10-02).*
 3. **wrong.** 5.4 says the logs hide message content because of `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS`. That variable only affects spans. The logs hide content because `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` defaults to `NO_CONTENT`. 5.4 also expects one `operation.details` event per model call; the rerun got three separate event types, because the deploy doesn't opt in to the experimental format. *Status: done.*
 4. **wrong.** 4.2 says one logging config covers "all four streams", including the `uvicorn.access` filter from Part 2. `examples/06_custom_server.py` sets up neither OpenTelemetry nor that filter, and its access lines carry no trace id. *Status: done.*
 5. **wrong.** 4.4 says you can filter Cloud Logging on the logger name `agent.telemetry`. The deployed server's formatter never writes the logger name, and the filter returned nothing on the rerun. *Status: done.*
-6. **wrong.** Five pages create cloud resources and never delete them: 1.4 (a Cloud Run job), 1.5 (two services), 3.4 (a storage bucket holding full prompts), 6.2 and 6.3 (two Agent Runtime engines). *Status: still real.*
-7. **misleading.** The gitignored `demo_agent/.env` changes results from page to page. Setup never creates it, but 1.6 and Part 6 write it, and Cloud Run images include it. On the reruns, its `LOG_LEVEL=info` overrode `--log_level WARNING` in 1.3, and its `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` hid span content in 5.2. 6.2's "restore" step writes `LOG_LEVEL=info` back into it. *Status: still real.*
-8. **wrong.** 4.1 shows 3 of the 6 lines one question produces, and 4.3's table shows 6 of 8. A question that uses the weather tool calls the model twice, and several pages show only one call without saying the output is trimmed. *Status: still real.*
+6. **wrong.** Five pages create cloud resources and never delete them: 1.4 (a Cloud Run job), 1.5 (two services), 3.4 (a storage bucket holding full prompts), 6.2 and 6.3 (two Agent Runtime engines). *Status: done.*
+7. **misleading.** The gitignored `demo_agent/.env` changes results from page to page. Setup never creates it, but 1.6 and Part 6 write it, and Cloud Run images include it. On the reruns, its `LOG_LEVEL=info` overrode `--log_level WARNING` in 1.3, and its `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` hid span content in 5.2. 6.2's "restore" step writes `LOG_LEVEL=info` back into it. *Status: done.*
+8. **wrong.** 4.1 shows 3 of the 6 lines one question produces, and 4.3's table shows 6 of 8. A question that uses the weather tool calls the model twice, and several pages show only one call without saying the output is trimmed. *Status: done.*
 9. **wrong.** Two 5.5 claims hold only with settings in the author's gitignored root `.env`: the `generic_task` resource with a `job` label (needs `service.instance.id`), and `<elided>` content. A reader starting from `.env.example` sees neither. *Status: done.*
-10. **wrong.** `deploy/deploy_job.sh` and `deploy/deploy_api.sh` end by telling the reader that stderr lines get ERROR severity. 1.4 shows, and the rerun confirmed, that they arrive with blank (Default) severity. *Status: still real.*
+10. **wrong.** `deploy/deploy_job.sh` and `deploy/deploy_api.sh` end by telling the reader that stderr lines get ERROR severity. 1.4 shows, and the rerun confirmed, that they arrive with blank (Default) severity. *Status: done.*
 
 ---
 
@@ -46,26 +46,26 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F001 | 47 | "The Python examples (02 to 08) are verified end to end against a real GCP project." | `examples/` holds 01–06, 08, and 09. There is no 07, and 01 and 09 are left out. The how-to-choose page says "Examples 01–09". | "The Python examples (01–06, 08, 09) are verified against a real GCP project, except the items under Not verified in [How to choose & reference](tutorial/how-to-choose.md)." | still real |
+| F001 | 47 | "The Python examples (02 to 08) are verified end to end against a real GCP project." | `examples/` holds 01–06, 08, and 09. There is no 07, and 01 and 09 are left out. The how-to-choose page says "Examples 01–09". | "The Python examples (01–06, 08, 09) are verified against a real GCP project, except the items under Not verified in [How to choose & reference](tutorial/how-to-choose.md)." | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F002 | 40 | "cp .env.example .env          # then set your project / model config" | House style keeps comments out of runnable fences. | Remove the `#` comment from the fence line. Add "Then set your project in `.env`." as prose after the fence. | still real |
-| F003 | 30 | "you own the `dictConfig`, with explicit `severity` and per-request trace correlation" | The phrasing is dense jargon for a table cell. | "a server where you write the logging config yourself, so every line carries a `severity` and its request's trace id." | still real |
+| F002 | 40 | "cp .env.example .env          # then set your project / model config" | House style keeps comments out of runnable fences. | Remove the `#` comment from the fence line. Add "Then set your project in `.env`." as prose after the fence. | done |
+| F003 | 30 | "you own the `dictConfig`, with explicit `severity` and per-request trace correlation" | The phrasing is dense jargon for a table cell. | "a server where you write the logging config yourself, so every line carries a `severity` and its request's trace id." | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F004 | 5 and 32 | "Cloud Run, Vertex AI Agent Engine" and "Cloud Run and Agent Engine" | The same deploy target has two names here. The title, the TUTORIAL table, and the Part 6 H1 all say "Agent Runtime", so a reader cannot tell it is the same product. | Use "Agent Runtime" everywhere and gloss it once: "Agent Runtime (`adk deploy agent_engine`)". | still real |
+| F004 | 5 and 32 | "Cloud Run, Vertex AI Agent Engine" and "Cloud Run and Agent Engine" | The same deploy target has two names here. The title, the TUTORIAL table, and the Part 6 H1 all say "Agent Runtime", so a reader cannot tell it is the same product. | Use "Agent Runtime" everywhere and gloss it once: "Agent Runtime (`adk deploy agent_engine`)". | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F005 | 20–32 | The Files table has no rows for `examples/09_min_api.py`, `otel/`, or `agent_runtime_byoc/` | The table lists the folder contents but skips these three. `09_min_api.py` is the server deployed in 1.5. | Add a row for each, for example "`examples/09_min_api.py` \| A bare FastAPI server with naive logging, deployed in 1.5." | still real |
+| F005 | 20–32 | The Files table has no rows for `examples/09_min_api.py`, `otel/`, or `agent_runtime_byoc/` | The table lists the folder contents but skips these three. `09_min_api.py` is the server deployed in 1.5. | Add a row for each, for example "`examples/09_min_api.py` \| A bare FastAPI server with naive logging, deployed in 1.5." | done |
 
 ### TUTORIAL.md
 
@@ -73,23 +73,23 @@
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F006 | 49 | "Every command and output block is from a real run." | The Not verified table on the how-to-choose page lists 4.3 as not verified end to end. 4.3's console table also does not match a real run. | "Every output block was captured from a real run, except the items under Not verified in [How to choose & reference](tutorial/how-to-choose.md)." | still real |
+| F006 | 49 | "Every command and output block is from a real run." | The Not verified table on the how-to-choose page lists 4.3 as not verified end to end. 4.3's console table also does not match a real run. | "Every output block was captured from a real run, except the items under Not verified in [How to choose & reference](tutorial/how-to-choose.md)." | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F007 | 19–20 | "Almost every…" (third purpose paragraph) | House style allows two purpose paragraphs. | Fold it into the first paragraph. | still real |
-| F008 | 70 | "Ready? **[Start with Setup →](tutorial/00-setup.md)**" | It repeats "Start with **Setup**." at line 55. | Delete it. | still real |
-| F009 | 46 | The diagram caption does not explain the dotted stream 3 | Stream 3 is drawn dotted and the caption never says why. | Add "Dotted: uvicorn configures this stream itself." | still real |
-| F010 | 66 | The Part 5 row is a run-on list | One long sentence packs several topics together. | "Stream 4: read `gen_ai.*` events back from Cloud Logging, from a local run to Cloud Run, and control what content they capture (5.0–5.8)." | still real |
-| F011 | 65 | The Part 4 row leaves out 4.4 | The page range says 4.1–4.4, but the row never mentions 4.4. | End it with "…and when a per-agent callback beats a plugin (4.1–4.4)." | still real |
+| F007 | 19–20 | "Almost every…" (third purpose paragraph) | House style allows two purpose paragraphs. | Fold it into the first paragraph. | done |
+| F008 | 70 | "Ready? **[Start with Setup →](tutorial/00-setup.md)**" | It repeats "Start with **Setup**." at line 55. | Delete it. | done |
+| F009 | 46 | The diagram caption does not explain the dotted stream 3 | Stream 3 is drawn dotted and the caption never says why. | Add "Dotted: uvicorn configures this stream itself." | done |
+| F010 | 66 | The Part 5 row is a run-on list | One long sentence packs several topics together. | "Stream 4: read `gen_ai.*` events back from Cloud Logging, from a local run to Cloud Run, and control what content they capture (5.0–5.8)." | done |
+| F011 | 65 | The Part 4 row leaves out 4.4 | The page range says 4.1–4.4, but the row never mentions 4.4. | End it with "…and when a per-agent callback beats a plugin (4.1–4.4)." | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F012 | 55 | "(each page has a **Next →** link)" | The nav links read `[→ 1.2 · …]`. No link is labeled "Next". | "(each page has a → link to the next page)" | still real |
+| F012 | 55 | "(each page has a **Next →** link)" | The nav links read `[→ 1.2 · …]`. No link is labeled "Next". | "(each page has a → link to the next page)" | done |
 
 ### tutorial/00-setup.md
 
@@ -300,7 +300,7 @@
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
 | F074 | 27 | "**The flag worked. It does not reach this stream.**" | House style does not use bold for body sentences. | "The flag worked, but it does not reach this stream." Drop the bold. | done |
-| F075 | 67 of tutorial/how-to-choose.md | The Date cell is empty in the how-to-choose run row matching this page | The captured lines on this page are dated 2026-08-31. | Fill it in with 2026-08-31. | still real (date goes in with the how-to-choose fixes) |
+| F075 | 67 of tutorial/how-to-choose.md | The Date cell is empty in the how-to-choose run row matching this page | The captured lines on this page are dated 2026-08-31. | Fill it in with 2026-08-31. | done |
 
 **Misleading**
 
@@ -781,27 +781,27 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F195 | 27–28 | "There is no `--otel_to_cloud` flag reaching a server process here. Telemetry is governed by one env var on the deployment" | The page says no flag reaches the server, but one does. In ADK 2.8.0, `adk deploy agent_engine` deploys a container that starts `adk api_server`. Both Part 6 methods (the flag in 6.2, the `.env` line in 6.3) make the CLI add `--otel_to_cloud` to that start command (`cli_deploy.py:1273-1292`, `:1392`). The 6.3 rerun printed "`--otel_to_cloud` is set to True by GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY". | "`adk deploy agent_engine` builds a container that runs `adk api_server`. Passing `--otel_to_cloud`, or setting `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true` in `.env`, puts `--otel_to_cloud` on that server's start command and sets the env var on the deployment." | still real |
-| F196 | 16 | "On a native deploy you do not run uvicorn or write JSON lines" | The deployed container does run uvicorn. The generated container runs `adk api_server`, which serves through uvicorn. The page's own "access lines on `reasoning_engine_stdout`" are uvicorn's. | "On a native deploy you do not write the server; the CLI generates one that runs `adk api_server`." | still real |
+| F195 | 27–28 | "There is no `--otel_to_cloud` flag reaching a server process here. Telemetry is governed by one env var on the deployment" | The page says no flag reaches the server, but one does. In ADK 2.8.0, `adk deploy agent_engine` deploys a container that starts `adk api_server`. Both Part 6 methods (the flag in 6.2, the `.env` line in 6.3) make the CLI add `--otel_to_cloud` to that start command (`cli_deploy.py:1273-1292`, `:1392`). The 6.3 rerun printed "`--otel_to_cloud` is set to True by GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY". | "`adk deploy agent_engine` builds a container that runs `adk api_server`. Passing `--otel_to_cloud`, or setting `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY=true` in `.env`, puts `--otel_to_cloud` on that server's start command and sets the env var on the deployment." | done |
+| F196 | 16 | "On a native deploy you do not run uvicorn or write JSON lines" | The deployed container does run uvicorn. The generated container runs `adk api_server`, which serves through uvicorn. The page's own "access lines on `reasoning_engine_stdout`" are uvicorn's. | "On a native deploy you do not write the server; the CLI generates one that runs `adk api_server`." | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F197 | 16–29 | Three body paragraphs, about 315 words | House style keeps a landing page to one paragraph of about 200 words. | Cut to one paragraph of about 200 words. | still real |
-| F198 | 35–38 | The link text in the "In this part" table | The link text is not each page's full H1. | Use each page's full H1 as the link text. | still real |
+| F197 | 16–29 | Three body paragraphs, about 315 words | House style keeps a landing page to one paragraph of about 200 words. | Cut to one paragraph of about 200 words. | done |
+| F198 | 35–38 | The link text in the "In this part" table | The link text is not each page's full H1. | Use each page's full H1 as the link text. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F199 | 22–25 | "Your Part 4 structured plugin works here unchanged… Drop the trace-header parsing, because the platform handles request correlation." | The Part 4 plugin claim was never run in Part 6. Nothing in Part 6 runs the plugin, and How to choose does not list it as unverified. | Label the claim "Not run in this tutorial" and add it to the Not verified table in How to choose. | still real |
+| F199 | 22–25 | "Your Part 4 structured plugin works here unchanged… Drop the trace-header parsing, because the platform handles request correlation." | The Part 4 plugin claim was never run in Part 6. Nothing in Part 6 runs the plugin, and How to choose does not list it as unverified. | Label the claim "Not run in this tutorial" and add it to the Not verified table in How to choose. | done (claim labeled not run, and added to Not verified) |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F200 | 7–25 | "Vertex AI Agent Engine", "Agent Engine", and "Agent Runtime" all appear; "native deploy" is defined only in 1.6. | The same product has three names. A reader cannot tell whether these are one product or three, and has to go back to 1.6 for "native deploy". | Write "Agent Runtime (deployed with `adk deploy agent_engine`, not your own container)" once, then "Agent Runtime" throughout. | still real |
+| F200 | 7–25 | "Vertex AI Agent Engine", "Agent Engine", and "Agent Runtime" all appear; "native deploy" is defined only in 1.6. | The same product has three names. A reader cannot tell whether these are one product or three, and has to go back to 1.6 for "native deploy". | Write "Agent Runtime (deployed with `adk deploy agent_engine`, not your own container)" once, then "Agent Runtime" throughout. | done |
 
 ### tutorial/part-6/6.1-one-switch.md
 
@@ -809,27 +809,27 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F201 | 13–14 | "The `AdkApp` wrapper reads it at startup." | `AdkApp` is not what reads the variable on this deploy. `AdkApp` does read it (`vertexai/agent_engines/templates/adk.py:1780-1792`: `true` or `1` on, `false` or `0` off). But 2.8.0 `adk deploy agent_engine` deploys a container running `adk api_server`, not an `AdkApp` (`cli_deploy.py:1424`). There the CLI reads the variable at deploy time and adds `--otel_to_cloud` to the start command. In this tutorial `AdkApp` runs only in the bring-your-own-container (BYOC) image (`agent_runtime_byoc/main.py:56`). | "On a deploy with `adk deploy agent_engine`, the CLI reads the variable when you deploy and adds `--otel_to_cloud` to the container's `adk api_server`. A BYOC container built on `AdkApp` reads it at startup: `true` or `1` turns telemetry on, `false` or `0` turns it off." | still real |
-| F202 | 37–38 | "The BYOC script here passes only project, location, and log level" | The BYOC script passes three other variables. `agent_runtime_byoc/deploy_byoc.py:53-60` passes `LOG_LEVEL`, `GOOGLE_GENAI_USE_VERTEXAI`, and `MODEL_LOCATION`. The platform injects project and location. | Name those three variables in the sentence. | still real |
+| F201 | 13–14 | "The `AdkApp` wrapper reads it at startup." | `AdkApp` is not what reads the variable on this deploy. `AdkApp` does read it (`vertexai/agent_engines/templates/adk.py:1780-1792`: `true` or `1` on, `false` or `0` off). But 2.8.0 `adk deploy agent_engine` deploys a container running `adk api_server`, not an `AdkApp` (`cli_deploy.py:1424`). There the CLI reads the variable at deploy time and adds `--otel_to_cloud` to the start command. In this tutorial `AdkApp` runs only in the bring-your-own-container (BYOC) image (`agent_runtime_byoc/main.py:56`). | "On a deploy with `adk deploy agent_engine`, the CLI reads the variable when you deploy and adds `--otel_to_cloud` to the container's `adk api_server`. A BYOC container built on `AdkApp` reads it at startup: `true` or `1` turns telemetry on, `false` or `0` turns it off." | done |
+| F202 | 37–38 | "The BYOC script here passes only project, location, and log level" | The BYOC script passes three other variables. `agent_runtime_byoc/deploy_byoc.py:53-60` passes `LOG_LEVEL`, `GOOGLE_GENAI_USE_VERTEXAI`, and `MODEL_LOCATION`. The platform injects project and location. | Name those three variables in the sentence. | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F203 | 19, 23, 24, 26 | "they are not equivalent", "you", "and", "the CLI sets no content knobs" | House style does not use bold for emphasis inside running text. | Remove the bold. | still real |
+| F203 | 19, 23, 24, 26 | "they are not equivalent", "you", "and", "the CLI sets no content knobs" | House style does not use bold for emphasis inside running text. | Remove the bold. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F204 | 23 | "`ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` (the span knob, set safe for you)" | The setting only covers span content. It turns off message content on spans only. The page never names the setting for content in log events, `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`, which first appears in 6.3. | "The flag turns off message content on spans only. Content in the `gen_ai.*` log events is controlled by `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`, which stays at its default unless you set it. See [5.6](../part-5/5.6-content-knobs.md)." | still real |
-| F205 | 24 | "`cli/cli_deploy.py:1283-1291`" | The source citation is off by one and incomplete. The block ends at line 1292, and its only effect is setting `otel_to_cloud`. The value must be lowercase `true` or `1`. | "`google/adk/cli/cli_deploy.py:1283-1292` (google-adk 2.8.0); the value must be `true` or `1`." | still real |
+| F204 | 23 | "`ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` (the span knob, set safe for you)" | The setting only covers span content. It turns off message content on spans only. The page never names the setting for content in log events, `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`, which first appears in 6.3. | "The flag turns off message content on spans only. Content in the `gen_ai.*` log events is controlled by `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`, which stays at its default unless you set it. See [5.6](../part-5/5.6-content-knobs.md)." | done |
+| F205 | 24 | "`cli/cli_deploy.py:1283-1291`" | The source citation is off by one and incomplete. The block ends at line 1292, and its only effect is setting `otel_to_cloud`. The value must be lowercase `true` or `1`. | "`google/adk/cli/cli_deploy.py:1283-1292` (google-adk 2.8.0); the value must be `true` or `1`." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F206 | Whole page | No "Why you are here" note, no command, no handoff | This is a concept page with no step, command, or handoff. The two other ways to set the variable (the SDK's `update` call and the Console toggle) were never run, so they and the BYOC note are side material. | Add the "Why you are here" note and the handoff "6.2 deploys with the flag.", and move the side material under `## Deep dives`. | still real |
+| F206 | Whole page | No "Why you are here" note, no command, no handoff | This is a concept page with no step, command, or handoff. The two other ways to set the variable (the SDK's `update` call and the Console toggle) were never run, so they and the BYOC note are side material. | Add the "Why you are here" note and the handoff "6.2 deploys with the flag.", and move the side material under `## Deep dives`. | done |
 
 ### tutorial/part-6/6.2-deploy-flag.md
 
@@ -837,31 +837,31 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F207 | 131 | No teardown step | The engine is deployed and never torn down. The page deploys an Agent Runtime engine, and 6.3 deploys a second one with the same `display_name`. How to choose says "Both engines deleted after the runs", but the reader is never told how. The rerun on jwd-dev-5 showed both engines still listed until the reviewer deleted them. | "**Step N — Tear down.**" with the delete command for `$ENGINE_ID` (and `$ENGINE_ID_ENV` in 6.3). Or link to 1.6's teardown. | still real |
-| F208 | 13–14 and 125–126 | "The flag makes the CLI write the telemetry vars; the `.env` carries only the base config." | The flag does more than write telemetry variables, and the citation is off. The flag also adds `--otel_to_cloud` to the container's start command (`cli_deploy.py:1392`). The cited `cli_deploy.py:1230-1234` only reads `.env` into the deployment's env vars; the agent folder is copied into the image elsewhere (`:1419-1424`). | "The flag writes the telemetry vars into the deployment's env and adds `--otel_to_cloud` to the server command. `cli_deploy.py:1226-1234` reads `.env` into the env vars, and the agent folder, `.env` included, is copied into the image." | still real |
+| F207 | 131 | No teardown step | The engine is deployed and never torn down. The page deploys an Agent Runtime engine, and 6.3 deploys a second one with the same `display_name`. How to choose says "Both engines deleted after the runs", but the reader is never told how. The rerun on jwd-dev-5 showed both engines still listed until the reviewer deleted them. | "**Step N — Tear down.**" with the delete command for `$ENGINE_ID` (and `$ENGINE_ID_ENV` in 6.3). Or link to 1.6's teardown. | done |
+| F208 | 13–14 and 125–126 | "The flag makes the CLI write the telemetry vars; the `.env` carries only the base config." | The flag does more than write telemetry variables, and the citation is off. The flag also adds `--otel_to_cloud` to the container's start command (`cli_deploy.py:1392`). The cited `cli_deploy.py:1230-1234` only reads `.env` into the deployment's env vars; the agent folder is copied into the image elsewhere (`:1419-1424`). | "The flag writes the telemetry vars into the deployment's env and adds `--otel_to_cloud` to the server command. `cli_deploy.py:1226-1234` reads `.env` into the env vars, and the agent folder, `.env` included, is copied into the image." | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F209 | 94 and 105 | "stderr", "no `gen_ai.*`" | House style does not use bold for emphasis inside running text. | Remove the bold. | still real |
-| F210 | 123 | "### Why the copy and restore" | House style writes deep-dive headings as questions. | "### Why copy a `.env` in before deploying and restore it after?" | still real |
+| F209 | 94 and 105 | "stderr", "no `gen_ai.*`" | House style does not use bold for emphasis inside running text. | Remove the bold. | done |
+| F210 | 123 | "### Why the copy and restore" | House style writes deep-dive headings as questions. | "### Why copy a `.env` in before deploying and restore it after?" | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F211 | 102–110 | "Where the OTel telemetry lands on a native deploy is an open question", under "What Agent Runtime does NOT do, that Cloud Run did." | The callout blames a platform difference that does not exist. The heading implies Agent Runtime works differently from Cloud Run. It runs the same `adk api_server --otel_to_cloud` command that works on Cloud Run in 5.4, so that can't explain why nothing arrived. The rerun on jwd-dev-5 got the same result as the page: no `gen_ai.*` logs, no traces, no export errors. | "**What it means.** Agent Runtime started the same `adk api_server --otel_to_cloud` as Cloud Run, but no `gen_ai.*` events reached Cloud Logging and no spans reached Cloud Trace in 40 minutes of queries. See [Not verified](../how-to-choose.md#not-verified)." Worth checking: whether the image installed the export packages in `demo_agent/requirements.txt`, and whether the engine's service account can write to Cloud Trace and Cloud Logging. | still real |
-| F212 | 112–118 | "Restore the base `.env` so the deploy's `LOG_LEVEL` does not leak into a local `adk web` run." with `cp deploy/env/default.env demo_agent/.env` | The restore step leaves `LOG_LEVEL` in place. `default.env` itself sets `LOG_LEVEL=info`, and `demo_agent/agent.py:29-33` applies that over `--log_level`. This breaks 1.3's WARNING step if the reader repeats it (seen in the rerun on jwd-dev-1). The copy also overwrites any `demo_agent/.env` the reader had. | Drop `LOG_LEVEL` from `default.env`. Or back up the reader's file first with `cp demo_agent/.env /tmp/demo_agent.env.bak`, then restore it after with `cp /tmp/demo_agent.env.bak demo_agent/.env`. | still real |
+| F211 | 102–110 | "Where the OTel telemetry lands on a native deploy is an open question", under "What Agent Runtime does NOT do, that Cloud Run did." | The callout blames a platform difference that does not exist. The heading implies Agent Runtime works differently from Cloud Run. It runs the same `adk api_server --otel_to_cloud` command that works on Cloud Run in 5.4, so that can't explain why nothing arrived. The rerun on jwd-dev-5 got the same result as the page: no `gen_ai.*` logs, no traces, no export errors. | "**What it means.** Agent Runtime started the same `adk api_server --otel_to_cloud` as Cloud Run, but no `gen_ai.*` events reached Cloud Logging and no spans reached Cloud Trace in 40 minutes of queries. See [Not verified](../how-to-choose.md#not-verified)." Worth checking: whether the image installed the export packages in `demo_agent/requirements.txt`, and whether the engine's service account can write to Cloud Trace and Cloud Logging. | done (rewritten as the review proposed; the 2026-10-02 rerun again found no `gen_ai.*` entries for either engine) |
+| F212 | 112–118 | "Restore the base `.env` so the deploy's `LOG_LEVEL` does not leak into a local `adk web` run." with `cp deploy/env/default.env demo_agent/.env` | The restore step leaves `LOG_LEVEL` in place. `default.env` itself sets `LOG_LEVEL=info`, and `demo_agent/agent.py:29-33` applies that over `--log_level`. This breaks 1.3's WARNING step if the reader repeats it (seen in the rerun on jwd-dev-1). The copy also overwrites any `demo_agent/.env` the reader had. | Drop `LOG_LEVEL` from `default.env`. Or back up the reader's file first with `cp demo_agent/.env /tmp/demo_agent.env.bak`, then restore it after with `cp /tmp/demo_agent.env.bak demo_agent/.env`. | done (the step now runs `rm demo_agent/.env`, matching Setup, which has no such file; `deploy/env/default.env` is deleted as unused) |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F213 | 94–100 | Expected output for the query step shows one set of three INFO lines | The expected output is shorter than a real run. The rerun on jwd-dev-5 showed each set twice (two model calls), Python `FutureWarning` and `UserWarning` lines on stderr, and the stdout access line. Each deploy also printed "Ignoring GOOGLE_CLOUD_LOCATION in .env as --region was explicitly passed", which the page never mentions; the env list still reads `global`. | Label the block "(trimmed)" and add one sentence explaining the `GOOGLE_CLOUD_LOCATION` notice. | still real |
-| F214 | 33 | "**Read the deployment's env list.**" (no `**Step N — …**` labels) | House style uses numbered step labels, a "Why you are here" note, and a handoff sentence. The page has none, and does not warn that the deploy takes several minutes. | Add the step labels, the note, the handoff, and a line saying the deploy takes several minutes. | still real |
-| F215 | 33–34 | "`gcloud ai` has no reasoning-engine subcommand in every install" | The page contradicts How to choose on `gcloud ai`. How to choose says the subcommand "does not exist in this install". The two pages disagree, and "in every install" is vague. | "`gcloud ai` has no command that reads an engine's env, so use the `vertexai` SDK." | still real |
-| F216 | 39 and 72 | `$GOOGLE_CLOUD_PROJECT` (lines 39 and 72) and `$PROJECT_ID` (lines 19, 23 and 89) | The page uses two names for the project. A reader will wonder whether they are different values. | Use `$PROJECT_ID` throughout. | still real |
+| F213 | 94–100 | Expected output for the query step shows one set of three INFO lines | The expected output is shorter than a real run. The rerun on jwd-dev-5 showed each set twice (two model calls), Python `FutureWarning` and `UserWarning` lines on stderr, and the stdout access line. Each deploy also printed "Ignoring GOOGLE_CLOUD_LOCATION in .env as --region was explicitly passed", which the page never mentions; the env list still reads `global`. | Label the block "(trimmed)" and add one sentence explaining the `GOOGLE_CLOUD_LOCATION` notice. | done |
+| F214 | 33 | "**Read the deployment's env list.**" (no `**Step N — …**` labels) | House style uses numbered step labels, a "Why you are here" note, and a handoff sentence. The page has none, and does not warn that the deploy takes several minutes. | Add the step labels, the note, the handoff, and a line saying the deploy takes several minutes. | done |
+| F215 | 33–34 | "`gcloud ai` has no reasoning-engine subcommand in every install" | The page contradicts How to choose on `gcloud ai`. How to choose says the subcommand "does not exist in this install". The two pages disagree, and "in every install" is vague. | "`gcloud ai` has no command that reads an engine's env, so use the `vertexai` SDK." | done |
+| F216 | 39 and 72 | `$GOOGLE_CLOUD_PROJECT` (lines 39 and 72) and `$PROJECT_ID` (lines 19, 23 and 89) | The page uses two names for the project. A reader will wonder whether they are different values. | Use `$PROJECT_ID` throughout. | done |
 
 ### tutorial/part-6/6.3-deploy-env.md
 
@@ -869,21 +869,21 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F217 | 105 | No teardown step | The second engine is never torn down. The page deploys a second engine and never deletes it. The same gap exists in 6.2. | Add a "**Step N — Tear down.**" with the delete command for `$ENGINE_ID_ENV`, shared with 6.2's teardown. | still real |
+| F217 | 105 | No teardown step | The second engine is never torn down. The page deploys a second engine and never deletes it. The same gap exists in 6.2. | Add a "**Step N — Tear down.**" with the delete command for `$ENGINE_ID_ENV`, shared with 6.2's teardown. | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F218 | 13–14 | "the deploy drops `--otel_to_cloud`" | The CLI does add the flag. It reads `true` from `.env` and adds `--otel_to_cloud` to the container's start command itself (`cli_deploy.py:1287-1292`, `:1392`). The rerun on jwd-dev-5 printed "`--otel_to_cloud` is set to True by GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY". | "the command omits `--otel_to_cloud`; the CLI reads the `.env` value and adds the flag to the server command itself." | still real |
-| F219 | 65–66 | "Had `6.2b.env` omitted the span knob, prompt text would ride on the spans." | The page states as fact something 6.2 could not observe. It asserts this right after 6.2 found no spans at all on Agent Runtime. | "…the span attributes would carry prompt text (default `true`, `google/adk/telemetry/context.py:108-110`), though no spans appeared on Agent Runtime in these runs." | still real |
+| F218 | 13–14 | "the deploy drops `--otel_to_cloud`" | The CLI does add the flag. It reads `true` from `.env` and adds `--otel_to_cloud` to the container's start command itself (`cli_deploy.py:1287-1292`, `:1392`). The rerun on jwd-dev-5 printed "`--otel_to_cloud` is set to True by GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY". | "the command omits `--otel_to_cloud`; the CLI reads the `.env` value and adds the flag to the server command itself." | done |
+| F219 | 65–66 | "Had `6.2b.env` omitted the span knob, prompt text would ride on the spans." | The page states as fact something 6.2 could not observe. It asserts this right after 6.2 found no spans at all on Agent Runtime. | "…the span attributes would carry prompt text (default `true`, `google/adk/telemetry/context.py:108-110`), though no spans appeared on Agent Runtime in these runs." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F220 | 13–14 and 64 | "both content knobs" and "the event knob" | The content settings are named but never defined. The page does not say what these are or link to 5.6. | Name `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` once (it controls prompt and reply text in log events), with a link to 5.6. | still real |
-| F221 | 73–94 | 6.2's whole query fence, repeated, with no output | The page repeats 6.2's query and shows no output. The reader sees a long command and no result. | "Run 6.2's query; the output is the same." | still real |
+| F220 | 13–14 and 64 | "both content knobs" and "the event knob" | The content settings are named but never defined. The page does not say what these are or link to 5.6. | Name `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` once (it controls prompt and reply text in log events), with a link to 5.6. | done |
+| F221 | 73–94 | 6.2's whole query fence, repeated, with no output | The page repeats 6.2's query and shows no output. The reader sees a long command and no result. | "Run 6.2's query; the output is the same." | done |
 
 ### tutorial/part-6/6.4-platform-changes.md
 
@@ -891,15 +891,15 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F222 | 17 | "The enablement switch \| One env var… Both routes set it to `true`." | Enabling telemetry also adds a server flag. Both methods also add `--otel_to_cloud` to the server's start command (see 6.1). | "Both methods set the variable to `true` and add `--otel_to_cloud` to the server's start command." | still real |
-| F223 | 25–28 | "If you scaffold with `agents-cli`, the generated project wires a `setup_telemetry()` … `LOGS_BUCKET_NAME` (exported to GCS and BigQuery). That is the same OTel machinery from Part 5, pre-wired." | This is an unrun claim about a different tool. No page runs this, How to choose does not list it as unverified, and `agents-cli` is a separate tool, not the pinned ADK. | Delete the paragraph. Or replace it with "For other export targets, see [5.7](../part-5/5.7-other-backends.md)." | still real |
+| F222 | 17 | "The enablement switch \| One env var… Both routes set it to `true`." | Enabling telemetry also adds a server flag. Both methods also add `--otel_to_cloud` to the server's start command (see 6.1). | "Both methods set the variable to `true` and add `--otel_to_cloud` to the server's start command." | done |
+| F223 | 25–28 | "If you scaffold with `agents-cli`, the generated project wires a `setup_telemetry()` … `LOGS_BUCKET_NAME` (exported to GCS and BigQuery). That is the same OTel machinery from Part 5, pre-wired." | This is an unrun claim about a different tool. No page runs this, How to choose does not list it as unverified, and `agents-cli` is a separate tool, not the pinned ADK. | Delete the paragraph. Or replace it with "For other export targets, see [5.7](../part-5/5.7-other-backends.md)." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F224 | 12–28 | No step, no command | The page has no step and restates 6.2 and 6.3. The content repeats what 6.2 and 6.3 already cover. | Fold it into 6.3 as a short closing table. Or reframe it as a decision table. | still real |
-| F225 | 22 | "Do not extend this list past what you can see in your own project's console." | The closing advice is vague. The reader is not told where to look or why. | "Check your own project's Trace Explorer and Logs Explorer; this tutorial did not establish where Agent Runtime sends telemetry." | still real |
+| F224 | 12–28 | No step, no command | The page has no step and restates 6.2 and 6.3. The content repeats what 6.2 and 6.3 already cover. | Fold it into 6.3 as a short closing table. Or reframe it as a decision table. | done (kept as a short reference page with a Why-you-are-here note) |
+| F225 | 22 | "Do not extend this list past what you can see in your own project's console." | The closing advice is vague. The reader is not told where to look or why. | "Check your own project's Trace Explorer and Logs Explorer; this tutorial did not establish where Agent Runtime sends telemetry." | done |
 
 ### tutorial/how-to-choose.md
 
@@ -907,32 +907,32 @@ No findings.
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F226 | 63 and 67 | "Every console block in the tutorial is from one of these runs." | 4.3 has no run row and sits under Not verified. The "1.1–1.3, 3.1, 3.3, 4.1, Part 2" row has no date. | Fill in the date, add 4.3 to Not verified explicitly, and reword to "Every console block except those under Not verified…". | still real |
+| F226 | 63 and 67 | "Every console block in the tutorial is from one of these runs." | 4.3 has no run row and sits under Not verified. The "1.1–1.3, 3.1, 3.3, 4.1, Part 2" row has no date. | Fill in the date, add 4.3 to Not verified explicitly, and reword to "Every console block except those under Not verified…". | done |
 
 **Style**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F227 | 32–33 | "Emit **one JSON object per line** with an explicit **`severity`**, to **stdout**." | House style does not use bold for body phrases. | "Write one JSON object per line to stdout, with an explicit `severity`." | still real |
+| F227 | 32–33 | "Emit **one JSON object per line** with an explicit **`severity`**, to **stdout**." | House style does not use bold for body phrases. | "Write one JSON object per line to stdout, with an explicit `severity`." | done |
 
 **Misleading**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F228 | 36 | "Keep GenAI content capture at **`NO_CONTENT`** unless you have a reviewed reason." | `NO_CONTENT` leaves prompt text on trace spans. In ADK 2.8.0 it governs only the `gen_ai.*` log events. Span attributes are governed by `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS`, which defaults to true (`google/adk/telemetry/context.py:108`). | "Turn content capture off in both places: `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT` for log events and `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` for span attributes (5.6)." | still real |
-| F229 | 82 | "Whether `=true` also puts the prompt and reply on the `call_llm` span… and whether `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` empties them" | The pinned ADK source already answers both Not verified questions (`tracing.py:629`). | State the answer from the source, and keep only "not yet observed in Trace Explorer" as the unverified part. | still real |
-| F230 | 20 | "Emitting metrics for production \| Custom `BasePlugin` (4.1)" | The 4.1 plugin emits log events, not metrics. | Change the first cell to "Emitting structured events you can query and alert on". | still real |
-| F231 | 25 | "`adk deploy agent_engine` (1.6) + `--otel_to_cloud`" | The row implies telemetry arrives. The page's own Not verified table records that none did. | Add "Telemetry did not surface in our runs; see Not verified." | still real |
+| F228 | 36 | "Keep GenAI content capture at **`NO_CONTENT`** unless you have a reviewed reason." | `NO_CONTENT` leaves prompt text on trace spans. In ADK 2.8.0 it governs only the `gen_ai.*` log events. Span attributes are governed by `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS`, which defaults to true (`google/adk/telemetry/context.py:108`). | "Turn content capture off in both places: `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT` for log events and `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` for span attributes (5.6)." | done |
+| F229 | 82 | "Whether `=true` also puts the prompt and reply on the `call_llm` span… and whether `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` empties them" | The pinned ADK source already answers both Not verified questions (`tracing.py:629`). | State the answer from the source, and keep only "not yet observed in Trace Explorer" as the unverified part. | done |
+| F230 | 20 | "Emitting metrics for production \| Custom `BasePlugin` (4.1)" | The 4.1 plugin emits log events, not metrics. | Change the first cell to "Emitting structured events you can query and alert on". | done |
+| F231 | 25 | "`adk deploy agent_engine` (1.6) + `--otel_to_cloud`" | The row implies telemetry arrives. The page's own Not verified table records that none did. | Add "Telemetry did not surface in our runs; see Not verified." | done |
 
 **Unclear**
 
 | ID | Lines | Text on the page | Problem | Fix | Status |
 |---|---|---|---|---|---|
-| F232 | 87 | "**verified negative**" (in the Not verified table) | Something checked and found absent is a verified result, so the table title contradicts the row. | Retitle the table "Not verified or inconclusive". Or move the row to the run table. | still real |
-| F233 | 89–92 | "**Re-run checklist for Part 5:** … `export OTEL_RESOURCE_ATTRIBUTES=…`" | These are steps on a reference page, and the `…` leaves the export incomplete. | Replace the checklist with "To rerun Part 5, follow 5.2's exports." | still real |
-| F234 | 72 and 74–76 | The "What it showed" cells for 5.2, 5.4, 5.5, and 6.2/6.3 | They are walls of text. They pack run records, trace-id prefixes, and terms such as `prometheus_target` and `generic_task` into one cell. | Keep one or two facts per cell and leave the details to the pages that teach them. | still real |
-| F235 | 23 and 56 | "severity is Cloud Run's guess (Default)" and "The ADK observability skill and `https://adk.dev/observability/` cover these." | "Cloud Run's guess" is not a term readers know, and a reader cannot open the skill. | "severity is `DEFAULT` (unset)" and "See the [ADK observability docs](https://adk.dev/observability/)." | still real |
-| F236 | 27 | No decision row for silencing health checks | The decision table skips the Part 2 topic. | Add "Silencing health-check access lines \| A filter on `uvicorn.access` (Part 2)". | still real |
+| F232 | 87 | "**verified negative**" (in the Not verified table) | Something checked and found absent is a verified result, so the table title contradicts the row. | Retitle the table "Not verified or inconclusive". Or move the row to the run table. | done |
+| F233 | 89–92 | "**Re-run checklist for Part 5:** … `export OTEL_RESOURCE_ATTRIBUTES=…`" | These are steps on a reference page, and the `…` leaves the export incomplete. | Replace the checklist with "To rerun Part 5, follow 5.2's exports." | done |
+| F234 | 72 and 74–76 | The "What it showed" cells for 5.2, 5.4, 5.5, and 6.2/6.3 | They are walls of text. They pack run records, trace-id prefixes, and terms such as `prometheus_target` and `generic_task` into one cell. | Keep one or two facts per cell and leave the details to the pages that teach them. | done |
+| F235 | 23 and 56 | "severity is Cloud Run's guess (Default)" and "The ADK observability skill and `https://adk.dev/observability/` cover these." | "Cloud Run's guess" is not a term readers know, and a reader cannot open the skill. | "severity is `DEFAULT` (unset)" and "See the [ADK observability docs](https://adk.dev/observability/)." | done |
+| F236 | 27 | No decision row for silencing health checks | The decision table skips the Part 2 topic. | Add "Silencing health-check access lines \| A filter on `uvicorn.access` (Part 2)". | done |
 
 ### agent_runtime_byoc/
 
@@ -1030,22 +1030,22 @@ No demo was skipped for cost.
 
 | # | Inconsistency | Pages | Status |
 |---|---|---|---|
-| 1 | `demo_agent/.env` has no owner. Setup never creates it, later pages write it, read it, and ship it in images, so what a page shows depends on which page ran last. | Setup, 1.3, 1.6, 5.1 to 5.6, 6.2, 6.3 | still real |
-| 2 | The two content settings are explained four ways. 5.4 says the span setting hides log content; 5.6 says the two are independent; how-to-choose turns off only the log setting; 5.6's rule for `true` holds only when ADK writes the events itself. | 5.2, 5.4, 5.6, 6.1, 6.3, how-to-choose | still real |
-| 3 | Pages show `operation.details` events without saying they need `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`. 5.4 doesn't set it. | 5.2, 5.3, 5.4, 5.5 | still real |
-| 4 | "All four streams" appears before any page sets up stream 4 (OpenTelemetry). 1.5's "four sources" and 5.8's "four places" reuse the number for other things. | Part 1 index, 1.5, Part 4, 4.2, 5.8 | still real |
-| 5 | Three names for one product: Agent Runtime, Agent Engine, and Vertex AI Agent Engine. "Native" and "BYOC" are defined only in 1.6. | README, TUTORIAL, 1.6, Part 6, how-to-choose | still real |
-| 6 | How telemetry is turned on for Agent Runtime: Part 6 describes an `AdkApp` reading an environment variable; the CLI actually starts `adk api_server --otel_to_cloud`. | 1.6, Part 6, how-to-choose | still real |
-| 7 | Stderr severity: the pages say blank (Default), the deploy scripts' closing messages say ERROR. | 1.4, 1.5, `deploy/deploy_job.sh`, `deploy/deploy_api.sh` | still real |
-| 8 | One log call shown at three line numbers: `agent.py:40`, `:53` and `:54`. It is at `:54` now. | 1.3, 1.6, 6.2 | still real |
-| 9 | The standard question drifts: Paris, New York, "weather in Tokyo?" and "What is the weather…" instead of the Tokyo or London question. | 3.3, 3.4, 4.1, 4.2, 5.5 | still real |
-| 10 | Expected output shows one model call where a tool question makes two, without saying it is trimmed. | 1.4, 4.1, 4.2, 4.3, 6.2 | still real |
-| 11 | "Every block is from a real run", while 4.3's table doesn't match a real run and 5.3 and 5.5 Step 4 show no captured output. None is marked unverified. | TUTORIAL, how-to-choose, 4.3, 5.3, 5.5 | still real |
-| 12 | Only Part 5 numbers a page N.0. | 5.0 | still real |
-| 13 | The tutorial's `CLAUDE.md` gives a page order that stops at Part 3. | `CLAUDE.md` | still real |
-| 14 | BYOC files still call the page "tutorial 1.7". | `agent_runtime_byoc/`, 1.6 | still real |
-| 15 | Pages over the 750-word limit: 1.4 (812), 1.5 (752), 1.6 (about 1,750), 3.1 (865), 5.1 (852), 5.2 (about 2,020). | 1.4, 1.5, 1.6, 3.1, 5.1, 5.2 | still real |
-| 16 | Most pages lack the "Why you are here" note, `**Step N — …**` labels, or a closing sentence that introduces the next page; deep-dive headings are statements, not questions. | Most pages in Parts 1 and 3 to 6 | still real |
+| 1 | `demo_agent/.env` has no owner. Setup never creates it, later pages write it, read it, and ship it in images, so what a page shows depends on which page ran last. | Setup, 1.3, 1.6, 5.1 to 5.6, 6.2, 6.3 | done |
+| 2 | The two content settings are explained four ways. 5.4 says the span setting hides log content; 5.6 says the two are independent; how-to-choose turns off only the log setting; 5.6's rule for `true` holds only when ADK writes the events itself. | 5.2, 5.4, 5.6, 6.1, 6.3, how-to-choose | done |
+| 3 | Pages show `operation.details` events without saying they need `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`. 5.4 doesn't set it. | 5.2, 5.3, 5.4, 5.5 | done |
+| 4 | "All four streams" appears before any page sets up stream 4 (OpenTelemetry). 1.5's "four sources" and 5.8's "four places" reuse the number for other things. | Part 1 index, 1.5, Part 4, 4.2, 5.8 | done |
+| 5 | Three names for one product: Agent Runtime, Agent Engine, and Vertex AI Agent Engine. "Native" and "BYOC" are defined only in 1.6. | README, TUTORIAL, 1.6, Part 6, how-to-choose | done |
+| 6 | How telemetry is turned on for Agent Runtime: Part 6 describes an `AdkApp` reading an environment variable; the CLI actually starts `adk api_server --otel_to_cloud`. | 1.6, Part 6, how-to-choose | done |
+| 7 | Stderr severity: the pages say blank (Default), the deploy scripts' closing messages say ERROR. | 1.4, 1.5, `deploy/deploy_job.sh`, `deploy/deploy_api.sh` | done |
+| 8 | One log call shown at three line numbers: `agent.py:40`, `:53` and `:54`. It is at `:54` now. | 1.3, 1.6, 6.2 | done |
+| 9 | The standard question drifts: Paris, New York, "weather in Tokyo?" and "What is the weather…" instead of the Tokyo or London question. | 3.3, 3.4, 4.1, 4.2, 5.5 | done |
+| 10 | Expected output shows one model call where a tool question makes two, without saying it is trimmed. | 1.4, 4.1, 4.2, 4.3, 6.2 | done |
+| 11 | "Every block is from a real run", while 4.3's table doesn't match a real run and 5.3 and 5.5 Step 4 show no captured output. None is marked unverified. | TUTORIAL, how-to-choose, 4.3, 5.3, 5.5 | done |
+| 12 | Only Part 5 numbers a page N.0. | 5.0 | done (kept the 5.0 number; see F145) |
+| 13 | The tutorial's `CLAUDE.md` gives a page order that stops at Part 3. | `CLAUDE.md` | skipped: the fix is to the tutorial's CLAUDE.md, which this pass did not edit; needs an author edit |
+| 14 | BYOC files still call the page "tutorial 1.7". | `agent_runtime_byoc/`, 1.6 | done |
+| 15 | Pages over the 750-word limit: 1.4 (812), 1.5 (752), 1.6 (about 1,750), 3.1 (865), 5.1 (852), 5.2 (about 2,020). | 1.4, 1.5, 1.6, 3.1, 5.1, 5.2 | done except 5.2 (see F155) |
+| 16 | Most pages lack the "Why you are here" note, `**Step N — …**` labels, or a closing sentence that introduces the next page; deep-dive headings are statements, not questions. | Most pages in Parts 1 and 3 to 6 | done |
 
 ---
 

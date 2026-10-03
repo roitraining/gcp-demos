@@ -17,23 +17,26 @@
 | Debugging what the model saw | `--log_level DEBUG` | Full prompt, history, tool schema. |
 | Reading tool calls live in dev | `LoggingPlugin` (3.1, 3.5) | Clean narration + tokens. Prints, so dev only. |
 | Capturing one bad turn in full | `DebugLoggingPlugin` (3.3, 3.5) | Complete YAML record, secrets redacted. |
-| Emitting metrics for production | Custom `BasePlugin` (4.1) | Real `logging` records; queryable, alertable. |
+| Emitting structured events you can query and alert on | Custom `BasePlugin` (4.1) | Real `logging` records; queryable, alertable. |
 | Logging or guarding one agent only | Per-agent callback (4.4) | Siloed by design; can short-circuit a step. |
 | Running your own HTTP server | `dictConfig` + the 4.1 plugin (4.2) | Own streams 1–3 in one place. |
-| Seeing raw logs reach the cloud, fast | Cloud Run Job/service, no JSON (1.4, 1.5) | Zero setup; but severity is Cloud Run's guess (Default), not yours. |
+| Seeing raw logs reach the cloud, fast | Cloud Run Job/service, no JSON (1.4, 1.5) | Zero setup; but severity is `DEFAULT` (unset), not yours. |
 | Deploying to Cloud Run for real | JSON to stdout + trace field (4.3) | Auto-ingested; severity you set; grouped by request. |
-| Deploying the agent to Agent Runtime | `adk deploy agent_engine` (1.6) + `--otel_to_cloud` | Managed; but the platform owns log format/stream. |
+| Deploying the agent to Agent Runtime | `adk deploy agent_engine` (1.6) + `--otel_to_cloud` | Managed; but the platform owns log format/stream. Telemetry did not surface in our runs; see Not verified. |
 | Keeping your own logging on Agent Runtime | Custom container / BYOC (1.7) | Your server, your format; you implement the runtime contract. |
 | Finding where latency goes | `--otel_to_cloud` / `get_gcp_exporters` | Timed span tree in Cloud Trace. |
+| Silencing health-check access lines | A filter on `uvicorn.access` (Part 2) | The log level never reaches stream 3. |
 
 Best-practice summary:
 
 - Serve at **INFO or WARNING** in production; keep DEBUG for active debugging.
-- Emit **one JSON object per line** with an explicit **`severity`**, to
-  **stdout**. Do not rely on Cloud Run inferring severity from the stream: 1.4
-  and 1.5 showed plain stderr lines landing as Default.
+- Write one JSON object per line to stdout, with an explicit `severity`. Do not
+  rely on Cloud Run inferring severity from the stream: 1.4 and 1.5 showed plain
+  stderr lines landing as Default.
 - Correlate with the **trace** field so a request is one filterable group.
-- Keep GenAI content capture at **`NO_CONTENT`** unless you have a reviewed reason.
+- Turn content capture off in both places:
+  `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=NO_CONTENT` for log events
+  and `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` for span attributes (5.6).
 - Tune the framework as a group via `logging.getLogger("google_adk")`, and
   silence `uvicorn.access` health-check spam.
 - Remember which stream a flag configures. Most confusion is a flag aimed at the
@@ -53,7 +56,7 @@ observability story:
 - **Third-party platforms** (AgentOps, Phoenix, MLflow, Weave, and others)
   integrate over OpenTelemetry for session replays and dashboards.
 
-The ADK observability skill and `https://adk.dev/observability/` cover these.
+See the [ADK observability docs](https://adk.dev/observability/).
 
 ---
 
@@ -123,7 +126,7 @@ Captured with a wrapped session, the body says:
 
 The Telemetry API stores OTLP metrics as `prometheus_target` time series. That
 monitored resource requires an `instance` and a real `location`, which the API
-derives from `service.instance.id` and `cloud.region`. Off Agent Engine,
+derives from `service.instance.id` and `cloud.region`. Off Agent Runtime,
 `get_gcp_resource` starts from `{gcp.project_id}` and merges two detectors
 (`telemetry/google_cloud.py:335-352`): the OTel one reads
 `OTEL_RESOURCE_ATTRIBUTES` and `OTEL_SERVICE_NAME`, and the Google Cloud one
@@ -176,37 +179,36 @@ works.
 
 ## Verification status
 
-All runs were against one real project (`jwd-gcp-demos`, Vertex AI, Gemini 3.7
-Flash). Every console block in the tutorial is from one of these runs.
+All runs were against real projects with Vertex AI and Gemini 3.7 Flash. Every
+console block was captured from one of these runs on `jwd-gcp-demos`, except the
+items under Not verified.
 
 | Section | What ran | Date | What it showed |
 |---|---|---|---|
-| 1.1–1.3, 3.1, 3.3, 4.1, Part 2 | Examples 01–09 locally | | DEBUG/INFO/WARNING differences, plugin narration, JSON events. |
-| 4.2 | `06_custom_server.py` locally | 2026-09-04 | Every stream emits JSON with explicit `severity`, and with the `X-Cloud-Trace-Context` header, the same `logging.googleapis.com/trace` value. |
-| 1.4, 1.5, 1.6 | Cloud Run Job, Cloud Run service, native Agent Runtime, BYOC container | 2026-09-03 | stderr lands as Default, not ERROR (1.4, 1.5). The platform owns the format on native Agent Runtime (1.6). The `artifactregistry.reader` and reserved-var traps (1.6 BYOC). |
-| 3.2, 3.4, Part 4 Job | `deploy/deploy_plugin_job.sh` | 2026-09-03 | Narration survives `LOG_LEVEL=WARNING` and lands on stdout with Default severity and literal ANSI bytes (3.2). The YAML is discarded with the container until a Cloud Storage volume is mounted, and the plugin then warns about the FUSE mount's mode (3.4). The Part 4 plugin's JSON parsed into queryable `jsonPayload` fields with `severity` INFO. |
-| 5.1 | plain `adk web` | 2026-09-04 | Seven spans read back from `/dev/apps/demo_agent/debug/trace/session/{id}`, the endpoint the Trace tab reads. `adk api_server` installs the same exporters but serves no `/dev` route (404), so [otel/check_local.sh](../otel/check_local.sh) uses `adk web`. |
-| 5.2 | `adk web --otel_to_cloud` | 2026-09-04, captures 2026-09-05 | Exported to Cloud Trace, Cloud Logging (`gen_ai.*`), and Cloud Monitoring. OTLP metrics land as `prometheus.googleapis.com/gen_ai.*` on `prometheus_target` and need `OTEL_RESOURCE_ATTRIBUTES` locally or every batch returns 400. `google-adk[otel-gcp]` does not duplicate the `generate_content` span. The log-side blocks in Steps 1, 2, 4, and 5 are real captures (traces `c5fdba98…`, `9d24673b…`, `3b80ad2b…`, `acacdad7…`). |
-| 5.3 | `adk api_server --otel_to_cloud` | 2026-09-04 | The original run produced the same tree (trace `fb802902…`). The rewritten three-export version has not been re-run. |
-| 5.4 | `adk deploy cloud_run --otel_to_cloud ./demo_agent` | 2026-09-04 | `gen_ai.*` on a `generic_task` resource (job = service name), content `<elided>` proving `demo_agent/.env`'s span knob shipped in the image. No `OTEL_RESOURCE_ATTRIBUTES` needed on Cloud Run. A bare `google-adk` container boot-crashes at the OTLP exporter import. Service deleted after the run. |
-| 5.5 (local) | `examples/08_otel_server.py` | 2026-09-05 | `gen_ai.*` events on `generic_task` with `resource.labels.job` = `weather-agent`. Content knob verified through `.env` both ways (`true` shows prompt text, `NO_CONTENT` shows `<elided>`). Logging-only export needs no `get_gcp_resource`; the exporter takes the project from ADC. |
-| 6.2, 6.3 | Two control Agent Runtime deploys (flag route, `.env` route) | 2026-09-05 | Each route writes the expected env vars, read back via the `vertexai` SDK (`engine.api_resource.spec.deployment_spec.env`; `gcloud ai reasoning-engines` does not exist in this install). The agent answered queries and its framework INFO logs landed on `reasoning_engine_stderr`. Both engines deleted after the runs. |
+| 1.1–1.3, 3.1, 3.3, 4.1, 4.2 | Examples 01–06 locally | 2026-10-02 | DEBUG/INFO/WARNING differences, plugin narration, JSON events with explicit `severity` and the trace field. |
+| Part 2 | `02_tame_uvicorn.py` locally | 2026-08-31 (rerun matched 2026-10-02) | Health checks filtered from `uvicorn.access`. |
+| 1.4, 1.5 | Cloud Run Job and service | 2026-10-02 | stderr lands as Default, not ERROR. |
+| 1.6, 1.7 | Native Agent Runtime and a BYOC container | 2026-10-02 | The platform owns the format natively; BYOC keeps yours. Both log to `reasoning_engine_stderr`. |
+| 3.2, 3.4 | `deploy/deploy_plugin_job.sh` | 2026-10-02 | Plugin narration survives `LOG_LEVEL=WARNING` with Default severity (3.2). The YAML survives on a mounted bucket, and the plugin warns about the mount's mode (3.4). |
+| 4.3 | `deploy/deploy_cloudrun.sh` | 2026-10-02 | Eight `jsonPayload` rows per question at `INFO`; plugin fields queryable. |
+| 5.1 | plain `adk web` | 2026-09-04 | The five span names from the session trace endpoint the Trace tab reads. |
+| 5.2 | `adk web --otel_to_cloud` | 2026-09-04, captures 2026-09-05 | `gen_ai.*` events in Cloud Logging in both formats. Local metrics need `OTEL_RESOURCE_ATTRIBUTES`. |
+| 5.3 | `adk api_server --otel_to_cloud` | 2026-10-02 | Two `operation.details` events per turn, content off. |
+| 5.4 | `adk deploy cloud_run --otel_to_cloud` | 2026-10-02 | Eight default-format events on `generic_task` (job = service name), content elided by default. |
+| 5.5 | `08_otel_server.py` locally and on Cloud Run | 2026-10-02 | Locally, `generic_task` with job `weather-agent` once `service.instance.id` is set. On Cloud Run, `generic_node` with no job. |
+| 6.2, 6.3 | Two Agent Runtime deploys (flag, `.env`) | 2026-10-02 | Each route writes the expected env vars; framework INFO lines on `reasoning_engine_stderr`; no `gen_ai.*` events. |
 
-**Not verified.** Documented from the source; run them yourself.
+**Not verified or inconclusive.** Documented from the source, or checked
+without a clear result; run them yourself.
 
 | Item | What is missing |
 |---|---|
-| 5.2 span-content check (Steps 2-3, Trace Explorer) | Whether `=true` also puts the prompt and reply on the `call_llm` span's `gcp.vertex.agent.llm_request` / `llm_response`, and whether `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS=false` empties them while the logs keep content. |
-| 5.3 rewritten run | `adk api_server --otel_to_cloud` with the three shell exports, the London turn over curl, and `gen_ai.*` read back. The page shows no output blocks pending this run. |
-| 5.5 Cloud Run deploy | The inline `gcloud run deploy --source` path and `deploy/Dockerfile.otel_server` are written but not deployed. |
-| 4.3 end to end | The formatter and trace correlation are verified locally (4.2); the containerized `deploy/deploy_cloudrun.sh` deploy is not. |
-| Agent Runtime with no flag and no `.env` variable | Whether such a deploy produces traces. Every deploy here passed the flag or set the var. Part 6 says "the platform decides; set it explicitly" and claims no default. |
-| Where native Agent Runtime OTel telemetry lands (**verified negative**, 2026-09-05) | The `gen_ai.*` events that appear on local and Cloud Run runs (5.2-5.5) did **not** surface under any `gen_ai.*` log name, and **no Cloud Trace spans** appeared for the engine across a 40-minute window and multiple queries. It may require Console-side enablement, a longer export path, or a wrapper exporter set not identified here. Part 6 states only what was observed. |
+| 5.2 span-content check (Steps 5-6, Trace Explorer) | The source answers it: `ADK_CAPTURE_MESSAGE_CONTENT_IN_SPANS` defaults to on and `=false` writes `{}` to `gcp.vertex.agent.llm_request` (`telemetry/tracing.py:629-635`). Not yet observed in Trace Explorer. |
+| The Part 4 plugin on Agent Runtime | Part 6 says the plugin works unchanged on a native deploy; no page runs it there. |
+| Agent Runtime with no flag and no `.env` variable | Whether such a deploy produces traces. Every native deploy here passed the flag or set the var. |
+| Where native Agent Runtime OTel telemetry lands (checked 2026-09-05 and 2026-10-02, nothing found) | No `gen_ai.*` log names and no Cloud Trace spans appeared for the engine. Part 6 states only what was observed. |
 
-**Re-run checklist for Part 5:** `gcloud auth application-default login`; enable
-`telemetry.googleapis.com`; `export OTEL_RESOURCE_ATTRIBUTES=…` for a local
-`--otel_to_cloud` run; keep the `.env` knob line; prompt "What's the weather in
-London?".
+To rerun Part 5, follow 5.2's exports.
 
 ---
 

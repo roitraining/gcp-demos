@@ -2,7 +2,7 @@
 
 A hands-on tour of logging strategies for ADK agents, across every way you serve
 them (`adk web`, `adk api_server`, a hand-written server) and both places you
-deploy them (Cloud Run, Vertex AI Agent Engine). Every example runs locally
+deploy them (Cloud Run, and Agent Runtime with `adk deploy agent_engine`). Every example runs locally
 against a real model; the cloud steps are optional.
 
 The one idea that makes the rest simple: an ADK agent process produces **four
@@ -27,9 +27,12 @@ Start with **[TUTORIAL.md](TUTORIAL.md)**.
 | [examples/03_logging_plugin.py](examples/03_logging_plugin.py) | Built-in `LoggingPlugin` for live terminal narration. |
 | [examples/04_debug_plugin.py](examples/04_debug_plugin.py) | `DebugLoggingPlugin`: full invocation capture to YAML. |
 | [examples/05_structured_plugin.py](examples/05_structured_plugin.py) | Custom `BasePlugin` emitting real JSON `logging` records. |
-| [examples/06_custom_server.py](examples/06_custom_server.py) | Cloud Run-ready ADK 2.x server; you own the `dictConfig`, with explicit `severity` and per-request trace correlation. |
+| [examples/06_custom_server.py](examples/06_custom_server.py) | Cloud Run-ready ADK 2.x server where you write the logging config yourself, so every line carries a `severity` and its request's trace id. |
 | [examples/08_otel_server.py](examples/08_otel_server.py) | Minimal ADK server that installs the OTel exporter and sends `gen_ai.*` events to Cloud Logging. |
-| [deploy/](deploy/) | Dockerfile and deploy scripts for Cloud Run and Agent Engine. |
+| [examples/09_min_api.py](examples/09_min_api.py) | A bare FastAPI server with naive logging, deployed in 1.5. |
+| [otel/](otel/) | `check_local.sh`, which asserts the span names a plain `adk web` produces (5.1). |
+| [agent_runtime_byoc/](agent_runtime_byoc/) | The custom container and deploy scripts for Agent Runtime BYOC (1.7). |
+| [deploy/](deploy/) | Dockerfiles and deploy scripts for Cloud Run and Agent Runtime. |
 
 ## Quick start
 
@@ -37,15 +40,21 @@ Start with **[TUTORIAL.md](TUTORIAL.md)**.
 cd ai/adk/logging
 python3.13 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-cp .env.example .env          # then set your project / model config
-cp env.sh.example env.sh      # shell vars for the cloud parts; set PROJECT_ID, then `source env.sh`
-.venv/bin/python examples/01_log_levels.py debug   # start here, then read the tutorial
+cp .env.example .env
+cp env.sh.example env.sh
+```
+
+Then set your project in `.env` and `PROJECT_ID` in `env.sh`, and run the first
+example:
+
+```bash
+source env.sh
+.venv/bin/python examples/01_log_levels.py debug
 ```
 
 ## Status
 
-The Python examples (02 to 08) are verified end to end against a real GCP
-project. The `deploy/` scripts are syntax-checked with flags matching
-`adk 2.8.0`, but the deploys themselves are left for you to run. See the
-Verification status section in
-[How to choose & reference](tutorial/how-to-choose.md) for the precise split.
+The Python examples (01–06, 08, 09) are verified against a real GCP project,
+except the items under Not verified in
+[How to choose & reference](tutorial/how-to-choose.md). See its Verification
+status section for what ran and when.
