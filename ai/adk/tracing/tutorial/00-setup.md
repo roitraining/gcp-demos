@@ -50,11 +50,15 @@ cp env.sh.example env.sh
 ```
 
 Open `env.sh` in your editor and set `PROJECT_ID` to your real project id, then
-source it:
+source it and make that project gcloud's default:
 
 ```bash
 source env.sh
+gcloud config set project "$PROJECT_ID"
 ```
+
+Several commands in this tutorial, such as `gcloud services enable` below, act
+on gcloud's default project when they have no `--project` flag.
 
 `OTEL_SERVICE_NAME` becomes the **OpenTelemetry service** filter and the
 **Service/workload** column in Trace Explorer, so every laptop run files under a
@@ -64,18 +68,26 @@ terminal**, since variables do not cross terminals.
 Unset any `OTEL_EXPORTER_OTLP_*` variables left in your shell. ADK adds an
 exporter when they are set, so the local Part 1 scripts would send spans there.
 
-## Enable the APIs (Parts 2 to 4)
+## Enable the APIs
 
 ```bash
 gcloud services enable \
+  aiplatform.googleapis.com \
   telemetry.googleapis.com \
   cloudtrace.googleapis.com \
-  logging.googleapis.com
+  logging.googleapis.com \
+  run.googleapis.com \
+  cloudbuild.googleapis.com \
+  artifactregistry.googleapis.com
 ```
 
-Spans are written through `telemetry.googleapis.com` and you read them back
-through `cloudtrace.googleapis.com`. `logging.googleapis.com` carries the log
-side of a trace, which [Part 3](part-3/index.md) correlates.
+| API | Used for |
+|---|---|
+| `aiplatform.googleapis.com` | The Gemini model (every part) and Agent Runtime ([2.4](part-2/2.4-agent-runtime.md)) |
+| `telemetry.googleapis.com` | Writing spans |
+| `cloudtrace.googleapis.com` | Reading spans back |
+| `logging.googleapis.com` | The log side of a trace, which [Part 3](part-3/index.md) correlates |
+| `run.googleapis.com`, `cloudbuild.googleapis.com`, `artifactregistry.googleapis.com` | Building and deploying the Cloud Run service ([2.2](part-2/2.2-cloud-run.md)) |
 
 You also need the roles that let you write and read telemetry. To write spans,
 `roles/telemetry.writer` (or `roles/telemetry.tracesWriter` for traces alone).

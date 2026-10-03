@@ -62,7 +62,7 @@ written). Only the last three leave a mark on the span.
 Rules behind the table:
 
 - `FunctionTool`'s own hook returns `TOOL_ERROR` for a dict with a truthy `error` key (`google/adk/tools/function_tool.py:355-359`).
-- `error.type` comes from an `error_type` attribute, then a genai `APIError` code, then the class name (`google/adk/telemetry/tracing.py:177-192`). `error.type` and the status hold only the class name, but each `exception` event stores the message and stack trace (`google/adk/telemetry/tracing.py:281`), so the city name does land on the span.
+- `error.type` comes from an `error_type` attribute, then a genai `APIError` code, then the class name (`google/adk/telemetry/tracing.py:177-192`). `error.type` holds only the class name. The status description holds the full message (`LookupError: No weather data for 'Atlantis'.`), and each `exception` event stores the message and stack trace (`google/adk/telemetry/tracing.py:281`), so the city name does land on the span.
 - The v1 API exposes no span status, so `error.type` is the only error handle a script can filter on ([4.3](part-4/4.3-the-failed-step.md)).
 
 ## Correlation
