@@ -1,0 +1,24 @@
+=== Part 4 checks after the 2026-10-02 review ===
+Read-only against jwd-gcp-demos; no new turns sent. Traces from the original
+2026-10-02 Part 4 runs are still retained.
+
+--- 4.1 medians (25 traces of the 17:21Z run, via Trace v1 view=COMPLETE) ---
+10 forecast, 15 weather turns, all service.name=adk-tracing.
+invoke_agent median: forecast 7.085 s, weather 5.411 s, difference 1.67 s.
+Model (sum of generate_content) median: forecast 5.886 s, weather 5.402 s (+0.48 s).
+execute_tool get_forecast median 1.059 s. Tool share of forecast invoke_agent:
+median 16%, max 24%. Means (page's old wording) were 6.775 vs 5.588 s (+1.19 s).
+
+--- 4.2 prompt on the Step 1 fifth turn (e1612d7caee028fa7e1d96930de00e84) ---
+grep -oE '"gcp.vertex.agent.(llm_request|tool_call_args)": ".{0,60}':
+"gcp.vertex.agent.llm_request": "{\"model\": \"gemini-3.7-flash\", \"config\": {\"http_option
+"gcp.vertex.agent.llm_request": "{}",
+"gcp.vertex.agent.tool_call_args": "{\"city\": \"London\"}",
+"gcp.vertex.agent.llm_request": "{\"model\": \"gemini-3.7-flash\", \"config\": {\"http_option
+
+--- 4.3 saved filter with --project ---
+trace 92972bbf..., spanId cd7c72f2a7b0ab5c, severity WARNING: one entry,
+"weather lookup failed for 'Atlantis': no data".
+
+--- 4.4 conversation id from the trace ---
+41e103ad363024ebd258ef42ce05f762 -> "gen_ai.conversation.id": "42e24c76-65f3-43ce-93bc-4f5c500d95f1"

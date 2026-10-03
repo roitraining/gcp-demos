@@ -10,16 +10,14 @@
 
 > [!NOTE]
 > **Why you are here.** Every turn now lands in Cloud Trace with its logs inside
-> its spans. This part uses that to answer the three questions a page at 3 a.m.
-> actually asks.
+> its spans. This part uses that to answer the questions an on-call alert
+> raises.
 
-Each question has one Trace Explorer surface that answers it, and each page runs
-one scenario from [scenarios.md](../scenarios.md) to produce traces worth
-reading.
+Each question has one Trace Explorer surface that answers it:
 
 | On-call question | Trace Explorer surface |
 |---|---|
-| Which step was slow? | The heatmap and the **Grouped table** by span name, then one slow trace's waterfall |
+| Which step was slow? | The **Span duration** chart and the **Grouped** tab by span name, then one slow trace's waterfall |
 | What did this user's request do? | **Add attribute filter** on `gen_ai.conversation.id`, or **Search for trace** by id |
 | Which step failed, and what did it say? | **Span status** error, the red bar, and the tool's log line in **Logs & Events** |
 
