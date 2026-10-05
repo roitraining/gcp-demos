@@ -137,7 +137,7 @@ column names them.
 | 1.5 | 2026-10-02 | `stage5-15-trace-per-turn.txt` | five turns, five trace ids, one `gen_ai.conversation.id` | none |
 | 1.6 | 2026-09-07 | `stage1-console-spans.txt` | `fetch_forecast` 0.695 s of the tool's 0.700 s | none |
 | 2.1 | 2026-09-07 | `stage2-21-adk-web-otel.txt` | same tree via v1; `service.name=adk-tracing` | **Details** waterfall |
-| 2.2 | 2026-09-07, 2026-10-02 | `stage2-22-cloudrun.txt`, `review-fixes-2026-10-02-part2.txt` | the `02` server on Cloud Run: seven-span tree; request log id differs from span id | **Service/workload** column |
+| 2.2 | 2026-10-03 | `stage2-22-adk-deploy-cloudrun.txt` | `adk deploy cloud_run --otel_to_cloud`: seven-span tree; `cloud_run` resource labels; request log id differs from span id | Trace Explorer filters, waterfall, **Attributes**; Logs Explorer `trace` field |
 | 2.3 | 2026-09-07, 2026-10-02 | `stage2-23-own-server.txt`, `review-fixes-2026-10-02-part2.txt` | recorded step (500 with no provider); exported step (400 without resource); a closed-port extra exporter fails while the trace still lands | visible step |
 | 2.4 | 2026-09-07, 2026-10-02 | `stage2-24-agent-runtime.txt`, `review-fixes-2026-10-02-part2.txt` | `invoke_workflow` root, `call_llm` present, seven spans once the model location is `global`; content off | the engine's **Traces** tab (same traces by `service.name` filter) |
 | 2.5 | 2026-09-07, 2026-10-02 | `stage2-25-sampling.txt`, `review-fixes-2026-10-02-part2.txt` | 11 of 20 kept at 0.5 through the `02` server, each with seven spans in Cloud Trace | none |

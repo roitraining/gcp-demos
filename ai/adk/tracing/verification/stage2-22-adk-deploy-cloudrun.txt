@@ -1,0 +1,47 @@
+=== 2.2 verification run: adk deploy cloud_run — 2026-10-03 ===
+google-adk 2.8.0 (image and local), Gemini 3.7 Flash / Vertex, project jwd-dev-2, region us-central1.
+Replaces the 02-server route (stage2-22-cloudrun.txt) so 2.2 differs from 2.3.
+
+--- Deploy ---
+adk deploy cloud_run --project jwd-dev-2 --region us-central1 --service_name adk-trace \
+  --otel_to_cloud demo_agent -- --no-allow-unauthenticated \
+  --set-env-vars "GOOGLE_CLOUD_LOCATION=global,OTEL_SERVICE_NAME=adk-tracing"
+revision: adk-trace-00001-l5v (100% traffic)
+url:      https://adk-trace-754549205293.us-central1.run.app
+image:    us-central1-docker.pkg.dev/jwd-dev-2/cloud-run-source-deploy/adk-trace@sha256:946abefa94cda3755c1e34c7b424226e751eb663c8ae83b931a1df68cb9908f7
+demo_agent/requirements.txt (google-adk[otel-gcp]==2.8.0, OTLP http exporter,
+gcp-logging exporter) was installed by the generated Dockerfile. No boot crash.
+Generated Dockerfile installs google-adk[a2a] and sets GOOGLE_CLOUD_LOCATION to
+the region; --set-env-vars overrode it with global.
+
+--- Turn (2026-10-03T20:27:50Z) ---
+POST /apps/demo_agent/users/u1/sessions/s1 {}  -> session s1
+POST /run "What's the weather in London?"
+answer: "The current weather in London is 15°C and drizzling." (3 events)
+
+--- Read-back (trace/list_traces.sh 'root:invocation', trace/get_trace.sh) ---
+trace a512da51efd6f41b468ad1b65711646f  (7 spans)
+invocation                               3.088s
+  invoke_agent weather_agent               3.011s
+    call_llm                                 1.661s
+      generate_content gemini-3.7-flash        1.527s
+      execute_tool get_weather                 0.003s
+    call_llm                                 1.220s
+      generate_content gemini-3.7-flash        1.218s
+
+invocation span labels (v1): service.name=adk-tracing, cloud.platform=gcp_cloud_run,
+cloud.provider=gcp, cloud.region=us-central1, cloud.account.id=jwd-dev-2,
+faas.name=adk-trace, faas.version=adk-trace-00001-l5v, faas.instance=<id>
+
+--- Two trace ids ---
+Cloud Run request log for /run: projects/jwd-dev-2/traces/a9febcac58f1c18504346514663611d8
+ADK spans:                      a512da51efd6f41b468ad1b65711646f
+DIFFER: YES. ADK's API server attaches inbound context only under
+gemini_enterprise_app_name (google/adk/cli/fast_api.py:456, :543-553).
+
+--- Not observed ---
+Console steps on the page (Trace Explorer filters, waterfall, Attributes;
+Logs Explorer trace field) were written from the docs, not clicked through.
+
+--- Teardown ---
+Service deleted, image deleted, gs://run-sources-jwd-dev-2-us-central1/services/adk-trace/ removed.
