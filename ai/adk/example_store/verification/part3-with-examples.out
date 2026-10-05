@@ -1,0 +1,48 @@
+=== Where is order 4417?
+[examples] 5 in this request
+[examples]   Where is order 2210?
+[examples]   Where's my package?
+[examples]   Has my order 1875 shipped yet?
+[examples]   I want a refund for order 6032.
+[examples]   My order hasn't arrived and I'm getting worried.
+[examples] 5 in this request
+[examples]   Where is order 2210?
+[examples]   Where's my package?
+[examples]   Has my order 1875 shipped yet?
+[examples]   I want a refund for order 6032.
+[examples]   My order hasn't arrived and I'm getting worried.
+[order_support]: Order 4417: shipped, arrives Tuesday.
+=== Where's my order?
+[examples] 7 in this request
+[examples]   Where's my package?
+[examples]   My order hasn't arrived and I'm getting worried.
+[examples]   Has my order 1875 shipped yet?
+[examples]   I want a refund for order 6032.
+[examples]   Where is order 2210?
+[examples]   Can I get my money back? The item arrived broken.
+[examples]   What's the weather like today?
+[order_support]: Which order? Send me the four-digit order number.
+=== I want a refund for order 5521.
+[examples] 6 in this request
+[examples]   I want a refund for order 6032.
+[examples]   Can I get my money back? The item arrived broken.
+[examples]   My order hasn't arrived and I'm getting worried.
+[examples]   Where's my package?
+[examples]   Where is order 2210?
+[examples]   Has my order 1875 shipped yet?
+[order_support]: Refunds are handled by our returns team at returns.example.com within 30 days of delivery.
+=== What's a good recipe for pancakes?
+[examples] 1 in this request
+[examples]   Can you recommend a good laptop?
+[order_support]: I can only help with orders. Do you have an order number?
+=== two-turn: Where's my order? / 4417 (captured 2026-10-05)
+turn 2 retrieved: 1875, 2210, weather, package, refund 6032; reply: Order 4417: shipped, arrives Tuesday.
+=== search 4417
+0.57  kept     Has my order 1875 shipped yet?
+0.57  kept     Where is order 2210?
+0.54  kept     What's the weather like today?
+0.53  kept     Where's my package?
+0.50  kept     I want a refund for order 6032.
+0.49  dropped  My order hasn't arrived and I'm getting worried.
+0.49  dropped  Can you recommend a good laptop?
+0.48  dropped  Can I get my money back? The item arrived broken.

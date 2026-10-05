@@ -1,0 +1,22 @@
+<EXAMPLES>
+Begin few-shot
+The following are examples of user queries and model responses using the available tools.
+
+EXAMPLE 1:
+Begin example
+[user]
+Where is order 2210?
+[model]
+```tool_code
+get_order_status(order_id='2210')
+```
+[user]
+```tool_outputs
+{'will_continue': None, 'scheduling': None, 'parts': None, 'id': None, 'name': 'get_order_status', 'response': {'status': 'shipped', 'order_id': '2210', 'eta': 'Monday'}}
+```
+[model]
+Order 2210: shipped, arrives Monday.
+End example
+
+End few-shot
+<EXAMPLES>

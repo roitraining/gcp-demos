@@ -1,0 +1,48 @@
+=== Where is order 4417?
+0.82  kept     Where is order 2210?
+0.63  kept     Where's my package?
+0.61  kept     Has my order 1875 shipped yet?
+0.59  kept     I want a refund for order 6032.
+0.55  kept     My order hasn't arrived and I'm getting worried.
+0.47  dropped  What's the weather like today?
+0.47  dropped  Can I get my money back? The item arrived broken.
+0.40  dropped  Can you recommend a good laptop?
+=== Where's my order?
+0.89  kept     Where's my package?
+0.85  kept     My order hasn't arrived and I'm getting worried.
+0.76  kept     Has my order 1875 shipped yet?
+0.69  kept     I want a refund for order 6032.
+0.69  kept     Where is order 2210?
+0.62  kept     Can I get my money back? The item arrived broken.
+0.55  kept     What's the weather like today?
+0.46  dropped  Can you recommend a good laptop?
+=== I want a refund for order 5521.
+    ^
+  File "/Users/jeff/Desktop/Dev/gcp-demos/ai/adk/example_store/.venv/lib/python3.13/site-packages/google/cloud/aiplatform_v1beta1/services/example_store_service/client.py", line 1714, in search_examples
+    response = rpc(
+        request,
+    ...<2 lines>...
+        metadata=metadata,
+    )
+  File "/Users/jeff/Desktop/Dev/gcp-demos/ai/adk/example_store/.venv/lib/python3.13/site-packages/google/api_core/gapic_v1/method.py", line 189, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "/Users/jeff/Desktop/Dev/gcp-demos/ai/adk/example_store/.venv/lib/python3.13/site-packages/google/api_core/grpc_helpers.py", line 57, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.InternalServerError: 500 Internal error encountered.
+=== What's a good recipe for pancakes?
+0.56  kept     Can you recommend a good laptop?
+0.49  dropped  What's the weather like today?
+0.46  dropped  Where is order 2210?
+0.43  dropped  Where's my package?
+0.43  dropped  I want a refund for order 6032.
+0.43  dropped  Can I get my money back? The item arrived broken.
+0.42  dropped  My order hasn't arrived and I'm getting worried.
+0.38  dropped  Has my order 1875 shipped yet?
+0.90  kept     I want a refund for order 6032.
+0.72  kept     Can I get my money back? The item arrived broken.
+0.66  kept     My order hasn't arrived and I'm getting worried.
+0.64  kept     Where's my package?
+0.64  kept     Where is order 2210?
+0.62  kept     Has my order 1875 shipped yet?
+0.45  dropped  Can you recommend a good laptop?
+0.43  dropped  What's the weather like today?
