@@ -1,0 +1,32 @@
+=== Where is order 4417?
+[examples] none in this request
+[examples] none in this request
+[order_support]: Order #4417 has been **shipped** and is estimated to arrive on **Tuesday**.
+=== Where's my order?
+[examples] none in this request
+[order_support]: Could you please provide your 4-digit order ID so I can look up the status for you?
+=== I want a refund for order 5521.
+[examples] none in this request
+[examples] none in this request
+[order_support]: Order 5521 is currently marked as **delivered**. 
+To proceed with your refund request, could you please let me know the reason for the refund (e.g., damaged item, wrong item, or dissatisfaction)? If applicable, providing any details or photos of the issue will help us process it as quickly as possible.
+=== What's a good recipe for pancakes?
+[examples] none in this request
+[order_support]: Here is a simple, classic pancake recipe:
+### Classic Pancakes
+**Ingredients:**
+* 1 ½ cups all-purpose flour
+* 3 ½ tsp baking powder
+* 1 tbsp white sugar
+* ¼ tsp salt
+* 1 ¼ cups milk
+* 1 egg
+* 3 tbsp melted butter
+**Instructions:**
+1. **Mix dry ingredients:** In a large bowl, sift together the flour, baking powder, sugar, and salt.
+2. **Add wet ingredients:** Make a well in the center and pour in the milk, egg, and melted butter. Mix until smooth (a few small lumps are okay).
+3. **Cook:** Heat a lightly oiled griddle or frying pan over medium-high heat. Pour or scoop the batter onto the griddle, using approximately ¼ cup for each pancake.
+4. **Flip:** Cook until bubbles form on the surface and pop, then flip and cook until browned on the other side.
+5. **Serve:** Serve hot with butter, maple syrup, or your favorite toppings.
+---
+*Note: I am the order-support agent for this store. If you have any questions about an order or need to check an order status, please let me know your 4-digit Order ID!*

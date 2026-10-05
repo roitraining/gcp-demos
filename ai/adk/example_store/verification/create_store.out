@@ -1,0 +1,10 @@
+Creating ExampleStore
+Create ExampleStore backing LRO: projects/240659336105/locations/us-central1/exampleStores/1983052783577726976/operations/8740305713475092480
+ExampleStore created. Resource name: projects/240659336105/locations/us-central1/exampleStores/1983052783577726976
+To use this ExampleStore in another session:
+example_store = aiplatform.ExampleStore('projects/240659336105/locations/us-central1/exampleStores/1983052783577726976')
+
+EXAMPLE_STORE_NAME=projects/240659336105/locations/us-central1/exampleStores/1983052783577726976
+real 486.48
+user 2.26
+sys 0.57

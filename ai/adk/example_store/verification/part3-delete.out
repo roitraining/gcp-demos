@@ -1,0 +1,5 @@
+Deleting ExampleStore : projects/240659336105/locations/us-central1/exampleStores/1983052783577726976
+ExampleStore deleted. . Resource name: projects/240659336105/locations/us-central1/exampleStores/1983052783577726976
+Deleting ExampleStore resource: projects/240659336105/locations/us-central1/exampleStores/1983052783577726976
+Delete ExampleStore backing LRO: projects/240659336105/locations/us-central1/operations/826038608929488896
+ExampleStore resource projects/240659336105/locations/us-central1/exampleStores/1983052783577726976 deleted.
