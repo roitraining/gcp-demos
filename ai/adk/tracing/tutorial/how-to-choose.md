@@ -5,12 +5,12 @@
 
 # How to choose & reference
 
-*The span catalog, the failure and correlation decisions, the version caveats, and what was verified. The last page.*
+*The span catalog, the failure and correlation decisions, and the version caveats. The last page.*
 
 > [!NOTE]
 > **Why you are here.** This page is a reference, not a lesson. Use it to look up
-> a span or attribute, pick a correlation setup, and check what has been verified
-> against a real run on google-adk 2.8.0.
+> a span or attribute, pick a correlation setup, and check what changes after
+> google-adk 2.8.0.
 
 ## Span catalog
 
@@ -91,20 +91,6 @@ the deploy defaults are in
 With both defaults, the only prompt text Cloud Trace holds is on the spans.
 Whether the **Inputs/Outputs** tab renders it is not verified.
 
-## Trace v1 API gotchas
-
-| Gotcha | What to do |
-|---|---|
-| `spanId` and `parentSpanId` are decimal uint64; log entries use 16 hex | convert with `int(hex, 16)` before comparing |
-| A new trace 404s with "Trace bucket not found" for 20 to 120 s | retry; `get_trace.sh` does |
-| Filter terms split on spaces | quote span names: `span:"execute_tool get_forecast"` |
-| An unfiltered list can return an empty first page | always pass a filter |
-| `orderBy=duration` and `latency:` act on the root span only | use the **Grouped** tab for per-span percentiles |
-| No status field | filter on `error.type:<value>` |
-| Lists come back ordered by trace id | sort by start time yourself |
-| 300 reads per minute per project; a 429 prints nothing through `grep` | retry after a minute |
-| Spans expire ([How long it lasts](part-4/4.5-cost-retention-content.md#how-long-it-lasts)) | save the evidence yourself for anything longer ([4.3](part-4/4.3-the-failed-step.md)) |
-
 ## 2.8.0 versus newer releases
 
 `requirements.txt` pins `google-adk[otel-gcp]==2.8.0`. An unpinned `>=2.8.0`
@@ -121,49 +107,6 @@ The `adk-python` main branch at `b0180620` (2026-09-06, source only) adds no spa
 names. It strips the `generate_content` span name, drops `thought_signature` bytes
 from the request and response attributes, and gives `gen_ai.choice` records an
 explicit span context. On 2.8.0 Agent Runtime's schema v2 still emits `call_llm`.
-
-## Verification status
-
-All runs used google-adk 2.8.0, Python 3.13, and Gemini 3.7 Flash on Vertex AI.
-Records are in [verification/](../verification/). No run opened the Cloud
-console, so every console step is written from Google's docs; the right-hand
-column names them.
-
-| Page | Date | Record | What it showed | Console steps not observed |
-|---|---|---|---|---|
-| 1.1, 1.2 | 2026-09-07 | `stage0-local-probes.txt`, `stage1-console-spans.txt` | seven spans, `execute_tool` under `call_llm`, `force_flush()` sufficient | none |
-| 1.3 | 2026-09-07, 2026-10-02 | `stage1-console-spans.txt`, `stage5-tool-response-knob.txt` | `llm_request` ~1,955 chars, then `{}` | none |
-| 1.4 | 2026-09-07, 2026-10-02 | `stage0-local-probes.txt`; 2026-10-02 rerun on `jwd-dev-3` | the four failure shapes; the raised turn has five spans and two `LookupError` events, each with the message | none |
-| 1.5 | 2026-10-02 | `stage5-15-trace-per-turn.txt` | five turns, five trace ids, one `gen_ai.conversation.id` | none |
-| 1.6 | 2026-09-07 | `stage1-console-spans.txt` | `fetch_forecast` 0.695 s of the tool's 0.700 s | none |
-| 2.1 | 2026-09-07 | `stage2-21-adk-web-otel.txt` | same tree via v1; `service.name=adk-tracing` | **Details** waterfall |
-| 2.2 | 2026-10-03 | `stage2-22-adk-deploy-cloudrun.txt` | `adk deploy cloud_run --otel_to_cloud`: seven-span tree; `cloud_run` resource labels; request log id differs from span id | Trace Explorer filters, waterfall, **Attributes**; Logs Explorer `trace` field |
-| 2.3 | 2026-09-07, 2026-10-02 | `stage2-23-own-server.txt`, `review-fixes-2026-10-02-part2.txt` | recorded step (500 with no provider); exported step (400 without resource); a closed-port extra exporter fails while the trace still lands | visible step |
-| 2.4 | 2026-09-07, 2026-10-02 | `stage2-24-agent-runtime.txt`, `review-fixes-2026-10-02-part2.txt` | `invoke_workflow` root, `call_llm` present, seven spans once the model location is `global`; content off | the engine's **Traces** tab (same traces by `service.name` filter) |
-| 2.5 | 2026-09-07, 2026-10-02 | `stage2-25-sampling.txt`, `review-fixes-2026-10-02-part2.txt` | 11 of 20 kept at 0.5 through the `02` server, each with seven spans in Cloud Trace | none |
-| 3.1, 3.3 | 2026-09-07, 2026-10-02 | `stage3-31-33-log-join.txt`, `stage5-31-free-join.txt`, `stage5-33-framework-logs.txt`, `review-fixes-2026-10-02-part3.txt` | events under the two `generate_content` spans; framework INFO and the tool's INFO under their spans; `uvicorn.access` absent from Cloud Logging; controls 2 to 4 and a `concurrent` run hold | **Logs & Events**, **View logs** |
-| 3.2 | 2026-09-07, 2026-10-02 | `stage3-32-viewer-gate.txt`, `stage5-32-before.txt` | before: no WARNING in Cloud Logging; after: WARNING `spanId` equals the `execute_tool` span | **Logs & Events** before and after |
-| 3.4 | 2026-09-07, 2026-10-02 | `stage3-34-propagation.txt`, `stage3-34-request-log-cloudrun.txt`, `review-fixes-2026-10-02-part3.txt` | header id = returned id; `parentbased_always_on` records nothing under an unsampled parent, `always_on` keeps it; Cloud Run request log joins | **Correlate by** `request_log` |
-| 4.1 | 2026-10-02 | `stage4-41-slow-step.txt`, `review-fixes-2026-10-02-part4.txt` | per-name percentiles; model spans rank above the tool; medians | **OpenTelemetry service** filter, **Span duration** chart, **Grouped** tab, **Span name** filter, trace details panel, **Attributes** |
-| 4.2 | 2026-10-02 | `stage4-42-one-users-request.txt`, `review-fixes-2026-10-02-part4.txt` | five traces for one conversation id; full prompt on turn five; content-off `{}` | **Add filter**, attribute filter, **Search for trace**, trace details panel, **Find in Trace**, **Inputs/Outputs** |
-| 4.3 | 2026-10-02 | `stage4-43-failed-step.txt`, `classified-error-92972bbf….txt` | `error.type` filter finds one trace; WARNING under the span | **Span status** filter, bar color, **Attributes**, **Logs & Events** |
-| 2.6, 3.5, 4.4, 4.5 | none | none | reference pages; 4.4's BigQuery section is source only; 4.5 cites the quotas page, read 2026-10-02 | none |
-
-Two cloud probes settled design questions before any page was written:
-`stage0-row10-cloudrun-traceparent.txt` (Cloud Run sends both headers) and
-`stage0-row12-trace-api-v1.txt` (v1 reads OTLP-ingested spans).
-
-### Not verified
-
-| Item | Status |
-|---|---|
-| Every console step in the right-hand column above | written from Google's docs |
-| A plain `{"error": ...}` tool's user answer and parent status | not captured |
-| Ways B and C ([3.5](part-3/3.5-three-ways-to-stamp.md)) and OTLP backends ([2.6](part-2/2.6-other-backends.md)) | not run |
-| The BigQuery plugin's `trace_id` columns ([4.4](part-4/4.4-traces-logs-metrics-rows.md)) | source only |
-| Everything on 2.11.0 beyond the three rows above | not run; pinned to 2.8.0 |
-| The `adk-python` `main` claims above | source only; never run |
-| Free tier and per-span price ([4.5](part-4/4.5-cost-retention-content.md)) | linked, not quoted |
 
 ## References
 
