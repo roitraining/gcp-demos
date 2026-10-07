@@ -45,10 +45,16 @@ collect, correlate, consume.
   returns no id.
 - Captures read traces back with `trace/get_trace.sh <trace-id>`, and logs with
   `gcloud logging read 'trace="projects/P/traces/ID"' --project="$PROJECT_ID"`.
-  On 2.1 and 2.2 the reader reads back in the console; the script output is
-  shown as what the waterfall holds.
-- Commands use bare `python` and `adk`; setup activates `.venv`. A terminal
-  that runs either needs `source .venv/bin/activate`.
+  On 2.1 to 2.4 and 3.1 to 3.4 the reader reads back in the console. Part 2
+  shows the scripted waterfall capture as what the console holds; Part 3
+  describes what each span's **Logs & Events** shows, with no `gcloud` output.
+- Commands use bare `python` and `adk`. Each page's first fence that runs
+  either starts with `source .venv/bin/activate`, so no page depends on an
+  earlier page's terminal or on `PATH` order (a global pyenv `adk` once
+  shadowed the venv's and lacked the OTLP exporter).
+- A page's first second-terminal fence starts with
+  `cd "$(git rev-parse --show-toplevel)/ai/adk/tracing"`, which works from
+  anywhere in the repo and is a no-op when already there.
 - Prompts: "What's the weather in London?" for single turns, "What's the
   three-day forecast for London?" for the slow tool, and "What's the weather in
   Atlantis?" for errors.

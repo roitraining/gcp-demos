@@ -33,7 +33,7 @@ Start with **[TUTORIAL.md](TUTORIAL.md)**.
 | [examples/03_correlated_server.py](examples/03_correlated_server.py) | `02` plus a logging bridge, so your log lines land under their spans (3.2, 3.3, Part 4). |
 | [examples/04_propagated_server.py](examples/04_propagated_server.py) | `03` plus inbound trace-context propagation and an always-on sampler: one trace per request (3.4). |
 | [examples/_common.py](examples/_common.py) | Shared bootstrap, the console-span exporter, the flush helper, and the run loop. |
-| [trace/](trace/) | The Trace v1 read-back scripts (`get_trace.sh`, `list_traces.sh`) every cloud capture uses (4.4 explains them). |
+| [trace/](trace/) | The Trace v1 read-back scripts (`get_trace.sh`, `list_traces.sh`) every cloud capture uses. |
 | [load/turns.sh](load/turns.sh) | Fires N turns of a named scenario at a running server; the load tool from Part 2 on. |
 | [deploy/Dockerfile.trace_server](deploy/Dockerfile.trace_server) | Container for the `02` server on Cloud Run; `SERVER` selects `03` or `04` (the 3.4 Cloud Run capture). |
 | [requirements.txt](requirements.txt) | `google-adk[otel-gcp]==2.8.0` (pinned) plus the OTLP, Cloud Logging, FastAPI-instrumentation, and propagator packages. |

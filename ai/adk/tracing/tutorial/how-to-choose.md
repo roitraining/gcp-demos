@@ -1,4 +1,4 @@
-[← 4.6 · Cost, retention, and content policy](part-4/4.6-cost-retention-content.md)<br>
+[← 4.5 · Cost, retention, and content policy](part-4/4.5-cost-retention-content.md)<br>
 [Tutorial index](../TUTORIAL.md)
 
 ---
@@ -87,7 +87,7 @@ span stored in the same project ([3.1](part-3/3.1-the-free-join.md)).
 
 The two content variables, their defaults, the always-redacted payloads, and
 the deploy defaults are in
-[4.6 · Cost, retention, and content policy](part-4/4.6-cost-retention-content.md#what-should-never-be-in-a-span).
+[4.5 · Cost, retention, and content policy](part-4/4.5-cost-retention-content.md#what-should-never-be-in-a-span).
 With both defaults, the only prompt text Cloud Trace holds is on the spans.
 Whether the **Inputs/Outputs** tab renders it is not verified.
 
@@ -103,7 +103,7 @@ Whether the **Inputs/Outputs** tab renders it is not verified.
 | No status field | filter on `error.type:<value>` |
 | Lists come back ordered by trace id | sort by start time yourself |
 | 300 reads per minute per project; a 429 prints nothing through `grep` | retry after a minute |
-| Spans expire ([How long can you read a trace back?](part-4/4.4-read-back-without-the-console.md#how-long-can-you-read-a-trace-back)) | save the evidence yourself for anything longer ([4.3](part-4/4.3-the-failed-step.md)) |
+| Spans expire ([How long it lasts](part-4/4.5-cost-retention-content.md#how-long-it-lasts)) | save the evidence yourself for anything longer ([4.3](part-4/4.3-the-failed-step.md)) |
 
 ## 2.8.0 versus newer releases
 
@@ -147,8 +147,7 @@ column names them.
 | 4.1 | 2026-10-02 | `stage4-41-slow-step.txt`, `review-fixes-2026-10-02-part4.txt` | per-name percentiles; model spans rank above the tool; medians | **OpenTelemetry service** filter, **Span duration** chart, **Grouped** tab, **Span name** filter, trace details panel, **Attributes** |
 | 4.2 | 2026-10-02 | `stage4-42-one-users-request.txt`, `review-fixes-2026-10-02-part4.txt` | five traces for one conversation id; full prompt on turn five; content-off `{}` | **Add filter**, attribute filter, **Search for trace**, trace details panel, **Find in Trace**, **Inputs/Outputs** |
 | 4.3 | 2026-10-02 | `stage4-43-failed-step.txt`, `classified-error-92972bbf….txt` | `error.type` filter finds one trace; WARNING under the span | **Span status** filter, bar color, **Attributes**, **Logs & Events** |
-| 4.4 | 2026-10-02 | `stage4-44-read-back.txt`, `review-fixes-2026-10-02-part4.txt` | scripts match the raw v1 response (`list_traces.sh` after a same-day fix) | comparison with the Trace Explorer waterfall |
-| 2.6, 3.5, 4.5, 4.6 | none | none | reference pages; 4.5's BigQuery section is source only; 4.6 cites the quotas page, read 2026-10-02 | none |
+| 2.6, 3.5, 4.4, 4.5 | none | none | reference pages; 4.4's BigQuery section is source only; 4.5 cites the quotas page, read 2026-10-02 | none |
 
 Two cloud probes settled design questions before any page was written:
 `stage0-row10-cloudrun-traceparent.txt` (Cloud Run sends both headers) and
@@ -161,10 +160,10 @@ Two cloud probes settled design questions before any page was written:
 | Every console step in the right-hand column above | written from Google's docs |
 | A plain `{"error": ...}` tool's user answer and parent status | not captured |
 | Ways B and C ([3.5](part-3/3.5-three-ways-to-stamp.md)) and OTLP backends ([2.6](part-2/2.6-other-backends.md)) | not run |
-| The BigQuery plugin's `trace_id` columns ([4.5](part-4/4.5-traces-logs-metrics-rows.md)) | source only |
+| The BigQuery plugin's `trace_id` columns ([4.4](part-4/4.4-traces-logs-metrics-rows.md)) | source only |
 | Everything on 2.11.0 beyond the three rows above | not run; pinned to 2.8.0 |
 | The `adk-python` `main` claims above | source only; never run |
-| Free tier and per-span price ([4.6](part-4/4.6-cost-retention-content.md)) | linked, not quoted |
+| Free tier and per-span price ([4.5](part-4/4.5-cost-retention-content.md)) | linked, not quoted |
 
 ## References
 
@@ -185,5 +184,5 @@ Two cloud probes settled design questions before any page was written:
 
 ---
 
-[← 4.6 · Cost, retention, and content policy](part-4/4.6-cost-retention-content.md)<br>
+[← 4.5 · Cost, retention, and content policy](part-4/4.5-cost-retention-content.md)<br>
 [Tutorial index](../TUTORIAL.md)

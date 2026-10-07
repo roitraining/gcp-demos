@@ -18,8 +18,10 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 ```
 
-Every `python` and `adk` command in this tutorial assumes the environment is
-active.
+Every `python` and `adk` command in this tutorial runs from this environment.
+Each page's first such command starts with `source .venv/bin/activate`, so a
+fresh terminal, or a stray global `adk` on your `PATH`, cannot run the wrong
+install.
 
 ## Point the agent at a model
 
@@ -76,8 +78,11 @@ on gcloud's default project when they have no `--project` flag.
 `OTEL_SERVICE_NAME` becomes the **OpenTelemetry service** filter and the
 **Service/workload** column in Trace Explorer, so every laptop run files under a
 name you can find. `env.sh` is gitignored. **In each new terminal, run `source
-env.sh` again**, since variables do not cross terminals. Run `source
-.venv/bin/activate` there too if that terminal will run `python` or `adk`.
+env.sh` again**, since variables do not cross terminals. The pages
+activate `.venv` for you wherever they run `python` or `adk`. When a page opens
+a second terminal, its first command,
+`cd "$(git rev-parse --show-toplevel)/ai/adk/tracing"`, moves it to this folder
+from anywhere in the repo.
 
 Unset any `OTEL_EXPORTER_OTLP_*` variables left in your shell. ADK adds an
 exporter when they are set, so the local Part 1 scripts would send spans there.

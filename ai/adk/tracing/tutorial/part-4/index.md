@@ -28,9 +28,8 @@ Each question has one Trace Explorer surface that answers it:
 | [4.1 · The slow step](4.1-the-slow-step.md) | Find the span that makes a turn slow under load. |
 | [4.2 · One user's request](4.2-one-users-request.md) | Pull one conversation's turns and read what each one did. |
 | [4.3 · The failed step](4.3-the-failed-step.md) | Find the red span, its `error.type`, and the log line beside it. |
-| [4.4 · Read-back without the console](4.4-read-back-without-the-console.md) | Get the tree and a trace list from a script through the Trace v1 API. |
-| [4.5 · Traces, logs, metrics, rows](4.5-traces-logs-metrics-rows.md) | Which store answers which question, and the ids that join them. |
-| [4.6 · Cost, retention, and content policy](4.6-cost-retention-content.md) | What tracing costs, how long it lasts, and what stays out of a span. |
+| [4.4 · Traces, logs, metrics, rows](4.4-traces-logs-metrics-rows.md) | Which store answers which question, and the ids that join them. |
+| [4.5 · Cost, retention, and content policy](4.5-cost-retention-content.md) | What tracing costs, how long it lasts, and what stays out of a span. |
 
 ---
 
