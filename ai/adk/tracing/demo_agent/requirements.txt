@@ -1,0 +1,5 @@
+google-adk[otel-gcp]==2.8.0
+# adk deploy installs these into the image. --otel_to_cloud needs both
+# exporters, and the otel-gcp extra does not pull them in.
+opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-gcp-logging

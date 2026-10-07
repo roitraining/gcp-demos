@@ -7,15 +7,21 @@
 
 All commands run from this folder. Do this once. Part 1 needs only a model;
 Parts 2 to 4 add Google Cloud APIs, which this page enables now so you do not
-stop later. You need Python 3.13, the `gcloud` CLI, and `jq`.
+stop later. You need `uv`, the `gcloud` CLI, and `jq`.
 
 ## Create the environment
 
 ```bash
 cd ai/adk/tracing
-python3.13 -m venv .venv
-.venv/bin/pip install -r requirements.txt
+uv venv .venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
 ```
+
+Every `python` and `adk` command in this tutorial runs from this environment.
+Each page's first such command starts with `source .venv/bin/activate`, so a
+fresh terminal, or a stray global `adk` on your `PATH`, cannot run the wrong
+install.
 
 ## Point the agent at a model
 
@@ -34,10 +40,19 @@ GOOGLE_CLOUD_PROJECT=your-project-id
 GOOGLE_CLOUD_LOCATION=global
 ```
 
-If you have not authenticated before, log in once:
+Log in to `gcloud`, then create the application default credentials the agent
+uses:
 
 ```bash
+gcloud auth login
 gcloud auth application-default login
+```
+
+If the second command warns that no quota project is set, or names a different
+one, set yours:
+
+```bash
+gcloud auth application-default set-quota-project your-project-id
 ```
 
 ## Set your shell variables
@@ -62,8 +77,12 @@ on gcloud's default project when they have no `--project` flag.
 
 `OTEL_SERVICE_NAME` becomes the **OpenTelemetry service** filter and the
 **Service/workload** column in Trace Explorer, so every laptop run files under a
-name you can find. `env.sh` is gitignored. **`source env.sh` again in each new
-terminal**, since variables do not cross terminals.
+name you can find. `env.sh` is gitignored. **In each new terminal, run `source
+env.sh` again**, since variables do not cross terminals. The pages
+activate `.venv` for you wherever they run `python` or `adk`. When a page opens
+a second terminal, its first command,
+`cd "$(git rev-parse --show-toplevel)/ai/adk/tracing"`, moves it to this folder
+from anywhere in the repo.
 
 Unset any `OTEL_EXPORTER_OTLP_*` variables left in your shell. ADK adds an
 exporter when they are set, so the local Part 1 scripts would send spans there.
@@ -117,7 +136,7 @@ every span shape the tutorial teaches. Each is on only when set to `1`:
 **Command:**
 
 ```bash
-.venv/bin/python examples/01_console_spans.py
+python examples/01_console_spans.py
 ```
 
 **Expected output:** the file path prints at startup, then the agent's answer.

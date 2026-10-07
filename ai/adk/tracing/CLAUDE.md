@@ -30,6 +30,11 @@ collect, correlate, consume.
 - Under the default `ParentBased(ALWAYS_ON)` sampler, an unsampled inbound
   `traceparent` drops every ADK span; `OTEL_TRACES_SAMPLER=always_on` restores
   them (page 3.4).
+- `adk deploy cloud_run` (2.2) installs `google-adk[a2a]` only, so the
+  exporters come from `demo_agent/requirements.txt`. Its Dockerfile sets
+  `GOOGLE_CLOUD_LOCATION` to the region, which 404s the model; override it with
+  `global`. ADK's API server does not extract an inbound `traceparent` on Cloud
+  Run, so the request log and the spans carry different trace ids.
 
 ## Conventions
 
@@ -38,8 +43,18 @@ collect, correlate, consume.
 - The `02` and `03` servers return the trace id from a span processor keyed on
   `gen_ai.conversation.id`; `04` reads the server span. A sampled-out turn
   returns no id.
-- Read traces back with `trace/get_trace.sh <trace-id>`, and logs with
+- Captures read traces back with `trace/get_trace.sh <trace-id>`, and logs with
   `gcloud logging read 'trace="projects/P/traces/ID"' --project="$PROJECT_ID"`.
+  On 2.1 to 2.4 and 3.1 to 3.4 the reader reads back in the console. Part 2
+  shows the scripted waterfall capture as what the console holds; Part 3
+  describes what each span's **Logs & Events** shows, with no `gcloud` output.
+- Commands use bare `python` and `adk`. Each page's first fence that runs
+  either starts with `source .venv/bin/activate`, so no page depends on an
+  earlier page's terminal or on `PATH` order (a global pyenv `adk` once
+  shadowed the venv's and lacked the OTLP exporter).
+- A page's first second-terminal fence starts with
+  `cd "$(git rev-parse --show-toplevel)/ai/adk/tracing"`, which works from
+  anywhere in the repo and is a no-op when already there.
 - Prompts: "What's the weather in London?" for single turns, "What's the
   three-day forecast for London?" for the slow tool, and "What's the weather in
   Atlantis?" for errors.

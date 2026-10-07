@@ -1,5 +1,5 @@
 # Container for the minimal tracing server (examples/02_trace_server.py),
-# deployed by page 2.2 (Cloud Run). Copy it to ./Dockerfile before
+# deployed to Cloud Run for the 3.4 run record. Copy it to ./Dockerfile before
 # `gcloud run deploy --source .`, then delete the copy. The server installs the Cloud
 # trace and logging exporters itself and passes get_gcp_resource(project) as the
 # OTel resource, so the span tree leaves the process for Cloud Trace. On Cloud
@@ -30,7 +30,7 @@ EXPOSE 8080
 
 # No .env in the image: set GOOGLE_CLOUD_PROJECT / GOOGLE_CLOUD_LOCATION /
 # GOOGLE_GENAI_USE_VERTEXAI via --set-env-vars at deploy time. SERVER selects
-# which server module runs; default is 02 (page 2.2). The 3.4 run record set it
+# which server module runs; default is 02. The 3.4 run record set it
 # to examples/04_propagated_server.py.
 ENV SERVER=examples/02_trace_server.py
 CMD ["sh", "-c", "python $SERVER"]

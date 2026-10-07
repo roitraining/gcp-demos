@@ -57,7 +57,7 @@ tutorial runs.
 | [1. What a trace is](tutorial/part-1/index.md) | The span tree, the raw span, the content on it, an error turn three ways, a trace per turn, and your own span inside a tool (1.1–1.6). Local, no cloud. |
 | [2. Collect](tutorial/part-2/index.md) | Ship the tree to Cloud Trace: `adk web --otel_to_cloud`, Cloud Run, your own server, Agent Runtime, sampling, and other backends (2.1–2.6). |
 | [3. Correlate](tutorial/part-3/index.md) | Get every log line inside its span: the free join, the missing tool line, framework and server logs, one trace per request, and three ways to stamp (3.1–3.5). |
-| [4. Consume](tutorial/part-4/index.md) | Answer the on-call questions: the slow step, one user's request, the failed step, read-back without the console, how traces, logs, metrics, and rows compare, and cost, retention, and content policy (4.1–4.6). |
+| [4. Consume](tutorial/part-4/index.md) | Answer the on-call questions: the slow step, one user's request, the failed step, how traces, logs, metrics, and rows compare, and cost, retention, and content policy (4.1–4.5). |
 | [How to choose & reference](tutorial/how-to-choose.md) | The span and attribute catalog, correlation decision table, verification status, and references. |
 
 Ready? **[Start with Setup →](tutorial/00-setup.md)**
